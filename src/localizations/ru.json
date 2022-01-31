@@ -1,0 +1,10 @@
+{
+  "HEADER": "HEADER",
+
+  "calls": "Звонки",
+  "markupRules": "Правила разметки",
+  "loadCall": "Загрузить звонок",
+  "alert": "Оповещение",
+  "settings": "Настройки",
+  "logout": "Выход"
+}
