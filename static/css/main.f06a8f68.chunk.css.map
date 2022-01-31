@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/index.css"],"names":[],"mappings":"AAAA,KACE,wBAGF,CAEA,yBAJE,QAAS,CACT,SAMF","file":"main.f06a8f68.chunk.css","sourcesContent":["body {\r\n  background-color: #EEF2F6;\r\n  margin: 0;\r\n  padding: 0;\r\n}\r\n\r\nh1, h2, h3, h4, h5, h6, p {\r\n  margin: 0;\r\n  padding: 0;\r\n}\r\n"]}
