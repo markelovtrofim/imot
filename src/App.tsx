@@ -1,18 +1,9 @@
 import React from 'react';
 import {Redirect, Route, Switch, Link} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
-import {Typography} from "@mui/material";
+import {Button, Typography} from "@mui/material";
 import {Header} from "./components";
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import ButtonGroup from '@mui/material/ButtonGroup';
-
-const buttons = [
-  <Button key="one">One</Button>,
-  <Button key="two">Two</Button>,
-  <Button key="three">Three</Button>,
-];
-
+import Calls from "./pages/Calls";
 
 const useStyles = makeStyles(({
   wrapper: {
@@ -20,7 +11,7 @@ const useStyles = makeStyles(({
   },
   container: {
     width: '100%',
-    maxWidth: '1400px',
+    maxWidth: '1280px',
     margin: '0 auto'
   }
 }));
@@ -34,15 +25,14 @@ const App = () => {
         {/* Авторизация */}
         <Route exact path="/auth/login">
           <Header/>
-          <h1>Login page</h1>
+          <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">Login page</Typography>
         </Route>
 
         {/* Звонки */}
         <Route path="/calls">
           <Header/>
           <div className={classes.container}>
-            <Typography variant="h3">calls</Typography>
-
+            <Calls/>
           </div>
         </Route>
 
@@ -50,7 +40,7 @@ const App = () => {
         <Route path="/report">
           <Header/>
           <div className={classes.container}>
-            <Typography variant="h3">report</Typography>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">report</Typography>
           </div>
         </Route>
 
@@ -58,7 +48,7 @@ const App = () => {
         <Route path="/upload">
           <Header/>
           <div className={classes.container}>
-            <Typography variant="h3">load call</Typography>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">load call</Typography>
           </div>
         </Route>
 
@@ -66,7 +56,7 @@ const App = () => {
         <Route path="/dictionaries">
           <Header/>
           <div className={classes.container}>
-            <Typography variant="h3">alert</Typography>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">alert</Typography>
           </div>
         </Route>
 
@@ -74,17 +64,18 @@ const App = () => {
         <Route path="/settings">
           <Header/>
           <div className={classes.container}>
-            <Typography variant="h3">settings</Typography>
+            <div>
+              <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">Settings</Typography>
+            </div>
           </div>
         </Route>
 
-        {/* Авторизация */}
         <Route exact path="/">
           <Redirect to="calls"/>
         </Route>
 
         <Route exact path="*">
-          <Link to="/"><button>на главную</button></Link>
+          <Button variant="contained"><Link to="/">На главную страницу.</Link></Button>
           <h1>404</h1>
         </Route>
 

@@ -6,5 +6,17 @@
   "loadCall": "Загрузить звонок",
   "alert": "Оповещение",
   "settings": "Настройки",
-  "logout": "Выход"
+  "logout": "Выход",
+
+
+  "CONTROL_BLOCK": "CONTROL_BLOCK",
+
+  "from": "C",
+  "to": "По",
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+  "week": "Неделя",
+  "month": "Месяц",
+  "year": "Год",
+  "download": "Скачать"
 }

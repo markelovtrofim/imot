@@ -1,13 +1,15 @@
 import {createTheme} from '@mui/material/styles';
 
 const theme = createTheme({
+
   typography: {
     body1: {
       fontFamily: "Inter, sans-serif",
       fontWeight: 400,
-      fontSize: 16,
+      fontSize: 14,
     },
     allVariants: {
+      fontFamily: "Inter, sans-serif",
       'color': '#000000',
     },
     fontFamily: [
@@ -19,8 +21,7 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: "#000000",
-      contrastText: '#FFFFFF'
+      main: "#FFFFFF",
     },
     secondary: {
       main: '#545B69',
