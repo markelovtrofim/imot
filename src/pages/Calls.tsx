@@ -10,6 +10,7 @@ import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import {makeStyles} from "@mui/styles";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -46,8 +47,16 @@ const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
   padding: theme.spacing(2),
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
+
+const useStyles = makeStyles(({
+  employee: {
+
+  }
+}));
+
 const Calls = () => {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
+  const classes = useStyles();
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
@@ -61,7 +70,13 @@ const Calls = () => {
         <div>
           <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
             <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-              <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}>Calls item #1</Typography>
+
+              <div className={classes.employee}>
+                <div>
+                  Сотрудник
+                </div>
+              </div>
+
             </AccordionSummary>
             <AccordionDetails>
               <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}>Calls body #1</Typography>
