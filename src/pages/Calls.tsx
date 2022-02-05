@@ -69,15 +69,28 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const useStyles = makeStyles(({
   accordion: {
     backgroundColor: '#ffffff !important',
-    borderTop: '2px solid #EEF2F6 !important',
-    padding: '17px 24px !important',
+    borderTop: '2px solid #F8FAFC !important',
+    padding: '17px 24px 0 24px !important',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start !important',
     '& .MuiAccordionSummary-content': {
       margin: 0
     },
-    '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {}
+    '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
+      margin: '25px !important',
+      position: 'relative',
+      fill: '#818D9F'
+    },
+  },
+  slave: {
+    position: 'absolute',
+    top: '34px',
+    right: '40px',
+    borderRadius: '5px',
+    width: '32px',
+    height: '32px',
+    backgroundColor: '#E3E8EF',
   },
   callInner: {},
   employee: {
@@ -109,7 +122,7 @@ const useStyles = makeStyles(({
     fontSize: '15px !important'
   },
   callTags: {
-    display: 'flex',
+    display: 'flex'
   },
   callTagsTitle: {
     color: '#738094 !important',
@@ -166,7 +179,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -175,7 +187,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -184,7 +195,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -193,7 +203,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -202,7 +211,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -211,7 +219,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -226,7 +233,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -235,7 +241,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -244,7 +249,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -253,7 +257,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -262,7 +265,6 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
@@ -271,20 +273,21 @@ const Calls = () => {
                               <Tag
                                 // @ts-ignore
                                 label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                                style={{fontFamily: '\'Inter\', sans-serif'}}
                               />
                             </div>
                           </Tooltip>
 
                         </Stack>
+                        <div className={classes.slave}>
+                        </div>
                       </div>
                     </Grid>
                   </Grid>
                 </AccordionSummary>
                 {/* Основная информация о звонке. */}
                 <AccordionDetails style={{backgroundColor: '#F8FAFC', height: '400px', border: 'none'}}>
-                  <Typography variant="h3" style={{marginTop: '100px', textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}>
-                    Calls body
+                  <Typography variant="h3" style={{overflowY: 'auto', marginTop: '100px', textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}>
+                    Call body
                   </Typography>
                 </AccordionDetails>
               </Accordion>

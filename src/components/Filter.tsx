@@ -112,7 +112,7 @@ const Filter: FC<FilterPropsType> = ({pageName}) => {
               <CustomSelect/>
             </div>
           </div>
-          <div style={{display: 'flex'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
             <LoadingButton
               onClick={searchButtonHandleClick}
               startIcon={<SearchIcon/>}
