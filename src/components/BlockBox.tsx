@@ -13,7 +13,7 @@ type BoxPropsType = {
   padding: string
 };
 
-export const BlockBox: FC<BoxPropsType> = ({width, padding = '10px', children}) => {
+export const BlockBox: FC<BoxPropsType> = ({width, padding = '0', children}) => {
   const classes = useStyles();
   return (
     <div style={{width: width, padding}} className={classes.boxWrapper}>

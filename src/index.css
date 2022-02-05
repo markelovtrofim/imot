@@ -1,4 +1,5 @@
 body {
+  min-height: 101vh;
   background-color: #EEF2F6;
   margin: 0;
   padding: 0;

@@ -39,6 +39,7 @@ const StyledButton = styled('button')`
 `;
 
 const StyledListbox = styled('ul')`
+  cursor: pointer;
   font-family: IBM Plex Sans, sans-serif;
   font-size: 0.875rem;
   box-sizing: border-box;
@@ -52,11 +53,11 @@ const StyledListbox = styled('ul')`
 `;
 
 const StyledOption = styled(OptionUnstyled)`
+  cursor: pointer;
   list-style: none;
   padding: 4px 10px;
   margin: 0;
   border-bottom: 1px solid #ddd;
-  cursor: default;
 
   &:last-of-type {
     border-bottom: none;

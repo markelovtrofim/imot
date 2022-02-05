@@ -60,7 +60,9 @@ const useStyles = makeStyles(({
     display: 'flex'
   },
   langHandler: {
-    marginRight: '25px'
+    marginRight: '25px',
+    border: 'none',
+    outline: 'none'
   },
   headerLogout: {
     cursor: 'pointer',

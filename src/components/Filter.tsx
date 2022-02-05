@@ -1,14 +1,14 @@
 import React, {FC} from 'react';
 import {BlockBox} from "./BlockBox";
-import {Button, Input, InputBase, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 import {Theme} from '@mui/material/styles';
-import Box from '@mui/material/Box';
 import CustomSelect from './CustomSelect'
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
 import Select, {SelectChangeEvent} from '@mui/material/Select';
-import Chip from '@mui/material/Chip';
+import SendIcon from '@mui/icons-material/Send';
 import {makeStyles} from "@mui/styles";
+import LoadingButton from '@mui/lab/LoadingButton';
+import SearchIcon from '@mui/icons-material/Search';
+import MenuItem from "@mui/material/MenuItem";
 
 const useStyles = makeStyles(({
   filterItems: {
@@ -65,6 +65,15 @@ const MenuProps = {
 };
 
 const Filter: FC<FilterPropsType> = ({pageName}) => {
+  const [loading, setLoading] = React.useState(false);
+
+  const searchButtonHandleClick = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000)
+  };
+
   const classes = useStyles();
   const [personName, setPersonName] = React.useState<string[]>([]);
 
@@ -104,8 +113,17 @@ const Filter: FC<FilterPropsType> = ({pageName}) => {
             </div>
           </div>
           <div style={{display: 'flex'}}>
-            <Button variant={'contained'} color={'primary'}>Искать</Button>
-            <Typography style={{cursor: 'pointer'}}>Еще ^</Typography>
+            <LoadingButton
+              onClick={searchButtonHandleClick}
+              startIcon={<SearchIcon/>}
+              loading={loading}
+              color="secondary"
+              loadingPosition="start"
+              variant="contained"
+            >
+              Искать
+            </LoadingButton>
+            <Typography style={{marginLeft: '10px', cursor: 'pointer'}}>Еще</Typography>
           </div>
         </div>
       </BlockBox>
