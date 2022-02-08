@@ -7,9 +7,10 @@ import {StylesProvider} from '@material-ui/styles';
 import App from './App';
 import './index.css';
 import theme from "./theme";
-import store from "./store";
+import {setupStore} from "./store";
 import {Provider} from "react-redux";
 
+const store = setupStore();
 
 ReactDOM.render(
   <React.StrictMode>

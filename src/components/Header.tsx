@@ -1,8 +1,8 @@
 import React from 'react';
-import logo from '../assets/images/logo.png';
 import {SelectChangeEvent, Typography} from '@mui/material';
 import {makeStyles} from '@mui/styles';
-import {NavLink, Link} from 'react-router-dom';
+import {NavLink} from 'react-router-dom';
+import LogoPng from '../assets/images/logo.png';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from '../store';
 import {setLanguage} from '../store/actions/langActions';
@@ -60,9 +60,16 @@ const useStyles = makeStyles(({
     display: 'flex'
   },
   langHandler: {
+    '& .MuiInput-input:focus': {
+      backgroundColor: '#fff',
+
+    },
     marginRight: '25px',
     border: 'none',
-    outline: 'none'
+    outline: 'none',
+    '&::before': {
+      border: 'none !important'
+    }
   },
   headerLogout: {
     cursor: 'pointer',
@@ -95,7 +102,7 @@ const Header: React.FC = () => {
   const handleChange = (event: SelectChangeEvent) => {
     const currentLang = event.target.value;
     dispatch(setLanguage(currentLang));
-  }
+  };
 
   const headerItemsArray: { id: number, path: string, name: string }[] = [
     {id: 1, path: 'calls', name: translate('calls', language)},
@@ -110,7 +117,7 @@ const Header: React.FC = () => {
       <div className={classes.headerInner}>
         <div className={classes.headerLeftBlock}>
           {/* Логотип */}
-          <img className={classes.headerIcon} height={25} src={logo} alt=""/>
+          <img className={classes.headerIcon} height={25} src={LogoPng} alt=""/>
 
           {/* Навигация */}
           {headerItemsArray.map(item =>
@@ -123,7 +130,9 @@ const Header: React.FC = () => {
 
         <div className={classes.headerRightBlock}>
           {/* Смена языка */}
-          <Select className={classes.langHandler} variant='standard' value={language} onChange={handleChange} autoWidth>
+          <Select MenuProps={{
+            disableScrollLock: true
+          }} className={classes.langHandler} variant='standard' value={language} onChange={handleChange}>
             <MenuItem value={'RU'}>RU</MenuItem>
             <MenuItem value={'EN'}>EN</MenuItem>
           </Select>

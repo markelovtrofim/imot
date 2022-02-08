@@ -1,13 +1,18 @@
-import { createStore, combineReducers } from 'redux';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import langReducer from './reducers/langReducer';
+
 
 const rootReducer = combineReducers({
   lang: langReducer
 });
 
-const store = createStore(rootReducer);
+export const setupStore = () => {
+  return configureStore({
+    reducer: rootReducer
+  });
+};
 
 export type RootState = ReturnType<typeof rootReducer>;
-
-export default store;
+export type AppStore = ReturnType<typeof setupStore>;
+export type AppDispatch = AppStore['dispatch'];

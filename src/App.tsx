@@ -1,9 +1,9 @@
 import React from 'react';
 import {Redirect, Route, Switch, Link} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
-import {Button, Typography} from "@mui/material";
-import {Header} from "./components";
-import Calls from "./pages/Calls";
+import {Button, Typography} from '@mui/material';
+import {Header} from './components';
+import {Auth, Calls} from './pages';
 
 const useStyles = makeStyles(({
   wrapper: {
@@ -23,9 +23,8 @@ const App = () => {
       <Switch>
 
         {/* Авторизация */}
-        <Route exact path="/auth/login">
-          <Header/>
-          <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">Login page</Typography>
+        <Route exact path="/auth">
+          <Auth/>
         </Route>
 
         {/* Звонки */}
