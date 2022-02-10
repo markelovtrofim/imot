@@ -8,12 +8,13 @@ type AuthType = {
 
 export const fetchAuthToken = createAsyncThunk(
   'auth/fetchAuthToken',
-  async (authData: {username : string, password: string}, thunkAPI) => {
-    // let bodyFormData = new FormData();
-    console.log(authData)
-    const response = await axios.post<AuthType>('https://test.imot.io/new_api/token', authData)
+  async (authData: {username : string, password: string}, {dispatch}) => {
+    let bodyFormData = new FormData();
+    bodyFormData.append('username', authData.username);
+    bodyFormData.append('password', authData.password);
+    const response = await axios.post<AuthType>('https://test.imot.io/new_api/token', bodyFormData);
+    dispatch(authSlice.actions.setAuth(true));
     localStorage.setItem('token', response.data.access_token);
-    console.log(response)
   }
 );
 
@@ -26,8 +27,8 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuth(state, action: PayloadAction<{isAuth: boolean}>) {
-      state.isAuth = action.payload.isAuth;
+    setAuth(state, action: PayloadAction<boolean>) {
+      state.isAuth = action.payload;
     },
     setLoading(state, action: PayloadAction<{isLoading: boolean}>) {
       state.isLoading = action.payload.isLoading;

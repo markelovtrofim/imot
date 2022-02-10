@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Button, TextField, Typography} from "@mui/material";
 import cn from 'classnames';
@@ -6,6 +6,7 @@ import {PhonePng, DashboardPng, SoundPng} from '../assets/images/Auth';
 import LogoPng from '../assets/images/logo.png';
 import {fetchAuthToken} from "../store/reducers/auth.slice";
 import {useAppDispatch} from "../hooks/redux";
+import { useFormik } from 'formik';
 
 const useStyles = makeStyles(({
   authWrapper: {
@@ -130,11 +131,20 @@ const PasswordSvg = (props: React.SVGProps<SVGSVGElement>) => {
 };
 
 const Auth = () => {
-  const classes = useStyles()
-  const dispatch = useAppDispatch()
-  useEffect(() => {
-    dispatch(fetchAuthToken({username : 'TVK', password: '294218TVK'}));
-  })
+  const classes = useStyles();
+  const dispatch = useAppDispatch();
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: ''
+    },
+    onSubmit: (values) => {
+      debugger;
+      dispatch(fetchAuthToken(values));
+    },
+  });
+
   return (
     <div className={classes.authWrapper}>
       <div className={cn(classes.authGreetSide, classes.authBothSides)}>
@@ -159,22 +169,34 @@ const Auth = () => {
           <div className={classes.authLogoBox}>
             <img src={LogoPng} height={30} alt="This is Logo icon."/>
           </div>
-          <div className={classes.authInputBox}>
-            <TextField className={classes.authInput} label="Login"/>
-            <LoginSvg className={classes.authLoginInputIcon}/>
-          </div>
-          <div className={classes.authInputBox}>
-            <Button onClick={() => alert("Данная функция пока не работает:( Постарайтесь вспомнить пароль.")}
-                    className={classes.authForgotButton}>
-              Забыли пароль
-            </Button>
-            <TextField className={classes.authInput} label="Password"/>
-            <PasswordSvg className={classes.authPasswordInputIcon}/>
-          </div>
-          <Button onClick={() => alert("Логинизация пока не работает:(")}
-            style={{width: '100%', margin: '16px 0 30px 0'}} variant="contained" color="secondary">Войти</Button>
+          <form onSubmit={formik.handleSubmit}>
+            <div className={classes.authInputBox}>
+              <TextField className={classes.authInput} id="username"
+                         name="username"
+                         type="text"
+                         onChange={formik.handleChange}
+                         value={formik.values.username} label="Login"/>
+              <LoginSvg className={classes.authLoginInputIcon}/>
+            </div>
+            <div className={classes.authInputBox}>
+              <Button onClick={() => alert("Данная функция пока не работает:( Постарайтесь вспомнить пароль.")}
+                      className={classes.authForgotButton}>
+                Забыли пароль
+              </Button>
+              <TextField className={classes.authInput} id="password"
+                         name="password"
+                         type="text"
+                         onChange={formik.handleChange}
+                         value={formik.values.password}
+                         label="Password"/>
+              <PasswordSvg className={classes.authPasswordInputIcon}/>
+            </div>
+
+            <Button type="submit"
+                    style={{width: '100%', margin: '16px 0 30px 0'}} variant="contained" color="secondary">Войти</Button>
+          </form>
           <Button onClick={() => alert("Регистрация пока не работает:(")}
-            style={{width: '100%'}} variant="outlined" color="secondary">Зарегистрироваться</Button>
+                  style={{width: '100%'}} variant="outlined" color="secondary">Зарегистрироваться</Button>
         </div>
       </div>
     </div>
