@@ -3,13 +3,14 @@ import {SelectChangeEvent, Typography} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {NavLink} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
-import {useDispatch, useSelector} from "react-redux";
 import {RootState} from '../store';
 import {setLanguage} from '../store/actions/langActions';
 import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select  from '@mui/material/Select';
 import cn from 'classnames';
+import {removeAuthToken} from "../store/reducers/auth.slice";
+import {useAppDispatch, useAppSelector} from "../hooks/redux";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -96,8 +97,8 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const Header: React.FC = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const {language} = useSelector((state: RootState) => state.lang);
+  const dispatch = useAppDispatch();
+  const {language} = useAppSelector((state: RootState) => state.lang);
 
   const handleChange = (event: SelectChangeEvent) => {
     const currentLang = event.target.value;
@@ -138,8 +139,8 @@ const Header: React.FC = () => {
           </Select>
 
           {/* Выход из аккаунта */}
-          <div className={cn(classes.headerLogout, classes.headerItem)}>
-            <LogoutSvg  className={classes.headerLogoutIcon}/>
+          <div className={cn(classes.headerLogout, classes.headerItem)} onClick={() => {dispatch(removeAuthToken())}}>
+            <LogoutSvg className={classes.headerLogoutIcon}/>
             <Typography className={classes.headerItemText}>{translate('logout', language)}</Typography>
           </div>
 

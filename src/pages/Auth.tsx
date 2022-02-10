@@ -5,8 +5,11 @@ import cn from 'classnames';
 import {PhonePng, DashboardPng, SoundPng} from '../assets/images/Auth';
 import LogoPng from '../assets/images/logo.png';
 import {fetchAuthToken} from "../store/reducers/auth.slice";
-import {useAppDispatch} from "../hooks/redux";
+import {useAppDispatch, useAppSelector} from "../hooks/redux";
 import { useFormik } from 'formik';
+import {LoadingButton} from "@mui/lab";
+import {Redirect} from "react-router-dom";
+import SendIcon from '@mui/icons-material/Send';
 
 const useStyles = makeStyles(({
   authWrapper: {
@@ -104,6 +107,13 @@ const useStyles = makeStyles(({
     position: 'absolute',
     right: '-220px',
     top: '-5px',
+  },
+  authButton: {
+    width: '100%',
+    margin: '16px 0 30px 0 !important',
+    '& .MuiLoadingButton-loadingIndicator': {
+      right: '123px'
+    }
   }
 }));
 
@@ -123,7 +133,7 @@ const PasswordSvg = (props: React.SVGProps<SVGSVGElement>) => {
       <path
         d="M4.875 11C4.875 10.3787 5.3787 9.875 6 9.875C6.6213 9.875 7.125 10.3787 7.125 11C7.125 11.6213 6.6213 12.125 6 12.125C5.3787 12.125 4.875 11.6213 4.875 11Z"
         fill="#2F3747"/>
-      <path fill-rule="evenodd" clip-rule="evenodd"
+      <path fillRule="evenodd" clipRule="evenodd"
             d="M2.71622 6.94792L2.47964 4.81871C2.44931 4.54573 2.44931 4.27022 2.47964 3.99724L2.49672 3.84356C2.67783 2.21352 3.95929 0.923783 5.58816 0.73215C5.86176 0.69996 6.13821 0.69996 6.41181 0.73215C8.04066 0.923783 9.32211 2.21353 9.50324 3.84357L9.52026 3.99724C9.55064 4.27022 9.55064 4.54573 9.52026 4.8187L9.28371 6.94792L9.79866 6.98902C10.6107 7.05389 11.2738 7.66432 11.4055 8.46824C11.68 10.1449 11.68 11.8552 11.4055 13.5319C11.2738 14.3359 10.6107 14.9463 9.79866 15.0111L8.67659 15.1007C6.89504 15.2429 5.10501 15.2429 3.32345 15.1007L2.20135 15.0111C1.3893 14.9463 0.726226 14.3359 0.594586 13.5319C0.320034 11.8552 0.320034 10.1449 0.594586 8.46824C0.726226 7.66432 1.3893 7.05389 2.20135 6.98902L2.71622 6.94792ZM5.71956 1.84945C5.90586 1.82753 6.09411 1.82753 6.28034 1.84945C7.38936 1.97991 8.26176 2.85802 8.38514 3.9678L8.40216 4.12147C8.42331 4.31188 8.42331 4.50406 8.40216 4.69447L8.16134 6.86234C6.72194 6.76964 5.27804 6.76964 3.83864 6.86234L3.59777 4.69447C3.57661 4.50406 3.57661 4.31188 3.59777 4.12147L3.61484 3.9678C3.73815 2.85802 4.61061 1.97991 5.71956 1.84945ZM8.58704 8.02087C6.86511 7.88347 5.13494 7.88347 3.41297 8.02087L2.29088 8.11049C1.99468 8.13412 1.75282 8.35679 1.7048 8.65004C1.44996 10.2064 1.44996 11.7938 1.7048 13.3501C1.75282 13.6434 1.99468 13.8661 2.29088 13.8897L3.41297 13.9792C5.13494 14.1167 6.86511 14.1167 8.58704 13.9792L9.70911 13.8897C10.0054 13.8661 10.2472 13.6434 10.2952 13.3501C10.5501 11.7938 10.5501 10.2064 10.2952 8.65004C10.2472 8.35679 10.0054 8.13412 9.70911 8.11049L8.58704 8.02087Z"
             fill="#1B202B"/>
     </svg>
@@ -133,6 +143,9 @@ const PasswordSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const Auth = () => {
   const classes = useStyles();
   const dispatch = useAppDispatch();
+  const [buttonClick, setButtonClick] = useState<boolean>(false);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+
 
   const formik = useFormik({
     initialValues: {
@@ -140,10 +153,20 @@ const Auth = () => {
       password: ''
     },
     onSubmit: (values) => {
-      debugger;
+      setButtonClick(true);
       dispatch(fetchAuthToken(values));
     },
   });
+
+  useEffect(() => {
+    return () => {
+      setButtonClick(false);
+    }
+  }, [])
+
+  if (isAuth) {
+    return <Redirect to="/calls"/>;
+  }
 
   return (
     <div className={classes.authWrapper}>
@@ -192,11 +215,10 @@ const Auth = () => {
               <PasswordSvg className={classes.authPasswordInputIcon}/>
             </div>
 
-            <Button type="submit"
-                    style={{width: '100%', margin: '16px 0 30px 0'}} variant="contained" color="secondary">Войти</Button>
+            <LoadingButton className={classes.authButton} loading={buttonClick} loadingPosition="end" endIcon={<SendIcon  />} type="submit"
+                           variant="contained" color="secondary">Войти</LoadingButton>
           </form>
-          <Button onClick={() => alert("Регистрация пока не работает:(")}
-                  style={{width: '100%'}} variant="outlined" color="secondary">Зарегистрироваться</Button>
+          <Button className={classes.authButton} variant="outlined" color="secondary">Зарегистрироваться</Button>
         </div>
       </div>
     </div>

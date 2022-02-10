@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Redirect, Route, Switch, Link} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
 import {Header} from './components';
 import {Auth, Calls} from './pages';
+import {useAppDispatch, useAppSelector} from "./hooks/redux";
+import {authSlice} from "./store/reducers/auth.slice";
 
 const useStyles = makeStyles(({
   wrapper: {
@@ -18,6 +20,16 @@ const useStyles = makeStyles(({
 
 const App = () => {
   const classes = useStyles();
+  const dispatch = useAppDispatch();
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+  useEffect(() => {
+    // @ts-ignore
+    const token = JSON.parse(localStorage.getItem('token'));
+    if (token) {
+      dispatch(authSlice.actions.setAuth(true));
+    }
+  });
+
   return (
     <div className={classes.wrapper}>
       <Switch>
@@ -26,6 +38,7 @@ const App = () => {
         <Route exact path="/auth">
           <Auth/>
         </Route>
+        {!isAuth && <Redirect to="/auth"/>}
 
         {/* Звонки */}
         <Route path="/calls">
