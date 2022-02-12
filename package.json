@@ -2,7 +2,7 @@
   "name": "imot.io",
   "version": "0.0.1",
   "private": true,
-  "homepage": "https://markelovtrofim.github.io/imot/",
+  "homepage": "https://markelovtrofim.github.io/imot",
   "proxy": "https://test.imot.io/new_api",
   "dependencies": {
     "@date-io/date-fns": "^2.13.1",

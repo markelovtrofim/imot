@@ -1,9 +1,8 @@
 import React, {FC} from 'react';
-import {BlockBox} from "./BlockBox";
+import BlockBox from "./BlockBox";
 import {Typography} from "@mui/material";
 import {Theme} from '@mui/material/styles';
-import CustomSelect from './CustomSelect'
-import Select, {SelectChangeEvent} from '@mui/material/Select';
+import Select from './Select'
 import SendIcon from '@mui/icons-material/Send';
 import {makeStyles} from "@mui/styles";
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -64,7 +63,7 @@ const MenuProps = {
   },
 };
 
-const Filter: FC<FilterPropsType> = ({pageName}) => {
+const Search: FC<FilterPropsType> = ({pageName}) => {
   const [loading, setLoading] = React.useState(false);
 
   const searchButtonHandleClick = () => {
@@ -77,18 +76,6 @@ const Filter: FC<FilterPropsType> = ({pageName}) => {
   const classes = useStyles();
   const [personName, setPersonName] = React.useState<string[]>([]);
 
-  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
-    const {
-      target: {value},
-    } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
-  };
-  const handleDelete = () => {
-    console.log('DELETE')
-  }
   return (
     <div style={{margin: '24px 0'}}>
       <BlockBox padding="30px 25px">
@@ -97,19 +84,19 @@ const Filter: FC<FilterPropsType> = ({pageName}) => {
           <div className={classes.filterItems}>
             <div className={classes.filterItem}>
               <Typography>Группа тегов</Typography>
-              <CustomSelect/>
+              <Select/>
             </div>
             <div className={classes.filterItem}>
               <Typography>Клиент</Typography>
-              <CustomSelect/>
+              <Select/>
             </div>
             <div className={classes.filterItem}>
               <Typography>Сотрудник</Typography>
-              <CustomSelect/>
+              <Select/>
             </div>
             <div className={classes.filterItem}>
               <Typography>Отдел</Typography>
-              <CustomSelect/>
+              <Select/>
             </div>
           </div>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -131,5 +118,5 @@ const Filter: FC<FilterPropsType> = ({pageName}) => {
   );
 };
 
-export default Filter;
+export default Search;
 

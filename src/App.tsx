@@ -5,7 +5,7 @@ import {Button, Typography} from '@mui/material';
 import {Header} from './components';
 import {Auth, Calls} from './pages';
 import {useAppDispatch, useAppSelector} from "./hooks/redux";
-import {authSlice} from "./store/reducers/auth.slice";
+import {authSlice} from "./store/auth/auth.slice";
 
 const useStyles = makeStyles(({
   wrapper: {

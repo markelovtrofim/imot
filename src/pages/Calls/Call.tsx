@@ -1,9 +1,8 @@
 import React from 'react';
-import {ControlBlock} from "../components";
-import Filter from "../components/Filter";
+import Search from "../../components/Search";
 import {NavLink} from 'react-router-dom';
 import {Typography} from "@mui/material";
-import {BlockBox} from "../components/BlockBox";
+import {BlockBox} from "../../components";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -14,7 +13,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import Tag from "../components/Tag";
+import Tag from "../../components/Tag";
 import Tooltip from '@mui/material/Tooltip';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -129,8 +128,7 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Call = ({call}: any) => {
-  const [expanded, setExpanded] = React.useState<string | false>(false);
+const Call = ({call, expanded, setExpanded}: any) => {
   const classes = useStyles();
 
   const handleChange =

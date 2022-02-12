@@ -9,7 +9,7 @@ import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select  from '@mui/material/Select';
 import cn from 'classnames';
-import {removeAuthToken} from "../store/reducers/auth.slice";
+import {removeAuthToken} from "../store/auth/auth.slice";
 import {useAppDispatch, useAppSelector} from "../hooks/redux";
 
 const useStyles = makeStyles(({

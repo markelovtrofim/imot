@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {makeStyles} from '@mui/styles';
-import {BlockBox} from './BlockBox';
+import BlockBox from './BlockBox';
 import {Button, ButtonGroup, InputBase, Typography} from '@mui/material';
 import DateRangePicker, {DateRange} from '@mui/lab/DateRangePicker';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';

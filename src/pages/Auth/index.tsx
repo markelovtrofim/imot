@@ -1,15 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import {makeStyles} from "@mui/styles";
-import {Button, TextField, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 import cn from 'classnames';
-import {PhonePng, DashboardPng, SoundPng} from '../assets/images/Auth';
-import LogoPng from '../assets/images/logo.png';
-import {fetchAuthToken} from "../store/reducers/auth.slice";
-import {useAppDispatch, useAppSelector} from "../hooks/redux";
-import { useFormik } from 'formik';
+import {PhonePng, DashboardPng, SoundPng} from '../../assets/images/Auth';
+import LogoPng from '../../assets/images/logo.png';
+import {authSlice, fetchAuthToken} from "../../store/auth/auth.slice";
+import {useAppDispatch, useAppSelector} from "../../hooks/redux";
+import {useFormik} from 'formik';
 import {LoadingButton} from "@mui/lab";
 import {Redirect} from "react-router-dom";
 import SendIcon from '@mui/icons-material/Send';
+import Alert from "@mui/material/Alert";
+import Input from "../../components/Input";
+import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
+import Button from '@mui/material/Button';
+import SignUpModalWindow from "./SignUpModalWindow";
 
 const useStyles = makeStyles(({
   authWrapper: {
@@ -113,7 +118,7 @@ const useStyles = makeStyles(({
     margin: '16px 0 30px 0 !important',
     '& .MuiLoadingButton-loadingIndicator': {
       right: '123px'
-    }
+    },
   }
 }));
 
@@ -144,23 +149,34 @@ const Auth = () => {
   const classes = useStyles();
   const dispatch = useAppDispatch();
   const [buttonClick, setButtonClick] = useState<boolean>(false);
-  const isAuth = useAppSelector(state => state.auth.isAuth);
 
+  const [openChangePasswordWindow, setOpenChangePasswordWindow] = useState<boolean>(false);
+  const handleOpenChangePasswordWindow = () => setOpenChangePasswordWindow(true);
+  const handleCloseChangePasswordWindow = () => setOpenChangePasswordWindow(false);
+
+  const [openSignUpWindow, setOpenSignUpWindow] = useState<boolean>(false);
+  const handleOpenSignUpWindow = () => setOpenSignUpWindow(true);
+  const handleCloseSignUpWindow = () => setOpenSignUpWindow(false);
+
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+  const error = useAppSelector(state => state.auth.error);
 
   const formik = useFormik({
     initialValues: {
       username: '',
       password: ''
     },
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       setButtonClick(true);
-      dispatch(fetchAuthToken(values));
+      await dispatch(fetchAuthToken(values));
+      setButtonClick(false);
     },
   });
 
   useEffect(() => {
     return () => {
       setButtonClick(false);
+      dispatch(authSlice.actions.setError(null));
     }
   }, [])
 
@@ -194,32 +210,53 @@ const Auth = () => {
           </div>
           <form onSubmit={formik.handleSubmit}>
             <div className={classes.authInputBox}>
-              <TextField className={classes.authInput} id="username"
-                         name="username"
-                         type="text"
-                         onChange={formik.handleChange}
-                         value={formik.values.username} label="Login"/>
+              <Input
+                name={"username"}
+                type={"text"}
+                handleChange={formik.handleChange}
+                value={formik.values.username}
+                bcColor={"#FFFFFF"}
+                label={"Login"}
+              />
               <LoginSvg className={classes.authLoginInputIcon}/>
             </div>
             <div className={classes.authInputBox}>
-              <Button onClick={() => alert("Данная функция пока не работает:( Постарайтесь вспомнить пароль.")}
+              <Button tabIndex={-1} onClick={() => {
+                handleOpenChangePasswordWindow();
+              }}
                       className={classes.authForgotButton}>
                 Забыли пароль
               </Button>
-              <TextField className={classes.authInput} id="password"
-                         name="password"
-                         type="text"
-                         onChange={formik.handleChange}
-                         value={formik.values.password}
-                         label="Password"/>
+              <Input
+                name={"password"}
+                type={"password"}
+                handleChange={formik.handleChange}
+                value={formik.values.password}
+                bcColor={"#FFFFFF"}
+                label={"Password"}
+              />
               <PasswordSvg className={classes.authPasswordInputIcon}/>
             </div>
 
-            <LoadingButton className={classes.authButton} loading={buttonClick} loadingPosition="end" endIcon={<SendIcon  />} type="submit"
-                           variant="contained" color="secondary">Войти</LoadingButton>
+            <LoadingButton
+              className={classes.authButton} loading={buttonClick} loadingPosition="end"
+              endIcon={<SendIcon/>} type="submit"
+              variant="contained" color="primary"
+            >Войти</LoadingButton>
           </form>
-          <Button className={classes.authButton} variant="outlined" color="secondary">Зарегистрироваться</Button>
+          <Button
+            className={classes.authButton}
+            variant="outlined" color="primary"
+            onClick={handleOpenSignUpWindow}
+          >
+            Зарегистрироваться
+          </Button>
+          <div style={{height: '48px'}}>
+            {error ? <Alert severity="error">{error}</Alert> : null}
+          </div>
         </div>
+        <ForgotPasswordModalWindow isOpen={openChangePasswordWindow} handleClose={handleCloseChangePasswordWindow}/>
+        <SignUpModalWindow isOpen={openSignUpWindow} handleClose={handleCloseSignUpWindow}/>
       </div>
     </div>
   );

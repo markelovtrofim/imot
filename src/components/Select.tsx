@@ -104,7 +104,7 @@ const CustomMultiSelect = React.forwardRef(function CustomMultiSelect(
   return <MultiSelectUnstyled {...props} ref={ref} components={components} />;
 });
 
-export default function CustomSelect() {
+export default function Select() {
   return (
     <CustomMultiSelect defaultValue={[10]}>
       <StyledOption value={10}>Ten</StyledOption>
