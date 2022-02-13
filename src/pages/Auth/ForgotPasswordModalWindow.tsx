@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ModalWindowBox from "../../components/ModalWindowBox";
 import {IconButton, Typography} from "@mui/material";
 import cn from "classnames";
@@ -6,6 +6,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import Input from "../../components/Input";
 import {LoadingButton} from "@mui/lab";
 import {makeStyles} from "@mui/styles";
+import {useFormik} from "formik";
+import {fetchAuthToken} from "../../store/auth/auth.slice";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -25,12 +27,35 @@ const useStyles = makeStyles(({
     marginBottom: '35px !important'
   },
   mwButtonBox: {
+    marginTop: '25px',
     textAlign: 'right'
   }
 }));
 
 const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
   const classes = useStyles();
+  const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
+
+  const validate = (values: {email: string}) => {
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      setSubmitButtonDisabled(true);
+    } else {
+      setSubmitButtonDisabled(false);
+    }
+  };
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+    },
+    validate,
+    onSubmit: async (values) => {
+      alert(values.email);
+    },
+  });
+
+  useEffect(() => {
+    formik.values.email = '';
+  }, [handleClose])
 
   return (
     <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
@@ -42,20 +67,25 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
       </div>
       <Typography className={cn(classes.mwHelp, classes.mwText)}>Ввидите email для восстановление пароля,на него будет
         выслано письмо.</Typography>
-      <Input
-        name={"email"}
-        type={"text"}
-        bcColor={"#EEF2F6"}
-        label={"Email"}
-      />
-      <div className={classes.mwButtonBox}>
-        <LoadingButton variant="contained" color="primary">
-          Отправить
-        </LoadingButton>
-        <LoadingButton variant="contained" color="secondary">
-          Отмена
-        </LoadingButton>
-      </div>
+      <form onSubmit={formik.handleSubmit}>
+        <Input
+          name={"email"}
+          type={"email"}
+          handleChange={formik.handleChange}
+          value={formik.values.email}
+          bcColor={"#EEF2F6"}
+          label={"Email"}
+          autoComplete="off"
+        />
+        <div className={classes.mwButtonBox}>
+          <LoadingButton disabled={submitButtonDisabled} type="submit" style={{marginRight: '15px'}} variant="contained" color="primary">
+            Отправить
+          </LoadingButton>
+          <LoadingButton onClick={handleClose} variant="contained" color="secondary">
+            Отмена
+          </LoadingButton>
+        </div>
+      </form>
     </ModalWindowBox>
   );
 };

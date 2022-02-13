@@ -63,12 +63,14 @@ const useStyles = makeStyles(({
   langHandler: {
     '& .MuiInput-input:focus': {
       backgroundColor: '#fff',
-
     },
     marginRight: '25px',
     border: 'none',
     outline: 'none',
     '&::before': {
+      border: 'none !important'
+    },
+    '&::after': {
       border: 'none !important'
     }
   },

@@ -104,7 +104,7 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
               onClick={searchButtonHandleClick}
               startIcon={<SearchIcon/>}
               loading={loading}
-              color="secondary"
+              color="primary"
               loadingPosition="start"
               variant="contained"
             >

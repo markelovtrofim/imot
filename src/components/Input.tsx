@@ -8,7 +8,8 @@ type InputPropsType = {
   handleChange?: (e: React.ChangeEvent<any>) => void,
   value?: string,
   bcColor: string,
-  label: string
+  label: string,
+  autoComplete?: 'on' | 'off',
 };
 
 const Input: FC<InputPropsType> = (props) => {
@@ -38,6 +39,7 @@ const Input: FC<InputPropsType> = (props) => {
     name={props.name}
     type={props.type}
     onChange={props.handleChange}
+    autoComplete={props.autoComplete}
     value={props.value} label={props.label}
   />
 };

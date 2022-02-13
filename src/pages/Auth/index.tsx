@@ -242,7 +242,9 @@ const Auth = () => {
               className={classes.authButton} loading={buttonClick} loadingPosition="end"
               endIcon={<SendIcon/>} type="submit"
               variant="contained" color="primary"
-            >Войти</LoadingButton>
+            >
+              Войти
+            </LoadingButton>
           </form>
           <Button
             className={classes.authButton}
