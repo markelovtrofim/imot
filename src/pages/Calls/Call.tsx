@@ -68,13 +68,14 @@ const useStyles = makeStyles(({
   accordion: {
     backgroundColor: '#ffffff !important',
     borderTop: '2px solid #F8FAFC !important',
-    padding: '17px 24px 0 24px !important',
+    padding: '0 24px !important',
+    paddingTop: '18px !important',
+    '& .MuiAccordionSummary-content': {
+      margin: '0 !important',
+    },
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start !important',
-    '& .MuiAccordionSummary-content': {
-      margin: 0
-    },
     '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
       margin: '25px !important',
       position: 'relative',
@@ -83,7 +84,7 @@ const useStyles = makeStyles(({
   },
   slave: {
     position: 'absolute',
-    top: '34px',
+    top: '35px',
     right: '40px',
     borderRadius: '5px',
     width: '32px',
@@ -141,7 +142,7 @@ const Call = ({call, expanded, setExpanded}: any) => {
       <AccordionSummary className={classes.accordion}>
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
-          <Grid item xs={1.8} style={{minWidth: '130px'}}>
+          <Grid item xs={1.8} style={{minWidth: '145px'}}>
             {/* Имя и фамилия. */}
             <div className={classes.employee}>
               <Typography className={classes.employeeText}>Сотрудник</Typography>

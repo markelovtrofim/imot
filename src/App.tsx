@@ -12,9 +12,9 @@ const useStyles = makeStyles(({
     width: 'auto'
   },
   container: {
-    width: '100%',
-    maxWidth: '1280px',
-    margin: '0 auto'
+    maxWidth: '1628px',
+    margin: '0 auto',
+    padding: '0 146px'
   }
 }));
 
@@ -49,10 +49,18 @@ const App = () => {
         </Route>
 
         {/* Отсчеты */}
-        <Route path="/report">
+        <Route path="/reports">
           <Header/>
           <div className={classes.container}>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">report</Typography>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">reports</Typography>
+          </div>
+        </Route>
+
+        {/* Загрузить звонок */}
+        <Route path="/rules">
+          <Header/>
+          <div className={classes.container}>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">markup rules</Typography>
           </div>
         </Route>
 
@@ -63,6 +71,7 @@ const App = () => {
             <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">load call</Typography>
           </div>
         </Route>
+
 
         {/* Оповещение */}
         <Route path="/dictionaries">

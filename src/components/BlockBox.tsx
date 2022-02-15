@@ -1,25 +1,30 @@
 import React, {FC} from 'react';
 import {makeStyles} from '@mui/styles';
 
-const useStyles = makeStyles(({
-  boxWrapper: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '10px'
-  }
-}));
-
 type BoxPropsType = {
   width?: string,
-  padding: string
+  padding?: string,
+  borderRadius?: string,
+  border?: string
 };
 
-const BlockBox: FC<BoxPropsType> = ({width, padding = '0', children}) => {
+const BlockBox: FC<BoxPropsType> = ({width, padding = '0', border,
+                                     borderRadius = '10px', children
+                                   }) => {
+  const useStyles = makeStyles(({
+    boxWrapper: {
+      backgroundColor: '#FFFFFF',
+      height: '100%',
+      width,
+      padding,
+      border,
+      borderRadius
+    }
+  }));
   const classes = useStyles();
-  return (
-    <div style={{height: '100%', width: width, padding}} className={classes.boxWrapper}>
-      {children}
-    </div>
-  );
+  return <div className={classes.boxWrapper}>
+    {children}
+  </div>
 };
 
 export default BlockBox;

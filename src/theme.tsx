@@ -10,7 +10,7 @@ const theme = createTheme({
     },
     allVariants: {
       fontFamily: "Inter, sans-serif",
-      'color': '#000000',
+      'color': '#738094',
     },
     fontFamily: [
       'Inter'

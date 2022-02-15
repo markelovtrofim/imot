@@ -2,6 +2,7 @@
   "HEADER": "HEADER",
 
   "calls": "Звонки",
+  "reports": "Мои отсчеты",
   "markupRules": "Правила разметки",
   "loadCall": "Загрузить звонок",
   "alert": "Оповещение",
