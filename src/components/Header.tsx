@@ -143,7 +143,7 @@ const Header: React.FC = () => {
             style={{cursor: 'pointer'}}
           >
             {headerItemsArray.map(item =>
-              <ToggleButton disabled={item.path === alignment} onClick={() => {
+              <ToggleButton key={item.id} disabled={item.path === alignment} onClick={() => {
                 history.push(item.path);
               }} className={classes.headerItemText} value={item.path}>
                 {item.name}

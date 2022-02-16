@@ -178,7 +178,7 @@ const Auth = () => {
       setButtonClick(false);
       dispatch(authSlice.actions.setError(null));
     }
-  }, [])
+  }, [dispatch])
 
   if (isAuth) {
     return <Redirect to="/calls"/>;

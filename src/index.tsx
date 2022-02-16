@@ -12,6 +12,14 @@ import {Provider} from "react-redux";
 
 const store = setupStore();
 
+declare global {
+  interface Window {
+    __store__: any
+  }
+}
+
+window.__store__ = store;
+
 ReactDOM.render(
   <React.StrictMode>
     <StylesProvider injectFirst>

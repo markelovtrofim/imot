@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {AuthResponseErrors} from "./auth.types";
+import {fetchCalls} from "../calls/calls.slice";
 
 type AuthType = {
   access_token: "string",
@@ -15,14 +16,15 @@ export const fetchAuthToken = createAsyncThunk(
       bodyFormData.append('username', authData.username);
       bodyFormData.append('password', authData.password);
       const response = await axios.post<AuthType>('https://test.imot.io/new_api/token', bodyFormData);
-      thunkAPI.dispatch(authSlice.actions.setAuth(true));
       console.log(response.data);
       localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));
-    } catch (e) {
+      await thunkAPI.dispatch(fetchCalls({skip: 0, limit: 20}));
+      thunkAPI.dispatch(authSlice.actions.setAuth(true));
+    } catch (error) {
       // @ts-ignore
-      const status = Number(e.message.substr(-3, 3));
+      const status = Number(error.message.substr(-3, 3));
       if (status === AuthResponseErrors.FieldsRequired) {
         thunkAPI.dispatch(authSlice.actions.setError('Поля обязательны для ввода'));
       } else if (status === AuthResponseErrors.IncorrectData) {
@@ -40,8 +42,13 @@ export const removeAuthToken = createAsyncThunk(
   }
 );
 
+type InitialStateType = {
+  error: null | string,
+  isAuth: boolean,
+  isLoading: boolean
+};
 
-const initialState: { isAuth: boolean, isLoading: boolean, error: null | string } = {
+const initialState: InitialStateType = {
   error: null,
   isAuth: false,
   isLoading: false

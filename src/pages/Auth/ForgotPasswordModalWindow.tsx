@@ -7,7 +7,6 @@ import Input from "../../components/Input";
 import {LoadingButton} from "@mui/lab";
 import {makeStyles} from "@mui/styles";
 import {useFormik} from "formik";
-import {fetchAuthToken} from "../../store/auth/auth.slice";
 
 const useStyles = makeStyles(({
   mwTitle: {

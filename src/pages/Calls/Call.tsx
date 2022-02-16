@@ -1,8 +1,5 @@
 import React from 'react';
-import Search from "../../components/Search";
-import {NavLink} from 'react-router-dom';
 import {Typography} from "@mui/material";
-import {BlockBox} from "../../components";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -15,6 +12,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Tag from "../../components/Tag";
 import Tooltip from '@mui/material/Tooltip';
+
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -136,6 +134,7 @@ const Call = ({call, expanded, setExpanded}: any) => {
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
     };
+
   return (
     <Accordion style={{border: 'none '}} expanded={expanded === call} onChange={handleChange(call)}>
       {/* Первичная информация о звонке. */}

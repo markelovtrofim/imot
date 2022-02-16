@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Search from "../../components/Search";
 import {BlockBox, Select, СontrolBlock} from "../../components";
 import Call from "./Call";
 import {Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
+import {useAppDispatch, useAppSelector} from "../../hooks/redux";
+import {fetchCalls, fetchCertainCall} from "../../store/calls/calls.slice";
+import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
   callsHeader: {
@@ -30,7 +33,6 @@ const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
     <path fillRule="evenodd" clipRule="evenodd" d="M10 1.5C5.30558 1.5 1.5 5.30558 1.5 10C1.5 14.6944 5.30558 18.5 10 18.5C14.6944 18.5 18.5 14.6944 18.5 10C18.5 5.30558 14.6944 1.5 10 1.5ZM10.75 5C10.75 4.58579 10.4142 4.25 10 4.25C9.5858 4.25 9.25 4.58579 9.25 5V10C9.25 10.2586 9.3832 10.4989 9.6025 10.636L12.6025 12.511C12.9538 12.7305 13.4165 12.6238 13.636 12.2725C13.8555 11.9212 13.7488 11.4585 13.3975 11.239L10.75 9.5843V5Z" fill="#738094"/>
     <path d="M15.4697 1.53033C15.1768 1.23744 15.1768 0.762557 15.4697 0.469667C15.7626 0.176778 16.2374 0.176778 16.5303 0.469667L19.0303 2.96967C19.3232 3.26256 19.3232 3.73744 19.0303 4.03033C18.7374 4.32322 18.2626 4.32322 17.9697 4.03033L15.4697 1.53033Z" fill="#738094"/>
   </svg>
-
 );
 
 const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
@@ -43,6 +45,25 @@ const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
 const Calls = () => {
   const [expanded, setExpanded] = React.useState<string | false>(false);
   const classes = useStyles();
+
+  const callsDetails = useAppSelector(state => state.calls.callsDetails);
+  const callIds = useAppSelector(state => state.calls.calls.call_ids)
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCalls({skip: 0, limit: 20}))
+  }, [])
+
+  useEffect(() => {
+    if (callIds) {
+      for (let i = 0; i < callsDetails.length; i++) {
+        if (!callsDetails[i]) {
+          dispatch(fetchCertainCall({callId: callIds[i], index: i}));
+        }
+      }
+    }
+  }, [callIds])
+
   return (
     <div style={{cursor: 'default'}}>
       <СontrolBlock/>
@@ -79,9 +100,13 @@ const Calls = () => {
         </div>
 
         <div>
-          {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'].map(call => (
+          {callsDetails.map(call => {
+            if (!call) {
+              return <h3>EMPTY</h3>
+            }
+            return (
               <Call key={call} call={call} expanded={expanded} setExpanded={setExpanded}/>
-            )
+            )}
           )}
         </div>
       </BlockBox>

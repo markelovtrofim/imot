@@ -3,11 +3,10 @@ import BlockBox from "./BlockBox";
 import {Typography} from "@mui/material";
 import {Theme} from '@mui/material/styles';
 import Select from './Select'
-import SendIcon from '@mui/icons-material/Send';
 import {makeStyles} from "@mui/styles";
 import LoadingButton from '@mui/lab/LoadingButton';
 import SearchIcon from '@mui/icons-material/Search';
-import MenuItem from "@mui/material/MenuItem";
+import axios from "axios";
 
 const useStyles = makeStyles(({
   filterItems: {
@@ -66,16 +65,47 @@ const MenuProps = {
 const Search: FC<FilterPropsType> = ({pageName}) => {
   const [loading, setLoading] = React.useState(false);
 
-  const searchButtonHandleClick = () => {
+  const searchButtonHandleClick = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000)
+
+    // ALL CALLS
+    let allCalls = []
+    // @ts-ignore
+    const token = await JSON.parse(localStorage.getItem('token'));
+    const responseCalls = await axios.post('https://test.imot.io/new_api/search_calls/?skip=0&limit=50', [], {
+      headers: {
+        'Authorization': `Bearer ${token.token}`
+      }
+    });
+    console.log('')
+    console.log('ALL CALLS')
+    console.log(JSON.stringify(responseCalls.data));
+
+    // ONE CALL
+    const responseCall = await axios.get(`https://test.imot.io/new_api/call/${responseCalls.data.call_ids[0]}`, {
+      headers: {
+        'Authorization': `Bearer ${token.token}`
+      }
+    });
+    console.log('')
+    console.log('ONE CALLS')
+    console.log(JSON.stringify(responseCall.data));
+
+    // ONE CALL STT
+    const responseCallStt = await axios.get(`https://test.imot.io/new_api/call/${responseCalls.data.call_ids[0]}/stt`, {
+      headers: {
+        'Authorization': `Bearer ${token.token}`
+      }
+    });
+    console.log('')
+    console.log('ONE CALLS STT')
+    console.log(JSON.stringify(responseCall.data));
+
+    setLoading(false);
   };
 
   const classes = useStyles();
   const [personName, setPersonName] = React.useState<string[]>([]);
-
   return (
     <div style={{margin: '24px 0'}}>
       <BlockBox padding="30px 25px">
