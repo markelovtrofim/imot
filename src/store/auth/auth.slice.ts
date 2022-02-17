@@ -16,11 +16,9 @@ export const fetchAuthToken = createAsyncThunk(
       bodyFormData.append('username', authData.username);
       bodyFormData.append('password', authData.password);
       const response = await axios.post<AuthType>('https://test.imot.io/new_api/token', bodyFormData);
-      console.log(response.data);
       localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));
-      await thunkAPI.dispatch(fetchCalls({skip: 0, limit: 20}));
       thunkAPI.dispatch(authSlice.actions.setAuth(true));
     } catch (error) {
       // @ts-ignore
