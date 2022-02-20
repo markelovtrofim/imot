@@ -1,5 +1,5 @@
 import React from 'react';
-import {Typography} from "@mui/material";
+import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -12,15 +12,15 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Tag from "../../components/Tag";
 import Tooltip from '@mui/material/Tooltip';
+import {CallsInfoType, CallsType, TagType} from "../../store/calls/calls.types";
 
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({theme}) => ({
   border: `1px solid ${theme.palette.divider}`,
-  '&:not(:last-child)': {
-    borderBottom: 0,
-  },
+  '&:not(:last-child)': {},
+  borderBottom: 0,
   '&:before': {
     display: 'none',
   },
@@ -108,6 +108,9 @@ const useStyles = makeStyles(({
   callTime: {
     color: '#738094 !important'
   },
+  callDurationBox: {
+    marginTop: '8px'
+  },
   callDuration: {
     color: '#738094 !important'
   },
@@ -127,7 +130,7 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Call = ({call, expanded, setExpanded}: any) => {
+const Call = ({call, expanded, setExpanded}: { call: CallsInfoType | null, expanded: any, setExpanded: any }) => {
   const classes = useStyles();
 
   const handleChange =
@@ -135,8 +138,25 @@ const Call = ({call, expanded, setExpanded}: any) => {
       setExpanded(newExpanded ? panel : false);
     };
 
+  function msToTime(s: number) {
+    // Pad to 2 or 3 digits, default is 2
+    function pad(n: any, z: any) {
+      z = z || 2;
+      return ('00' + n).slice(-z);
+    }
+
+    let ms = s % 1000;
+    s = (s - ms) / 1000;
+    let secs = s % 60;
+    s = (s - secs) / 60;
+    let mins = s % 60;
+    let hrs = (s - mins) / 60;
+    // @ts-ignore
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
+  }
+
   return (
-    <Accordion style={{border: 'none '}} expanded={expanded === call} onChange={handleChange(call)}>
+    <Accordion style={{border: 'none '}} expanded={expanded === call}>
       {/* Первичная информация о звонке. */}
       <AccordionSummary className={classes.accordion}>
         <Grid container className={classes.callInner}>
@@ -144,132 +164,67 @@ const Call = ({call, expanded, setExpanded}: any) => {
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
             {/* Имя и фамилия. */}
             <div className={classes.employee}>
-              <Typography className={classes.employeeText}>Сотрудник</Typography>
+              <Typography className={classes.employeeText}>{call ? call.operatorPhone :
+                <Skeleton width={60} height={20} variant="text"/>}</Typography>
               <CallSvg/>
             </div>
             {/* Дата звонка.*/}
             <div className={classes.callDateBox}>
-              <Typography className={classes.callDate}>01/01/2042</Typography>
-              <Typography className={classes.callTime}>10:42</Typography>
+              <Typography className={classes.callDate}>{call ? call.callTimeReadable :
+                <Skeleton width={100}height={20} variant="text"/>}</Typography>
             </div>
             {/* Время звонка. */}
-            <Typography className={classes.callDuration}>00:01:42</Typography>
+            <div className={classes.callDurationBox}>
+              <Typography className={classes.callDuration}>
+                {call ? msToTime(
+                  // @ts-ignore
+                  call.duration) : <Skeleton width={60} height={20} variant="text"/>}
+              </Typography>
+            </div>
           </Grid>
           {/* Клиент. */}
           <Grid item xs={1.5} className={classes.callMNumberBox}>
             {/* Номер телефона. */}
-            <Typography className={classes.callMNumber}>79607807211</Typography>
+            <Typography className={classes.callMNumber}>{call ? call.clientPhone :
+              <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>}</Typography>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={6.5}>
             <div className={classes.callTags}>
               <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
-              <Stack direction="row" style={{flexWrap: 'wrap'}} spacing={1}>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                    />
-                  </div>
-                </Tooltip>
-
+              {call ?
+                <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                {// @ts-ignore
+                  call.tags.map((tag: TagType) => {
+                    const colorArray = [
+                      {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
+                      {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
+                      {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
+                    ]
+                    const randomColor = () => {
+                      const random = Math.floor(Math.random() * 3);
+                      return colorArray[random];
+                    }
+                    const randomColorResult = randomColor()
+                    return (
+                      <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
+                        <div style={{margin: 0}}>
+                          <Tag
+                            label={tag.name} backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
+                            color={tag.color ? tag.color : randomColorResult.color}
+                            hover={tag.color ? tag.color : randomColorResult.hover}
+                          />
+                        </div>
+                      </Tooltip>)
+                  })
+                }
               </Stack>
+                : <div style={{width: '100%'}}>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27}
+                            variant="text"/>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                </div>}
             </div>
-            <div className={classes.callTags}>
-              <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
-              <Stack direction="row" style={{flexWrap: 'wrap'}} spacing={1}>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Red" backgroundColor="#FFCCC7" color="#A8071A" hover="#F9AEA7"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Blue" backgroundColor="#D6E4FF" color="#061178" hover="#BED3FE"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="TOOLTIP" placement="top">
-                  <div style={{margin: 0}}>
-                    <Tag
-                      // @ts-ignore
-                      label="Green" backgroundColor="#D9F7BE" color="#237804" hover="#9EEC5A"
-                    />
-                  </div>
-                </Tooltip>
-
-              </Stack>
-              <div className={classes.slave}>
-              </div>
+            <div className={classes.slave}>
             </div>
           </Grid>
         </Grid>

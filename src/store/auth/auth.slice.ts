@@ -1,7 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {AuthResponseErrors} from "./auth.types";
-import {fetchCalls} from "../calls/calls.slice";
 
 type AuthType = {
   access_token: "string",

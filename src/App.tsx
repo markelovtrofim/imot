@@ -6,7 +6,7 @@ import {Header} from './components';
 import {Auth, Calls} from './pages';
 import {useAppDispatch, useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
-import {fetchCalls} from "./store/calls/calls.slice";
+import {getBaseCallsData} from "./store/calls/calls.slice";
 import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
@@ -30,7 +30,6 @@ const App = () => {
     if (token) {
       dispatch(authSlice.actions.setAuth(true));
     }
-    dispatch(fetchCalls({skip: 0, limit: 20}));
   }, []);
 
   return (

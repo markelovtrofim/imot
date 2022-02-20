@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import Search from "../../components/Search";
 import {BlockBox, Select, СontrolBlock} from "../../components";
-import Call from "./Call";
-import {Typography} from "@mui/material";
+import {CircularProgress, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
-import {useAppDispatch, useAppSelector} from "../../hooks/redux";
-import {callsSlice, fetchCalls, fetchCertainCallBundle} from "../../store/calls/calls.slice";
+import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
-import {Button} from "@material-ui/core";
+import CallsBundle from "./CallsBundle";
+import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
+import {CallsType} from "../../store/calls/calls.types";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -52,38 +52,45 @@ const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const Calls = () => {
+const Calls = React.memo(() => {
   const classes = useStyles();
-
-  const callIds = useAppSelector(state => state.calls.calls.call_ids)
-  const callsDetails = useAppSelector(state => state.calls.callsDetails);
-  const dispatch = useDispatch();
-
-  const [expanded, setExpanded] = React.useState<string | false>(false);
-  const [queryRange, setQueryRange] = useState<{ start: number, end: number }>({
-    start: 0,
-    end: 20
-  });
+  const [skip, setSkip] = useState<number>(0)
+  const [fetching, setFetching] = useState<boolean>(false);
+  const pushNewCalls = async () => {
+    await dispatch(getBaseCallsData({skip: skip, limit: 10, data: []}))
+    setSkip(prev => prev + 10);
+    setFetching(true);
+  };
 
   useEffect(() => {
-    if (callIds) {
-      dispatch(fetchCertainCallBundle({callIds, range: queryRange}));
+    if (!fetching) {
+      const response = pushNewCalls();
     }
-  }, [callIds]);
+  }, [fetching])
 
-  const createEmptyBundle = (lengthArray: number): null[] => {
-    let totalArray = [];
-    for (let i = 0; i < lengthArray; i++) {
-      totalArray.push(null);
+  useEffect(() => {
+    return () => {
+      dispatch(callsSlice.actions.setEmptyState(null));
     }
-    return totalArray;
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener('scroll', scrollHandler);
+    return () => {
+      document.removeEventListener('scroll', scrollHandler)
+    }
+  });
+  const scrollHandler = (e: any) => {
+    console.log(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight))
+    if (fetching) {
+      if (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 1500) {
+        setFetching(false)
+      }
+    }
   };
 
-  const callsArrayUpdate = async () => {
-    setQueryRange({start: queryRange.start += 20, end: queryRange.end += 20});
-    await dispatch(callsSlice.actions.setEmptyCertainCalls({body: createEmptyBundle(20)}))
-    await dispatch(fetchCalls({skip: queryRange.end, limit: 20}));
-  };
+  const calls = useAppSelector(state => state.calls.calls);
+  const dispatch = useDispatch();
 
   return (
     <div style={{cursor: 'default'}}>
@@ -91,8 +98,6 @@ const Calls = () => {
       <Search pageName="Звонок"/>
       <BlockBox>
         <div style={{display: 'flex'}}>
-          <Button variant={"contained"} onClick={callsArrayUpdate}>GET</Button>
-          <Typography>- пока что эта штука запрашивает новый бандл звонков.</Typography>
         </div>
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
@@ -125,19 +130,18 @@ const Calls = () => {
         </div>
 
         <div>
-          {callsDetails.map(call => {
-              if (!call) {
-                return <h3>EMPTY</h3>
-              }
-              return (
-                <Call key={call.id} call={call} expanded={expanded} setExpanded={setExpanded}/>
-              )
-            }
-          )}
+          {calls.map((calls: CallsType[]) => {
+            return <div>
+              <CallsBundle calls={calls}/>
+            </div>
+          })}
+        </div>
+        <div style={{height: '200px', textAlign: 'center'}}>
+          {!fetching && <CircularProgress color="primary"/>}
         </div>
       </BlockBox>
     </div>
   )
-}
+});
 
 export default Calls;
