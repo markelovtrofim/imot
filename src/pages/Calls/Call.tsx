@@ -130,11 +130,11 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Call = ({call, expanded, setExpanded}: { call: CallsInfoType | null, expanded: any, setExpanded: any }) => {
+const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null, expanded: any, setExpanded: any, name: string | null}) => {
   const classes = useStyles();
 
   const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+    (panel: string | null) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
     };
 
@@ -156,7 +156,7 @@ const Call = ({call, expanded, setExpanded}: { call: CallsInfoType | null, expan
   }
 
   return (
-    <Accordion style={{border: 'none '}} expanded={expanded === call}>
+    <Accordion style={{border: 'none '}} onChange={handleChange(name)} expanded={expanded === name}>
       {/* Первичная информация о звонке. */}
       <AccordionSummary className={classes.accordion}>
         <Grid container className={classes.callInner}>

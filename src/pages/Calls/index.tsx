@@ -70,7 +70,7 @@ const Calls = React.memo(() => {
 
   useEffect(() => {
     return () => {
-      dispatch(callsSlice.actions.setEmptyState(null));
+      setFetching(false)
     }
   }, [])
 
@@ -81,7 +81,6 @@ const Calls = React.memo(() => {
     }
   });
   const scrollHandler = (e: any) => {
-    console.log(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight))
     if (fetching) {
       if (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 1500) {
         setFetching(false)

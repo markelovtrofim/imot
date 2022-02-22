@@ -7,7 +7,7 @@ const CallsBundle = React.memo((props: any) => {
   return (
     <div>
       {props.calls.map((call: CallsType) => {
-        return <Call call={call.info} expanded={expanded} setExpanded={setExpanded}/>
+        return <Call name={call.id} call={call.info} expanded={expanded} setExpanded={setExpanded}/>
       })}
     </div>
   );

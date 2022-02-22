@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {makeStyles} from '@mui/styles';
 import BlockBox from './BlockBox';
 import {Button, InputBase, Typography} from '@mui/material';
@@ -11,6 +11,8 @@ import {translate} from '../localizations';
 import cn from 'classnames';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Calendar from "./Calendar";
+import CustomCalendar from "./Calendar";
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -62,7 +64,6 @@ const useStyles = makeStyles(({
   },
   cbDateItems: {
     display: 'flex',
-    padding: '6px 12px'
   },
   controlBlockDateItem: {
     display: 'flex',
@@ -120,35 +121,36 @@ const ControlBlock = () => {
 
         {/* Ввод точной даты */}
         <div style={{height: '40px'}}>
-          <BlockBox width={'302px'} padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DateRangePicker
-                inputFormat="dd/MM/yyyy"
-                value={value}
-                clearText={'Clear'}
-                onChange={(newValue) => {
-                  setValue(newValue);
-                }}
-                renderInput={(startProps: any, endProps: any) => {
-                  const changedStartProps = {...startProps, focused: startProps.focused.toString(), inputProps: {...startProps.inputProps, placeholder: ''}};
-                  const changedEndProps = {...endProps, focused: endProps.focused.toString(), inputProps: {...endProps.inputProps, placeholder: ''}};
-                  return (
-                    <div className={classes.cbDateItems}>
-                      <div className={classes.controlBlockDateItem}>
-                        <Typography>{translate('from', language)}</Typography>
-                        <InputBase sx={{ml: 1, flex: 1}} {...changedStartProps} />
-                        <ArrowSvg/>
-                      </div>
-                      <div className={classes.controlBlockDateItem}>
-                        <Typography>{translate('to', language)}</Typography>
-                        <InputBase sx={{ml: 1, flex: 1}} {...changedEndProps}/>
-                        <CaseSvg/>
-                      </div>
-                    </div>
-                  )
-                }}
-              />
-            </LocalizationProvider>
+          <BlockBox padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
+            <Calendar/>
+            {/*<LocalizationProvider dateAdapter={AdapterDateFns}>*/}
+            {/*  <DateRangePicker*/}
+            {/*    inputFormat="dd/MM/yyyy"*/}
+            {/*    value={value}*/}
+            {/*    clearText={'Clear'}*/}
+            {/*    onChange={(newValue) => {*/}
+            {/*      setValue(newValue);*/}
+            {/*    }}*/}
+            {/*    renderInput={(startProps: any, endProps: any) => {*/}
+            {/*      const changedStartProps = {...startProps, focused: startProps.focused.toString(), inputProps: {...startProps.inputProps, placeholder: ''}};*/}
+            {/*      const changedEndProps = {...endProps, focused: endProps.focused.toString(), inputProps: {...endProps.inputProps, placeholder: ''}};*/}
+            {/*      return (*/}
+            {/*        <div className={classes.cbDateItems}>*/}
+            {/*          <div className={classes.controlBlockDateItem}>*/}
+            {/*            <Typography>{translate('from', language)}</Typography>*/}
+            {/*            <InputBase sx={{ml: 1, flex: 1}} {...changedStartProps} />*/}
+            {/*            <ArrowSvg/>*/}
+            {/*          </div>*/}
+            {/*          <div className={classes.controlBlockDateItem}>*/}
+            {/*            <Typography>{translate('to', language)}</Typography>*/}
+            {/*            <InputBase sx={{ml: 1, flex: 1}} {...changedEndProps}/>*/}
+            {/*            <CaseSvg/>*/}
+            {/*          </div>*/}
+            {/*        </div>*/}
+            {/*      )*/}
+            {/*    }}*/}
+            {/*  />*/}
+            {/*</LocalizationProvider>*/}
           </BlockBox>
         </div>
 

@@ -3,11 +3,14 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import langReducer from './lang/langReducer';
 import {authSlice} from "./auth/auth.slice";
 import {callsSlice} from "./calls/calls.slice";
+import {searchSlice} from "./search/search.slice";
+
 
 const rootReducer = combineReducers({
   lang: langReducer,
   auth: authSlice.reducer,
-  calls: callsSlice.reducer
+  calls: callsSlice.reducer,
+  search: searchSlice.reducer,
 });
 
 export const setupStore = () => {

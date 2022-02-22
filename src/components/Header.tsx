@@ -4,7 +4,7 @@ import {makeStyles} from '@mui/styles';
 import {NavLink, useHistory} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
 import {RootState} from '../store';
-import {setLanguage} from '../store/actions/langActions';
+import {setLanguage} from '../store/lang/langActions';
 import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';

@@ -1,12 +1,12 @@
-import React, {useEffect} from 'react';
-import {Redirect, Route, Switch, Link} from 'react-router-dom';
+import React, {useEffect, useRef} from 'react';
+import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
 import {Header} from './components';
 import {Auth, Calls} from './pages';
-import {useAppDispatch, useAppSelector} from "./hooks/redux";
+import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
-import {getBaseCallsData} from "./store/calls/calls.slice";
+import {callsSlice} from "./store/calls/calls.slice";
 import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
@@ -31,6 +31,21 @@ const App = () => {
       dispatch(authSlice.actions.setAuth(true));
     }
   }, []);
+
+  const history = useHistory();
+
+  const didMountRef = useRef('sdf')
+  console.log(didMountRef)
+  useEffect(() => {
+    const unListen = history.listen((location) => {
+      if (location.pathname !== '/calls') {
+        dispatch(callsSlice.actions.setEmptyState(null));
+      }
+    });
+
+    return unListen
+  }, []);
+
 
   return (
     <div className={classes.wrapper}>

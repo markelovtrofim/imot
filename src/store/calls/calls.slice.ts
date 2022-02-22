@@ -21,7 +21,7 @@ export const getBaseCallsData = createAsyncThunk(
     try {
       // @ts-ignore;
       const {token} = await JSON.parse(localStorage.getItem('token'));
-      const response = await axios.post<ResponseBaseCallsDataType>(`https://test.imot.io/new_api/search_calls/?skip=${payload.skip}&limit=${payload.limit}`, payload.data, {
+      const response = await axios.post<ResponseBaseCallsDataType>(`https://test.imot.io/new_api/search_calls/?skip=${payload.skip}&limit=${payload.limit}&start_date=2022-02-20&end_date=2022-02-21`, payload.data, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -131,15 +131,11 @@ export const callsSlice = createSlice({
       state.calls[state.calls.length - 1] = action.payload;
     },
     setEmptyState(state, action: PayloadAction<null>) {
-      debugger
-      state = {
-        bundleLength: 10,
-        total: null as number | null,
-        found: null as number | null,
-        skip: null as number | null,
-        limit: null as number | null,
-        calls: createInitialCalls()
-      }
+      state.total = null;
+      state.found = null;
+      state.skip = null;
+      state.limit = null;
+      state.calls = createInitialCalls()
     }
   }
 });
