@@ -9,7 +9,9 @@ import {useAppSelector} from "../hooks/redux";
 import {RootState} from "../store";
 import {searchSlice} from "../store/search/search.slice";
 import {useDispatch} from "react-redux";
-
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import BlockBox from "./BlockBox";
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -37,7 +39,7 @@ const CaseSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const useStyles = makeStyles(({
   cbDateItems: {
     display: 'flex',
-    padding: '6px 12px 0 2px'
+    padding: '5px 12px 0 2px'
   },
   controlBlockDateItem: {
     width: '50%',
@@ -60,22 +62,63 @@ const useStyles = makeStyles(({
   },
   calendarInput: {
     '& .MuiInputBase-input': {
+      cursor: 'pointer !important',
       width: '100px !important',
       marginLeft: '10px'
+    },
+    '& .MuiInputBase-input.Mui-disabled': {
+      WebkitTextFillColor: '#738094'
     }
-  }
+  },
+  controlBlockButtonBox: {
+    boxShadow: 'none !important',
+    padding: '0 5px',
+    marginLeft: '20px'
+  },
+  controlBlockButton: {
+    border: 'none !important',
+    transition: '0.4s !important',
+    outline: 'none !important',
+    height: '40px',
+    fontSize: '14px !important',
+    // @ts-ignore
+    textTransform: 'none !important',
+    color: '#738094 !important',
+    backgroundColor: '#ffffff !important',
+    '&.Mui-selected': {
+      backgroundColor: '#D6D9DF !important',
+      color: '#000 !important'
+    }
+  },
 }));
 
-const CustomCalendar = () => {
+const CustomCalendar = React.memo(() => {
   const dispatch = useDispatch();
   const date = useAppSelector(state => state.search.date);
-
   const [localDate, setLocalDate] = useState([
     new Date(), new Date()
   ]);
 
   useEffect(() => {
-    dispatch(searchSlice.actions.setDate(localDate));
+    const startDate = localDate[0].toLocaleDateString();
+    const endDate = localDate[1].toLocaleDateString();
+    let newDateFormat = {
+      startDate: null as string | null,
+      endDate: null as string | null
+    };
+
+    if (startDate === endDate) {
+      newDateFormat = {
+        startDate: startDate,
+        endDate: ''
+      }
+    } else {
+      newDateFormat = {
+        startDate: startDate,
+        endDate: endDate
+      };
+    }
+    dispatch(searchSlice.actions.setDate(newDateFormat));
   }, [localDate]);
 
   const classes = useStyles();
@@ -107,30 +150,108 @@ const CustomCalendar = () => {
     }
   };
 
+  const convertDateToDisplay = (date: string | null) => {
+    if (date) {
+      const dateArray = date.split("/");
+      if (dateArray[0].length === 1) {
+        dateArray[0] = `0${dateArray[0]}`;
+      }
+      return `${dateArray[1]}.${dateArray[0]}.${dateArray[2]}`;
+    } else {
+      return date;
+    }
+  };
+  const [alignment, setAlignment] = useState('today');
+  const handleChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newAlignment: string,
+  ) => {
+    setAlignment(newAlignment);
+  };
   return (
-    <div className={classes.cbDateItems} onScroll={scrollHandler}>
-      <div className={classes.controlBlockDateItem}>
-        <Typography>{translate('from', language)}</Typography>
-        <InputBase className={classes.calendarInput} value={date ? date[0].toISOString().slice(0, 10) : ''} onClick={handleClickOpen}/>
-        <ArrowSvg/>
-      </div>
-      <div className={classes.controlBlockDateItem}>
-        <Typography>{translate('to', language)}</Typography>
-        <InputBase className={classes.calendarInput} value={date ? date[1].toISOString().slice(0, 10) : ''} onClick={handleClickOpen}/>
-        <CaseSvg/>
-      </div>
-      <Dialog className={classes.calendar} disableScrollLock={true}
-        open={open}  onClose={handleClose} BackdropProps={{ style: { backgroundColor: "transparent" } }}
+    <div style={{display: 'flex', alignItems: 'center'}}>
+      <BlockBox padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
+        <div className={classes.cbDateItems} onScroll={scrollHandler}>
+          <div className={classes.controlBlockDateItem}>
+            <Typography>{translate('from', language)}</Typography>
+            <InputBase className={classes.calendarInput} disabled value={convertDateToDisplay(date.startDate)}
+                       onClick={handleClickOpen}/>
+            <ArrowSvg/>
+          </div>
+          <div className={classes.controlBlockDateItem}>
+            <Typography>{translate('to', language)}</Typography>
+            <InputBase className={classes.calendarInput} disabled value={convertDateToDisplay(date.endDate)}
+                       onClick={handleClickOpen}/>
+            <CaseSvg/>
+          </div>
+          <Dialog className={classes.calendar} disableScrollLock={true}
+                  open={open} onClose={handleClose} BackdropProps={{style: {backgroundColor: "transparent"}}}
+          >
+            <Calendar
+              locale={"ru-RU"}
+              onChange={setLocalDate}
+              value={localDate}
+              selectRange={true}
+            />
+          </Dialog>
+        </div>
+      </BlockBox>
+      {/* Разные еденицы времени */}
+      <ToggleButtonGroup
+        className={classes.controlBlockButtonBox}
+        value={alignment}
+        exclusive
+        onChange={handleChange}
       >
-        <Calendar
-          locale={"ru-RU"}
-          onChange={setLocalDate}
-          value={localDate}
-          selectRange={true}
-        />
-      </Dialog>
+        <ToggleButton
+          disabled={"today" === alignment}
+          className={classes.controlBlockButton} value="today"
+          onClick={() => {
+            setLocalDate([new Date(Date.now()), new Date(Date.now())])
+          }}
+        >
+          {translate('today', language)}
+        </ToggleButton>
+
+        <ToggleButton disabled={"yesterday" === alignment}
+                      className={classes.controlBlockButton} value="yesterday"
+                      onClick={() => {
+                        setLocalDate([new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)])
+                      }}
+        >
+          {translate('yesterday', language)}
+        </ToggleButton>
+
+        <ToggleButton
+          className={classes.controlBlockButton} disabled={"week" === alignment} value="week"
+          onClick={() => {
+            setLocalDate([new Date(Date.now() - 168 * 60 * 60 * 1000), new Date(Date.now() - 168 * 60 * 60 * 1000)])
+          }}
+        >
+          {translate('week', language)}
+        </ToggleButton>
+
+        <ToggleButton
+          className={classes.controlBlockButton} disabled={"month" === alignment} value="month"
+          onClick={() => {
+            setLocalDate([new Date(Date.now() - 720 * 60 * 60 * 1000), new Date(Date.now() - 720 * 60 * 60 * 1000)])
+          }}
+        >
+          {translate('month', language)}
+        </ToggleButton>
+
+        <ToggleButton
+          className={classes.controlBlockButton} disabled={"year" === alignment} value="year"
+          onClick={() => {
+            setLocalDate([new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now() - 8760 * 60 * 60 * 1000)])
+          }}
+        >
+          {translate('year', language)}
+        </ToggleButton>
+      </ToggleButtonGroup>
+
     </div>
   );
-}
+})
 
 export default CustomCalendar;

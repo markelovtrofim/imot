@@ -2,19 +2,25 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 
 type InitialStateType = {
-  date: Date[] | null
+  date: {
+    startDate: string | null,
+    endDate: string | null
+  }
 }
 
 
 const initialState: InitialStateType = {
-  date: null,
+  date: {
+    startDate: null,
+    endDate: null
+  }
 };
 
 export const searchSlice = createSlice({
   name: 'search',
   initialState,
   reducers: {
-    setDate(state, action: PayloadAction<Date[]>) {
+    setDate(state, action: PayloadAction<typeof initialState.date>) {
       state.date = action.payload;
     }
   }

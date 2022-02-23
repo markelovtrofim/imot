@@ -7,7 +7,7 @@ import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import CallsBundle from "./CallsBundle";
-import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
+import {getBaseCallsData} from "../../store/calls/calls.slice";
 import {CallsType} from "../../store/calls/calls.types";
 
 const useStyles = makeStyles(({
@@ -64,7 +64,7 @@ const Calls = React.memo(() => {
 
   useEffect(() => {
     if (!fetching) {
-      const response = pushNewCalls();
+      pushNewCalls();
     }
   }, [fetching])
 

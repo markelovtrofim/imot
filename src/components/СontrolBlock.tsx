@@ -1,10 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@mui/styles';
 import BlockBox from './BlockBox';
-import {Button, InputBase, Typography} from '@mui/material';
-import DateRangePicker, {DateRange} from '@mui/lab/DateRangePicker';
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import {Button} from '@mui/material';
+import {DateRange} from '@mui/lab/DateRangePicker';
 import {useSelector} from "react-redux";
 import {RootState} from "../store";
 import {translate} from '../localizations';
@@ -12,7 +10,6 @@ import cn from 'classnames';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Calendar from "./Calendar";
-import CustomCalendar from "./Calendar";
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -107,13 +104,6 @@ const ControlBlock = () => {
 
   const [alignment, setAlignment] = useState('');
 
-  const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string,
-  ) => {
-    setAlignment(newAlignment);
-  };
-
   const classes = useStyles();
   return (
     <div className={classes.controlBlockWrapper}>
@@ -121,92 +111,10 @@ const ControlBlock = () => {
 
         {/* Ввод точной даты */}
         <div style={{height: '40px'}}>
-          <BlockBox padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
             <Calendar/>
-            {/*<LocalizationProvider dateAdapter={AdapterDateFns}>*/}
-            {/*  <DateRangePicker*/}
-            {/*    inputFormat="dd/MM/yyyy"*/}
-            {/*    value={value}*/}
-            {/*    clearText={'Clear'}*/}
-            {/*    onChange={(newValue) => {*/}
-            {/*      setValue(newValue);*/}
-            {/*    }}*/}
-            {/*    renderInput={(startProps: any, endProps: any) => {*/}
-            {/*      const changedStartProps = {...startProps, focused: startProps.focused.toString(), inputProps: {...startProps.inputProps, placeholder: ''}};*/}
-            {/*      const changedEndProps = {...endProps, focused: endProps.focused.toString(), inputProps: {...endProps.inputProps, placeholder: ''}};*/}
-            {/*      return (*/}
-            {/*        <div className={classes.cbDateItems}>*/}
-            {/*          <div className={classes.controlBlockDateItem}>*/}
-            {/*            <Typography>{translate('from', language)}</Typography>*/}
-            {/*            <InputBase sx={{ml: 1, flex: 1}} {...changedStartProps} />*/}
-            {/*            <ArrowSvg/>*/}
-            {/*          </div>*/}
-            {/*          <div className={classes.controlBlockDateItem}>*/}
-            {/*            <Typography>{translate('to', language)}</Typography>*/}
-            {/*            <InputBase sx={{ml: 1, flex: 1}} {...changedEndProps}/>*/}
-            {/*            <CaseSvg/>*/}
-            {/*          </div>*/}
-            {/*        </div>*/}
-            {/*      )*/}
-            {/*    }}*/}
-            {/*  />*/}
-            {/*</LocalizationProvider>*/}
-          </BlockBox>
         </div>
 
-        {/* Разные еденицы времени */}
-        <ToggleButtonGroup
-          className={classes.controlBlockButtonBox}
-          value={alignment}
-          exclusive
-          onChange={handleChange}
-        >
-          <ToggleButton
-            disabled={"today" === alignment}
-            className={classes.controlBlockButton} value="today"
-            onClick={() => {
-              setValue([new Date(Date.now()), new Date()])
-            }}
-          >
-            {translate('today', language)}
-          </ToggleButton>
 
-          <ToggleButton disabled={"yesterday" === alignment}
-            className={classes.controlBlockButton} value="yesterday"
-            onClick={() => {
-              setValue([new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()])
-            }}
-          >
-            {translate('yesterday', language)}
-          </ToggleButton>
-
-          <ToggleButton
-            className={classes.controlBlockButton} disabled={"week" === alignment} value="week"
-            onClick={() => {
-              setValue([new Date(Date.now() - 168 * 60 * 60 * 1000), new Date()])
-            }}
-          >
-            {translate('week', language)}
-          </ToggleButton>
-
-          <ToggleButton
-            className={classes.controlBlockButton} disabled={"month" === alignment} value="month"
-            onClick={() => {
-              setValue([new Date(Date.now() - 720 * 60 * 60 * 1000), new Date()])
-            }}
-          >
-            {translate('month', language)}
-          </ToggleButton>
-
-          <ToggleButton
-            className={classes.controlBlockButton} disabled={"year" === alignment} value="year"
-            onClick={() => {
-              setValue([new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date()])
-            }}
-          >
-            {translate('year', language)}
-          </ToggleButton>
-        </ToggleButtonGroup>
 
       </div>
       <Button
