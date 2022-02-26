@@ -15,6 +15,23 @@ type ResponseBaseCallsDataType = {
   limit: number,
   call_ids: string[]
 }
+
+export const getCallAudio = createAsyncThunk(
+  'calls/getCallAudio',
+  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
+    debugger
+    // @ts-ignore;
+    const {token} = await JSON.parse(localStorage.getItem('token'));
+    const response = await axios.get(`https://test.imot.io/new_api/call/${payload.id}/audio`,{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    console.log(response.data)
+    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: new Audio(response.data), id: payload.id, index: payload.bundleIndex}))
+  }
+)
+
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
   async (payload: InputBaseCallsDataType, thunkAPI) => {
@@ -68,7 +85,8 @@ type InitialStateType = {
   found: number | null,
   skip: number | null,
   limit: number | null,
-  calls: CallsType[][]
+  callIds: null,
+  calls: CallsType[][] | []
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -86,10 +104,11 @@ const createInitialCalls = (lengthEmptyArray: number = 10) => {
 
 const initialState: InitialStateType = {
   bundleLength: 10,
-  total: null as number | null,
-  found: null as number | null,
-  skip: null as number | null,
-  limit: null as number | null,
+  total: null,
+  found: null,
+  skip: null,
+  limit: null,
+  callIds: null,
   calls: createInitialCalls()
 };
 
@@ -124,6 +143,7 @@ export const callsSlice = createSlice({
           })
         }
         state.calls.slice(state.bundleLength);
+        // @ts-ignore
         state.calls.push(calls);
       }
     },
@@ -136,6 +156,17 @@ export const callsSlice = createSlice({
       state.skip = null;
       state.limit = null;
       state.calls = createInitialCalls()
+    },
+    setAudio(state, action: PayloadAction<any>) {
+      // @ts-ignore
+      state.calls[action.payload.index].map(i => {
+        console.log(i)
+        // @ts-ignore
+        if (i.id.toLowerCase() === action.payload.id) {
+          debugger
+          i.audio = action.payload.audio
+        }
+      })
     }
   }
 });

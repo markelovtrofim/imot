@@ -39,7 +39,7 @@ const CaseSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const useStyles = makeStyles(({
   cbDateItems: {
     display: 'flex',
-    padding: '5px 12px 0 2px'
+    margin: '5px 10px 0 0'
   },
   controlBlockDateItem: {
     width: '50%',
@@ -169,7 +169,7 @@ const CustomCalendar = React.memo(() => {
     setAlignment(newAlignment);
   };
   return (
-    <div style={{display: 'flex', alignItems: 'center'}}>
+    <div style={{display: 'flex', alignItems: 'center', height: '40px'}}>
       <BlockBox padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
         <div className={classes.cbDateItems} onScroll={scrollHandler}>
           <div className={classes.controlBlockDateItem}>

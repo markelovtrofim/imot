@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
@@ -13,6 +13,9 @@ import Stack from '@mui/material/Stack';
 import Tag from "../../components/Tag";
 import Tooltip from '@mui/material/Tooltip';
 import {CallsInfoType, CallsType, TagType} from "../../store/calls/calls.types";
+import CallBody from "./CallBody";
+import {useDispatch} from "react-redux";
+import {getCallAudio} from "../../store/calls/calls.slice";
 
 
 const Accordion = styled((props: AccordionProps) => (
@@ -130,13 +133,8 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null, expanded: any, setExpanded: any, name: string | null}) => {
+const Call = ({call, callAudio, name, bundleIndex}: {callAudio: any, call: CallsInfoType | null, name: string | null, bundleIndex: number }) => {
   const classes = useStyles();
-
-  const handleChange =
-    (panel: string | null) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
-    };
 
   function msToTime(s: number) {
     // Pad to 2 or 3 digits, default is 2
@@ -155,8 +153,30 @@ const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null,
     return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
   }
 
+  const dispatch = useDispatch();
+  const [callData, setCallData] = React.useState<{
+    id: string | null,
+    bundleIndex: number | null
+  }>({
+    id: null,
+    bundleIndex: null
+  });
+
+  useEffect(() => {
+    if (callData.id) {
+      debugger
+      // @ts-ignore
+      dispatch(getCallAudio(callData));
+    }
+  }, [callData])
+  console.log(callAudio)
   return (
-    <Accordion style={{border: 'none '}} onChange={handleChange(name)} expanded={expanded === name}>
+    <Accordion style={{border: 'none '}} onClick={() => {
+      debugger
+      setCallData(
+        // @ts-ignore
+        {id: call.id, bundleIndex})
+    }}>
       {/* Первичная информация о звонке. */}
       <AccordionSummary className={classes.accordion}>
         <Grid container className={classes.callInner}>
@@ -171,7 +191,7 @@ const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null,
             {/* Дата звонка.*/}
             <div className={classes.callDateBox}>
               <Typography className={classes.callDate}>{call ? call.callTimeReadable :
-                <Skeleton width={100}height={20} variant="text"/>}</Typography>
+                <Skeleton width={100} height={20} variant="text"/>}</Typography>
             </div>
             {/* Время звонка. */}
             <div className={classes.callDurationBox}>
@@ -193,31 +213,32 @@ const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null,
               <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
               {call ?
                 <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                {// @ts-ignore
-                  call.tags.map((tag: TagType) => {
-                    const colorArray = [
-                      {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
-                      {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
-                      {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
-                    ]
-                    const randomColor = () => {
-                      const random = Math.floor(Math.random() * 3);
-                      return colorArray[random];
-                    }
-                    const randomColorResult = randomColor()
-                    return (
-                      <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
-                        <div style={{margin: 0}}>
-                          <Tag
-                            label={tag.name} backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
-                            color={tag.color ? tag.color : randomColorResult.color}
-                            hover={tag.color ? tag.color : randomColorResult.hover}
-                          />
-                        </div>
-                      </Tooltip>)
-                  })
-                }
-              </Stack>
+                  {// @ts-ignore
+                    call.tags.map((tag: TagType) => {
+                      const colorArray = [
+                        {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
+                        {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
+                        {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
+                      ]
+                      const randomColor = () => {
+                        const random = Math.floor(Math.random() * 3);
+                        return colorArray[random];
+                      }
+                      const randomColorResult = randomColor()
+                      return (
+                        <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
+                          <div style={{margin: 0}}>
+                            <Tag
+                              label={tag.name}
+                              backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
+                              color={tag.color ? tag.color : randomColorResult.color}
+                              hover={tag.color ? tag.color : randomColorResult.hover}
+                            />
+                          </div>
+                        </Tooltip>)
+                    })
+                  }
+                </Stack>
                 : <div style={{width: '100%'}}>
                   <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27}
                             variant="text"/>
@@ -230,15 +251,8 @@ const Call = ({call, expanded, setExpanded, name}: { call: CallsInfoType | null,
         </Grid>
       </AccordionSummary>
       {/* Основная информация о звонке. */}
-      <AccordionDetails style={{backgroundColor: '#F8FAFC', height: '400px', border: 'none'}}>
-        <Typography variant="h3" style={{
-          overflowY: 'auto',
-          marginTop: '100px',
-          textAlign: 'center',
-          color: 'rgba(0, 0, 0, 0.2)'
-        }}>
-          Call body
-        </Typography>
+      <AccordionDetails style={{backgroundColor: '#F8FAFC', border: 'none'}}>
+        <CallBody/>
       </AccordionDetails>
     </Accordion>
   );

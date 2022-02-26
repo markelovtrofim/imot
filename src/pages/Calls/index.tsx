@@ -57,7 +57,7 @@ const Calls = React.memo(() => {
   const [skip, setSkip] = useState<number>(0)
   const [fetching, setFetching] = useState<boolean>(false);
   const pushNewCalls = async () => {
-    await dispatch(getBaseCallsData({skip: skip, limit: 10, data: []}))
+    await dispatch(getBaseCallsData({skip, limit: 10, data: []}))
     setSkip(prev => prev + 10);
     setFetching(true);
   };
@@ -89,6 +89,7 @@ const Calls = React.memo(() => {
   };
 
   const calls = useAppSelector(state => state.calls.calls);
+
   const dispatch = useDispatch();
 
   return (
@@ -129,9 +130,9 @@ const Calls = React.memo(() => {
         </div>
 
         <div>
-          {calls.map((calls: CallsType[]) => {
+          {calls.map((callss: CallsType[]) => {
             return <div>
-              <CallsBundle calls={calls}/>
+              <CallsBundle calls={callss} index={calls.length - 1}/>
             </div>
           })}
         </div>

@@ -7,7 +7,7 @@ const CustomChip: FC<any> = ({label, backgroundColor, color, hover}) => {
     root: {
       borderRadius: '5px !important',
       height: '27px !important',
-      margin: '0 0 20px 10px !important',
+      margin: '5px !important',
       cursor: 'pointer !important',
       backgroundColor: `${backgroundColor} !important`,
       color: `${color} !important`,

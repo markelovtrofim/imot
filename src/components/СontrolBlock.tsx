@@ -1,14 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {makeStyles} from '@mui/styles';
-import BlockBox from './BlockBox';
 import {Button} from '@mui/material';
-import {DateRange} from '@mui/lab/DateRangePicker';
 import {useSelector} from "react-redux";
 import {RootState} from "../store";
 import {translate} from '../localizations';
 import cn from 'classnames';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Calendar from "./Calendar";
 
 // Svg
@@ -100,9 +96,7 @@ const useStyles = makeStyles(({
 
 const ControlBlock = () => {
   const {language} = useSelector((state: RootState) => state.lang);
-  const [value, setValue] = useState<DateRange<Date>>([null, null]);
 
-  const [alignment, setAlignment] = useState('');
 
   const classes = useStyles();
   return (
@@ -111,10 +105,8 @@ const ControlBlock = () => {
 
         {/* Ввод точной даты */}
         <div style={{height: '40px'}}>
-            <Calendar/>
+          <Calendar/>
         </div>
-
-
 
       </div>
       <Button
