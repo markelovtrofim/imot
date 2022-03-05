@@ -1,14 +1,13 @@
 import React from 'react';
-import {Button, SelectChangeEvent, Typography} from '@mui/material';
+import {Button, SelectChangeEvent} from '@mui/material';
 import {makeStyles} from '@mui/styles';
-import {NavLink, useHistory} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
 import {RootState} from '../store';
 import {setLanguage} from '../store/lang/langActions';
 import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import cn from 'classnames';
 import {removeAuthToken} from "../store/auth/auth.slice";
 import {useAppDispatch, useAppSelector} from "../hooks/redux";
 import ToggleButton from '@mui/material/ToggleButton';
@@ -34,7 +33,6 @@ const useStyles = makeStyles(({
     padding: '14px 35px'
   },
   headerItemText: {
-
     color: '#738094 !important',
     transition: '0.4s !important',
     opacity: '0.7',
@@ -51,13 +49,14 @@ const useStyles = makeStyles(({
   },
   headerRightBlock: {
     display: 'flex',
+    justifyContent: 'space-between',
+    width: '185px',
     height: '53px !important'
   },
   langHandler: {
     '& .MuiInput-input:focus': {
       backgroundColor: '#fff',
     },
-    marginRight: '30px',
     border: 'none',
     outline: 'none',
     '&::before': {

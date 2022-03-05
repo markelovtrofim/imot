@@ -3,7 +3,6 @@ import Call from "./Call";
 import {CallsType} from "../../store/calls/calls.types";
 
 const CallsBundle = React.memo((props: any) => {
-  console.log(props.index)
   return (
     <div>
       {props.calls.map((call: CallsType) => {

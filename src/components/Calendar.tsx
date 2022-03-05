@@ -12,6 +12,7 @@ import {useDispatch} from "react-redux";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import BlockBox from "./BlockBox";
+import {convertDate} from "../utils/convertData";
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -56,7 +57,7 @@ const useStyles = makeStyles(({
       left: '148px',
       height: 'auto !important',
       '& .MuiPaper-root': {
-        margin: '0',
+        margin: '0'
       }
     }
   },
@@ -150,17 +151,6 @@ const CustomCalendar = React.memo(() => {
     }
   };
 
-  const convertDateToDisplay = (date: string | null) => {
-    if (date) {
-      const dateArray = date.split("/");
-      if (dateArray[0].length === 1) {
-        dateArray[0] = `0${dateArray[0]}`;
-      }
-      return `${dateArray[1]}.${dateArray[0]}.${dateArray[2]}`;
-    } else {
-      return date;
-    }
-  };
   const [alignment, setAlignment] = useState('today');
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -174,13 +164,13 @@ const CustomCalendar = React.memo(() => {
         <div className={classes.cbDateItems} onScroll={scrollHandler}>
           <div className={classes.controlBlockDateItem}>
             <Typography>{translate('from', language)}</Typography>
-            <InputBase className={classes.calendarInput} disabled value={convertDateToDisplay(date.startDate)}
+            <InputBase className={classes.calendarInput} disabled value={convertDate(date.startDate, 'display')}
                        onClick={handleClickOpen}/>
             <ArrowSvg/>
           </div>
           <div className={classes.controlBlockDateItem}>
             <Typography>{translate('to', language)}</Typography>
-            <InputBase className={classes.calendarInput} disabled value={convertDateToDisplay(date.endDate)}
+            <InputBase className={classes.calendarInput} disabled value={convertDate(date.endDate, 'display')}
                        onClick={handleClickOpen}/>
             <CaseSvg/>
           </div>
@@ -225,7 +215,7 @@ const CustomCalendar = React.memo(() => {
         <ToggleButton
           className={classes.controlBlockButton} disabled={"week" === alignment} value="week"
           onClick={() => {
-            setLocalDate([new Date(Date.now() - 168 * 60 * 60 * 1000), new Date(Date.now() - 168 * 60 * 60 * 1000)])
+            setLocalDate([new Date(Date.now() - 168 * 60 * 60 * 1000), new Date()])
           }}
         >
           {translate('week', language)}
@@ -234,7 +224,7 @@ const CustomCalendar = React.memo(() => {
         <ToggleButton
           className={classes.controlBlockButton} disabled={"month" === alignment} value="month"
           onClick={() => {
-            setLocalDate([new Date(Date.now() - 720 * 60 * 60 * 1000), new Date(Date.now() - 720 * 60 * 60 * 1000)])
+            setLocalDate([new Date(Date.now() - 720 * 60 * 60 * 1000), new Date()])
           }}
         >
           {translate('month', language)}
@@ -243,7 +233,7 @@ const CustomCalendar = React.memo(() => {
         <ToggleButton
           className={classes.controlBlockButton} disabled={"year" === alignment} value="year"
           onClick={() => {
-            setLocalDate([new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now() - 8760 * 60 * 60 * 1000)])
+            setLocalDate([new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date()])
           }}
         >
           {translate('year', language)}

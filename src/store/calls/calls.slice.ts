@@ -1,13 +1,10 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {CallsType} from "./calls.types";
+import {convertDate} from "../../utils/convertData";
+import {AppStore, RootState} from "../index";
 
 // get all calls
-type InputBaseCallsDataType = {
-  skip: number,
-  limit: number,
-  data: any[] | []
-};
 type ResponseBaseCallsDataType = {
   total: number,
   found: number,
@@ -19,32 +16,50 @@ type ResponseBaseCallsDataType = {
 export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
-    debugger
     // @ts-ignore;
     const {token} = await JSON.parse(localStorage.getItem('token'));
-    const response = await axios.get(`https://test.imot.io/new_api/call/${payload.id}/audio`,{
+    const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/audio`, {
+      responseType: 'arraybuffer',
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'audio/wav'
       }
     });
-    console.log(response.data)
-    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: new Audio(response.data), id: payload.id, index: payload.bundleIndex}))
+    const blob = new Blob([data], {
+      type: 'audio/wav'
+    });
+    const blobUrl = URL.createObjectURL(blob);
+    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: blobUrl, id: payload.id, index: payload.bundleIndex}))
   }
 )
 
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
-  async (payload: InputBaseCallsDataType, thunkAPI) => {
+  async (payload: any, thunkAPI) => {
     try {
       // @ts-ignore;
       const {token} = await JSON.parse(localStorage.getItem('token'));
-      const response = await axios.post<ResponseBaseCallsDataType>(`https://test.imot.io/new_api/search_calls/?skip=${payload.skip}&limit=${payload.limit}&start_date=2022-02-20&end_date=2022-02-21`, payload.data, {
+      // @ts-ignore;
+      const state: RootState = thunkAPI.getState();
+      let startDate = convertDate(state.search.date.startDate, 'request');
+      let endDate = convertDate(state.search.date.endDate, 'request');
+      if (startDate === endDate || !endDate) {
+        endDate = startDate;
+      }
+      debugger
+      const response = await axios.post<ResponseBaseCallsDataType>(
+      `https://imot-api.pyzzle.ru/search_calls/?` +
+      `skip=${payload.skip}&limit=${payload.limit}` +
+      `&start_date=${startDate}` +
+      `&end_date=${endDate}`,
+      payload.data,
+      {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       thunkAPI.dispatch(callsSlice.actions.setBaseCallsData(response.data));
-      // @ts-ignore;
+      // @ts-ignore
       await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]))
     } catch (error) {
       console.log(error);
@@ -56,11 +71,12 @@ export const getCallsInfo = createAsyncThunk(
   'calls/getCallsInfo',
   async (payload: CallsType[], thunkAPI) => {
     try {
+      debugger
       let localCalls = [];
       // @ts-ignore
       const {token} = await JSON.parse(localStorage.getItem('token'));
       for (let i = 0; i < payload.length; i++) {
-        const response = await axios.get(`https://test.imot.io/new_api/call/${payload[i].id}`, {
+        const response = await axios.get(`https://imot-api.pyzzle.ru/call/${payload[i].id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -81,6 +97,7 @@ export const getCallsInfo = createAsyncThunk(
 
 type InitialStateType = {
   bundleLength: number,
+  callsArrayIndex: number,
   total: number | null,
   found: number | null,
   skip: number | null,
@@ -104,6 +121,7 @@ const createInitialCalls = (lengthEmptyArray: number = 10) => {
 
 const initialState: InitialStateType = {
   bundleLength: 10,
+  callsArrayIndex: 0,
   total: null,
   found: null,
   skip: null,
@@ -119,7 +137,7 @@ export const callsSlice = createSlice({
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       if (!state.total) {
         let calls = [];
-        for (let i = 0; i < action.payload.call_ids.length; i++){
+        for (let i = 0; i < action.payload.call_ids.length; i++) {
           calls.push({
             id: action.payload.call_ids[i],
             info: null,
@@ -134,7 +152,7 @@ export const callsSlice = createSlice({
         state.calls = [calls]
       } else {
         let calls = [];
-        for (let i = 0; i < action.payload.call_ids.length; i++){
+        for (let i = 0; i < action.payload.call_ids.length; i++) {
           calls.push({
             id: action.payload.call_ids[i],
             info: null,
@@ -148,6 +166,9 @@ export const callsSlice = createSlice({
       }
     },
     setCallsInfo(state, action: PayloadAction<any[]>) {
+      if (action.payload.length < 1) {
+        state.calls = [];
+      }
       state.calls[state.calls.length - 1] = action.payload;
     },
     setEmptyState(state, action: PayloadAction<null>) {
@@ -162,7 +183,7 @@ export const callsSlice = createSlice({
       state.calls[action.payload.index].map(i => {
         console.log(i)
         // @ts-ignore
-        if (i.id.toLowerCase() === action.payload.id) {
+        if (i.info.id === action.payload.id) {
           debugger
           i.audio = action.payload.audio
         }

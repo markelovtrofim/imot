@@ -14,7 +14,11 @@ export const fetchAuthToken = createAsyncThunk(
       let bodyFormData = new FormData();
       bodyFormData.append('username', authData.username);
       bodyFormData.append('password', authData.password);
-      const response = await axios.post<AuthType>('https://test.imot.io/new_api/token', bodyFormData);
+      const response = await axios.post<AuthType>('https://imot-api.pyzzle.ru/token', bodyFormData, {
+        headers: {
+          'Content-Security-Policy': 'block-all-mixed-content'
+        }
+      });
       localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));

@@ -19,5 +19,23 @@
   "week": "Неделя",
   "month": "Месяц",
   "year": "Год",
-  "download": "Скачать"
+  "download": "Скачать",
+
+
+  "SEARCH": "SEARCH",
+
+  "searchTitle": "Звонок",
+  "searchClear": "Очистить",
+  "searchSaveTemp": "Сохранить как шаблон",
+  "searchButton": "Искать",
+  "searchMore": "Еще",
+
+
+  "CALLS": "CALLS",
+
+  "callsLastCalls": "Последние звонки",
+  "callsEmployee": "Сотрудник",
+  "callsCustomer": "Клиент",
+  "callsTag": "Тег",
+  "callsTags": "Теги звонка"
 }

@@ -9,6 +9,7 @@ import {useDispatch} from "react-redux";
 import CallsBundle from "./CallsBundle";
 import {getBaseCallsData} from "../../store/calls/calls.slice";
 import {CallsType} from "../../store/calls/calls.types";
+import Call from "./Call";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -56,8 +57,9 @@ const Calls = React.memo(() => {
   const classes = useStyles();
   const [skip, setSkip] = useState<number>(0)
   const [fetching, setFetching] = useState<boolean>(false);
+  const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
   const pushNewCalls = async () => {
-    await dispatch(getBaseCallsData({skip, limit: 10, data: []}))
+    await dispatch(getBaseCallsData({skip, limit: 10, data: defaultCriterias}))
     setSkip(prev => prev + 10);
     setFetching(true);
   };
@@ -102,7 +104,7 @@ const Calls = React.memo(() => {
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
             <Typography className={classes.callsTitleText}>Последние звонки</Typography>
-            <Select/>
+            <Typography className={classes.callsTitleText}>тут будет селект</Typography>
           </div>
           <Grid container className={classes.callsCols}>
 
@@ -130,13 +132,15 @@ const Calls = React.memo(() => {
         </div>
 
         <div>
-          {calls.map((callss: CallsType[]) => {
+          {calls.length != 0 ? calls.map((callsArrays: CallsType[]) => {
             return <div>
-              <CallsBundle calls={callss} index={calls.length - 1}/>
+              {callsArrays.map((call: CallsType) => {
+                return <Call name={call.id} call={call.info} callAudio={call.audio} bundleIndex={calls.length - 1}/>
+              })}
             </div>
-          })}
+            }) : <BlockBox padding={'24px'}><Typography>Фильтры звонков не выбраны</Typography></BlockBox>}
         </div>
-        <div style={{height: '200px', textAlign: 'center'}}>
+        <div style={{textAlign: 'center'}}>
           {!fetching && <CircularProgress color="primary"/>}
         </div>
       </BlockBox>

@@ -19,5 +19,23 @@
   "week": "Week",
   "month": "Month",
   "year": "Year",
-  "download": "Download"
+  "download": "Download",
+
+
+  "SEARCH": "SEARCH",
+
+  "searchTitle": "Call",
+  "searchClear": "Clear",
+  "searchSaveTemp": "Save as template",
+  "searchButton": "Search",
+  "searchMore": "More",
+
+
+  "CALLS": "CALLS",
+
+  "callsLastCalls": "Last calls",
+  "callsEmployee": "Employee",
+  "callsCustomer": "Customer",
+  "callsTag": "Tag",
+  "callsTags": "Call tags"
 }

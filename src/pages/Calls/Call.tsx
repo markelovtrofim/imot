@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
@@ -12,7 +12,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Tag from "../../components/Tag";
 import Tooltip from '@mui/material/Tooltip';
-import {CallsInfoType, CallsType, TagType} from "../../store/calls/calls.types";
+import {CallsInfoType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./CallBody";
 import {useDispatch} from "react-redux";
 import {getCallAudio} from "../../store/calls/calls.slice";
@@ -62,8 +62,8 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
         d="M1.00005 6.86077C2.91645 11.0346 6.32648 14.3531 10.566 16.1521L11.2456 16.4549C12.8004 17.1477 14.6282 16.6214 15.5765 15.2079L16.4646 13.8842C16.7533 13.4538 16.6654 12.8741 16.2621 12.5487L13.2502 10.1189C12.8078 9.76204 12.1573 9.84524 11.8189 10.3018L10.8872 11.5591C8.49637 10.3797 6.55528 8.43874 5.37595 6.04792L6.63317 5.1162C7.08987 4.77778 7.17298 4.12726 6.81608 3.68488L4.38622 0.672942C4.06087 0.269662 3.48137 0.181692 3.051 0.470262L1.71816 1.36396C0.295825 2.31766 -0.227555 4.16051 0.481175 5.71946L0.999265 6.85908L1.00005 6.86077Z"
         fill="#A3AEBE"/>
     </svg>
-  )
-}
+  );
+};
 
 const useStyles = makeStyles(({
   accordion: {
@@ -133,8 +133,20 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Call = ({call, callAudio, name, bundleIndex}: {callAudio: any, call: CallsInfoType | null, name: string | null, bundleIndex: number }) => {
+const Call = ({
+                call,
+                callAudio,
+                name,
+                bundleIndex
+              }: { callAudio: any, call: CallsInfoType | null, name: string | null, bundleIndex: number }) => {
   const classes = useStyles();
+  const [index, setIndex] = useState<null | number>(null);
+
+  useEffect(() => {
+    if (index === null) {
+      setIndex(bundleIndex);
+    }
+  }, [bundleIndex])
 
   function msToTime(s: number) {
     // Pad to 2 or 3 digits, default is 2
@@ -169,16 +181,17 @@ const Call = ({call, callAudio, name, bundleIndex}: {callAudio: any, call: Calls
       dispatch(getCallAudio(callData));
     }
   }, [callData])
-  console.log(callAudio)
   return (
-    <Accordion style={{border: 'none '}} onClick={() => {
-      debugger
-      setCallData(
-        // @ts-ignore
-        {id: call.id, bundleIndex})
-    }}>
+    <Accordion style={{border: 'none '}}>
       {/* Первичная информация о звонке. */}
-      <AccordionSummary className={classes.accordion}>
+      <AccordionSummary className={classes.accordion} onClick={() => {
+        debugger
+        if (index || index === 0) {
+          setCallData(
+            // @ts-ignore
+            {id: call.id, bundleIndex: index})
+        }
+      }}>
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
@@ -252,7 +265,7 @@ const Call = ({call, callAudio, name, bundleIndex}: {callAudio: any, call: Calls
       </AccordionSummary>
       {/* Основная информация о звонке. */}
       <AccordionDetails style={{backgroundColor: '#F8FAFC', border: 'none'}}>
-        <CallBody/>
+        <CallBody audio={callAudio}/>
       </AccordionDetails>
     </Accordion>
   );
