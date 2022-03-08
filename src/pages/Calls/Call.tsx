@@ -124,9 +124,7 @@ const useStyles = makeStyles(({
   callMNumber: {
     fontSize: '15px !important'
   },
-  callTags: {
-    display: 'flex'
-  },
+  callTags: {},
   callTagsTitle: {
     color: '#738094 !important',
     minWidth: '120px'
@@ -136,12 +134,11 @@ const useStyles = makeStyles(({
 const Call = ({
                 call,
                 callAudio,
-                name,
                 bundleIndex
               }: { callAudio: any, call: CallsInfoType | null, name: string | null, bundleIndex: number }) => {
   const classes = useStyles();
   const [index, setIndex] = useState<null | number>(null);
-
+  const [disabled, setDisabled] = useState<boolean>(false);
   useEffect(() => {
     if (index === null) {
       setIndex(bundleIndex);
@@ -149,7 +146,6 @@ const Call = ({
   }, [bundleIndex])
 
   function msToTime(s: number) {
-    // Pad to 2 or 3 digits, default is 2
     function pad(n: any, z: any) {
       z = z || 2;
       return ('00' + n).slice(-z);
@@ -176,21 +172,38 @@ const Call = ({
 
   useEffect(() => {
     if (callData.id) {
-      debugger
       // @ts-ignore
       dispatch(getCallAudio(callData));
     }
-  }, [callData])
+  }, [callData]);
+
+  let tags = [];
+  let fragments = [];
+  if (call) {
+    debugger
+    // @ts-ignore
+    for (let i = 0; i < call.tags.length; i++) {
+      // @ts-ignore
+      if (call.tags[i].fragment) {
+        // @ts-ignore
+        fragments.push(call.tags[i]);
+      } else {
+        // @ts-ignore
+        tags.push(call.tags[i]);
+      }
+    }
+  }
+
   return (
     <Accordion style={{border: 'none '}}>
       {/* Первичная информация о звонке. */}
       <AccordionSummary className={classes.accordion} onClick={() => {
-        debugger
-        if (index || index === 0) {
+        if ((index || index === 0) && !disabled) {
           setCallData(
             // @ts-ignore
             {id: call.id, bundleIndex: index})
         }
+        setDisabled(prev => !prev);
       }}>
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
@@ -223,43 +236,80 @@ const Call = ({
           </Grid>
           <Grid item xs={6.5}>
             <div className={classes.callTags}>
-              <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
-              {call ?
-                <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                  {// @ts-ignore
-                    call.tags.map((tag: TagType) => {
-                      const colorArray = [
-                        {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
-                        {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
-                        {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
-                      ]
-                      const randomColor = () => {
-                        const random = Math.floor(Math.random() * 3);
-                        return colorArray[random];
-                      }
-                      const randomColorResult = randomColor()
-                      return (
-                        <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
-                          <div style={{margin: 0}}>
-                            <Tag
-                              label={tag.name}
-                              backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
-                              color={tag.color ? tag.color : randomColorResult.color}
-                              hover={tag.color ? tag.color : randomColorResult.hover}
-                            />
-                          </div>
-                        </Tooltip>)
-                    })
-                  }
-                </Stack>
-                : <div style={{width: '100%'}}>
-                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27}
-                            variant="text"/>
-                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
-                </div>}
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
+                {call ?
+                  <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                    {// @ts-ignore
+                      tags.map((tag: TagType) => {
+                        const colorArray = [
+                          {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
+                          {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
+                          {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
+                        ]
+                        const randomColor = () => {
+                          const random = Math.floor(Math.random() * 3);
+                          return colorArray[random];
+                        }
+                        const randomColorResult = randomColor()
+                        return (
+                          <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
+                            <div style={{margin: 0}}>
+                              <Tag
+                                label={tag.name}
+                                backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
+                                color={tag.color ? tag.color : randomColorResult.color}
+                                hover={tag.color ? tag.color : randomColorResult.hover}
+                              />
+                            </div>
+                          </Tooltip>
+                        )
+                      })
+                    }
+                  </Stack>
+                  : <div style={{width: '100%'}}>
+                    <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                  </div>
+                }
+              </div>
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
+                {call ?
+                  <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                    {// @ts-ignore
+                      fragments.map((tag: TagType) => {
+                        const colorArray = [
+                          {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
+                          {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
+                          {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
+                        ]
+                        const randomColor = () => {
+                          const random = Math.floor(Math.random() * 3);
+                          return colorArray[random];
+                        }
+                        const randomColorResult = randomColor()
+                        return (
+                          <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
+                            <div style={{margin: 0}}>
+                              <Tag
+                                label={tag.name}
+                                backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
+                                color={tag.color ? tag.color : randomColorResult.color}
+                                hover={tag.color ? tag.color : randomColorResult.hover}
+                              />
+                            </div>
+                          </Tooltip>
+                        )
+                      })
+                    }
+                  </Stack>
+                  : <div style={{width: '100%'}}>
+                    <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                  </div>
+                }
+              </div>
             </div>
-            <div className={classes.slave}>
-            </div>
+            <div className={classes.slave}></div>
           </Grid>
         </Grid>
       </AccordionSummary>

@@ -43,26 +43,32 @@ const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 type SelectType = {
   criteriaFull: CriteriasType,
-  criteriaCurrent: CriteriasType | RequestDataType
+  criteriaCurrent: CriteriasType | RequestDataType,
+  isDefaultCriteria: boolean
 };
 
 
-const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent}) => {
+const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultCriteria}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [selectDataArray, setSelectDataArray] = useState<string[]>(criteriaCurrent.values)
 
   const removeCriteria = () => {
-    debugger
     setSelectDataArray([]);
-    dispatch(searchSlice.actions.removeCriteria(criteriaFull));
+    dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
   };
 
   const handleChange = (event: any) => {
     const {target: {value}} = event;
     setSelectDataArray(value);
-    dispatch(searchSlice.actions.updateActiveCriteria({key: criteriaFull.key, values: [...value]}))
+    if (isDefaultCriteria) {
+      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...value]}))
+    } else {
+      debugger
+      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...value]}));
+    }
   };
+
   return (
     <FormControl>
       <div className={classes.selectBox}>
@@ -95,11 +101,13 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent}) => {
             )
           }) : null}
         </Select>
-        <CrossSvg onClick={removeCriteria} style={{cursor: 'pointer', marginLeft: '8px'}}/>
+        {isDefaultCriteria
+          ? null
+          : <CrossSvg onClick={removeCriteria} style={{cursor: 'pointer', marginLeft: '8px'}}/>
+        }
       </div>
     </FormControl>
   );
-}
+};
 
 export default CustomSelect;
-

@@ -9,9 +9,10 @@ import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import {removeAuthToken} from "../store/auth/auth.slice";
-import {useAppDispatch, useAppSelector} from "../hooks/redux";
+import {useAppSelector} from "../hooks/redux";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -101,7 +102,7 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const Header: React.FC = () => {
   const classes = useStyles();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const {language} = useAppSelector((state: RootState) => state.lang);
   const history = useHistory();
   const handleLangChange = (event: SelectChangeEvent) => {

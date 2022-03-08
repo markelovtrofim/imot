@@ -1,15 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import Search from "../../components/Search";
-import {BlockBox, Select, СontrolBlock} from "../../components";
+import {BlockBox, СontrolBlock} from "../../components";
 import {CircularProgress, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
-import CallsBundle from "./CallsBundle";
-import {getBaseCallsData} from "../../store/calls/calls.slice";
+import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
 import {CallsType} from "../../store/calls/calls.types";
 import Call from "./Call";
+import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../../store/search/search.slice";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -55,26 +55,29 @@ const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
 
 const Calls = React.memo(() => {
   const classes = useStyles();
-  const [skip, setSkip] = useState<number>(0)
   const [fetching, setFetching] = useState<boolean>(false);
-  const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
   const pushNewCalls = async () => {
-    await dispatch(getBaseCallsData({skip, limit: 10, data: defaultCriterias}))
-    setSkip(prev => prev + 10);
+    await dispatch(getBaseCallsData());
+    dispatch(callsSlice.actions.incrementSkip(null));
     setFetching(true);
   };
+
+  useEffect(() => {
+    if (isAuth) {
+      dispatch(getDefaultCriterias());
+      dispatch(getAllSearchCriterias());
+    }
+    return () => {
+      setFetching(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (!fetching) {
       pushNewCalls();
     }
   }, [fetching])
-
-  useEffect(() => {
-    return () => {
-      setFetching(false)
-    }
-  }, [])
 
   useEffect(() => {
     document.addEventListener('scroll', scrollHandler);
@@ -132,13 +135,13 @@ const Calls = React.memo(() => {
         </div>
 
         <div>
-          {calls.length != 0 ? calls.map((callsArrays: CallsType[]) => {
+          {calls.length !== 0 ? calls.map((callsArrays: CallsType[]) => {
             return <div>
               {callsArrays.map((call: CallsType) => {
                 return <Call name={call.id} call={call.info} callAudio={call.audio} bundleIndex={calls.length - 1}/>
               })}
             </div>
-            }) : <BlockBox padding={'24px'}><Typography>Фильтры звонков не выбраны</Typography></BlockBox>}
+          }) : <BlockBox padding={'24px'}><Typography>Фильтры звонков не выбраны</Typography></BlockBox>}
         </div>
         <div style={{textAlign: 'center'}}>
           {!fetching && <CircularProgress color="primary"/>}

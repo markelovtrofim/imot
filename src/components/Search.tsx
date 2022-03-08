@@ -10,6 +10,7 @@ import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../store/calls/calls.slice";
 import SelectTwo from "./SelectTwo";
 import {searchSlice} from "../store/search/search.slice";
+import {convertDataForRequest} from "../utils/convertDataForRequest";
 
 const useStyles = makeStyles(({
   searchTitle: {
@@ -105,10 +106,10 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
 
   const dispatch = useDispatch();
   const classes = useStyles();
-  const date = useAppSelector(state => state.search.date);
   const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
-  const allCriterias = useAppSelector(state => state.search.allCriterias);
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
+
+  const allCriterias = useAppSelector(state => state.search.allCriterias);
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -123,33 +124,15 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
   };
 
   const removeAllCriteriasHandler = () => {
-    dispatch(searchSlice.actions.removeALlCriterias(null));
+    dispatch(searchSlice.actions.setClearDefaultCriteriasValues(null));
+    dispatch(searchSlice.actions.removeAllActiveCriterias(null));
   };
 
   const searchRequest = async () => {
     setLoading(true);
-
-    const convertDataForRequest = () => {
-      let requestArray = [];
-      for (let i = 0; i < defaultCriterias.length; i++) {
-        if (defaultCriterias[i].values.length > 0) {
-          requestArray.push({key: defaultCriterias[i].key, values: defaultCriterias[i].values})
-        }
-      }
-      for (let i = 0; i < activeCriterias.length; i++) {
-        if (activeCriterias[i].values.length > 0) {
-          requestArray.push({key: activeCriterias[i].key, values: activeCriterias[i].values});
-        }
-      }
-      return requestArray;
-    };
     await dispatch(callsSlice.actions.setEmptyState(null));
-    await dispatch(getBaseCallsData({
-      skip: 0,
-      limit: 10,
-      date: {startDate: date.startDate, endDate: date.endDate},
-      data: convertDataForRequest()
-    }));
+    await dispatch(getBaseCallsData());
+    dispatch(callsSlice.actions.incrementSkip(null));
     setLoading(false);
   };
 
@@ -161,7 +144,7 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
             <Typography className={classes.searchTitleLeftText} variant="h5">{pageName}</Typography>
             <Typography className={classes.searchTitleLeftStick} variant="h6">|</Typography>
           </div>
-          {activeCriterias.length > 0 && <div className={classes.searchTitleRight}>
+          {(activeCriterias.length > 0 || defaultCriterias.some(item => item.values.length > 0)) && <div className={classes.searchTitleRight}>
             <div onClick={removeAllCriteriasHandler} className={classes.searchDeleteAllButton}>
               <CrossSvg style={{marginRight: '5px'}}/>
               <Typography className={classes.searchDeleteAllButtonText}>Очистить</Typography>
@@ -182,24 +165,22 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
         </div>
         <div style={{display: 'flex', alignItems: 'flex-start', minHeight: '50px'}}>
           <div className={classes.searchItems}>
-            <div>
-              {defaultCriterias && allCriterias ? defaultCriterias.map(criteria => {
-                const criteriaKey = criteria.key.slice(4);
-                const compResult = allCriterias.filter(v => v.key === criteria.key);
-                return (
-                  <div className={classes.searchItem}>
-                    <Typography className={classes.searchText}>{criteriaKey}</Typography>
-                    <Select criteriaFull={compResult[0]} criteriaCurrent={criteria}/>
-                  </div>
-                )
-              }) : null}
-            </div>
+            {defaultCriterias && allCriterias ? defaultCriterias.map(criteria => {
+              const criteriaKey = criteria.key.slice(4);
+              const compResult = allCriterias.filter(v => v.key === criteria.key);
+              return (
+                <div className={classes.searchItem}>
+                  <Typography className={classes.searchText}>{criteriaKey}</Typography>
+                  <Select criteriaFull={compResult[0]} criteriaCurrent={criteria} isDefaultCriteria={true}/>
+                </div>
+              )
+            }) : null}
             {activeCriterias && allCriterias ? activeCriterias.map(criteria => {
               const compResult = allCriterias.filter(v => v.key === criteria.key);
               return (
                 <div className={classes.searchItem}>
                   <Typography className={classes.searchText}>{criteria.title}</Typography>
-                  <Select criteriaFull={compResult[0]} criteriaCurrent={criteria}/>
+                  <Select criteriaFull={compResult[0]} criteriaCurrent={criteria} isDefaultCriteria={false}/>
                 </div>
               )
             }) : null}

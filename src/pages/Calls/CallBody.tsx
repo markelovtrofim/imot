@@ -42,12 +42,9 @@ const CallBody = React.memo(({audio}: any) => {
   return (
     <div>
       <div style={{height: '250px'}}>
-
         <AudioPlayer
           src={audio}
-          onPlay={(e: any) => console.log("onPlay")}
         />
-
       </div>
       <div style={{display: 'flex'}}>
         <div className={classes.cbDialogWrapper}>

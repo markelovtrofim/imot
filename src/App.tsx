@@ -8,7 +8,7 @@ import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
 import {callsSlice} from "./store/calls/calls.slice";
 import {useDispatch} from "react-redux";
-import {getAllSearchCriterias, getUserSearchCriterias} from "./store/search/search.slice";
+import {getAllSearchCriterias, getDefaultCriterias} from "./store/search/search.slice";
 
 const useStyles = makeStyles(({
   wrapper: {
@@ -26,18 +26,12 @@ const App = () => {
   const dispatch = useDispatch();
   const isAuth = useAppSelector(state => state.auth.isAuth);
   useEffect(() => {
-    // @ts-ignore
-    const token = JSON.parse(localStorage.getItem('token'));
-    if (token) {
-      dispatch(authSlice.actions.setAuth(true));
-      dispatch(getAllSearchCriterias());
-      dispatch(getUserSearchCriterias());
-    }
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    if (token) {dispatch(authSlice.actions.setAuth(true))}
   }, []);
 
   const history = useHistory();
 
-  const didMountRef = useRef('sdf')
   useEffect(() => {
     const unListen = history.listen((location) => {
       if (location.pathname !== '/calls') {

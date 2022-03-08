@@ -6,8 +6,7 @@ import cloneDeep from "lodash.clonedeep";
 export const getAllSearchCriterias = createAsyncThunk(
   'search/getBaseSearchCriterias',
   async (payload, thunkAPI) => {
-    // @ts-ignore;
-    const {token} = await JSON.parse(localStorage.getItem('token'));
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const response = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -17,17 +16,16 @@ export const getAllSearchCriterias = createAsyncThunk(
   }
 );
 
-export const getUserSearchCriterias = createAsyncThunk(
+export const getDefaultCriterias = createAsyncThunk(
   'search/getBaseSearchCriterias',
   async (payload, thunkAPI) => {
-    // @ts-ignore;
-    const {token} = await JSON.parse(localStorage.getItem('token'));
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const response = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/default_keys`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
-    thunkAPI.dispatch(searchSlice.actions.setUserCriterias(response.data));
+    thunkAPI.dispatch(searchSlice.actions.setDefaultCriterias(response.data));
   }
 )
 
@@ -58,18 +56,25 @@ export const searchSlice = createSlice({
     setDate(state, action: PayloadAction<typeof initialState.date>) {
       state.date = action.payload;
     },
-    setUserCriterias(state, action: PayloadAction<string[]>) {
+
+    setDefaultCriterias(state, action: PayloadAction<string[]>) {
       for (let i = 0; i < action.payload.length; i++) {
         state.defaultCriterias.push({key: action.payload[i], values: []});
       }
     },
-    updateActiveCriteria(state, action: PayloadAction<RequestDataType>) {
-      const obj = current(state.activeCriterias).find(item => {
+    setDefaultCriteriaValues(state, action: PayloadAction<RequestDataType>) {
+      const obj = current(state.defaultCriterias).find(item => {
         return item.key === action.payload.key
       });
       // @ts-ignore
-      const index = current(state.activeCriterias).indexOf(obj);
-      state.activeCriterias[index].values = action.payload.values;
+      const index = current(state.defaultCriterias).indexOf(obj);
+      debugger
+      state.defaultCriterias[index].values = action.payload.values;
+    },
+    setClearDefaultCriteriasValues(state, action: PayloadAction<null>) {
+      for (let i = 0; i < state.defaultCriterias.length; i++) {
+        state.defaultCriterias[i] = {...state.defaultCriterias[i], values: []};
+      }
     },
     setAllCriterias(state, action: PayloadAction<CriteriasType[]>) {
       state.allCriterias = action.payload;
@@ -77,7 +82,15 @@ export const searchSlice = createSlice({
     setActiveCriterias(state, action: PayloadAction<CriteriasType[]>) {
       state.activeCriterias = action.payload;
     },
-    removeCriteria(state, action: PayloadAction<CriteriasType>) {
+    setActiveCriteriaValues(state, action: PayloadAction<RequestDataType>) {
+      const obj = current(state.activeCriterias).find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const index = current(state.activeCriterias).indexOf(obj);
+      state.activeCriterias[index].values = action.payload.values;
+    },
+    removeActiveCriteria(state, action: PayloadAction<CriteriasType>) {
       let activeCriterias = cloneDeep(current(state.activeCriterias));
       const obj = current(state.activeCriterias).find(item => {
         return item.key === action.payload.key
@@ -87,7 +100,7 @@ export const searchSlice = createSlice({
       activeCriterias.splice(index, 1);
       state.activeCriterias = activeCriterias;
     },
-    removeALlCriterias(state, action: PayloadAction<null>) {
+    removeAllActiveCriterias(state, action: PayloadAction<null>) {
       state.activeCriterias = [];
     }
   }

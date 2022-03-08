@@ -102,12 +102,10 @@ const ControlBlock = () => {
   return (
     <div className={classes.controlBlockWrapper}>
       <div className={classes.controlBlockDate}>
-
         {/* Ввод точной даты */}
         <div style={{height: '40px'}}>
           <Calendar/>
         </div>
-
       </div>
       <Button
         className={cn(classes.controlBlockButton, classes.cbButtonWithIcon)}

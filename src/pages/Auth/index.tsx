@@ -5,7 +5,7 @@ import cn from 'classnames';
 import {PhonePng, DashboardPng, SoundPng} from '../../assets/images/Auth';
 import LogoPng from '../../assets/images/logo.png';
 import {authSlice, fetchAuthToken} from "../../store/auth/auth.slice";
-import {useAppDispatch, useAppSelector} from "../../hooks/redux";
+import {useAppSelector} from "../../hooks/redux";
 import {useFormik} from 'formik';
 import {LoadingButton} from "@mui/lab";
 import {Redirect} from "react-router-dom";
@@ -15,6 +15,7 @@ import Input from "../../components/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
 import Button from '@mui/material/Button';
 import SignUpModalWindow from "./SignUpModalWindow";
+import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
   authWrapper: {
@@ -147,7 +148,7 @@ const PasswordSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const Auth = () => {
   const classes = useStyles();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [buttonClick, setButtonClick] = useState<boolean>(false);
 
   const [openChangePasswordWindow, setOpenChangePasswordWindow] = useState<boolean>(false);
