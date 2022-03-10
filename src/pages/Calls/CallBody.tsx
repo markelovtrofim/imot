@@ -2,11 +2,8 @@ import React from 'react';
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 import DialogItem from './DialogItem';
-// @ts-ignore
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
-// @ts-ignore
-import testAudio from '../../assets/gucci.mp3';
 
 const useStyles = makeStyles(({
   cbDialogWrapper: {
@@ -43,6 +40,7 @@ const CallBody = React.memo(({audio}: any) => {
     <div>
       <div style={{height: '250px'}}>
         <AudioPlayer
+          autoPlay={false}
           src={audio}
         />
       </div>
@@ -60,6 +58,11 @@ const CallBody = React.memo(({audio}: any) => {
               <DialogItem person={'employee'}/>
               <DialogItem person={'customer'}/>
               <DialogItem person={'employee'}/>
+              <DialogItem person={'customer'}/>
+              <DialogItem person={'employee'}/>
+              <DialogItem person={'customer'}/>
+              <DialogItem person={'employee'}/>
+              <DialogItem person={'customer'}/>
             </div>
           </div>
         </div>

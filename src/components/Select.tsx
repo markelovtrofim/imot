@@ -4,7 +4,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import {makeStyles} from "@mui/styles";
 import {Checkbox, InputBase, ListItemText} from "@mui/material";
-import Tag from "./Tag";
+import {BaseTag} from "./Tag";
 import {FC, useState} from "react";
 import {CriteriasType, RequestDataType} from "../store/search/search.types";
 import {searchSlice} from "../store/search/search.slice";
@@ -85,11 +85,11 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
           renderValue={(selected) => {
             if (selected.length > 1) {
               return <div style={{display: 'flex'}}>
-                <Tag label={selected[0]}/>
-                <Tag label={`+${selected.length - 1}`}/>
+                <BaseTag body={selected[0]}/>
+                <BaseTag body={`+${selected.length - 1}`}/>
               </div>
             }
-            return <Tag label={selected[0]}/>
+            return <BaseTag body={selected[0]}/>
           }}
         >
           {criteriaFull.values ? criteriaFull.values.map((name: string) => {

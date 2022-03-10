@@ -187,7 +187,6 @@ export const callsSlice = createSlice({
       })
     },
     incrementSkip(state, action: PayloadAction<null>) {
-      debugger
       state.skip += state.limit;
     }
   }

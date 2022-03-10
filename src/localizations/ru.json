@@ -37,5 +37,7 @@
   "callsEmployee": "Сотрудник",
   "callsCustomer": "Клиент",
   "callsTag": "Тег",
-  "callsTags": "Теги звонка"
+  "callsTags": "Теги звонка",
+  "callsFragments": "Теги фрагмента",
+  "callsEmpty": "Фильтры звонков не выбраны"
 }

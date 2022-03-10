@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
@@ -10,8 +10,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import Tag from "../../components/Tag";
-import Tooltip from '@mui/material/Tooltip';
+import {TwoTags, Fragment} from "../../components/Tag";
 import {CallsInfoType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./CallBody";
 import {useDispatch} from "react-redux";
@@ -69,8 +68,8 @@ const useStyles = makeStyles(({
   accordion: {
     backgroundColor: '#ffffff !important',
     borderTop: '2px solid #F8FAFC !important',
-    padding: '0 24px !important',
-    paddingTop: '18px !important',
+    padding: '18px 24px 10px 24px !important',
+    cursor: 'default !important',
     '& .MuiAccordionSummary-content': {
       margin: '0 !important',
     },
@@ -126,24 +125,46 @@ const useStyles = makeStyles(({
   },
   callTags: {},
   callTagsTitle: {
+    margin: '5px !important',
     color: '#738094 !important',
     minWidth: '120px'
   }
 }));
 
-const Call = ({
-                call,
-                callAudio,
-                bundleIndex
-              }: { callAudio: any, call: CallsInfoType | null, name: string | null, bundleIndex: number }) => {
+type CallPropsType = {
+  callAudio: string,
+  call: CallsInfoType | null,
+  name: string | null,
+  bundleIndex: number
+}
+
+const Call = memo(({call, callAudio, bundleIndex}: CallPropsType) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
   const [index, setIndex] = useState<null | number>(null);
   const [disabled, setDisabled] = useState<boolean>(false);
+  type CallDataType = {
+    id: string | null,
+    bundleIndex: number | null
+  }
+  const [callData, setCallData] = React.useState<CallDataType>({
+    id: null,
+    bundleIndex: null
+  });
+
   useEffect(() => {
     if (index === null) {
       setIndex(bundleIndex);
     }
   }, [bundleIndex])
+
+  useEffect(() => {
+    if (callData.id) {
+      // @ts-ignore
+      dispatch(getCallAudio(callData));
+    }
+  }, [callData]);
 
   function msToTime(s: number) {
     function pad(n: any, z: any) {
@@ -161,26 +182,9 @@ const Call = ({
     return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
   }
 
-  const dispatch = useDispatch();
-  const [callData, setCallData] = React.useState<{
-    id: string | null,
-    bundleIndex: number | null
-  }>({
-    id: null,
-    bundleIndex: null
-  });
-
-  useEffect(() => {
-    if (callData.id) {
-      // @ts-ignore
-      dispatch(getCallAudio(callData));
-    }
-  }, [callData]);
-
   let tags = [];
   let fragments = [];
   if (call) {
-    debugger
     // @ts-ignore
     for (let i = 0; i < call.tags.length; i++) {
       // @ts-ignore
@@ -231,8 +235,12 @@ const Call = ({
           {/* Клиент. */}
           <Grid item xs={1.5} className={classes.callMNumberBox}>
             {/* Номер телефона. */}
-            <Typography className={classes.callMNumber}>{call ? call.clientPhone :
-              <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>}</Typography>
+            <Typography className={classes.callMNumber}>
+              {call
+                ? call.clientPhone
+                : <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>
+              }
+            </Typography>
           </Grid>
           <Grid item xs={6.5}>
             <div className={classes.callTags}>
@@ -242,27 +250,10 @@ const Call = ({
                   <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
                     {// @ts-ignore
                       tags.map((tag: TagType) => {
-                        const colorArray = [
-                          {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
-                          {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
-                          {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
-                        ]
-                        const randomColor = () => {
-                          const random = Math.floor(Math.random() * 3);
-                          return colorArray[random];
-                        }
-                        const randomColorResult = randomColor()
                         return (
-                          <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
-                            <div style={{margin: 0}}>
-                              <Tag
-                                label={tag.name}
-                                backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
-                                color={tag.color ? tag.color : randomColorResult.color}
-                                hover={tag.color ? tag.color : randomColorResult.hover}
-                              />
-                            </div>
-                          </Tooltip>
+                          <div style={{margin: 0, display: 'flex'}}>
+                            <TwoTags title={tag.name} body={tag.value}/>
+                          </div>
                         )
                       })
                     }
@@ -278,27 +269,9 @@ const Call = ({
                   <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
                     {// @ts-ignore
                       fragments.map((tag: TagType) => {
-                        const colorArray = [
-                          {backgroundColor: "#FFCCC7", color: "#A8071A", hover: "#F9AEA7"},
-                          {backgroundColor: "#D6E4FF", color: "#061178", hover: "#BED3FE"},
-                          {backgroundColor: "#D9F7BE", color: "#237804", hover: "#9EEC5A"}
-                        ]
-                        const randomColor = () => {
-                          const random = Math.floor(Math.random() * 3);
-                          return colorArray[random];
-                        }
-                        const randomColorResult = randomColor()
                         return (
-                          <Tooltip title={tag.value ? tag.value : 'пусто'} placement="top">
-                            <div style={{margin: 0}}>
-                              <Tag
-                                label={tag.name}
-                                backgroundColor={tag.color ? tag.color : randomColorResult.backgroundColor}
-                                color={tag.color ? tag.color : randomColorResult.color}
-                                hover={tag.color ? tag.color : randomColorResult.hover}
-                              />
-                            </div>
-                          </Tooltip>
+                          // @ts-ignore
+                          <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
                         )
                       })
                     }
@@ -319,6 +292,6 @@ const Call = ({
       </AccordionDetails>
     </Accordion>
   );
-};
+});
 
 export default Call;

@@ -9,6 +9,8 @@ import {CriteriasType} from "../store/search/search.types";
 import cn from 'classnames';
 import {searchSlice} from "../store/search/search.slice";
 import {useAppSelector} from "../hooks/redux";
+import {translate} from "../localizations";
+import {RootState} from "../store";
 
 const useStyles = makeStyles(({
   select: {
@@ -63,6 +65,8 @@ const CustomSelect: FC<SelectType> = ({criterias}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
 
   const handleChange = (event: any) => {
     const {target: {value}} = event;
@@ -82,7 +86,7 @@ const CustomSelect: FC<SelectType> = ({criterias}) => {
       renderValue={(selected) => {
         if (selected[0] == 'test') {
           return <div style={{display: 'flex'}}>
-            <Typography className={classes.selectText}>Еще</Typography>
+            <Typography className={classes.selectText}>{translate('searchMore', language)}</Typography>
           </div>
         } else {
           return (

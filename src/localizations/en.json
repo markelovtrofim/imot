@@ -37,5 +37,7 @@
   "callsEmployee": "Employee",
   "callsCustomer": "Customer",
   "callsTag": "Tag",
-  "callsTags": "Call tags"
+  "callsTags": "Call tags",
+  "callsFragments": "Fragment tags",
+  "callsEmpty": "No call filters selected"
 }

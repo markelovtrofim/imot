@@ -1,8 +1,9 @@
 import React, {FC} from 'react';
 import {makeStyles} from "@mui/styles";
-import {BlockBox, Tag} from "../../components";
+import {BlockBox} from "../../components";
 import {Typography} from "@mui/material";
 import cn from 'classnames';
+import {BaseTag} from "../../components/Tag";
 
 const HeadphoneIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -134,8 +135,8 @@ const DialogItem: FC<DialogItemType> = ({person}) => {
       {/* Tags */}
       <div className={classes.diTagsBlock}>
         <div style={condition ? {textAlign: 'right'} : {textAlign: 'left'}}>
-          <Tag label={"Тег"}/>
-          <Tag label={"Тег"}/>
+          <BaseTag body={"Тег"}/>
+          <BaseTag body={"Тег"}/>
         </div>
         <AddSvg style={condition ? {margin: '0 0 0 auto'} : {margin: '0 auto 0 0'}}/>
       </div>
