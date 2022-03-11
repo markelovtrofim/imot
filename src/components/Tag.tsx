@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, memo} from 'react';
 import Chip from '@mui/material/Chip';
 import {makeStyles} from "@mui/styles";
 import cn from 'classnames';
@@ -19,7 +19,7 @@ type TagPropsType = {
   body: string
 };
 
-export const TwoTags: FC<TagPropsType> = ({title, body}) => {
+export const TwoTags: FC<TagPropsType> = memo(({title, body}) => {
   const {backgroundColor, color, hover} = getRandomColor();
 
   const useStyles = makeStyles(({
@@ -54,9 +54,9 @@ export const TwoTags: FC<TagPropsType> = ({title, body}) => {
       {body && <Chip label={body} className={cn(classes.body, classes.general)}/>}
     </span>
   )
-};
+});
 
-export const BaseTag: FC<{ body: string }> = ({body}) => {
+export const BaseTag: FC<{ body: string }> = memo(({body}) => {
   const useStyles = makeStyles(({
     body: {
       height: '27px !important',
@@ -71,10 +71,10 @@ export const BaseTag: FC<{ body: string }> = ({body}) => {
   }));
   const classes = useStyles();
   return <Chip label={body} className={classes.body}/>
-};
+});
 
 
-export const Fragment: FC<{matchData: string}> = ({children, matchData}) => {
+export const Fragment: FC<{matchData: string}> = memo(({children, matchData}) => {
   const {backgroundColor, color, hover} = getRandomColor();
   const useStyles = makeStyles(({
     tooltip: {
@@ -109,4 +109,4 @@ export const Fragment: FC<{matchData: string}> = ({children, matchData}) => {
       <Chip label={children} className={classes.body}/>
     </Tooltip>
   )
-};
+});

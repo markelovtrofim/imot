@@ -13,6 +13,8 @@ import {useAppSelector} from "../hooks/redux";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import {useDispatch} from "react-redux";
+import {callsSlice} from "../store/calls/calls.slice";
+import {searchSlice} from "../store/search/search.slice";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -128,6 +130,12 @@ const Header: React.FC = () => {
     setAlignment(newAlignment);
   };
 
+  const logout = () => {
+    dispatch(removeAuthToken())
+    dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
+    dispatch(searchSlice.actions.removeAllState(null));
+  }
+
   return (
     <div className={classes.headerWrapper}>
       <div className={classes.headerInner}>
@@ -162,9 +170,7 @@ const Header: React.FC = () => {
           </Select>
 
           {/* Выход из аккаунта */}
-          <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={() => {
-            dispatch(removeAuthToken())
-          }}>
+          <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={logout}>
             {translate('logout', language)}
           </Button>
 

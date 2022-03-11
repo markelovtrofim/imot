@@ -14,11 +14,11 @@ import {TwoTags, Fragment} from "../../components/Tag";
 import {CallsInfoType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./CallBody";
 import {useDispatch} from "react-redux";
-import {getCallAudio} from "../../store/calls/calls.slice";
+import {callsSlice, getCallAudio} from "../../store/calls/calls.slice";
 
 
 const Accordion = styled((props: AccordionProps) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
+  <MuiAccordion disableGutters elevation={0} square {...props}/>
 ))(({theme}) => ({
   border: `1px solid ${theme.palette.divider}`,
   '&:not(:last-child)': {},
@@ -97,7 +97,8 @@ const useStyles = makeStyles(({
     alignItems: 'center'
   },
   employeeText: {
-    marginRight: '20px !important'
+    marginRight: '20px !important',
+    minWidth: '40px !important'
   },
   callDateBox: {
     display: 'flex',
@@ -123,7 +124,6 @@ const useStyles = makeStyles(({
   callMNumber: {
     fontSize: '15px !important'
   },
-  callTags: {},
   callTagsTitle: {
     margin: '5px !important',
     color: '#738094 !important',
@@ -131,167 +131,256 @@ const useStyles = makeStyles(({
   }
 }));
 
-type CallPropsType = {
-  callAudio: string,
-  call: CallsInfoType | null,
-  name: string | null,
-  bundleIndex: number
-}
+type CallStubMiddlewarePropsType = {
+  callInfo: CallsInfoType | null,
+  callAudio: string | null,
+  callStt: any | null,
+  bundleIndex: number,
 
-const Call = memo(({call, callAudio, bundleIndex}: CallPropsType) => {
+  expanded: boolean,
+  handleExpandedChange: (panel: string) => void
+};
+
+
+const CallStubMiddleware = memo(({
+                                   callInfo,
+                                   callAudio,
+                                   callStt = null,
+                                   bundleIndex,
+                                   expanded,
+                                   handleExpandedChange
+                                 }: CallStubMiddlewarePropsType) => {
+  const classes = useStyles();
+  // Заглушки пока не пришли звонки с сервака.
+  if (!callInfo) {
+    return (
+      <Accordion style={{border: 'none'}}>
+
+        {/* Первичная информация о звонке. */}
+        <AccordionSummary className={classes.accordion}>
+          <Grid container className={classes.callInner}>
+
+            {/* Сотрудник. */}
+            <Grid item xs={1.8} style={{minWidth: '145px'}}>
+              {/* Имя и фамилия. */}
+              <div className={classes.employee}>
+                <Typography className={classes.employeeText}>
+                  <Skeleton width={60} height={20} variant="text"/>
+                </Typography>
+                <CallSvg/>
+              </div>
+              {/* Дата звонка.*/}
+              <div className={classes.callDateBox}>
+                <Typography className={classes.callDate}>
+                  <Skeleton width={100} height={20} variant="text"/>
+                </Typography>
+              </div>
+              {/* Время звонка. */}
+              <div className={classes.callDurationBox}>
+                <Typography className={classes.callDuration}>
+                  <Skeleton width={60} height={20} variant="text"/>
+                </Typography>
+              </div>
+            </Grid>
+
+            {/* Клиент. */}
+            <Grid item xs={1.5} className={classes.callMNumberBox}>
+              {/* Номер телефона. */}
+              <Typography className={classes.callMNumber}>
+                <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6.7}>
+
+              {/* Теги */}
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
+                <div style={{width: '100%'}}>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                </div>
+              </div>
+
+              {/* Фрагменты */}
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
+                <div style={{width: '100%'}}>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                </div>
+              </div>
+
+              <div className={classes.slave}>
+
+              </div>
+            </Grid>
+
+          </Grid>
+        </AccordionSummary>
+
+      </Accordion>
+    );
+  }
+  return <Call callInfo={callInfo} callAudio={callAudio} callStt={callStt}
+               bundleIndex={bundleIndex}
+               handleExpandedChange={handleExpandedChange} expanded={expanded}/>
+});
+
+
+type CallPropsType = {
+  callInfo: CallsInfoType,
+  callAudio: string | null,
+  callStt: any | null,
+  bundleIndex: number,
+
+  expanded: boolean,
+  handleExpandedChange: (panel: string) => void
+};
+
+const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedChange, expanded}: CallPropsType) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
+  // устанавливает локальный bundle index
   const [index, setIndex] = useState<null | number>(null);
-  const [disabled, setDisabled] = useState<boolean>(false);
-  type CallDataType = {
-    id: string | null,
-    bundleIndex: number | null
-  }
-  const [callData, setCallData] = React.useState<CallDataType>({
-    id: null,
-    bundleIndex: null
-  });
-
   useEffect(() => {
     if (index === null) {
       setIndex(bundleIndex);
     }
   }, [bundleIndex])
 
+  // устанавливает пришело ли аудио (в будушем и stt)
+  const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
   useEffect(() => {
-    if (callData.id) {
-      // @ts-ignore
-      dispatch(getCallAudio(callData));
+    if (callAudio) {
+      setIsCallBodyData(true);
     }
-  }, [callData]);
+  }, [callAudio]);
 
-  function msToTime(s: number) {
-    function pad(n: any, z: any) {
-      z = z || 2;
-      return ('00' + n).slice(-z);
-    }
-
+  // конвертирует время для показа
+  const timeConverter = (s: number) => {
+    const pad = (n: number) => {
+      return ('00' + n).slice(-2);
+    };
     let ms = s % 1000;
     s = (s - ms) / 1000;
     let secs = s % 60;
     s = (s - secs) / 60;
     let mins = s % 60;
     let hrs = (s - mins) / 60;
-    // @ts-ignore
-    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
-  }
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  };
 
-  let tags = [];
-  let fragments = [];
-  if (call) {
-    // @ts-ignore
-    for (let i = 0; i < call.tags.length; i++) {
-      // @ts-ignore
-      if (call.tags[i].fragment) {
-        // @ts-ignore
-        fragments.push(call.tags[i]);
+  // разделяет теги на теги и фрагменты
+  const tagsAndFragmentsSeparator = () => {
+    let tags = [];
+    let fragments = [];
+    for (let i = 0; i < callInfo.tags?.length; i++) {
+      if (callInfo.tags[i].fragment) {
+        fragments.push(callInfo.tags[i]);
       } else {
-        // @ts-ignore
-        tags.push(call.tags[i]);
+        tags.push(callInfo.tags[i]);
       }
     }
-  }
+    return {tags, fragments};
+  };
+  const tagsAndFragmentsArray = tagsAndFragmentsSeparator();
 
   return (
-    <Accordion style={{border: 'none '}}>
-      {/* Первичная информация о звонке. */}
-      <AccordionSummary className={classes.accordion} onClick={() => {
-        if ((index || index === 0) && !disabled) {
-          setCallData(
-            // @ts-ignore
-            {id: call.id, bundleIndex: index})
+    <Accordion
+      style={{border: 'none'}}
+      expanded={expanded && isCallBodyData}
+      onChange={() => {
+        if (index || index === 0) {
+          if (!isCallBodyData) {
+            handleExpandedChange(callInfo.id);
+            dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
+          } else {
+            dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex: index}));
+            setIsCallBodyData(false);
+          }
         }
-        setDisabled(prev => !prev);
-      }}>
+      }}
+    >
+
+      {/* Первичная информация о звонке. */}
+      <AccordionSummary className={classes.accordion}>
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
+
             {/* Имя и фамилия. */}
             <div className={classes.employee}>
-              <Typography className={classes.employeeText}>{call ? call.operatorPhone :
-                <Skeleton width={60} height={20} variant="text"/>}</Typography>
+              <Typography className={classes.employeeText}>
+                {callInfo.operatorPhone}
+              </Typography>
               <CallSvg/>
             </div>
+
             {/* Дата звонка.*/}
             <div className={classes.callDateBox}>
-              <Typography className={classes.callDate}>{call ? call.callTimeReadable :
-                <Skeleton width={100} height={20} variant="text"/>}</Typography>
+              <Typography className={classes.callDate}>
+                {callInfo.callTimeReadable}
+              </Typography>
             </div>
+
             {/* Время звонка. */}
             <div className={classes.callDurationBox}>
               <Typography className={classes.callDuration}>
-                {call ? msToTime(
-                  // @ts-ignore
-                  call.duration) : <Skeleton width={60} height={20} variant="text"/>}
+                {timeConverter(callInfo.duration)}
               </Typography>
             </div>
           </Grid>
+
           {/* Клиент. */}
           <Grid item xs={1.5} className={classes.callMNumberBox}>
             {/* Номер телефона. */}
             <Typography className={classes.callMNumber}>
-              {call
-                ? call.clientPhone
-                : <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>
-              }
+              {callInfo.clientPhone}
             </Typography>
           </Grid>
+
           <Grid item xs={6.5}>
-            <div className={classes.callTags}>
-              <div style={{display: 'flex'}}>
-                <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
-                {call ?
-                  <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                    {// @ts-ignore
-                      tags.map((tag: TagType) => {
-                        return (
-                          <div style={{margin: 0, display: 'flex'}}>
-                            <TwoTags title={tag.name} body={tag.value}/>
-                          </div>
-                        )
-                      })
-                    }
-                  </Stack>
-                  : <div style={{width: '100%'}}>
-                    <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
-                  </div>
-                }
-              </div>
-              <div style={{display: 'flex'}}>
-                <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
-                {call ?
-                  <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                    {// @ts-ignore
-                      fragments.map((tag: TagType) => {
-                        return (
-                          // @ts-ignore
-                          <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
-                        )
-                      })
-                    }
-                  </Stack>
-                  : <div style={{width: '100%'}}>
-                    <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
-                  </div>
-                }
-              </div>
+            {/* Tags */}
+            <div style={{display: 'flex'}}>
+              <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
+              <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                {tagsAndFragmentsArray.tags.map((tag: TagType) => {
+                  return (
+                    <div style={{margin: 0, display: 'flex'}}>
+                      <TwoTags title={tag.name} body={tag.value}/>
+                    </div>
+                  )
+                })}
+              </Stack>
             </div>
-            <div className={classes.slave}></div>
+
+            {/* Fragments */}
+            {tagsAndFragmentsArray.fragments.length > 1 &&
+            <div style={{display: 'flex'}}>
+              <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
+              <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                {tagsAndFragmentsArray.fragments.map((tag: TagType) => {
+                  return (
+                    <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
+                  )
+                })}
+              </Stack>
+            </div>
+            }
+
+            <div className={classes.slave}>
+            </div>
+
           </Grid>
         </Grid>
       </AccordionSummary>
+
       {/* Основная информация о звонке. */}
       <AccordionDetails style={{backgroundColor: '#F8FAFC', border: 'none'}}>
-        <CallBody audio={callAudio}/>
+        <CallBody callInfo={callInfo} callAudio={callAudio} callStt={callStt} bundleIndex={bundleIndex} expanded={expanded}/>
       </AccordionDetails>
     </Accordion>
   );
 });
 
-export default Call;
+export default CallStubMiddleware;

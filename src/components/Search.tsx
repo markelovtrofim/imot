@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import BlockBox from "./BlockBox";
 import {Alert, Button, Snackbar, Typography} from "@mui/material";
 import Select from './Select'
@@ -9,7 +9,7 @@ import {useAppSelector} from "../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../store/calls/calls.slice";
 import SelectTwo from "./SelectTwo";
-import {searchSlice} from "../store/search/search.slice";
+import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../store/search/search.slice";
 import {translate} from "../localizations";
 import {RootState} from "../store";
 
@@ -116,6 +116,8 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
   const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
   const {language} = useAppSelector((state: RootState) => state.lang);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+
 
   const allCriterias = useAppSelector(state => state.search.allCriterias);
 
@@ -138,11 +140,18 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
 
   const searchRequest = async () => {
     setLoading(true);
-    await dispatch(callsSlice.actions.setEmptyState(null));
+    dispatch(callsSlice.actions.zeroingSkip(null));
+    await dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     await dispatch(getBaseCallsData());
-    dispatch(callsSlice.actions.incrementSkip(null));
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (isAuth && defaultCriterias.length < 1 && activeCriterias.length < 1) {
+      dispatch(getDefaultCriterias());
+      dispatch(getAllSearchCriterias());
+    }
+  }, []);
 
   return (
     <div style={{margin: '24px 0'}}>

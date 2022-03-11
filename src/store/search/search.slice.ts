@@ -102,6 +102,15 @@ export const searchSlice = createSlice({
     },
     removeAllActiveCriterias(state, action: PayloadAction<null>) {
       state.activeCriterias = [];
+    },
+    removeAllState(state, action: PayloadAction<null>) {
+      state.date = {
+        startDate: null,
+        endDate: null
+      };
+      state.allCriterias = null;
+      state.defaultCriterias = [];
+      state.activeCriterias = [];
     }
   }
 });

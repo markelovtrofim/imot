@@ -21,7 +21,7 @@ export type CallsInfoType = {
   uniqueId: string,
   conversationId: string,
   duration: number,
-  tags: TagType[] | null
+  tags: TagType[]
 };
 
 

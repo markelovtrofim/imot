@@ -1,9 +1,12 @@
-import React from 'react';
+import React, {FC, useEffect} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 import DialogItem from './DialogItem';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import {callsSlice} from "../../store/calls/calls.slice";
+import {useDispatch} from "react-redux";
+import {CallsInfoType} from "../../store/calls/calls.types";
 
 const useStyles = makeStyles(({
   cbDialogWrapper: {
@@ -34,14 +37,29 @@ const useStyles = makeStyles(({
   }
 }));
 
-const CallBody = React.memo(({audio}: any) => {
+type CallBodyPropsType = {
+  callInfo: CallsInfoType,
+  callAudio: string | null,
+  callStt: any | null,
+  bundleIndex: number,
+  expanded: boolean
+};
+
+const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callStt, bundleIndex, expanded}) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!expanded && callAudio) {
+      dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex}));
+    }
+  },[expanded]);
+
   return (
     <div>
       <div style={{height: '250px'}}>
         <AudioPlayer
-          autoPlay={false}
-          src={audio}
+          src={callAudio ? callAudio : ''}
         />
       </div>
       <div style={{display: 'flex'}}>
@@ -80,5 +98,6 @@ const CallBody = React.memo(({audio}: any) => {
     </div>
   );
 });
+
 
 export default CallBody;

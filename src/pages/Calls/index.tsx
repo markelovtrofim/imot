@@ -8,10 +8,11 @@ import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
 import {CallsType} from "../../store/calls/calls.types";
-import Call from "./Call";
+import CallStubMiddleware from "./Call";
 import {getAllSearchCriterias, getDefaultCriterias} from "../../store/search/search.slice";
 import {RootState} from "../../store";
 import {translate} from "../../localizations";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -57,29 +58,28 @@ const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
 
 const Calls = React.memo(() => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [fetching, setFetching] = useState<boolean>(false);
-  const isAuth = useAppSelector(state => state.auth.isAuth);
+
+  const calls = useAppSelector(state => state.calls.calls);
+
+  const {language} = useAppSelector((state: RootState) => state.lang);
+  const [expanded, setExpanded] = React.useState<string | false>(false);
+  const handleExpandedChange = (panel: string) => {
+    setExpanded(panel);
+  };
+
   const pushNewCalls = async () => {
+    setFetching(true);
     await dispatch(getBaseCallsData());
     dispatch(callsSlice.actions.incrementSkip(null));
-    setFetching(true);
+    setFetching(false);
   };
 
   useEffect(() => {
-    if (isAuth) {
-      dispatch(getDefaultCriterias());
-      dispatch(getAllSearchCriterias());
-    }
-    return () => {
-      setFetching(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!fetching) {
-      pushNewCalls();
-    }
-  }, [fetching])
+    pushNewCalls();
+    return () => setFetching(false);
+  }, []);
 
   useEffect(() => {
     document.addEventListener('scroll', scrollHandler);
@@ -88,25 +88,26 @@ const Calls = React.memo(() => {
     }
   });
   const scrollHandler = (e: any) => {
-    if (fetching) {
-      if (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 1500) {
-        setFetching(false)
-      }
+    if (calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 1500)) {
+      pushNewCalls();
     }
   };
 
-  const calls = useAppSelector(state => state.calls.calls);
+  const history = useHistory();
 
-  const {language} = useAppSelector((state: RootState) => state.lang);
-  const dispatch = useDispatch();
+  useEffect(() => {
+    return history.listen((location) => {
+      if (location.pathname !== '/calls') {
+        dispatch(callsSlice.actions.setEmptyState({leaveBundles: 1}));
+      }
+    });
+  }, []);
 
   return (
     <div style={{cursor: 'default'}}>
       <СontrolBlock/>
       <Search pageName="Звонок"/>
       <BlockBox>
-        <div style={{display: 'flex'}}>
-        </div>
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
             <Typography className={classes.callsTitleText}>{translate('callsLastCalls', language)}</Typography>
@@ -138,22 +139,34 @@ const Calls = React.memo(() => {
         </div>
 
         <div>
-          {calls.length !== 0 ? calls.map((callsArrays: CallsType[]) => {
-            // @ts-ignore
-            const callsArrayIndex = calls.indexOf(callsArrays);
-            return <div>
-              {callsArrays.map((call: CallsType) => {
-                return <Call name={call.id} call={call.info} callAudio={call.audio} bundleIndex={callsArrayIndex}/>
-              })}
-            </div>
-          }) : <BlockBox padding={'24px'}><Typography>{translate('callsEmpty', language)}</Typography></BlockBox>}
+          {calls.length !== 0 ?
+            calls.map((callsArrays: CallsType[]) => {
+              // @ts-ignore
+              const callsArrayIndex = calls.indexOf(callsArrays)
+              return (
+                <div>
+                  {callsArrays.map((call: CallsType) => {
+                    return (
+                      <CallStubMiddleware
+                        callInfo={call.info} callAudio={call.audio} callStt={null}
+                        bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
+                        handleExpandedChange={handleExpandedChange}
+                      />
+                    )
+                  })}
+                </div>
+              )
+            }) :
+            <BlockBox padding={'24px'}><Typography>{translate('callsEmpty', language)}</Typography></BlockBox>}
         </div>
+
         <div style={{textAlign: 'center'}}>
-          {!fetching && <CircularProgress color="primary"/>}
+          {fetching && <CircularProgress color="primary"/>}
         </div>
+
       </BlockBox>
     </div>
-  )
+  );
 });
 
 export default Calls;
