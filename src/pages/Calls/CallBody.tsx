@@ -59,6 +59,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
     <div>
       <div style={{height: '250px'}}>
         <AudioPlayer
+          // @ts-ignore
+          tabIndex={-1}
           src={callAudio ? callAudio : ''}
         />
       </div>
@@ -73,14 +75,11 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
               Текстовый диалог
             </Typography>
             <div className={classes.cbDialogItems}>
-              <DialogItem person={'employee'}/>
-              <DialogItem person={'customer'}/>
-              <DialogItem person={'employee'}/>
-              <DialogItem person={'customer'}/>
-              <DialogItem person={'employee'}/>
-              <DialogItem person={'customer'}/>
-              <DialogItem person={'employee'}/>
-              <DialogItem person={'customer'}/>
+              {callStt && callStt.fragments.map((phrase: any) => {
+                return (
+                  <DialogItem person={phrase.direction} text={phrase.text}/>
+                )
+              })}
             </div>
           </div>
         </div>

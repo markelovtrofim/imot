@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useDebugValue, useEffect, useState} from 'react';
 import BlockBox from "./BlockBox";
 import {Alert, Button, Snackbar, Typography} from "@mui/material";
 import Select from './Select'
@@ -117,8 +117,6 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
   const {language} = useAppSelector((state: RootState) => state.lang);
   const isAuth = useAppSelector(state => state.auth.isAuth);
-
-
   const allCriterias = useAppSelector(state => state.search.allCriterias);
 
   const [loading, setLoading] = useState(false);
@@ -152,7 +150,6 @@ const Search: FC<FilterPropsType> = ({pageName}) => {
       dispatch(getAllSearchCriterias());
     }
   }, []);
-
   return (
     <div style={{margin: '24px 0'}}>
       <BlockBox padding="34px 24px 10px 24px">

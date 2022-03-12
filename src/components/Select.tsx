@@ -1,14 +1,14 @@
 import * as React from 'react';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import {makeStyles} from "@mui/styles";
-import {Checkbox, InputBase, ListItemText} from "@mui/material";
-import {BaseTag} from "./Tag";
-import {FC, useState} from "react";
+import CreatableSelect from 'react-select/creatable';
+import Select from 'react-select';
+import {FC, memo, useState} from "react";
 import {CriteriasType, RequestDataType} from "../store/search/search.types";
 import {searchSlice} from "../store/search/search.slice";
 import {useDispatch} from "react-redux";
+import {makeStyles} from "@mui/styles";
+import {useAppSelector} from "../hooks/redux";
+import {current} from "@reduxjs/toolkit";
 
 const useStyles = makeStyles(({
   selectBox: {
@@ -21,8 +21,13 @@ const useStyles = makeStyles(({
     height: '32px',
     border: `1px solid #E3E8EF`,
     borderRadius: '5px',
-    "&:focus": {
-      borderColor: `red`,
+    '& input': {
+
+      height: '100%',
+      border: `none`,
+      borderRadius: '5px',
+      opacity: '1',
+      backgroundColor: '#E3E8EF'
     }
   }
 }));
@@ -51,56 +56,61 @@ type SelectType = {
 const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultCriteria}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [selectDataArray, setSelectDataArray] = useState<string[]>(criteriaCurrent.values)
+
 
   const removeCriteria = () => {
-    setSelectDataArray([]);
     dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
   };
 
   const handleChange = (event: any) => {
-    const {target: {value}} = event;
-    setSelectDataArray(value);
+    const eventConverter = () => {
+      let result = [];
+      for (let i = 0; i < event.length; i++) {
+        result.push(event[i].value);
+      }
+      return result;
+    };
+
+    const eventConverterResult = eventConverter();
+
     if (isDefaultCriteria) {
-      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...value]}))
+      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}))
     } else {
-      debugger
-      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...value]}));
+      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
     }
   };
-
+  const converter = (state: any) => {
+    let local: { value: string, label: string }[] = [];
+    for (let i = 0; i < state.values.length; i++) {
+      local.push({value: state.values[i], label: state.values[i]});
+    }
+    return local;
+  };
+  const converterFullResult = converter(criteriaFull);
+  const converterCurrentResult = converter(criteriaCurrent);
   return (
     <FormControl>
       <div className={classes.selectBox}>
-        <Select
-          MenuProps={{
-            disableScrollLock: true
-          }}
-          labelId="demo-multiple-checkbox-label"
-          id="demo-multiple-checkbox"
-          multiple
-          value={criteriaCurrent.values}
-          onChange={handleChange}
-          input={<InputBase className={classes.selectInput}/>}
-          renderValue={(selected) => {
-            if (selected.length > 1) {
-              return <div style={{display: 'flex'}}>
-                <BaseTag body={selected[0]}/>
-                <BaseTag body={`+${selected.length - 1}`}/>
-              </div>
-            }
-            return <BaseTag body={selected[0]}/>
-          }}
-        >
-          {criteriaFull.values ? criteriaFull.values.map((name: string) => {
-            return (
-              <MenuItem key={name} value={name}>
-                <ListItemText primary={name}/>
-                <Checkbox checked={selectDataArray.indexOf(name) > -1}/>
-              </MenuItem>
-            )
-          }) : null}
-        </Select>
+        {criteriaFull.selectType === "multiString" ?
+          <CreatableSelect
+            className={classes.selectInput}
+            placeholder={"Все"}
+            closeMenuOnSelect={false}
+            isMulti
+            value={converterCurrentResult}
+            onChange={handleChange}
+            options={converterFullResult}
+          /> :
+          <Select
+            placeholder={"Все"}
+            closeMenuOnSelect={false}
+            isMulti
+            className={classes.selectInput}
+            value={converterCurrentResult}
+            onChange={handleChange}
+            options={converterFullResult}
+          />
+        }
         {isDefaultCriteria
           ? null
           : <CrossSvg onClick={removeCriteria} style={{cursor: 'pointer', marginLeft: '8px'}}/>

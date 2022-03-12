@@ -62,7 +62,7 @@ const AddSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const useStyles = makeStyles(({
   diItem: {
     display: 'flex',
-    padding: '25px',
+    margin: '25px',
   },
   diCustomer: {
     flexDirection: 'row-reverse'
@@ -98,12 +98,13 @@ const useStyles = makeStyles(({
 }));
 
 type DialogItemType = {
-  person: 'employee' | 'customer'
+  person: 'operator' | 'client',
+  text: string
 };
 
-const DialogItem: FC<DialogItemType> = ({person}) => {
+const DialogItem: FC<DialogItemType> = ({person, text}) => {
   const classes = useStyles();
-  const condition = person === 'customer'
+  const condition = person === 'client'
   const svgStyles = {backgroundColor: '#ffffff', padding: '8px', borderRadius: '5px', margin: '0 8px'}
   return (
     <div className={cn(classes.diItem, condition ? classes.diCustomer : null)}>
@@ -124,10 +125,7 @@ const DialogItem: FC<DialogItemType> = ({person}) => {
             </Typography>
           </div>
           <Typography className={classes.diBodyText}>
-            Ну давайте я передам информацию то
-            есть с вами свяжутся не могу
-            подсказать то есть кто с вами свяжется по
-            поводу то есть то что
+            {text}
           </Typography>
         </div>
       </BlockBox>

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useDebugValue, useEffect, useState} from 'react';
 import Search from "../../components/Search";
 import {BlockBox, СontrolBlock} from "../../components";
 import {CircularProgress, Select, Skeleton, Typography} from "@mui/material";
@@ -62,6 +62,7 @@ const Calls = React.memo(() => {
   const [fetching, setFetching] = useState<boolean>(false);
 
   const calls = useAppSelector(state => state.calls.calls);
+  const found = useAppSelector(state => state.calls.found);
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
@@ -72,7 +73,6 @@ const Calls = React.memo(() => {
   const pushNewCalls = async () => {
     setFetching(true);
     await dispatch(getBaseCallsData());
-    dispatch(callsSlice.actions.incrementSkip(null));
     setFetching(false);
   };
 
@@ -88,7 +88,8 @@ const Calls = React.memo(() => {
     }
   });
   const scrollHandler = (e: any) => {
-    if (calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 1500)) {
+    // @ts-ignore
+    if (found > 10 && calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 500)) {
       pushNewCalls();
     }
   };
@@ -148,7 +149,7 @@ const Calls = React.memo(() => {
                   {callsArrays.map((call: CallsType) => {
                     return (
                       <CallStubMiddleware
-                        callInfo={call.info} callAudio={call.audio} callStt={null}
+                        callInfo={call.info} callAudio={call.audio} callStt={call.stt}
                         bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
                         handleExpandedChange={handleExpandedChange}
                       />

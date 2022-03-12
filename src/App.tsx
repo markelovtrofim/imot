@@ -12,7 +12,6 @@ import {useDispatch} from "react-redux";
 const useStyles = makeStyles(({
   wrapper: {
     width: 'auto',
-    minHeight: '101vh'
   },
   container: {
     maxWidth: '1610px',

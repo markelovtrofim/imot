@@ -68,7 +68,6 @@ export const searchSlice = createSlice({
       });
       // @ts-ignore
       const index = current(state.defaultCriterias).indexOf(obj);
-      debugger
       state.defaultCriterias[index].values = action.payload.values;
     },
     setClearDefaultCriteriasValues(state, action: PayloadAction<null>) {

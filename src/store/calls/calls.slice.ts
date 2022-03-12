@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {CallsType} from "./calls.types";
 import {convertDate} from "../../utils/convertData";
@@ -12,7 +12,22 @@ type ResponseBaseCallsDataType = {
   skip: number,
   limit: number,
   call_ids: string[]
-}
+};
+
+export const getCallStt = createAsyncThunk(
+  'calls/getCallAudio',
+  async (payload: { id: string, bundleIndex: number}, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/stt`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    thunkAPI.dispatch(callsSlice.actions.setStt({stt: data, id: payload.id, index: payload.bundleIndex}));
+  }
+);
+
+
 
 export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
@@ -31,7 +46,7 @@ export const getCallAudio = createAsyncThunk(
     const blobUrl = URL.createObjectURL(blob);
     thunkAPI.dispatch(callsSlice.actions.setAudio({audio: blobUrl, id: payload.id, index: payload.bundleIndex}))
   }
-)
+);
 
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
@@ -60,7 +75,9 @@ export const getBaseCallsData = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData(response.data));
+      thunkAPI.dispatch(callsSlice.actions.incrementSkip(null));
+      // @ts-ignore
+      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({...response.data, skip: thunkAPI.getState().calls.skip}));
       // @ts-ignore
       await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]))
     } catch (error) {
@@ -133,42 +150,35 @@ export const callsSlice = createSlice({
   initialState,
   reducers: {
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
+      let calls = [];
+      for (let i = 0; i < action.payload.call_ids.length; i++) {
+        calls.push({
+          id: action.payload.call_ids[i],
+          info: null,
+          stt: null,
+          audio: null
+        })
+      }
+      state.total = action.payload.total;
+      state.found = action.payload.found;
+      state.skip = action.payload.skip;
+      state.limit = action.payload.limit;
+
       if (!state.total) {
-        let calls = [];
-        for (let i = 0; i < action.payload.call_ids.length; i++) {
-          calls.push({
-            id: action.payload.call_ids[i],
-            info: null,
-            stt: null,
-            audio: null
-          })
-        }
-        state.total = action.payload.total;
-        state.found = action.payload.found;
-        state.skip = action.payload.skip;
-        state.limit = action.payload.limit;
         state.calls = [calls]
       } else {
-        let calls = [];
-        for (let i = 0; i < action.payload.call_ids.length; i++) {
-          calls.push({
-            id: action.payload.call_ids[i],
-            info: null,
-            stt: null,
-            audio: null
-          })
-        }
         state.calls.slice(state.bundleLength);
         // @ts-ignore
         state.calls.push(calls);
       }
+
     },
     setCallsInfo(state, action: PayloadAction<any[]>) {
       if (action.payload.length < 1) {
-        debugger
-        state.calls = createInitialCalls();
+        state.calls = []
+      } else {
+        state.calls[state.calls.length - 1] = action.payload;
       }
-      state.calls[state.calls.length - 1] = action.payload;
     },
     setEmptyState(state, action: PayloadAction<{ leaveBundles: number }>) {
       if (action.payload.leaveBundles === 0) {
@@ -182,8 +192,17 @@ export const callsSlice = createSlice({
         if (i.info.id === action.payload.id) {
           i.audio = action.payload.audio
         }
-      })
+      });
     },
+    setStt(state, action: PayloadAction<{stt: any, id: string, index: number}>) {
+      state.calls[action.payload.index].map(i => {
+        // @ts-ignore
+        if (i.info.id === action.payload.id) {
+          i.stt = action.payload.stt
+        }
+      });
+    },
+
     removeAudio(state, action: PayloadAction<{ id: string, bundleIndex: number}>) {
       if (state.calls[0]) {
         state.calls[action.payload.bundleIndex].map(i => {

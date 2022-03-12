@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useState} from 'react';
-import {Skeleton, Typography} from "@mui/material";
+import {CircularProgress, Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -14,7 +14,8 @@ import {TwoTags, Fragment} from "../../components/Tag";
 import {CallsInfoType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./CallBody";
 import {useDispatch} from "react-redux";
-import {callsSlice, getCallAudio} from "../../store/calls/calls.slice";
+import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
+import cn from 'classnames';
 
 
 const Accordion = styled((props: AccordionProps) => (
@@ -81,6 +82,11 @@ const useStyles = makeStyles(({
       position: 'relative',
       fill: '#818D9F'
     },
+  },
+  accordionFixed: {
+    // @ts-ignore
+    position: 'fixed !important',
+    top: '0 !important'
   },
   slave: {
     position: 'absolute',
@@ -248,11 +254,14 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
     }
   }, [bundleIndex])
 
-  // устанавливает пришело ли аудио (в будушем и stt)
+  // устанавливает пришело ли аудио и stt.
   const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
   useEffect(() => {
     if (callAudio) {
       setIsCallBodyData(true);
+    }
+    return () => {
+      setIsCallBodyData(false);
     }
   }, [callAudio]);
 
@@ -287,23 +296,27 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
 
   return (
     <Accordion
+      tabIndex={-1}
       style={{border: 'none'}}
       expanded={expanded && isCallBodyData}
-      onChange={() => {
-        if (index || index === 0) {
-          if (!isCallBodyData) {
-            handleExpandedChange(callInfo.id);
-            dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
-          } else {
-            dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex: index}));
-            setIsCallBodyData(false);
-          }
-        }
-      }}
     >
 
       {/* Первичная информация о звонке. */}
-      <AccordionSummary className={classes.accordion}>
+      <AccordionSummary
+        className={cn(classes.accordion)} tabIndex={-1}
+        onClick={async () => {
+          if (index || index === 0) {
+            if (!isCallBodyData) {
+              handleExpandedChange(callInfo.id);
+              await dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
+              dispatch(getCallStt({id: callInfo.id, bundleIndex: index}));
+            } else {
+              dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex: index}));
+              setIsCallBodyData(false);
+            }
+          }
+        }}
+      >
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
@@ -367,7 +380,6 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
               </Stack>
             </div>
             }
-
             <div className={classes.slave}>
             </div>
 
