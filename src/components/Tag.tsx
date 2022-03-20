@@ -3,6 +3,8 @@ import Chip from '@mui/material/Chip';
 import {makeStyles} from "@mui/styles";
 import cn from 'classnames';
 import Tooltip from '@mui/material/Tooltip';
+import {components} from "react-select";
+
 
 const getRandomColor = () => {
   const colorsArray = [
@@ -64,13 +66,13 @@ export const BaseTag: FC<{ body: string }> = memo(({body}) => {
       fontFamily: 'Inter, sans-serif !important',
       border: '2px solid #E9ECEF !important',
       borderRadius: '5px !important',
-      margin: '5px !important',
+      margin: '2px !important',
       backgroundColor: '#E9ECEF !important',
       color: `#000000 !important`
     }
   }));
   const classes = useStyles();
-  return <Chip label={body} className={classes.body}/>
+  return <Chip label={body} clickable className={classes.body}/>
 });
 
 

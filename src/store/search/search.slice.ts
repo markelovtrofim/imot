@@ -66,9 +66,10 @@ export const searchSlice = createSlice({
       const obj = current(state.defaultCriterias).find(item => {
         return item.key === action.payload.key
       });
-      // @ts-ignore
-      const index = current(state.defaultCriterias).indexOf(obj);
-      state.defaultCriterias[index].values = action.payload.values;
+      if (obj) {
+        const index = current(state.defaultCriterias).indexOf(obj);
+        state.defaultCriterias[index].values = action.payload.values;
+      }
     },
     setClearDefaultCriteriasValues(state, action: PayloadAction<null>) {
       for (let i = 0; i < state.defaultCriterias.length; i++) {

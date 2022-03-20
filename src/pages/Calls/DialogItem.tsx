@@ -72,18 +72,6 @@ const useStyles = makeStyles(({
     maxWidth: '308px',
     width: '100%'
   },
-  diBodyTitle: {
-    display: 'flex',
-    marginBottom: '12px'
-  },
-  diBodyTitlePerson: {
-    fontWeight: '700 !important',
-    color: '#738094 !important',
-    marginRight: '5px !important'
-  },
-  diBodyTitleName: {
-    color: '#000 !important'
-  },
   diBodyText: {
     lineHeight: '22px !important',
     color: '#738094 !important'
@@ -116,14 +104,6 @@ const DialogItem: FC<DialogItemType> = ({person, text}) => {
       {/* DIBody */}
       <BlockBox padding={'16px 26px 16px 16px'}>
         <div className={classes.diBodyInner}>
-          <div className={classes.diBodyTitle}>
-            <Typography className={classes.diBodyTitlePerson}>
-              {condition ? 'Клиент' : 'Сотрудник'}:
-            </Typography>
-            <Typography className={classes.diBodyTitleName}>
-              Имя Фамилия
-            </Typography>
-          </div>
           <Typography className={classes.diBodyText}>
             {text}
           </Typography>

@@ -8,44 +8,49 @@ import {callsSlice} from "../../store/calls/calls.slice";
 import {useDispatch} from "react-redux";
 import {CallsInfoType} from "../../store/calls/calls.types";
 
-const useStyles = makeStyles(({
-  cbDialogWrapper: {
-    height: '765px',
-    width: '100%',
-    backgroundColor: '#EEF2F6'
-  },
-  cbDialogInner: {
-    padding: '12.5px 12px'
-  },
-  cbDialogItems: {
-    overflowY: 'auto',
-    height: '765px',
-    '&::-webkit-scrollbar': {
-      width: '4px',
-      backgroundColor: 'f1f1f1',
-      outline: 'none',
-
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: '#A3AEBE',
-      height: '50px',
-      borderRadius: '10px'
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-      background: '#555'
-    }
-  }
-}));
-
 type CallBodyPropsType = {
   callInfo: CallsInfoType,
   callAudio: string | null,
   callStt: any | null,
   bundleIndex: number,
-  expanded: boolean
+  expanded: boolean,
 };
 
 const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callStt, bundleIndex, expanded}) => {
+  const useStyles = makeStyles(({
+    cbDialogWrapper: {
+      height: '765px',
+      width: '100%',
+      backgroundColor: '#EEF2F6'
+    },
+    cbDialogInner: {
+      padding: '12.5px 12px'
+    },
+    cbDialogItems: {
+      overflowY: 'auto',
+      height: '765px',
+      '&::-webkit-scrollbar': {
+        width: '4px',
+        backgroundColor: 'f1f1f1',
+        outline: 'none',
+
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: '#A3AEBE',
+        height: '50px',
+        borderRadius: '10px'
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        background: '#555'
+      }
+    },
+    audioPlayer: {
+      position: 'sticky',
+      top: `0px`,
+      zIndex: '100',
+      height: '250px'
+    }
+  }));
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -57,7 +62,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
 
   return (
     <div>
-      <div style={{height: '250px'}}>
+      <div className={classes.audioPlayer}>
         <AudioPlayer
           // @ts-ignore
           tabIndex={-1}

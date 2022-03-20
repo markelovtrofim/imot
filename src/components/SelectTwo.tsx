@@ -65,12 +65,13 @@ const CustomSelect: FC<SelectType> = ({criterias}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
+  const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
   const {language} = useAppSelector((state: RootState) => state.lang);
 
 
   const handleChange = (event: any) => {
     const {target: {value}} = event;
-    dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...value[value.length - 1], values :[]}]));
+    dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...value[value.length - 1], values: []}]));
   };
 
   return (
@@ -99,7 +100,8 @@ const CustomSelect: FC<SelectType> = ({criterias}) => {
       }}
     >
       {criterias ? criterias.map((criteria: CriteriasType) => {
-          if (!activeCriterias.find((item) => {
+          const defAcCriterias = [...activeCriterias, ...defaultCriterias]
+          if (!defAcCriterias.find((item) => {
             return item.key === criteria.key
           })) {
             return (

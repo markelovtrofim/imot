@@ -97,7 +97,7 @@ const CustomCalendar = React.memo(() => {
   const dispatch = useDispatch();
   const date = useAppSelector(state => state.search.date);
   const [localDate, setLocalDate] = useState([
-    new Date(), new Date()
+    new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date()
   ]);
 
   useEffect(() => {
@@ -151,7 +151,7 @@ const CustomCalendar = React.memo(() => {
     }
   };
 
-  const [alignment, setAlignment] = useState('today');
+  const [alignment, setAlignment] = useState('year');
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
     newAlignment: string,

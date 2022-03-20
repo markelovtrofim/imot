@@ -16,7 +16,10 @@ import CallBody from "./CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
 import cn from 'classnames';
-
+import {Link} from 'react-scroll'
+// @ts-ignore
+import ScrollToTop from "react-scroll-to-top";
+import AudioPlayer from "react-h5-audio-player";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props}/>
@@ -67,6 +70,10 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const useStyles = makeStyles(({
   accordion: {
+    // @ts-ignore
+    position: 'sticky !important',
+    top: '0 !important',
+    zIndex: '101 !important',
     backgroundColor: '#ffffff !important',
     borderTop: '2px solid #F8FAFC !important',
     padding: '18px 24px 10px 24px !important',
@@ -82,11 +89,9 @@ const useStyles = makeStyles(({
       position: 'relative',
       fill: '#818D9F'
     },
-  },
-  accordionFixed: {
-    // @ts-ignore
-    position: 'fixed !important',
-    top: '0 !important'
+    '&.Mui-disabled': {
+      opacity: '1 !important'
+    }
   },
   slave: {
     position: 'absolute',
@@ -134,6 +139,10 @@ const useStyles = makeStyles(({
     margin: '5px !important',
     color: '#738094 !important',
     minWidth: '120px'
+  },
+  accordionDetails: {
+    backgroundColor: '#F8FAFC',
+    border: 'none',
   }
 }));
 
@@ -161,9 +170,8 @@ const CallStubMiddleware = memo(({
   if (!callInfo) {
     return (
       <Accordion style={{border: 'none'}}>
-
         {/* Первичная информация о звонке. */}
-        <AccordionSummary className={classes.accordion}>
+        <AccordionSummary className={classes.accordion} disabled>
           <Grid container className={classes.callInner}>
 
             {/* Сотрудник. */}
@@ -222,7 +230,6 @@ const CallStubMiddleware = memo(({
 
           </Grid>
         </AccordionSummary>
-
       </Accordion>
     );
   }
@@ -294,21 +301,59 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
   };
   const tagsAndFragmentsArray = tagsAndFragmentsSeparator();
 
+
+  // const [click, setClick] = useState(false);
+  // useEffect(() => {
+  //   document.addEventListener('scroll', scrollHandler);
+  //   return () => {
+  //     document.removeEventListener('scroll', scrollHandler)
+  //   }
+  // }, [click]);
+  // const scrollHandler = (e: any) => {
+  //   if (click) {
+  //
+  //     window.scrollTo(window.innerHeight, 0)
+  //   }
+  //   console.log(e.target.documentElement.scrollHeight);
+  //   console.log(e.target.documentElement.scrollTop);
+  //   console.log(window.innerHeight);
+  // };
+
+
+  // const [height, setHeight] = useState<number | null>(null);
+  //
+  // const heightTracker = () => {
+  //   let acc = document.getElementById('acc');
+  //   if (acc) {
+  //     setHeight(acc.offsetHeight);
+  //   }
+  // }
+  //
+  // useEffect(() => {
+  //   heightTracker();
+  // });
+  //
+  // useEffect(() => {
+  //   window.addEventListener("resize", heightTracker);
+  //   return () => window.removeEventListener("resize", heightTracker);
+  // })
+
+
   return (
     <Accordion
       tabIndex={-1}
       style={{border: 'none'}}
       expanded={expanded && isCallBodyData}
     >
-
       {/* Первичная информация о звонке. */}
       <AccordionSummary
+        id={'acc'}
         className={cn(classes.accordion)} tabIndex={-1}
         onClick={async () => {
           if (index || index === 0) {
             if (!isCallBodyData) {
               handleExpandedChange(callInfo.id);
-              await dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
+              dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
               dispatch(getCallStt({id: callInfo.id, bundleIndex: index}));
             } else {
               dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex: index}));
@@ -386,10 +431,10 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
           </Grid>
         </Grid>
       </AccordionSummary>
-
       {/* Основная информация о звонке. */}
-      <AccordionDetails style={{backgroundColor: '#F8FAFC', border: 'none'}}>
-        <CallBody callInfo={callInfo} callAudio={callAudio} callStt={callStt} bundleIndex={bundleIndex} expanded={expanded}/>
+      <AccordionDetails className={classes.accordionDetails}>
+        <CallBody callInfo={callInfo} callAudio={callAudio} callStt={callStt} bundleIndex={bundleIndex}
+                  expanded={expanded}/>
       </AccordionDetails>
     </Accordion>
   );

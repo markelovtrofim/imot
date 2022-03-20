@@ -159,14 +159,15 @@ export const callsSlice = createSlice({
           audio: null
         })
       }
-      state.total = action.payload.total;
       state.found = action.payload.found;
       state.skip = action.payload.skip;
       state.limit = action.payload.limit;
 
       if (!state.total) {
+        state.total = action.payload.total;
         state.calls = [calls]
       } else {
+        state.total = action.payload.total;
         state.calls.slice(state.bundleLength);
         // @ts-ignore
         state.calls.push(calls);
@@ -194,7 +195,7 @@ export const callsSlice = createSlice({
         }
       });
     },
-    setStt(state, action: PayloadAction<{stt: any, id: string, index: number}>) {
+    setStt(state, action: PayloadAction<{stt:any, id: string, index: number}>) {
       state.calls[action.payload.index].map(i => {
         // @ts-ignore
         if (i.info.id === action.payload.id) {

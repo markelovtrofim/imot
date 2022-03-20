@@ -169,5 +169,6 @@ const Calls = React.memo(() => {
     </div>
   );
 });
+// @ts-ignore
 
-export default Calls;
+export default Calls
