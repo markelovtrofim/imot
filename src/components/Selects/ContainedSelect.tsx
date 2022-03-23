@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ButtonGroup = () => {
+const ContainedSelect = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const ButtonGroup = () => {
   );
 };
 
-export default ButtonGroup;
+export default ContainedSelect;

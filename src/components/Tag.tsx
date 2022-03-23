@@ -3,8 +3,6 @@ import Chip from '@mui/material/Chip';
 import {makeStyles} from "@mui/styles";
 import cn from 'classnames';
 import Tooltip from '@mui/material/Tooltip';
-import {components} from "react-select";
-
 
 const getRandomColor = () => {
   const colorsArray = [

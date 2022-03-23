@@ -46,6 +46,8 @@ const useStyles = makeStyles(({
 
 type SelectType = {
   criterias: CriteriasType[] | null,
+  setTemplateSelectValue?: any,
+  templateSelectValue?: any
 };
 
 export const PlusSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -61,7 +63,7 @@ export const PlusSvg = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-const CustomSelect: FC<SelectType> = ({criterias}) => {
+const CustomSelect: FC<SelectType> = ({criterias,setTemplateSelectValue, templateSelectValue}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const activeCriterias = useAppSelector(state => state.search.activeCriterias);
@@ -70,6 +72,9 @@ const CustomSelect: FC<SelectType> = ({criterias}) => {
 
 
   const handleChange = (event: any) => {
+    if (templateSelectValue.length === 1) {
+      setTemplateSelectValue([]);
+    }
     const {target: {value}} = event;
     dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...value[value.length - 1], values: []}]));
   };

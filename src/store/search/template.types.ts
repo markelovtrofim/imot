@@ -3,7 +3,7 @@ export type TemplateItem = {
   values: string[]
 };
 
-export type TemplatesType = {
+export type TemplateType = {
   id: string,
   items: TemplateItem[],
   title: string

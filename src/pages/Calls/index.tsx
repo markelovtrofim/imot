@@ -1,6 +1,5 @@
-import React, {useDebugValue, useEffect, useState} from 'react';
-import Search from "../../components/Search";
-import {BlockBox, СontrolBlock} from "../../components";
+import React, {useEffect, useState} from 'react';
+import {BlockBox, Search, СontrolBlock} from "../../components";
 import {CircularProgress, Select, Skeleton, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
@@ -9,7 +8,6 @@ import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
 import {CallsType} from "../../store/calls/calls.types";
 import CallStubMiddleware from "./Call";
-import {getAllSearchCriterias, getDefaultCriterias} from "../../store/search/search.slice";
 import {RootState} from "../../store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";

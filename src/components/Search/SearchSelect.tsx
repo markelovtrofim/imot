@@ -1,127 +1,17 @@
 import * as React from 'react';
 import CreatableSelect from 'react-select/creatable';
 import {FC, memo, useEffect, useState} from "react";
-import {CriteriasType, RequestDataType} from "../store/search/search.types";
-import {searchSlice} from "../store/search/search.slice";
+import {CriteriasType, RequestDataType} from "../../store/search/search.types";
+import {searchSlice} from "../../store/search/search.slice";
 import {useDispatch} from "react-redux";
-import {makeStyles, styled} from "@mui/styles";
-import {Checkbox, CheckboxProps, Typography} from "@mui/material";
+import {makeStyles} from "@mui/styles";
+import {Typography} from "@mui/material";
 import Select, {components} from "react-select";
 import SearchIcon from '@mui/icons-material/Search';
 import cn from 'classnames';
-
-const BpIcon = styled('span')(({theme}: any) => ({
-  borderRadius: 5,
-  border: '1px solid #A3AEBE',
-  width: 16,
-  height: 16,
-  backgroundColor: '#E3E8EF'
-}));
-
-const BpCheckedIcon = styled(BpIcon)({
-  backgroundColor: '#722ED1',
-  borderColor: '#722ED1',
-  '&:before': {
-    display: 'block',
-    width: 16,
-    height: 16,
-    backgroundImage:
-      "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
-      " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
-      "1.003 0 00-1.42 1.42l3 3c.18.18.43.29.71.29s.53-.11.71-.29l5-5A1.003 1.003 0 0012 5z' fill='%23fff'/%3E%3C/svg%3E\")",
-    content: '""',
-  },
-  'input:hover ~ &': {
-    backgroundColor: '#722ED1',
-  },
-});
-
-// Inspired by blueprintjs
-function BpCheckbox(props: CheckboxProps) {
-  return (
-    <Checkbox
-      sx={{
-        '&:hover': {bgcolor: 'transparent'},
-      }}
-      disableRipple
-      color="default"
-      checkedIcon={<BpCheckedIcon/>}
-      icon={<BpIcon/>}
-      inputProps={{'aria-label': 'Checkbox demo'}}
-      {...props}
-    />
-  );
-}
-
-const {MenuList, ValueContainer, SingleValue, Placeholder} = components;
-
-const useStyles = makeStyles(({
-  selectBox: {
-    display: 'flex !important',
-    alignItems: 'center'
-  },
-  selectItem: {},
-  selectMenuListInput: {
-    width: "228px",
-    margin: '16px 24px',
-    outline: 'none',
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E3E8EF',
-    borderRadius: '5px',
-    padding: '10px 30px 10px 12px',
-    color: '#738094',
-    fontSize: '14px',
-    position: 'relative'
-  },
-  selectMenuListInputIcon: {
-    position: 'absolute',
-    left: '262px',
-    top: '23px',
-    color: '#738094',
-    width: '11px'
-  },
-  selectOption: {
-    cursor: 'pointer',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '5px 24px'
-  },
-  selectArrow: {
-    marginRight: '10px'
-  },
-  selectArrowOnArrow: {
-    marginBottom: '5px'
-  },
-  selectCheckBox: {
-    '&.MuiCheckbox-root': {
-      backgroundColor: '#E3E8EF !important'
-    }
-  },
-  selectTag: {
-    height: '22px !important',
-    cursor: 'pointer !important',
-    fontFamily: 'Inter, sans-serif !important',
-    border: '2px solid #E9ECEF !important',
-    borderRadius: '5px !important',
-    margin: '2.5px !important',
-    padding: '0 5px',
-    backgroundColor: '#E9ECEF !important',
-    color: `#000000 !important`,
-    fontSize: '12px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  selectSelectBox: {
-    position: 'relative'
-  },
-  selectPlaceholder: {
-    // @ts-ignore
-    position: 'absolute !important',
-    left: '11px !important',
-    top: '9px !important'
-  }
-}));
+import Checkbox from "../Checkbox";
+import {TemplateType} from "../../store/search/template.types";
+import {templateSlice} from "../../store/search/template.slice";
 
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -137,13 +27,8 @@ const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-type SelectType = {
-  criteriaFull: CriteriasType,
-  criteriaCurrent: CriteriasType | RequestDataType,
-  isDefaultCriteria: boolean
-};
 
-const OnTopArrow = (props: React.SVGProps<SVGSVGElement>) => {
+export const OnTopArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
@@ -153,7 +38,7 @@ const OnTopArrow = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
+export const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
@@ -164,7 +49,7 @@ const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
 };
 
 
-const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
+export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
@@ -173,19 +58,92 @@ const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
       <path fillRule="evenodd" clipRule="evenodd"
             d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
             fill="#237804"/>
-    </svg>)
-}
+    </svg>
+  );
+};
 
-const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultCriteria}) => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
+// TYPES BLOCK
+type SelectPropsType = {
+  criteriaFull: CriteriasType,
+  criteriaCurrent: CriteriasType | RequestDataType,
+  isDefaultCriteria: boolean,
 
-  const removeCriteria = () => {
-    dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
-  };
+};
 
-  const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
 
+const SearchSelect: FC<SelectPropsType> = ({
+                                        criteriaFull,
+                                        criteriaCurrent,
+                                        isDefaultCriteria,
+                                      }) => {
+  // STYLES BLOCK
+  const useStyles = makeStyles(({
+    selectBox: {
+      display: 'flex !important',
+      alignItems: 'center'
+    },
+    selectItem: {},
+    selectMenuListInput: {
+      width: "228px",
+      margin: '16px 24px',
+      outline: 'none',
+      backgroundColor: '#F8FAFC',
+      border: '1px solid #E3E8EF',
+      borderRadius: '5px',
+      padding: '10px 30px 10px 12px',
+      color: '#738094',
+      fontSize: '14px',
+      position: 'relative'
+    },
+    selectMenuListInputIcon: {
+      position: 'absolute',
+      left: '262px',
+      top: '23px',
+      color: '#738094',
+      width: '11px'
+    },
+    selectOption: {
+      cursor: 'pointer',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '5px 24px'
+    },
+    selectArrow: {
+      marginRight: '10px'
+    },
+    selectArrowOnArrow: {
+      marginBottom: '5px'
+    },
+    selectCheckBox: {
+      '&.MuiCheckbox-root': {
+        backgroundColor: '#E3E8EF !important'
+      }
+    },
+    selectTag: {
+      height: '22px !important',
+      cursor: 'pointer !important',
+      fontFamily: 'Inter, sans-serif !important',
+      border: '2px solid #E9ECEF !important',
+      borderRadius: '5px !important',
+      margin: '2.5px !important',
+      padding: '0 5px',
+      backgroundColor: '#E9ECEF !important',
+      color: `#000000 !important`,
+      fontSize: '12px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    selectSelectBox: {
+      position: 'relative'
+    },
+    selectPlaceholder: {
+      // @ts-ignore
+      position: 'absolute !important',
+      left: '11px !important',
+      top: '9px !important'
+    }
+  }));
   const customStyles = {
     menu: (provided: any) => ({
       ...provided,
@@ -275,42 +233,15 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
       display: 'flex'
     })
   }
-  const handleChange = (event: any) => {
-    const eventConverter = () => {
-      let result = [];
-      for (let i = 0; i < event.length; i++) {
-        result.push(event[i].value);
-      }
-      return result;
-    };
-
-    const eventConverterResult = eventConverter();
-
-    if (isDefaultCriteria) {
-      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}))
-    } else {
-      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
-    }
-  };
-
-  const converter = (state: any) => {
-    let local: { value: string, label: string }[] = [];
-    for (let i = 0; i < state.values.length; i++) {
-      local.push({value: state.values[i], label: state.values[i]});
-    }
-    return local
-  };
-
-  const converterCurrentResult = converter(criteriaCurrent);
-  const converterFullResult = converter(criteriaFull);
+  const classes = useStyles();
 
 
+  // COMPONENTS BLOCK
   const CustomMultiValueLabel = memo((props: any) => {
     return (
       <components.MultiValueLabel {...props} />
     )
   });
-
   const CustomMultiValueRemove = memo((props: any) => {
     return (
       <components.MultiValueRemove {...props}>
@@ -318,7 +249,6 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
       </components.MultiValueRemove>
     )
   });
-
   const LimitedChipsContainer = ({children, hasValue, ...props}: any) => {
     if (!hasValue) {
       return (
@@ -327,12 +257,13 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
         </components.ValueContainer>
       );
     }
-
-    const CHIPS_LIMIT = 1;
+    let CHIPS_LIMIT = 3;
     const [chips, otherChildren] = children;
+    if (chips.length > CHIPS_LIMIT) {
+      CHIPS_LIMIT = 1;
+    }
     const overflowCounter = chips.slice(CHIPS_LIMIT).length;
     const displayChips = chips.slice(overflowCounter, overflowCounter + CHIPS_LIMIT);
-
     return (
       <components.ValueContainer {...props}>
         {displayChips}
@@ -343,26 +274,23 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
       </components.ValueContainer>
     );
   };
-
   const CustomInd = memo((props: any) => {
     if (menuIsOpen) {
       return <div className={cn(classes.selectArrowOnArrow, classes.selectArrow)}><OnTopArrow/></div>
     }
     return <OnBottomArrow className={classes.selectArrow}/>
   });
-
   const CustomOption = memo((props: any) => {
     return <div>
       <components.Option {...props} className={classes.selectOption}>
         {props.children}
-        <BpCheckbox
+        <Checkbox
           disableRipple
           checked={criteriaCurrent.values.indexOf(props.children) >= 0}
         />
       </components.Option>
     </div>
   });
-
   const CustomMenuList = memo(({selectProps, ...props}: any) => {
     const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
     return (
@@ -402,6 +330,50 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
     );
   });
 
+
+  // LOGIC BLOCK
+  // диспатч
+  const dispatch = useDispatch();
+
+  // открыте и закрытие менюшки.
+  const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
+
+  // удаление критерии.
+  const removeCriteria = () => {
+    dispatch(templateSlice.actions.setCurrentTemplate(null));
+    dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
+  };
+
+  // выполняется когда меняется значение.
+  const handleSelectChange = (event: any) => {
+    dispatch(templateSlice.actions.setCurrentTemplate(null));
+    const eventConverter = () => {
+      let result = [];
+      for (let i = 0; i < event.length; i++) {
+        result.push(event[i].value);
+      }
+      return result;
+    };
+
+    const eventConverterResult = eventConverter();
+
+    if (isDefaultCriteria) {
+      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}))
+    } else {
+      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+    }
+  };
+
+  const converter = (state: any) => {
+    let local: { value: string, label: string }[] = [];
+    for (let i = 0; i < state.values.length; i++) {
+      local.push({value: state.values[i], label: state.values[i]});
+    }
+    return local
+  };
+  const converterCurrentResult = converter(criteriaCurrent);
+  const converterFullResult = converter(criteriaFull);
+
   // костылечек для загрытия селектов
   useEffect(() => {
     document.addEventListener("mousedown", () => setMenuIsOpen(false));
@@ -419,7 +391,7 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
             isMulti
             styles={customStyles}
             value={converterCurrentResult}
-            onChange={handleChange}
+            onChange={handleSelectChange}
             options={converterFullResult}
             hideSelectedOptions={false}
             components={{
@@ -459,7 +431,7 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
               MultiValueRemove: CustomMultiValueRemove,
               ValueContainer: LimitedChipsContainer
             }}
-            onChange={handleChange}
+            onChange={handleSelectChange}
             isClearable={true}
             closeMenuOnSelect={false}
             styles={customStyles}
@@ -470,7 +442,7 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
             hideSelectedOptions={false}
           />
           {converterCurrentResult.length < 1 &&
-            <Typography className={classes.selectPlaceholder}>Все</Typography>
+          <Typography className={classes.selectPlaceholder}>Все</Typography>
           }
         </div>
       }
@@ -481,4 +453,5 @@ const CustomSelect: FC<SelectType> = ({criteriaFull, criteriaCurrent, isDefaultC
     </div>
   );
 };
-export default CustomSelect;
+
+export default SearchSelect;

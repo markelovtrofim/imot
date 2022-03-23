@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useState} from 'react';
-import {CircularProgress, Skeleton, Typography} from "@mui/material";
+import {CircularProgress, LinearProgress, Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -362,6 +362,7 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
           }
         }}
       >
+
         <Grid container className={classes.callInner}>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>

@@ -33,7 +33,7 @@ const Transition = React.forwardRef((
 export const AuthModalWindow: React.FC<AuthModalWindowPropsType> = ({isOpen, handleClose, children}) => {
   const classes = useStyles();
   return (
-    <Dialog className={classes.mwWrapper} open={isOpen} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog disableScrollLock={true} className={classes.mwWrapper} open={isOpen} onClose={handleClose} TransitionComponent={Transition}>
       <BlockBox padding="24px">
         {children}
       </BlockBox>
