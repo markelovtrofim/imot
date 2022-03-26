@@ -1,12 +1,11 @@
-import React, {useEffect, useRef} from 'react';
-import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {Redirect, Route, Switch, Link} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
 import {Header} from './components';
-import {Auth, Calls} from './pages';
+import {Auth, Calls, MarkupRules} from './pages';
 import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
-import {callsSlice} from "./store/calls/calls.slice";
 import {useDispatch} from "react-redux";
 
 const useStyles = makeStyles(({
@@ -16,7 +15,7 @@ const useStyles = makeStyles(({
   container: {
     maxWidth: '1610px',
     margin: '0 auto',
-    padding: '0 10px' // 146px
+    padding: '0 10px'
   }
 }));
 
@@ -26,7 +25,9 @@ const App = () => {
   const isAuth = useAppSelector(state => state.auth.isAuth);
   useEffect(() => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    if (token) {dispatch(authSlice.actions.setAuth(true))}
+    if (token) {
+      dispatch(authSlice.actions.setAuth(true))
+    }
   }, []);
 
   return (
@@ -56,10 +57,10 @@ const App = () => {
         </Route>
 
         {/* Загрузить звонок */}
-        <Route path="/rules">
+        <Route path="/markuprules">
           <Header/>
           <div className={classes.container}>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">markup rules</Typography>
+            <MarkupRules/>
           </div>
         </Route>
 
@@ -73,7 +74,7 @@ const App = () => {
 
 
         {/* Оповещение */}
-        <Route path="/dictionaries">
+        <Route path="/alert">
           <Header/>
           <div className={classes.container}>
             <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">alert</Typography>
@@ -95,13 +96,13 @@ const App = () => {
         </Route>
 
         <Route exact path="*">
-          <Button variant="contained"><Link to="/">На главную страницу.</Link></Button>
+          <Button variant="outlined"><Link to="/">На главную страницу.</Link></Button>
           <h1>404</h1>
         </Route>
 
       </Switch>
     </div>
   );
-}
+};
 
-export default App;
+export default App

@@ -42,7 +42,7 @@ const useStyles = makeStyles(({
     padding: '13px 20px !important',
     // @ts-ignore
     textTransform: 'none !important',
-    '&.Mui-selected': {
+    '&.Mui-selected, &:active': {
       backgroundColor: '#E3E8EF !important',
       color: '#000 !important'
     },
@@ -115,9 +115,9 @@ const Header: React.FC = () => {
   const headerItemsArray: { id: number, path: string, name: string }[] = [
     {id: 1, path: 'calls', name: translate('calls', language)},
     {id: 2, path: 'reports', name: translate('reports', language)},
-    {id: 3, path: 'rules', name: translate('markupRules', language)},
+    {id: 3, path: 'markuprules', name: translate('markupRules', language)},
     {id: 4, path: 'upload', name: translate('loadCall', language)},
-    {id: 5, path: 'dictionaries', name: translate('alert', language)},
+    {id: 5, path: 'alert', name: translate('alert', language)},
     {id: 6, path: 'settings', name: translate('settings', language)},
   ];
 

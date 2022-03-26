@@ -105,7 +105,7 @@ const TextSelect: FC<TextSelectPropsType> = ({
       position: 'relative'
     },
     selectArrow: {
-      fill: inputValueColor === 'default' ? '#000000' : inputValueColor,
+      fill:  inputValueColor !== 'default' && inputValue ? inputValueColor : '#000000',
       margin: '0 7px'
     },
     selectArrowOnTopBox: {
@@ -159,17 +159,18 @@ const TextSelect: FC<TextSelectPropsType> = ({
       ...provided,
       display: 'flex',
       flexDirection: arrowPosition === 'left' ? 'row-reverse' : 'row',
-
+      border: 'none',
+      minHeight: '24px',
+      borderLeft: '1px solid #CDD5DF',
       cursor: 'pointer',
-      border: '1px solid #fff',
       boxShadow: 'none',
+      borderRadius: '0px',
       "&:hover": {
         borderColor: 'none'
       },
       fontFamily: 'Inter, sans-serif',
-      minWidth: '70px',
-      marginLeft: '20px',
-      borderRadius: '5px',
+      minWidth: '100px',
+      paddingLeft: '20px',
       backgroundColor: 'none'
     }),
     valueContainer: (provided: any, state: any) => ({
@@ -179,13 +180,12 @@ const TextSelect: FC<TextSelectPropsType> = ({
     singleValue: (provided: any, state: any) => ({
       ...provided,
       color: inputValueColor === 'default' ? '#000000' : inputValueColor,
-      fontWeight: '700',
       fontSize: '14px'
     }),
     placeholder: (provided: any, state: any) => ({
       ...provided,
-      color: '#000000',
-      fontWeight: inputValueColor === 'default' ? '500' : '700',
+      color: '#2F3747',
+      fontWeight: '500',
       fontSize: '14px'
     })
   }
@@ -225,7 +225,7 @@ const TextSelect: FC<TextSelectPropsType> = ({
       <components.SingleValue {...props}>
         {children}
         <span style={{marginLeft: '3px'}}>
-          {customControl ? <span>({customControl})</span> : null}
+          {customControl && name === 'more' ? <span>({customControl})</span> : null}
         </span>
       </components.SingleValue>
     )
@@ -254,6 +254,14 @@ const TextSelect: FC<TextSelectPropsType> = ({
       </components.Option>
     );
   };
+  const Placeholder: FC<any> = memo(({children, ...props}: any) => {
+    return (
+      <components.Placeholder {...props}>
+        {children}
+        {name === "template" ? <span>({customControl})</span> : null}
+      </components.Placeholder>
+    );
+  });
 
   // LOGIC BLOCK
 
@@ -303,7 +311,8 @@ const TextSelect: FC<TextSelectPropsType> = ({
           Control: Control,
           SingleValue: Value,
           MenuList: CustomMenuList,
-          Option: CustomOption
+          Option: CustomOption,
+          Placeholder: Placeholder
         }}
       />
     </div>

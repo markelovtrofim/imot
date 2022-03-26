@@ -1,9 +1,9 @@
 import React, {FC} from 'react';
 import {makeStyles} from "@mui/styles";
-import {BlockBox} from "../../components";
+import {BlockBox} from "../../../components";
 import {Typography} from "@mui/material";
 import cn from 'classnames';
-import {BaseTag} from "../../components/Tag";
+import {BaseTag} from "../../../components/Tag";
 
 const HeadphoneIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (

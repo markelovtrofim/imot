@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {BlockBox, Search, СontrolBlock} from "../../components";
-import {CircularProgress, Select, Skeleton, Typography} from "@mui/material";
+import {CircularProgress, Select, Skeleton, Slider, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
@@ -11,6 +11,16 @@ import CallStubMiddleware from "./Call";
 import {RootState} from "../../store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
+import ContainedSelect from "../../components/Selects/ContainedSelect";
+import Skip from "./Body/Buttons/Skip";
+import PlayButton from "./Body/Buttons/Play";
+import Speed from "./Body/Buttons/Speed";
+import Plus from "./Body/Buttons/Plus";
+import Reboot from "./Body/Buttons/Reboot";
+import History from "./Body/Buttons/History";
+import Download from "./Body/Buttons/Download";
+import Back from "./Body/Buttons/Back";
+import Time from "./Body/Buttons/Time";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -102,6 +112,14 @@ const Calls = React.memo(() => {
     });
   }, []);
 
+  // sort select test
+  const sortOptions = [
+    {value: 'По звонкам', label: 'По звонкам'},
+    {value: 'Сначала новое', label: 'Сначала новое'},
+    {value: 'Сначала старые', label: 'Сначала старые'},
+  ];
+  const [sortOptionsValue, setSortOptionsValue] = useState(sortOptions[0]);
+
   return (
     <div style={{cursor: 'default'}}>
       <СontrolBlock/>
@@ -110,7 +128,13 @@ const Calls = React.memo(() => {
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
             <Typography className={classes.callsTitleText}>{translate('callsLastCalls', language)}</Typography>
-            <Skeleton animation="wave" width={120}/>
+            <ContainedSelect
+              width={'200px'}
+
+              options={sortOptions}
+              onSelectChange={(event: any) => setSortOptionsValue(event)}
+              value={sortOptionsValue}
+            />
           </div>
           <Grid container className={classes.callsCols}>
 
@@ -167,6 +191,5 @@ const Calls = React.memo(() => {
     </div>
   );
 });
-// @ts-ignore
 
 export default Calls

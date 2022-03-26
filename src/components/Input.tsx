@@ -5,24 +5,29 @@ import {makeStyles} from "@mui/styles";
 type InputPropsType = {
   name: string,
   type: string,
-  handleChange?: (e: React.ChangeEvent<any>) => void,
-  value?: string,
   bcColor: string,
   label: string,
+
   autoComplete?: 'on' | 'off',
+  handleChange?: (e: React.ChangeEvent<any>) => void,
+  value?: string,
+  border?: string,
+  height?: string
 };
 
 const Input: FC<InputPropsType> = (props) => {
   const useStyles = makeStyles(({
     inputRoot: {
       backgroundColor: props.bcColor,
+      height: `33px !important`,
       borderRadius: '5px',
       width: '100%',
+      border: props.border ?`${props.border} !important` : 'none !important',
       '& .MuiInputLabel-root': {
         color: '#738094 !important',
         fontSize: '14px !important',
         left: '-5px',
-        top: '-9px'
+        top: '-10px'
       },
       '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
         border: 'none',

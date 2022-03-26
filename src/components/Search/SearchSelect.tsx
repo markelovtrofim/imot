@@ -10,7 +10,6 @@ import Select, {components} from "react-select";
 import SearchIcon from '@mui/icons-material/Search';
 import cn from 'classnames';
 import Checkbox from "../Checkbox";
-import {TemplateType} from "../../store/search/template.types";
 import {templateSlice} from "../../store/search/template.slice";
 
 
@@ -57,7 +56,7 @@ export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
             fill="#237804"/>
       <path fillRule="evenodd" clipRule="evenodd"
             d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
-            fill="#237804"/>
+            />
     </svg>
   );
 };
@@ -80,7 +79,8 @@ const SearchSelect: FC<SelectPropsType> = ({
   const useStyles = makeStyles(({
     selectBox: {
       display: 'flex !important',
-      alignItems: 'center'
+      alignItems: 'center',
+      cursor: 'pointer'
     },
     selectItem: {},
     selectMenuListInput: {
@@ -180,7 +180,8 @@ const SearchSelect: FC<SelectPropsType> = ({
     }),
     control: (provided: any, state: any) => ({
       ...provided,
-      height: '32px',
+      cursor: 'pointer',
+      minHeight: '38px',
       border: '1px solid #E3E8EF',
       boxShadow: 'none',
       borderColor: menuIsOpen ? '#722ED1 !important' : '#E3E8EF !important',
@@ -213,7 +214,7 @@ const SearchSelect: FC<SelectPropsType> = ({
     }),
     multiValue: (provided: any) => ({
       ...provided,
-      height: '27px !important',
+      height: '24px !important',
       cursor: 'pointer !important',
       fontFamily: 'Inter, sans-serif !important',
       border: '2px solid #E9ECEF !important',
@@ -224,9 +225,7 @@ const SearchSelect: FC<SelectPropsType> = ({
     }),
     multiValueRemove: (provided: any) => ({
       ...provided,
-      '&:hover': {
-        backgroundColor: '#E9ECEF !important',
-      }
+      backgroundColor: '#E9ECEF !important',
     }),
     valueContainer: (provided: any) => ({
       ...provided,
@@ -245,7 +244,7 @@ const SearchSelect: FC<SelectPropsType> = ({
   const CustomMultiValueRemove = memo((props: any) => {
     return (
       <components.MultiValueRemove {...props}>
-        <CrossWithoutBg/>
+        <CrossWithoutBg fill={'000'}/>
       </components.MultiValueRemove>
     )
   });
@@ -330,7 +329,6 @@ const SearchSelect: FC<SelectPropsType> = ({
     );
   });
 
-
   // LOGIC BLOCK
   // диспатч
   const dispatch = useDispatch();
@@ -401,7 +399,7 @@ const SearchSelect: FC<SelectPropsType> = ({
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
-              ValueContainer: LimitedChipsContainer
+              ValueContainer: LimitedChipsContainer,
             }}
             placeholder={''}
             menuIsOpen={menuIsOpen}
@@ -411,11 +409,7 @@ const SearchSelect: FC<SelectPropsType> = ({
           <Typography className={classes.selectPlaceholder}>Все</Typography>
           }
         </div> :
-        <div className={classes.selectSelectBox} onClick={() => {
-          if (!menuIsOpen) {
-            setMenuIsOpen(true)
-          }
-        }}>
+        <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
           <Select
             openMenuOnFocus={true}
             menuIsOpen={menuIsOpen}
@@ -429,7 +423,7 @@ const SearchSelect: FC<SelectPropsType> = ({
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
-              ValueContainer: LimitedChipsContainer
+              ValueContainer: LimitedChipsContainer,
             }}
             onChange={handleSelectChange}
             isClearable={true}

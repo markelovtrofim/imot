@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useState} from 'react';
-import {CircularProgress, LinearProgress, Skeleton, Typography} from "@mui/material";
+import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -12,14 +12,10 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import {TwoTags, Fragment} from "../../components/Tag";
 import {CallsInfoType, TagType} from "../../store/calls/calls.types";
-import CallBody from "./CallBody";
+import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
 import cn from 'classnames';
-import {Link} from 'react-scroll'
-// @ts-ignore
-import ScrollToTop from "react-scroll-to-top";
-import AudioPlayer from "react-h5-audio-player";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props}/>
