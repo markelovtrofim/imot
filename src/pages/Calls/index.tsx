@@ -70,7 +70,9 @@ const Calls = React.memo(() => {
   const [fetching, setFetching] = useState<boolean>(false);
 
   const calls = useAppSelector(state => state.calls.calls);
+
   const found = useAppSelector(state => state.calls.found);
+  const total = useAppSelector(state => state.calls.total);
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
@@ -127,7 +129,7 @@ const Calls = React.memo(() => {
       <BlockBox>
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
-            <Typography className={classes.callsTitleText}>{translate('callsLastCalls', language)}</Typography>
+            <Typography className={classes.callsTitleText}>Найдено звонков {found} из {total}</Typography>
             <ContainedSelect
               width={'200px'}
 

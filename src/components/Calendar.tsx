@@ -12,7 +12,6 @@ import {useDispatch} from "react-redux";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import BlockBox from "./BlockBox";
-import {convertDate} from "../utils/convertData";
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -102,10 +101,48 @@ const CustomCalendar = React.memo(() => {
 
   const [alignment, setAlignment] = useState<string | null>('year');
 
+  const convertDate = (date: any, to: any) => {
+    // data request format month/day/year "2/24/2022".
+    if (date) {
+      const dateArray = date.split("/");
+      if (dateArray) {
+        // @ts-ignore
+        if (dateArray[0].length === 1) {
+          dateArray[0] = `0${dateArray[0]}`;
+        }
+        // @ts-ignore
+        if (dateArray[1].length === 1) {
+          dateArray[1] = `0${dateArray[1]}`;
+        }
+        if (to === 'display') {
+          return `${dateArray[1]}.${dateArray[0]}.${dateArray[2]}`
+        } else if (to === 'request') {
+          return `${dateArray[2]}-${dateArray[0]}-${dateArray[1]}`
+        }
+      }
+    } else {
+      return date
+    }
+  };
+
+  const convertDateFromDateType = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = date.getMonth() + 1; // Months start at 0!
+    let strMm = '';
+
+    const dd = date.getDate();
+    let strDd = '';
+
+    if (mm < 10) strMm = `0${mm}`
+    if (dd < 10) strDd = `0${dd}`;
+    debugger
+    return `${mm}/${dd}/${yyyy}`;
+  };
 
   useEffect(() => {
-    const startDate = localDate[0].toLocaleDateString();
-    const endDate = localDate[1].toLocaleDateString();
+    const startDate = convertDateFromDateType(localDate[0]);
+    const endDate = convertDateFromDateType(localDate[1]);
+
     let newDateFormat = {
       startDate: null as string | null,
       endDate: null as string | null

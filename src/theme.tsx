@@ -5,7 +5,6 @@ const theme = createTheme({
   typography: {
     body1: {
       fontFamily: "Inter, sans-serif",
-      fontWeight: 400,
       fontSize: 14,
     },
     allVariants: {

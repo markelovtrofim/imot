@@ -32,6 +32,7 @@ export const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
 // TYPE BLOCK
 type ContainedSelectPropsType = {
   width: string,
+  justify?: string,
 
   onSelectChange: (event: any) => void,
   options: { value: any, label: string }[],
@@ -41,6 +42,7 @@ type ContainedSelectPropsType = {
 
 const ContainedSelect: FC<ContainedSelectPropsType> = ({
                                                          width,
+                                                         justify,
 
                                                          onSelectChange,
                                                          options,
@@ -50,6 +52,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = ({
   const useStyles = makeStyles(({
     selectBox: {
       display: 'flex !important',
+      justifyContent: justify ? justify : 'left',
       alignItems: 'center'
     },
     selectMenuListInput: {

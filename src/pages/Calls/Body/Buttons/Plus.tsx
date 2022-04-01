@@ -1,7 +1,5 @@
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import IconButton from "../../../../components/IconButton";
-import {makeStyles} from "@mui/styles";
-
 
 const PlusSvg = () => {
   return (
@@ -12,16 +10,18 @@ const PlusSvg = () => {
   );
 };
 
+type PlusPropsType = {
+  margin?: string,
+  handleClick?: any
+}
 
-const Plus: FC = () => {
+const Plus: FC<PlusPropsType> = ({margin, handleClick}) => {
   return (
     <IconButton
-      margin={'0 15px 0 0'}
+      margin={margin ? margin : '0 15px 0 0'}
       backgroundColor="#D9F7BE"
       icon={<PlusSvg/>}
-      onClick={(event: any) => {
-        // эмпти.
-      }}
+      onClick={handleClick}
     />
   );
 };

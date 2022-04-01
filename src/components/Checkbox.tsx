@@ -7,7 +7,7 @@ const BpIcon = styled('span')(({theme}: any) => ({
   border: '1px solid #A3AEBE',
   width: 16,
   height: 16,
-  backgroundColor: '#E3E8EF'
+  backgroundColor: '#E3E8EF',
 }));
 
 const BpCheckedIcon = styled(BpIcon)({
@@ -33,6 +33,7 @@ const CustomCheckbox = (props: CheckboxProps) => {
     <Checkbox
       sx={{
         '&:hover': {bgcolor: 'transparent'},
+        padding: '0'
       }}
       disableRipple
       color="default"

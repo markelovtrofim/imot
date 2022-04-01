@@ -5,6 +5,7 @@ import {authSlice} from "./auth/auth.slice";
 import {callsSlice} from "./calls/calls.slice";
 import {searchSlice} from "./search/search.slice";
 import {templateSlice} from "./search/template.slice";
+import {dictsSlice} from "./dicts/dicts.slice";
 
 
 const rootReducer = combineReducers({
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
   auth: authSlice.reducer,
   calls: callsSlice.reducer,
   search: searchSlice.reducer,
-  template: templateSlice.reducer
+  template: templateSlice.reducer,
+  dicts: dictsSlice.reducer
 });
 
 export const setupStore = () => {

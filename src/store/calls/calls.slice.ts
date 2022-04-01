@@ -1,9 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {CallsType} from "./calls.types";
-import {convertDate} from "../../utils/convertData";
 import {RootState} from "../index";
-import {convertDataForRequest} from "../../utils/convertDataForRequest";
 
 // get all calls
 type ResponseBaseCallsDataType = {
@@ -12,6 +10,41 @@ type ResponseBaseCallsDataType = {
   skip: number,
   limit: number,
   call_ids: string[]
+};
+
+const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
+  let requestArray = [];
+  for (let i = 0; i < defaultCriterias.length; i++) {
+    if (defaultCriterias[i].values.length > 0) {
+      requestArray.push({key: defaultCriterias[i].key, values: defaultCriterias[i].values})
+    }
+  }
+  for (let i = 0; i < activeCriterias.length; i++) {
+    if (activeCriterias[i].values.length > 0) {
+      requestArray.push({key: activeCriterias[i].key, values: activeCriterias[i].values});
+    }
+  }
+  return requestArray;
+};
+
+export const convertDate = (date: any, to: any) => {
+  // data request format month/day/year "2/24/2022".
+  if (date) {
+    const dateArray = date.split("/");
+    if (dateArray) {
+      // @ts-ignore
+      if (dateArray[0].length === 1) {
+        dateArray[0] = `0${dateArray[0]}`;
+      }
+      // @ts-ignore
+      if (dateArray[1].length === 1) {
+        dateArray[1] = `0${dateArray[1]}`;
+      }
+      if (to === 'display') { return `${dateArray[1]}.${dateArray[0]}.${dateArray[2]}` }
+      else if (to === 'request') { return `${dateArray[2]}-${dateArray[0]}-${dateArray[1]}`}
+    }
+  }
+  else { return date }
 };
 
 export const getCallStt = createAsyncThunk(
@@ -81,7 +114,7 @@ export const getBaseCallsData = createAsyncThunk(
       // @ts-ignore
       await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]))
     } catch (error) {
-      console.log(error);
+      thunkAPI.dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     }
   }
 );

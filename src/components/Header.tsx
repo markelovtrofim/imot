@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, SelectChangeEvent} from '@mui/material';
+import {Button, LinearProgress, SelectChangeEvent} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
@@ -121,7 +121,8 @@ const Header: React.FC = () => {
     {id: 6, path: 'settings', name: translate('settings', language)},
   ];
 
-  const [alignment, setAlignment] = React.useState('calls');
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  const [alignment, setAlignment] = React.useState(path ? `${path.slice(1)}` : 'calls');
 
   const handleRouteChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -136,8 +137,27 @@ const Header: React.FC = () => {
     dispatch(searchSlice.actions.removeAllState(null));
   }
 
+  const [progress, setProgress] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((oldProgress) => {
+        if (oldProgress === 100) {
+          return 0;
+        }
+        const diff = Math.random() * 10;
+        return Math.min(oldProgress + diff, 100);
+      });
+    }, 500);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   return (
     <div className={classes.headerWrapper}>
+      {/*<LinearProgress  color="primary"/>*/}
       <div className={classes.headerInner}>
         <div className={classes.headerLeftBlock}>
           {/* Логотип */}

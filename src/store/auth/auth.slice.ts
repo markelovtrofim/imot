@@ -39,6 +39,7 @@ export const removeAuthToken = createAsyncThunk(
   'auth/removeAuthToken',
   async (_, {dispatch}) => {
     localStorage.removeItem('token');
+    localStorage.removeItem('path');
     dispatch(authSlice.actions.setAuth(false));
   }
 );

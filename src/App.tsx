@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Redirect, Route, Switch, Link} from 'react-router-dom';
+import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
 import {Header} from './components';
@@ -7,6 +7,7 @@ import {Auth, Calls, MarkupRules} from './pages';
 import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
 import {useDispatch} from "react-redux";
+import LoadCall from "./pages/LoadCall";
 
 const useStyles = makeStyles(({
   wrapper: {
@@ -29,6 +30,24 @@ const App = () => {
       dispatch(authSlice.actions.setAuth(true))
     }
   }, []);
+
+
+  const history = useHistory()
+
+  useEffect(() => {
+    history.listen((location) => {
+      localStorage.setItem('path', JSON.stringify({
+        path: location.pathname
+      }));
+    })
+  },[history]);
+
+  useEffect(() => {
+    const {path} = JSON.parse(localStorage.getItem('path' )  || '{}')
+    if (path) {
+      history.push(path);
+    }
+  }, [])
 
   return (
     <div className={classes.wrapper}>
@@ -68,7 +87,7 @@ const App = () => {
         <Route path="/upload">
           <Header/>
           <div className={classes.container}>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">load call</Typography>
+            <LoadCall/>
           </div>
         </Route>
 

@@ -236,7 +236,9 @@ const Auth = () => {
                 bcColor={"#FFFFFF"}
                 label={"Password"}
               />
-              <PasswordSvg className={classes.authPasswordInputIcon}/>
+              <div style={{width: '32px', height: '100%'}}>
+                <PasswordSvg className={classes.authPasswordInputIcon}/>
+              </div>
             </div>
 
             <LoadingButton

@@ -30,7 +30,7 @@ const Transition = React.forwardRef((
   ) => <Slide direction="up" ref={ref} {...props}/>
 );
 
-export const AuthModalWindow: React.FC<AuthModalWindowPropsType> = ({isOpen, handleClose, children}) => {
+export const ModalWindow: React.FC<AuthModalWindowPropsType> = ({isOpen, handleClose, children}) => {
   const classes = useStyles();
   return (
     <Dialog disableScrollLock={true} className={classes.mwWrapper} open={isOpen} onClose={handleClose} TransitionComponent={Transition}>
@@ -41,4 +41,4 @@ export const AuthModalWindow: React.FC<AuthModalWindowPropsType> = ({isOpen, han
   );
 };
 
-export default AuthModalWindow;
+export default ModalWindow;

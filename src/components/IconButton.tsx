@@ -8,19 +8,21 @@ type IconButtonPropsType = {
   onClick: (event: any) => void,
   width?: string,
   margin: string,
-  disabled?: boolean
+  disabled?: boolean,
+  height?: string,
+  borderRadius?: string
 };
 
-const IconButton: FC<IconButtonPropsType> = ({disabled, icon, backgroundColor, onClick, width, margin}) => {
+const IconButton: FC<IconButtonPropsType> = ({borderRadius, disabled, icon, backgroundColor, onClick, width, margin, height}) => {
   const useButtonStyles = makeStyles(({
     button: {
       '&.MuiButtonBase-root.MuiFab-root': {
         minWidth: '32px',
         padding: '0 8px',
         width: width ? width : '32px',
-        height: '32px',
+        height: height ? height : '32px',
         minHeight: '32px',
-        borderRadius: '5px',
+        borderRadius: borderRadius ? borderRadius : '5px',
         boxShadow: 'none',
         margin: margin,
         backgroundColor: backgroundColor

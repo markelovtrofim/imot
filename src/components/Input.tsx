@@ -24,6 +24,7 @@ const Input: FC<InputPropsType> = (props) => {
       width: '100%',
       border: props.border ?`${props.border} !important` : 'none !important',
       '& .MuiInputLabel-root': {
+        cursor: 'text !important',
         color: '#738094 !important',
         fontSize: '14px !important',
         left: '-5px',

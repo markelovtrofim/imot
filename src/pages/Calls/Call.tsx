@@ -11,7 +11,7 @@ import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import {TwoTags, Fragment} from "../../components/Tag";
-import {CallsInfoType, TagType} from "../../store/calls/calls.types";
+import {CallsInfoType, CallsType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
@@ -245,7 +245,7 @@ type CallPropsType = {
   handleExpandedChange: (panel: string) => void
 };
 
-const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedChange, expanded}: CallPropsType) => {
+const Call = memo((props: CallPropsType) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -253,20 +253,20 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
   const [index, setIndex] = useState<null | number>(null);
   useEffect(() => {
     if (index === null) {
-      setIndex(bundleIndex);
+      setIndex(props.bundleIndex);
     }
-  }, [bundleIndex])
+  }, [props.bundleIndex])
 
   // устанавливает пришело ли аудио и stt.
   const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
   useEffect(() => {
-    if (callAudio) {
+    if (props.callAudio) {
       setIsCallBodyData(true);
     }
     return () => {
       setIsCallBodyData(false);
     }
-  }, [callAudio]);
+  }, [props.callAudio]);
 
   // конвертирует время для показа
   const timeConverter = (s: number) => {
@@ -286,11 +286,11 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
   const tagsAndFragmentsSeparator = () => {
     let tags = [];
     let fragments = [];
-    for (let i = 0; i < callInfo.tags?.length; i++) {
-      if (callInfo.tags[i].fragment) {
-        fragments.push(callInfo.tags[i]);
+    for (let i = 0; i < props.callInfo.tags?.length; i++) {
+      if (props.callInfo.tags[i].fragment) {
+        fragments.push(props.callInfo.tags[i]);
       } else {
-        tags.push(callInfo.tags[i]);
+        tags.push(props.callInfo.tags[i]);
       }
     }
     return {tags, fragments};
@@ -334,12 +334,11 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
   //   return () => window.removeEventListener("resize", heightTracker);
   // })
 
-
   return (
     <Accordion
       tabIndex={-1}
       style={{border: 'none'}}
-      expanded={expanded && isCallBodyData}
+      expanded={props.expanded && isCallBodyData}
     >
       {/* Первичная информация о звонке. */}
       <AccordionSummary
@@ -347,12 +346,13 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
         className={cn(classes.accordion)} tabIndex={-1}
         onClick={async () => {
           if (index || index === 0) {
+            debugger
             if (!isCallBodyData) {
-              handleExpandedChange(callInfo.id);
-              dispatch(getCallAudio({id: callInfo.id, bundleIndex: index}));
-              dispatch(getCallStt({id: callInfo.id, bundleIndex: index}));
+              props.handleExpandedChange(props.callInfo.id);
+              dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
+              dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
             } else {
-              dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex: index}));
+              dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
               setIsCallBodyData(false);
             }
           }
@@ -366,7 +366,7 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
             {/* Имя и фамилия. */}
             <div className={classes.employee}>
               <Typography className={classes.employeeText}>
-                {callInfo.operatorPhone}
+                {props.callInfo.operatorPhone}
               </Typography>
               <CallSvg/>
             </div>
@@ -374,14 +374,14 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
             {/* Дата звонка.*/}
             <div className={classes.callDateBox}>
               <Typography className={classes.callDate}>
-                {callInfo.callTimeReadable}
+                {props.callInfo.callTimeReadable}
               </Typography>
             </div>
 
             {/* Время звонка. */}
             <div className={classes.callDurationBox}>
               <Typography className={classes.callDuration}>
-                {timeConverter(callInfo.duration)}
+                {timeConverter(props.callInfo.duration)}
               </Typography>
             </div>
           </Grid>
@@ -390,7 +390,7 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
           <Grid item xs={1.5} className={classes.callMNumberBox}>
             {/* Номер телефона. */}
             <Typography className={classes.callMNumber}>
-              {callInfo.clientPhone}
+              {props.callInfo.clientPhone}
             </Typography>
           </Grid>
 
@@ -430,11 +430,12 @@ const Call = memo(({callInfo, callAudio, callStt, bundleIndex, handleExpandedCha
       </AccordionSummary>
       {/* Основная информация о звонке. */}
       <AccordionDetails className={classes.accordionDetails}>
-        <CallBody callInfo={callInfo} callAudio={callAudio} callStt={callStt} bundleIndex={bundleIndex}
-                  expanded={expanded}/>
+        <CallBody callInfo={props.callInfo} callAudio={props.callAudio} callStt={props.callStt} bundleIndex={props.bundleIndex}
+                  expanded={props.expanded}/>
       </AccordionDetails>
     </Accordion>
   );
 });
+
 
 export default CallStubMiddleware;
