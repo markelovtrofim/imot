@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useState} from 'react';
-import {Skeleton, Typography} from "@mui/material";
+import {LinearProgress, Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -262,6 +262,7 @@ const Call = memo((props: CallPropsType) => {
   useEffect(() => {
     if (props.callAudio) {
       setIsCallBodyData(true);
+      setProgress(false);
     }
     return () => {
       setIsCallBodyData(false);
@@ -333,6 +334,7 @@ const Call = memo((props: CallPropsType) => {
   //   window.addEventListener("resize", heightTracker);
   //   return () => window.removeEventListener("resize", heightTracker);
   // })
+  const [progress, setProgress] = React.useState<boolean>(false);
 
   return (
     <Accordion
@@ -346,11 +348,11 @@ const Call = memo((props: CallPropsType) => {
         className={cn(classes.accordion)} tabIndex={-1}
         onClick={async () => {
           if (index || index === 0) {
-            debugger
             if (!isCallBodyData) {
               props.handleExpandedChange(props.callInfo.id);
               dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
               dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
+              setProgress(true);
             } else {
               dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
               setIsCallBodyData(false);
@@ -358,8 +360,10 @@ const Call = memo((props: CallPropsType) => {
           }
         }}
       >
-
         <Grid container className={classes.callInner}>
+          <div style={{position: 'absolute', top: '0', height: '4px !important', backgroundColor: '#F8FAFC', width:'96%'}}>
+            {progress && <LinearProgress style={{height: '4px !important', width: '100%'}} color="primary"/>}
+          </div>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
 

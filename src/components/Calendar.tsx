@@ -135,7 +135,6 @@ const CustomCalendar = React.memo(() => {
 
     if (mm < 10) strMm = `0${mm}`
     if (dd < 10) strDd = `0${dd}`;
-    debugger
     return `${mm}/${dd}/${yyyy}`;
   };
 

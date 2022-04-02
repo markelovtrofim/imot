@@ -11,8 +11,6 @@ import {useFormik} from "formik";
 import {LoadingButton} from "@mui/lab";
 import {useDispatch} from "react-redux";
 import {getGroups, updateDict} from "../../../../store/dicts/dicts.slice";
-import ModalWindow from "../../../../components/ModalWindowBox";
-import {Input} from "../../../../components";
 
 type DictDetailsPropsType = {
   alignment: string
