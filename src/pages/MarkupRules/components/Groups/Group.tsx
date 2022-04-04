@@ -1,10 +1,10 @@
-import React, {FC} from "react";
+import React, {FC, memo} from "react";
 import {makeStyles} from "@mui/styles";
-import {Typography} from "@mui/material";
-import CustomControlSelect from "../../../components/Selects/CustomControlSelect";
+import {Skeleton, Typography} from "@mui/material";
+import CustomControlSelect from "../../../../components/Selects/CustomControlSelect";
 import {useDispatch} from "react-redux";
-import {dictsSlice, getDicts} from "../../../store/dicts/dicts.slice";
-import {GroupType} from "../../../store/dicts/dicts.types";
+import {dictsSlice, getDicts} from "../../../../store/dicts/dicts.slice";
+import {GroupType} from "../../../../store/dicts/dicts.types";
 
 const PurpleCircleSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -47,14 +47,15 @@ const ClosedEye = (props: React.SVGProps<SVGSVGElement>) => {
 
 
 type GroupPropsType = {
-  group: GroupType,
+  group: GroupType | null,
   isActive: boolean
 };
 
 
-const Group: FC<GroupPropsType> = ({group, isActive}) => {
+const Group: FC<GroupPropsType> = memo(({group, isActive}) => {
   const useStyles = makeStyles(({
     groupItem: {
+      minHeight: '56px',
       cursor: "pointer",
       padding: '24px',
       margin: '0 24px 24px 24px',
@@ -100,25 +101,30 @@ const Group: FC<GroupPropsType> = ({group, isActive}) => {
 
   return (
     <div className={classes.groupItem} onClick={async () => {
-      dispatch(dictsSlice.actions.setLoading({type: 'items', value: true}));
-      dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: true}));
-      await dispatch(getDicts({group: group.group, showDisabled: group.group === 'Отключенные глобальные словари' || group.group === "Disabled global dictionaries"}));
-      dispatch(dictsSlice.actions.setCurrentGroup(group));
-      dispatch(dictsSlice.actions.setLoading({type: 'items', value: false}));
-      dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: false}));
+      if (group) {
+        dispatch(dictsSlice.actions.setEmptyDicts(null));
+        await dispatch(getDicts({group: group.group}));
+        dispatch(dictsSlice.actions.setCurrentGroup(group));
+      }
     }}>
 
       <div className={classes.groupTopBlock}>
-        <Typography className={classes.groupTopBlockText}>{group.group}</Typography>
+        {group
+          ? <Typography className={classes.groupTopBlockText}>{group.group}</Typography>
+          : <Skeleton variant="text" width={250} height={20} />
+        }
         {isActive && <PurpleCircleSvg/>}
       </div>
 
       <div className={classes.groupBottomBlock}>
-        <Typography className={classes.groupBottomBlockText}>{group.count} словарей</Typography>
+        {group
+          ? <Typography className={classes.groupBottomBlockText}>{group.count} словарей</Typography>
+          : <Skeleton variant="text" width={80} height={20} />
+        }
       </div>
 
     </div>
   );
-};
+});
 
 export default Group;

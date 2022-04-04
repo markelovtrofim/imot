@@ -18,11 +18,9 @@ import History from "./Buttons/History";
 import Download from "./Buttons/Download";
 import Back from "./Buttons/Back";
 import {BlockBox} from "../../../components";
-import TextSelect from "../../../components/Selects/TextSelect";
 import ContainedSelect from "../../../components/Selects/ContainedSelect";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
-import {translate} from "../../../localizations";
 
 type CallBodyPropsType = {
   callInfo: CallsInfoType,

@@ -1,9 +1,10 @@
 import React, {FC, memo} from "react";
-import {DictType} from "../../../store/dicts/dicts.types";
+import {DictType} from "../../../../store/dicts/dicts.types";
 import {makeStyles} from "@mui/styles";
-import {getDict} from "../../../store/dicts/dicts.slice";
+import {getDict} from "../../../../store/dicts/dicts.slice";
 import {useDispatch} from "react-redux";
-import {InfoCircleActive} from "../index";
+import {InfoCircleActive} from "../../index";
+import {Skeleton} from "@mui/material";
 
 const InfoCircle = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -19,7 +20,7 @@ const InfoCircle = (props: React.SVGProps<SVGSVGElement>) => {
 };
 
 type DictPropsType = {
-  body: DictType,
+  body: DictType | null,
   isActive: boolean,
   handleClick: any
 };
@@ -32,6 +33,8 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
   const useStyles = makeStyles(({
     itemBox: {
       cursor: 'pointer',
+      minHeight: '31px',
+
       padding: '9px 24px',
       transition: '0.1s',
       backgroundColor: isActive ? '#F9F0FF' : '#F8FAFC',
@@ -64,12 +67,23 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
   }));
   const classes = useStyles();
   return (
-    <div  className={classes.itemBox} onClick={isActive ? () => null : handleClick}>
-      <div>
-        <div className={classes.item}>{body.title}</div>
-        <div className={classes.rule}><i style={{marginRight: '3px'}}>{body.usedRules.map((rule) => rule.title)}</i></div>
+    <div className={classes.itemBox} onClick={isActive ? () => null : handleClick}>
+      <div style={{minWidth: '130px'}}>
+        <div className={classes.item}>
+          {body
+            ? <>{body.title}</>
+            : <Skeleton variant="text" width={130} height={15}/>
+          }
+        </div>
+        <div className={classes.rule}>
+          {body
+            ? <i style={{marginRight: '3px'}}>{body.usedRules.map((rule) => rule.title)}</i>
+            : <Skeleton variant="text" width={60} height={11}/>
+          }
+        </div>
       </div>
       {isActive ? <InfoCircleActive/> : <InfoCircle/>}
+
     </div>
   )
 });

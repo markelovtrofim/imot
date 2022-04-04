@@ -1,15 +1,12 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
-import {DictType, DictTypeDetailed, GroupType} from "./dicts.types";
+import {DictType, DictTypeDetailed, GroupType, MarkupRulesPagesType} from "./dicts.types";
 
 export const getGroups = createAsyncThunk(
   'dicts/getGroups',
   async (payload, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'groups', value: true}));
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'items', value: true}));
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: true}));
       const {data} = await axios.get<GroupType[]>(`https://imot-api.pyzzle.ru/dict_groups/`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -17,10 +14,8 @@ export const getGroups = createAsyncThunk(
       });
       thunkAPI.dispatch(dictsSlice.actions.setGroups(data));
       thunkAPI.dispatch(dictsSlice.actions.setCurrentGroup(data[0]));
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'groups', value: false}));
-      await thunkAPI.dispatch(getDicts({showDisabled: false, group: data[0].group}));
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'items', value: false}));
-      thunkAPI.dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: false}));
+
+      await thunkAPI.dispatch(getDicts({group: data[0].group}));
     } catch (error) {
       console.log(error);
     }
@@ -29,11 +24,11 @@ export const getGroups = createAsyncThunk(
 
 export const getDicts = createAsyncThunk(
   'dicts/getDicts',
-  async (payload: { showDisabled: boolean, filter?: string, group?: string }, thunkAPI) => {
+  async (payload: { filter?: string, group?: string }, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       const url = `https://imot-api.pyzzle.ru/dicts/` +
-        `?show_disabled=${payload.showDisabled}` +
+        `?show_disabled=true` +
         `${payload.filter ? `&filter=${payload.filter}` : ''}` +
         `${payload.group ? `&group=${payload.group}` : ''}`
       const {data} = await axios.get(url, {
@@ -41,8 +36,8 @@ export const getDicts = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      thunkAPI.dispatch(dictsSlice.actions.setDicts(data));
       await thunkAPI.dispatch(getDict(data[0].id));
+      thunkAPI.dispatch(dictsSlice.actions.setDicts(data));
     } catch (error) {
       console.log(error);
     }
@@ -68,6 +63,23 @@ export const getDict = createAsyncThunk(
   }
 );
 
+export const deleteDict = createAsyncThunk(
+  'dicts/deleteDict',
+  async (payload: string, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    // @ts-ignore
+    const currentDict = thunkAPI.getState().dicts.currentDict;
+    const {data} = await axios.delete(`https://imot-api.pyzzle.ru/dict/${payload}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    thunkAPI.dispatch(dictsSlice.actions.setCurrentDict(null));
+    await thunkAPI.dispatch(getGroups());
+    await thunkAPI.dispatch(getDicts({group: currentDict.group}));
+  }
+)
+
 export const updateDict = createAsyncThunk(
   'dict/updateDict',
   async (payload: DictTypeDetailed, thunkAPI) => {
@@ -79,18 +91,21 @@ export const updateDict = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      await thunkAPI.dispatch(getDicts({showDisabled: false, group: payload.group}));
+      await thunkAPI.dispatch(getDicts({group: payload.group}));
     } catch (error) {
       console.log(error);
     }
   }
 );
 
+
 type InitialStateType = {
-  groups: GroupType[] | null,
+  activePage: MarkupRulesPagesType,
+
+  groups: GroupType[] | null[],
   currentGroup: GroupType | null,
 
-  dicts: DictType[] | null,
+  dicts: DictType[] | null[] | null,
   currentDict: DictTypeDetailed | null,
 
   loading: {
@@ -100,11 +115,23 @@ type InitialStateType = {
   }
 };
 
+const createNullArray = (count: number) => {
+  let result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(null);
+  }
+  return result;
+};
+
 const initialState: InitialStateType = {
-  groups: null,
+  activePage: 'dictionaries',
+
+  groups: createNullArray(4),
   currentGroup: null,
-  dicts: null,
+
+  dicts: createNullArray(15),
   currentDict: null,
+
   loading: {
     groupsBlockLoading: false,
     itemsBlockLoading: false,
@@ -116,6 +143,12 @@ export const dictsSlice = createSlice({
   name: 'dicts',
   initialState,
   reducers: {
+    // Active page
+    setActivePage(state, action: PayloadAction<MarkupRulesPagesType>) {
+      state.activePage = action.payload;
+    },
+
+    // Groups
     setGroups(state, action: PayloadAction<GroupType[]>) {
       state.groups = action.payload;
     },
@@ -123,14 +156,23 @@ export const dictsSlice = createSlice({
       state.currentGroup = action.payload;
     },
 
+    // Dicts
     setDicts(state, action: PayloadAction<DictType[]>) {
       state.dicts = action.payload;
     },
-    setCurrentDict(state, action: PayloadAction<DictTypeDetailed | null >) {
+    setEmptyDicts(state, action) {
+      state.dicts = createNullArray(15);
+    },
+    setCurrentDict(state, action: PayloadAction<DictTypeDetailed | null>) {
       state.currentDict = action.payload;
     },
 
-    setLoading(state, action: PayloadAction<{type: 'groups' | 'items' | 'itemDetails', value: boolean }>) {
+    // Tags
+
+    // Checklists
+
+    // Loading
+    setLoading(state, action: PayloadAction<{ type: 'groups' | 'items' | 'itemDetails', value: boolean }>) {
       if (action.payload.type === 'groups') {
         state.loading.groupsBlockLoading = action.payload.value;
       } else if (action.payload.type === 'items') {

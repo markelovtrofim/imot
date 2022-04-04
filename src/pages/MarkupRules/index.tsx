@@ -1,24 +1,93 @@
-import React, {FC, memo, useEffect, useState} from 'react';
-import {Button, CircularProgress, IconButton, Typography} from "@mui/material";
+import React, {FC, memo, useDebugValue, useEffect, useRef, useState} from 'react';
+import {CircularProgress, IconButton, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
-import {BlockBox, Input} from "../../components";
+import {BlockBox, Header, Input} from "../../components";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import Plus from "../Calls/Body/Buttons/Plus";
 import {dictsSlice, getDicts, getGroups} from "../../store/dicts/dicts.slice";
 import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
-import CustomControlSelect from "../../components/Selects/CustomControlSelect";
-import Checkbox from "../../components/Checkbox";
-import Switch from '../../components/Switch';
-import Groups from "./Groups";
-import Item from "./Items/Item";
-import Items from "./Items";
+import Groups from "./components/Groups";
+import Items from "./components/Items";
 import {useFormik} from "formik";
-import {fetchAuthToken} from "../../store/auth/auth.slice";
-import DictDetails from "./Details/DictDetails";
+import DictDetails from "./pages/Dicts/Detail";
 import ModalWindow from "../../components/ModalWindowBox";
+import {useHistory} from "react-router-dom";
+import {MarkupRulesPagesType} from "../../store/dicts/dicts.types";
+import {useStyles} from "../../App";
+import Tags from "./pages/Tags/Detail";
+import Checklists from "./pages/Checklists/Detail";
 
+// CUSTOM COMMON COMPONENTS
+const SearchInput: FC<{handleMWOpen: () => void}> = ({handleMWOpen}) => {
+  const currentGroup = useAppSelector(state => state.dicts.currentGroup);
+
+  const dispatch = useDispatch();
+  const formik = useFormik({
+    initialValues: {
+      search: ''
+    },
+    onSubmit: async (values) => {
+      if (currentGroup) {
+        dispatch(dictsSlice.actions.setCurrentDict(null));
+        dispatch(dictsSlice.actions.setLoading({type: 'items', value: true}));
+        dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: true}));
+        await dispatch(getDicts({group: currentGroup.group, filter: values.search}));
+        dispatch(dictsSlice.actions.setLoading({type: 'items', value: false}));
+        dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: false}));
+      }
+    },
+  });
+  const useStyles = makeStyles(({
+    searchInputBox: {
+      display: 'flex',
+      alignItems: 'center',
+      margin: '0 24px',
+    },
+    searchInputInputBox: {
+      position: 'relative',
+      width: '100%'
+    },
+    searchInputSvgBox: {
+      textAlign: 'center',
+      paddingTop: '9px',
+      position: 'absolute',
+      top: '-7.5px',
+      right: '-1px',
+      width: '32px',
+      height: 'calc(100% - 9px)'
+    }
+  }));
+  const classes = useStyles();
+
+  return (
+    <div className={classes.searchInputBox}>
+      <form onSubmit={formik.handleSubmit} style={{width: '100%'}}>
+        <div className={classes.searchInputInputBox}>
+          <Input
+            handleChange={formik.handleChange}
+            value={formik.values.search}
+            name={'search'}
+            type={'text'}
+            height={'30px'}
+            bcColor={'#F8FAFC'}
+            border={'1px solid #E3E8EF'}
+            label={"Поиск"}
+          />
+          <div className={classes.searchInputSvgBox}>
+            <IconButton type={"submit"}>
+              <SearchSvg/>
+            </IconButton>
+          </div>
+        </div>
+      </form>
+      <Plus margin={'0 0 0 16px'} handleClick={() => handleMWOpen()}/>
+    </div>
+  );
+};
+
+// SVG BLOCK
 const SearchSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -49,7 +118,7 @@ export const Preloader = () => {
 
 const MarkupRules = memo(() => {
   // STYLES BLOCK
-  const useStyles = makeStyles(({
+  const useMarkupRulesStyles = makeStyles(({
     mrContainer: {
       width: '100%',
       height: '810px',
@@ -91,7 +160,9 @@ const MarkupRules = memo(() => {
       overflow: 'hidden',
       overflowY: 'auto',
       borderRadius: '5px',
+
       '&::-webkit-scrollbar': {
+        paddingTop: '4px',
         width: '4px',
         outline: 'none',
         background: '#CDD5DF'
@@ -132,189 +203,135 @@ const MarkupRules = memo(() => {
       width: '40%',
     },
   }));
-  const classes = useStyles();
+  const classes = useMarkupRulesStyles();
+  const appClasses = useStyles();
 
   // LOGIC BLOCK
   const dispatch = useDispatch();
+  const history = useHistory();
+  const activePage = useAppSelector(state => state.dicts.activePage);
 
+  // логика перехода между локальными страницами.
+  const handleChange = (
+    event: React.MouseEvent<HTMLElement>,
+    page: MarkupRulesPagesType,
+  ) => {
+    dispatch(dictsSlice.actions.setActivePage(page));
+  };
+  useEffect(() => {
+    if (path) {
+      // @ts-ignore
+      dispatch(dictsSlice.actions.setActivePage(path));
+    }
+  });
+  const path = history.location.pathname.split('/')[2];
+
+  // логика открытия модально окна
+  // MW - Modal Window
+  const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);
+  const handleMWOpen = () => {
+    setAddDictMWIsOpen(true);
+  };
+  const handleMWClose = () => {
+    setAddDictMWIsOpen(false);
+  };
+
+
+  //  запрос за данными (ВЫНЕСТИ В ОТДЕЛЬНЫЙ КОМПОНЕНТ).
+  const currentDict = useAppSelector(state => state.dicts.currentDict);
   useEffect(() => {
     if (!currentDict) {
       dispatch(getGroups());
     }
   }, []);
 
-  type alignmentType = 'dictionaries' | 'tags' | 'checklists'
-  const [alignment, setAlignment] = useState<alignmentType>('dictionaries');
-  const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: alignmentType,
-  ) => {
-    setAlignment(newAlignment);
-  };
-  const currentDict = useAppSelector(state => state.dicts.currentDict);
-
-  const SearchInput: FC = () => {
-    const currentGroup = useAppSelector(state => state.dicts.currentGroup);
-    let showDisabled = false;
-    if (currentGroup) {
-      showDisabled = currentGroup.group === 'Отключенные глобальные словари' || currentGroup.group === "Disabled global dictionaries"
-    }
-
-    const formik = useFormik({
-      initialValues: {
-        search: ''
-      },
-      onSubmit: async (values) => {
-        debugger;
-        if (currentGroup) {
-          dispatch(dictsSlice.actions.setCurrentDict(null));
-          dispatch(dictsSlice.actions.setLoading({type: 'items', value: true}));
-          dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: true}));
-          await dispatch(getDicts({showDisabled: showDisabled, group: currentGroup.group, filter: values.search}));
-          dispatch(dictsSlice.actions.setLoading({type: 'items', value: false}));
-          dispatch(dictsSlice.actions.setLoading({type: 'itemDetails', value: false}));
-        }
-        console.log(values.search);
-      },
-    });
-    const useStyles = makeStyles(({
-      searchInputBox: {
-        display: 'flex',
-        alignItems: 'center',
-        margin: '0 24px',
-      },
-      searchInputInputBox: {
-        position: 'relative',
-        width: '100%'
-      },
-      searchInputSvgBox: {
-        textAlign: 'center',
-        paddingTop: '9px',
-        position: 'absolute',
-        top: '-7.5px',
-        right: '-1px',
-        width: '32px',
-        height: 'calc(100% - 9px)'
-      }
-    }));
-    const classes = useStyles();
-
-    return (
-      <div className={classes.searchInputBox}>
-        <form onSubmit={formik.handleSubmit} style={{width: '100%'}}>
-          <div className={classes.searchInputInputBox}>
-            <Input
-              handleChange={formik.handleChange}
-              value={formik.values.search}
-              name={'search'}
-              type={'text'}
-              height={'30px'}
-              bcColor={'#F8FAFC'}
-              border={'1px solid #E3E8EF'}
-              label={"Поиск"}
-            />
-            <div className={classes.searchInputSvgBox}>
-              <IconButton type={"submit"}>
-                <SearchSvg/>
-              </IconButton>
-            </div>
-          </div>
-        </form>
-        <Plus margin={'0 0 0 16px'} handleClick={() => setAddDictMWIsOpen(true)}/>
-      </div>
-    );
-  };
-
-  // MW - Modal Window
-  const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);
 
   return (
-    <div className={classes.mrContainer}>
-      <ModalWindow isOpen={addDictMWIsOpen} handleClose={() => setAddDictMWIsOpen(false)}>
-        <Input name={'dict'} type={'text'} bcColor={'#F8FAFC'} label={'Добавить словарь'}/>
-      </ModalWindow>
-      <div className={classes.mrTypeHandlerBlock}>
-        <div className={classes.mrTypeHandlerGroups}>
+    <div>
+      {(path === 'dictionaries' || path === 'tags' || path === 'checklists') ?
+      <div>
+        <Header/>
+        <div className={appClasses.container}>
+          <div className={classes.mrContainer}>
+            <ModalWindow isOpen={addDictMWIsOpen} handleClose={() => handleMWClose()}>
+              <Input name={'dict'} type={'text'} bcColor={'#F8FAFC'} label={'Добавить словарь'}/>
+            </ModalWindow>
+            <div className={classes.mrTypeHandlerBlock}>
+              <div className={classes.mrTypeHandlerGroups}>
 
-          {/* Роутинг */}
-          <ToggleButtonGroup
-            className={classes.controlBlockButtonBox}
-            value={alignment}
-            exclusive
-            onChange={handleChange}
-          >
-            <ToggleButton
-              disabled={"dictionaries" === alignment}
-              className={classes.controlBlockButton} value="dictionaries"
-              onClick={() => {
-              }}
-            >
-              Словари
-            </ToggleButton>
+                {/* Роутинг */}
+                <ToggleButtonGroup
+                  className={classes.controlBlockButtonBox}
+                  value={activePage}
+                  exclusive
+                  onChange={handleChange}
+                >
+                  <ToggleButton
+                    disabled={"dictionaries" === activePage}
+                    className={classes.controlBlockButton} value="dictionaries"
+                    onClick={() => {
+                      history.location.pathname = '/'
 
-            <ToggleButton disabled={"tags" === alignment}
-                          className={classes.controlBlockButton} value="tags"
-                          onClick={() => {
-                          }}
-            >
-              Теги
-            </ToggleButton>
+                      history.replace('markuprules/dictionaries/1')
+                    }}
+                  >
+                    Словари
+                  </ToggleButton>
 
-            <ToggleButton
-              className={classes.controlBlockButton} disabled={"checklists" === alignment} value="checklists"
-              onClick={() => {
-              }}
-            >
-              Чек-листы
-            </ToggleButton>
-          </ToggleButtonGroup>
+                  <ToggleButton disabled={"tags" === activePage}
+                                className={classes.controlBlockButton} value="tags"
+                                onClick={() => {
+                                  history.location.pathname = '/'
+                                  history.replace('markuprules/tags/1')
+                                }}
+                  >
+                    Теги
+                  </ToggleButton>
 
-          {/* GROUPS */}
-          <div className={classes.mrGeneralBlock}>
-            <Groups/>
+                  <ToggleButton
+                    className={classes.controlBlockButton} disabled={"checklists" === activePage} value="checklists"
+                    onClick={() => {
+                      history.location.pathname = '/'
+                      history.replace('markuprules/checklists/1')
+                    }}
+                  >
+                    Чек-листы
+                  </ToggleButton>
+                </ToggleButtonGroup>
+
+                {/* GROUPS */}
+                <div className={classes.mrGeneralBlock}>
+                  <Groups/>
+                </div>
+              </div>
+
+              {/* ITEMS */}
+              <div className={classes.mrTypeHandlerItems}>
+                <SearchInput handleMWOpen={handleMWOpen}/>
+                <div className={classes.mrGeneralBlock}>
+                  <Items/>
+                </div>
+              </div>
+            </div>
+
+            {/* DETAILS */}
+            <div className={classes.mrTypeBodyBlock}>
+              <BlockBox padding={'5px 24px 0 24px'}>
+
+                {/* Dicts */}
+                {activePage === 'dictionaries' && <DictDetails />}
+
+                {/* Tags */}
+                {activePage === 'tags' && <Tags/>}
+
+                {/* Checklists */}
+                {activePage === 'checklists' && <Checklists/>}
+              </BlockBox>
+            </div>
           </div>
         </div>
-
-        {/* ITEMS */}
-        <div className={classes.mrTypeHandlerItems}>
-          <SearchInput/>
-          <div className={classes.mrGeneralBlock}>
-            <Items/>
-          </div>
-        </div>
-      </div>
-
-      {/* DETAILS */}
-      <div className={classes.mrTypeBodyBlock}>
-        <BlockBox padding={'5px 24px 0 24px'}>
-
-        <DictDetails alignment={'dictionaries'}/>
-
-          {/* Теги */}
-          {alignment === 'tags' &&
-          <div>
-            <Typography
-              style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}
-              variant="h3"
-            >
-              Tags
-            </Typography>
-          </div>
-          }
-
-          {/* Чек-листы */}
-          {alignment === 'checklists' &&
-          <div>
-            <Typography
-              style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}
-              variant="h3"
-            >
-              Checklists
-            </Typography>
-          </div>
-          }
-        </BlockBox>
-      </div>
+      </div> : <div style={{fontWeight: '700', marginTop: '400px', textAlign: 'center', fontSize: '45px', fontFamily: 'sans-serif'}}>404</div>
+      }
     </div>
   );
 });

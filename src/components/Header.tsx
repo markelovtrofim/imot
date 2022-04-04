@@ -15,6 +15,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import {useDispatch} from "react-redux";
 import {callsSlice} from "../store/calls/calls.slice";
 import {searchSlice} from "../store/search/search.slice";
+import {getGroups} from "../store/dicts/dicts.slice";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -106,23 +107,14 @@ const Header: React.FC = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const {language} = useAppSelector((state: RootState) => state.lang);
-  const history = useHistory();
   const handleLangChange = (event: SelectChangeEvent) => {
     const currentLang = event.target.value;
     dispatch(setLanguage(currentLang));
   };
 
-  const headerItemsArray: { id: number, path: string, name: string }[] = [
-    {id: 1, path: 'calls', name: translate('calls', language)},
-    {id: 2, path: 'reports', name: translate('reports', language)},
-    {id: 3, path: 'markuprules', name: translate('markupRules', language)},
-    {id: 4, path: 'upload', name: translate('loadCall', language)},
-    {id: 5, path: 'alert', name: translate('alert', language)},
-    {id: 6, path: 'settings', name: translate('settings', language)},
-  ];
-
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
-  const [alignment, setAlignment] = React.useState(path ? `${path.slice(1)}` : 'calls');
+  const historyPathArray = path.split('/');
+  const [alignment, setAlignment] = React.useState(path ? `${historyPathArray[1]}` : 'calls');
 
   const handleRouteChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -136,6 +128,11 @@ const Header: React.FC = () => {
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
   }
+
+  const history = useHistory();
+  const pagePath = history.location.pathname.split('/')[1];
+
+  const activePage = useAppSelector(state => state.dicts.activePage);
 
   return (
     <div className={classes.headerWrapper}>
@@ -151,13 +148,92 @@ const Header: React.FC = () => {
             onChange={handleRouteChange}
             style={{cursor: 'pointer'}}
           >
-            {headerItemsArray.map(item =>
-              <ToggleButton key={item.id} disabled={item.path === alignment} onClick={() => {
-                history.push(item.path);
-              }} className={classes.headerItemText} value={item.path}>
-                {item.name}
-              </ToggleButton>
-            )}
+            {/* Calls */}
+            <ToggleButton
+              key={0}
+              disabled={'calls' === alignment}
+              value={'calls'}
+              onClick={() => {
+                history.location.pathname = '/'
+                history.replace('calls');
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('calls', language)}
+            </ToggleButton>
+
+            {/* Reports */}
+            <ToggleButton
+              key={1}
+              disabled={'reports' === alignment}
+              value={'reports'}
+              onClick={() => {
+                history.location.pathname = '/'
+                history.replace('reports');
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('reports', language)}
+            </ToggleButton>
+
+            {/* Markuprules */}
+            <ToggleButton
+              key={2}
+              disabled={pagePath === 'markuprules' && pagePath === alignment}
+              value={'markuprules'}
+              onClick={async () => {
+                await dispatch(getGroups());
+                history.location.pathname = '/'
+                history.replace(`markuprules/${activePage}/1`);
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('markupRules', language)}
+            </ToggleButton>
+
+            {/* Upload */}
+            <ToggleButton
+              key={3}
+              disabled={'upload' === alignment}
+              value={'upload'}
+              onClick={() => {
+                history.location.pathname = '/'
+                history.replace('upload');
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('loadCall', language)}
+            </ToggleButton>
+
+            {/* Alert */}
+            <ToggleButton
+              key={4}
+              disabled={'alert' === alignment}
+              value={'alert'}
+              onClick={() => {
+                history.location.pathname = '/'
+                history.replace('alert');
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('alert', language)}
+            </ToggleButton>
+
+            {/* Settings */}
+            <ToggleButton
+              key={5}
+              disabled={'settings' === alignment}
+              value={'settings'}
+              onClick={() => {
+                history.location.pathname = '/'
+                history.replace('settings');
+              }}
+              className={classes.headerItemText}
+            >
+              {translate('settings', language)}
+            </ToggleButton>
+
+
           </ToggleButtonGroup>
         </div>
 

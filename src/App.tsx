@@ -9,7 +9,7 @@ import {authSlice} from "./store/auth/auth.slice";
 import {useDispatch} from "react-redux";
 import LoadCall from "./pages/LoadCall";
 
-const useStyles = makeStyles(({
+export const useStyles = makeStyles(({
   wrapper: {
     width: 'auto',
   },
@@ -40,15 +40,16 @@ const App = () => {
         path: location.pathname
       }));
     })
-  },[history]);
+  }, [history]);
 
   useEffect(() => {
-    const {path} = JSON.parse(localStorage.getItem('path' )  || '{}')
+    const {path} = JSON.parse(localStorage.getItem('path') || '{}')
     if (path) {
       history.push(path);
     }
   }, [])
 
+  const markupRulesPages = 'dictionaries' || 'tags' || 'checklists'
   return (
     <div className={classes.wrapper}>
       <Switch>
@@ -76,11 +77,8 @@ const App = () => {
         </Route>
 
         {/* Загрузить звонок */}
-        <Route path="/markuprules">
-          <Header/>
-          <div className={classes.container}>
-            <MarkupRules/>
-          </div>
+        <Route path="/markuprules/:page/:id">
+          <MarkupRules/>
         </Route>
 
         {/* Загрузить звонок */}

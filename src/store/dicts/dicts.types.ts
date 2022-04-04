@@ -1,3 +1,12 @@
+export type MarkupRulesPagesType = 'dictionaries' | 'tags' | 'checklists';
+
+
+export type GroupType = {
+  group: string,
+  count: number
+};
+
+
 export type DictType = {
   enabled?: boolean,
   id: string,
@@ -16,9 +25,4 @@ export type DictTypeDetailed = {
   allowedUsers: [],
   phrases: string[],
   group: string
-};
-
-export type GroupType = {
-  group: string,
-  count: number
 };

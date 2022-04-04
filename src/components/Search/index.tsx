@@ -262,7 +262,13 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
             {
               currentTemplate ?
                 <div>
-                  <CustomControlSelect svg={'vertical'}
+                  <CustomControlSelect
+                    optionsPosition={"bottom"}
+                    options={[
+                      {value: 'rename', label: 'Переименовать'},
+                      {value: 'delete', label: 'Удалить'}
+                    ]}
+                    svg={'vertical'}
                     handleSelectChange={(event: any) => {
                       if (event.value === 'rename') {
                         setIsOpenRenameMethod('put');

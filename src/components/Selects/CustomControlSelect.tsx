@@ -59,19 +59,37 @@ const TrashSvg = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
+const CloneSvg = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.16602 5.99935C2.16602 3.88226 3.88226 2.16602 5.99935 2.16602H10.6746C10.9507 2.16602 11.1746 2.38988 11.1746 2.66602C11.1746 2.94216 10.9507 3.16602 10.6746 3.16602H5.99935C4.43454 3.16602 3.16602 4.43454 3.16602 5.99935V10.7373C3.16602 11.0134 2.94216 11.2373 2.66602 11.2373C2.38988 11.2373 2.16602 11.0134 2.16602 10.7373V5.99935Z" fill="#738094"/>
+      <path d="M12.2691 4.52877C10.1084 4.28729 7.89292 4.28729 5.7323 4.52877C5.11679 4.59756 4.62217 5.08195 4.54961 5.70225C4.29336 7.89326 4.29336 10.1066 4.54961 12.2976C4.62217 12.9179 5.11679 13.4023 5.7323 13.4711C7.89292 13.7126 10.1084 13.7126 12.2691 13.4711C12.8845 13.4023 13.3792 12.9179 13.4517 12.2976C13.708 10.1066 13.708 7.89326 13.4517 5.70225C13.3792 5.08195 12.8845 4.59756 12.2691 4.52877Z" fill="#A3AEBE"/>
+    </svg>
+  );
+};
+
 // TYPES BLOCK
 type CustomControlSelectPropsType = {
   handleSelectChange: (event: any) => void,
-  svg: 'horizontal' | 'vertical'
+  svg: 'horizontal' | 'vertical',
+  options: {value: any, label: string}[],
+  optionsPosition: 'top' | 'bottom'
 };
 
-const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChange, svg}) => {
+const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChange, svg, options, optionsPosition}) => {
   // STYLES BLOCK
   const customDotsStyles = {
+    container: (base: any) => ({
+      ...base,
+      flex: 1
+    }),
     menu: (provided: any, state: any) => ({
       ...provided,
       width: '183px',
       right: '0',
+      bottom: '35px',
+      boxShadow: '0px 0px 4px rgba(98, 98, 98, 0.22)',
+      borderRadius: '10px',
       cursor: 'pointer',
       fontFamily: 'Inter, sans-serif',
       fontSize: '14px',
@@ -91,7 +109,10 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChan
       }
     }),
     menuList: (provided: any, state: any) => ({
-      padding: '0'
+      ...provided,
+      padding: '0',
+      display: 'flex',
+      flexDirection: 'column-reverse',
     }),
     control: (provided: any, state: any) => ({
       ...provided,
@@ -125,7 +146,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChan
           </div>
         </components.Option>
       )
-    } else {
+    } else if (data.value === 'delete') {
       return (
         <components.Option {...props}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -134,11 +155,29 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChan
           </div>
         </components.Option>
       )
+    } else if (data.value === 'clone') {
+      return (
+        <components.Option {...props}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <CloneSvg/>
+            <div style={{color: '#222D', marginLeft: '10px', fontWeight: '700'}}>{data.label}</div>
+          </div>
+        </components.Option>
+      )
+    } else {
+      return (
+        <components.Option {...props}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <div style={{marginLeft: '10px', fontWeight: '700'}}>{data.label}</div>
+          </div>
+        </components.Option>
+      )
     }
   };
 
   return (
     <Select
+      menuPlacement={optionsPosition}
       styles={customDotsStyles}
       placeholder={''}
       isSearchable={false}
@@ -149,10 +188,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChan
         Option: CustomOption
       }}
       onChange={handleSelectChange}
-      options={[
-        {value: 'rename', label: 'Переименовать'},
-        {value: 'delete', label: 'Удалить'}
-      ]}
+      options={options}
     />
   );
 };
