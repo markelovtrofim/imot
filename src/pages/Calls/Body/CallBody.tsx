@@ -95,6 +95,9 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
     },
     isActive: {
       backgroundColor: 'black'
+    },
+    test: {
+
     }
   }));
   const classes = useStyles();
@@ -121,50 +124,58 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
     setAlignment(newAlignment);
   };
 
+  // почитать про:
   // useCallback
   // useMemo
   // memo
-  // const phrases = [{words: []}, {words: []}];
 
-
-  // Возвращает новый массив фрагментов добавляя к полю word, каждого фрагмента, поле isActive.
-  // function createNewFragments() {
-  //   if (callStt) {
-  //     return callStt.fragments.map((phrase) => ({
-  //       ...phrase,
-  //       words: phrase.words.map((word: CallSttWordType) => ({
-  //         ...word,
-  //         isActive: word.begin <= currentTime.current && currentTime.current <= word.end
-  //       }))
-  //     }));
-  //   }
-  //   return undefined;
-  // }
-  //
-  // const phrases = createNewFragments();
   const currentTime = useRef(0);
-  const prevIndex = useRef<string | undefined>(undefined);
-  const currentIndex = useRef<string | undefined>(undefined);
+  const callId = callInfo.id;
+
+  const prevIndex = useRef<string[] | undefined | null>(undefined);
+  const currentIndex = useRef<string[] | undefined | null>(undefined);
+
+  useEffect(() => {
+    return () => {
+      currentTime.current = 0;
+      prevIndex.current = undefined;
+      currentIndex.current = undefined;
+    }
+  })
+
+  const getIndices = (array: Array<any>, necessaryElements: any) => {
+    let indices: number[] = []
+    for (let i = 0; i < necessaryElements.length; i++) {
+      indices.push(array.indexOf(necessaryElements[i]));
+    }
+    return indices;
+  }
 
   // Возвращает строку с индексом фрагмента/фразы и слова.
   function findWordIndex(phrases: any[] | undefined, currentTime: number) {
     if (phrases) {
-      const currentFragmentIndex = phrases.findIndex(
-        (phrase) => phrase.begin <= currentTime && currentTime <= phrase.end
-      );
-      if (currentFragmentIndex < 0) {
+      const currentFragments = phrases.filter(phrase => phrase.begin <= currentTime && currentTime <= phrase.end);
+      const currentFragmentsIndices = getIndices(phrases, currentFragments);
+
+      if (currentFragmentsIndices.length < 1 || currentFragmentsIndices.some(index => index < 0)) {
         return undefined;
-      } else {
-        const currentWordIndex = phrases[currentFragmentIndex].words.findIndex(
-          (word: any) => word.begin <= currentTime && currentTime <= word.end
-        );
-        if (currentWordIndex < 0) {
-          return undefined
-        }
-        return `${currentFragmentIndex}-${currentWordIndex}`;
       }
+
+      let indices = []
+      for (let i = 0; i < currentFragments.length; i++) {
+        const currentWords = currentFragments[i].words.filter((word: any) => word.begin <= currentTime && currentTime <= word.end);
+        const currentWordsIndices = getIndices(currentFragments[i].words, currentWords);
+
+        for (let j = 0; j < currentWords.length; j++) {
+          indices.push(`${callId}-${currentFragmentsIndices[i]}-${currentWordsIndices[j]}`)
+        }
+      }
+      if (indices.length < 1) {
+        return undefined;
+      }
+      return indices;
     }
-  } // return 1-4
+  } // return [1-4, 2-8]
 
 
   const onListen = (eventCurrentTime: any) => {
@@ -177,36 +188,46 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
 
     currentTime.current = currentTimeLocal;
     if (callStt) {
-      const index = findWordIndex(callStt.fragments, currentTimeLocal);
-      if (index && currentIndex.current !== index) {
-        const activeWord = document.getElementById(`${index}`);
-        if (activeWord) {
-          activeWord.classList.add(classes.isActive);
+      const indices = findWordIndex(callStt.fragments, currentTimeLocal);
+
+      if (indices && JSON.stringify(indices) !== JSON.stringify(prevIndex.current)) {
+
+        let activeWord = null;
+        for (let i = 0; i < indices.length; i++) {
+          activeWord = document.getElementById(`${indices[i]}`);
+          if (activeWord) {
+            activeWord.classList.add(classes.isActive);
+          }
         }
 
+        if (prevIndex.current) {
+          for (let i = 0; i < prevIndex.current.length; i++) {
+            // убираем раскраску с предыдущего
+            const removeElement = document.getElementById(`${prevIndex.current[i]}`);
+            if (removeElement) {
+              removeElement.classList.remove(classes.isActive)
+            }
+          }
+        }
+
+        // новоепредыдущее = текущее
+        prevIndex.current = indices;
+
+        // if (activeWord) {
+        //   activeWord.scrollIntoView({
+        //     behavior: "smooth",
+        //   });
+        // }
+
+      }
+      if (!indices) {
         // убираем раскраску с предыдущего
         const removeElement = document.getElementById(`${prevIndex.current}`);
         if (removeElement) {
           removeElement.classList.remove(classes.isActive)
         }
-
-
-        // новое предыдущее = текущее
-        prevIndex.current = index;
-
-        // @ts-ignore
-        // activeWord.scrollIntoView({
-        //   behavior: "smooth",
-        // });
       }
-      if (!index) {
-        // убираем раскраску с предыдущего
-        const removeElement = document.getElementById(`${prevIndex.current}`);
-        if (removeElement) {
-          removeElement.classList.remove(classes.isActive)
-        }
-      }
-      currentIndex.current = index;
+      currentIndex.current = indices;
     }
     // const activeWordPosition = item.getBoundingClientRect();
     // activeWord.scrollTo({
@@ -218,12 +239,6 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
   return (
     <div>
       <div className={classes.audioPlayer} onClick={onListen}>
-        {/*<AudioPlayer*/}
-        {/*  style={{width: '100%'}}*/}
-        {/*  src={callAudio ? callAudio : ''}*/}
-        {/*  listenInterval={1}*/}
-        {/*  onListen={onListen}*/}
-        {/*/>*/}
         <ReactAudioPlayer
           style={{width: '100%'}}
           src={callAudio ? callAudio : ''}
@@ -265,7 +280,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
                     <li key={i}>
                       {fragment.words.map((word, j) => (
                         <span
-                          id={`${i}-${j}`}
+                          id={`${callId}-${i}-${j}`}
+                          className={classes.test}
                           key={j}
                         >
                           {word.word}{" "}
@@ -323,7 +339,9 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
             <ContainedSelect
               value={checkListValue}
               options={checkListOptions}
-              onSelectChange={(event: any) => {setCheckListValue(event)}}
+              onSelectChange={(event: any) => {
+                setCheckListValue(event)
+              }}
               width="274px"
             />
 
