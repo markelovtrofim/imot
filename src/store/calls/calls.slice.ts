@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
-import {CallsType} from "./calls.types";
-import {RootState} from "../index";
+import {CallType} from "./calls.types";
+import {RootState} from "../store";
 
 // get all calls
 type ResponseBaseCallsDataType = {
@@ -27,29 +27,22 @@ const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   return requestArray;
 };
 
-export const convertDate = (date: any, to: any) => {
-  // data request format month/day/year "2/24/2022".
-  if (date) {
-    const dateArray = date.split("/");
-    if (dateArray) {
-      // @ts-ignore
-      if (dateArray[0].length === 1) {
-        dateArray[0] = `0${dateArray[0]}`;
-      }
-      // @ts-ignore
-      if (dateArray[1].length === 1) {
-        dateArray[1] = `0${dateArray[1]}`;
-      }
-      if (to === 'display') { return `${dateArray[1]}.${dateArray[0]}.${dateArray[2]}` }
-      else if (to === 'request') { return `${dateArray[2]}-${dateArray[0]}-${dateArray[1]}`}
-    }
-  }
-  else { return date }
+const convertDate = (date: Date) => {
+  const yyyy = date.getFullYear();
+  const mm = date.getMonth() + 1; // Months start at 0!
+  let strMm = `${mm}`;
+
+  const dd = date.getDate();
+  let strDd = `${dd}`;
+
+  if (mm < 10) strMm = `0${mm}`;
+  if (dd < 10) strDd = `0${dd}`;
+  return `${yyyy}-${strMm}-${strDd}`;
 };
 
 export const getCallStt = createAsyncThunk(
   'calls/getCallAudio',
-  async (payload: { id: string, bundleIndex: number}, thunkAPI) => {
+  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/stt`, {
       headers: {
@@ -61,10 +54,9 @@ export const getCallStt = createAsyncThunk(
 );
 
 
-
 export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
-  async (payload: { id: string, bundleIndex: number}, thunkAPI) => {
+  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/audio`, {
       responseType: 'arraybuffer',
@@ -90,24 +82,20 @@ export const getBaseCallsData = createAsyncThunk(
       // @ts-ignore;
       const state: RootState = thunkAPI.getState();
 
-      let startDate = convertDate(state.search.date.startDate, 'request');
-      let endDate = convertDate(state.search.date.endDate, 'request');
-      if (startDate === endDate || !endDate) {
-        endDate = startDate;
-      }
+      let startDate = convertDate(state.search.date[0]);
+      let endDate = convertDate(state.search.date[1]);
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
-
       const response = await axios.post<ResponseBaseCallsDataType>(
-      `https://imot-api.pyzzle.ru/search_calls/?` +
-      `skip=${state.calls.skip}&limit=${state.calls.limit}` +
-      `&start_date=${startDate}` +
-      `&end_date=${endDate}`,
-      requestData,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+        `https://imot-api.pyzzle.ru/search_calls/?` +
+        `skip=${state.calls.skip}&limit=${state.calls.limit}` +
+        `&start_date=${startDate}` +
+        `&end_date=${endDate}`,
+        requestData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
       thunkAPI.dispatch(callsSlice.actions.incrementSkip(null));
       // @ts-ignore
       thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({...response.data, skip: thunkAPI.getState().calls.skip}));
@@ -121,7 +109,7 @@ export const getBaseCallsData = createAsyncThunk(
 
 export const getCallsInfo = createAsyncThunk(
   'calls/getCallsInfo',
-  async (payload: CallsType[], thunkAPI) => {
+  async (payload: CallType[], thunkAPI) => {
     try {
       let localCalls = [];
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
@@ -152,7 +140,7 @@ type InitialStateType = {
   skip: number,
   limit: number,
   callIds: null,
-  calls: CallsType[][] | []
+  calls: CallType[][] | []
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -221,14 +209,13 @@ export const callsSlice = createSlice({
       state.calls.slice(0, action.payload.leaveBundles);
     },
     setAudio(state, action: PayloadAction<any>) {
-      state.calls[action.payload.index].map(i => {
-        // @ts-ignore
-        if (i.info.id === action.payload.id) {
-          i.audio = action.payload.audio
+      state.calls[action.payload.index].map((item) => {
+        if (item.info && (item.info.id === action.payload.id)) {
+          item.audio = action.payload.audio
         }
       });
     },
-    setStt(state, action: PayloadAction<{stt:any, id: string, index: number}>) {
+    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number }>) {
       state.calls[action.payload.index].map(i => {
         // @ts-ignore
         if (i.info.id === action.payload.id) {
@@ -237,7 +224,7 @@ export const callsSlice = createSlice({
       });
     },
 
-    removeAudio(state, action: PayloadAction<{ id: string, bundleIndex: number}>) {
+    removeAudio(state, action: PayloadAction<{ id: string, bundleIndex: number }>) {
       if (state.calls[0]) {
         state.calls[action.payload.bundleIndex].map(i => {
           // @ts-ignore

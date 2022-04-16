@@ -18,11 +18,15 @@ export type DictType = {
 
 export type DictTypeDetailed = {
   id: string,
-  owner: string,
+  owner: string | null,
   title: string,
   sttAutoReplace: boolean | null,
   enabled: boolean,
-  allowedUsers: [],
-  phrases: string[],
+  allowedActions: string[],
+  allowedUsers: string[] | [],
+  usedRules: any,
+  phrases: string[] | [],
   group: string
 };
+
+export type DictActionType = 'clone' | 'enable' | 'disable' | 'delete' | 'make_global';

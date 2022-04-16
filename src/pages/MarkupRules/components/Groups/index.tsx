@@ -1,11 +1,15 @@
-import React from 'react';
+import React, {FC} from 'react';
 import Group from "./Group";
 import {useAppSelector} from "../../../../hooks/redux";
 import {Preloader} from '../../index';
+import {GroupType} from "../../../../store/dicts/dicts.types";
 
-const Groups = () => {
+type GroupsPropsType = {
+  groups: GroupType[] | null[]
+}
+
+const Groups: FC<GroupsPropsType> = ({groups}) => {
   // в пропсах надо сделать.
-  const groups = useAppSelector(state => state.dicts.groups);
   const currentGroup = useAppSelector(state => state.dicts.currentGroup);
 
   return (

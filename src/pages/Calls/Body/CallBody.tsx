@@ -1,31 +1,37 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
-import DialogItem from './DialogItem';
-import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 import {callsSlice} from "../../../store/calls/calls.slice";
 import {useDispatch} from "react-redux";
-import {CallsInfoType} from "../../../store/calls/calls.types";
-import PlayButton from "./Buttons/Play";
-import Skip from "./Buttons/Skip";
-import Speed from "./Buttons/Speed";
-import Time from "./Buttons/Time";
+import {
+  CallAudioType,
+  CallInfoType,
+  CallSttType,
+} from "../../../store/calls/calls.types";
+import PlayButton from "../../../components/Buttons/Play";
+import Skip from "../../../components/Buttons/Skip";
+import Speed from "../../../components/Buttons/Speed";
+import Time from "../../../components/Buttons/Time";
 import Volume from "../../../components/Volume";
-import Plus from "./Buttons/Plus";
-import Reboot from "./Buttons/Reboot";
-import History from "./Buttons/History";
-import Download from "./Buttons/Download";
-import Back from "./Buttons/Back";
+import Plus from "../../../components/Buttons/Plus";
+import Reboot from "../../../components/Buttons/Reboot";
+import History from "../../../components/Buttons/History";
+import Download from "../../../components/Buttons/Download";
+import Back from "../../../components/Buttons/Back";
 import {BlockBox} from "../../../components";
 import ContainedSelect from "../../../components/Selects/ContainedSelect";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 
+import ReactAudioPlayer from 'react-audio-player';
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
+
 type CallBodyPropsType = {
-  callInfo: CallsInfoType,
-  callAudio: string | null,
-  callStt: any | null,
+  callInfo: CallInfoType,
+  callAudio: CallAudioType | null,
+  callStt: CallSttType | null,
   bundleIndex: number,
   expanded: boolean,
 };
@@ -87,25 +93,26 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
         color: '#000 !important'
       }
     },
+    isActive: {
+      backgroundColor: 'black'
+    }
   }));
   const classes = useStyles();
   const dispatch = useDispatch();
+
 
   useEffect(() => {
     if (!expanded && callAudio) {
       dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex}));
     }
   }, [expanded]);
-
-
   // test check list state.
   const checkListOptions = [
     {value: 'Чек лист 1', label: 'Чек лист 1'},
     {value: 'Чек лист 2', label: 'Чек лист 2'},
     {value: 'Чек лист 3', label: 'Чек лист 3'}
-  ]
+  ];
   const [checkListValue, setCheckListValue] = useState(checkListOptions[0]);
-
   const [alignment, setAlignment] = useState<string | null>('year');
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -114,14 +121,118 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
     setAlignment(newAlignment);
   };
 
+  // useCallback
+  // useMemo
+  // memo
+  // const phrases = [{words: []}, {words: []}];
+
+
+  // Возвращает новый массив фрагментов добавляя к полю word, каждого фрагмента, поле isActive.
+  // function createNewFragments() {
+  //   if (callStt) {
+  //     return callStt.fragments.map((phrase) => ({
+  //       ...phrase,
+  //       words: phrase.words.map((word: CallSttWordType) => ({
+  //         ...word,
+  //         isActive: word.begin <= currentTime.current && currentTime.current <= word.end
+  //       }))
+  //     }));
+  //   }
+  //   return undefined;
+  // }
+  //
+  // const phrases = createNewFragments();
+  const currentTime = useRef(0);
+  const prevIndex = useRef<string | undefined>(undefined);
+  const currentIndex = useRef<string | undefined>(undefined);
+
+  // Возвращает строку с индексом фрагмента/фразы и слова.
+  function findWordIndex(phrases: any[] | undefined, currentTime: number) {
+    if (phrases) {
+      const currentFragmentIndex = phrases.findIndex(
+        (phrase) => phrase.begin <= currentTime && currentTime <= phrase.end
+      );
+      if (currentFragmentIndex < 0) {
+        return undefined;
+      } else {
+        const currentWordIndex = phrases[currentFragmentIndex].words.findIndex(
+          (word: any) => word.begin <= currentTime && currentTime <= word.end
+        );
+        if (currentWordIndex < 0) {
+          return undefined
+        }
+        return `${currentFragmentIndex}-${currentWordIndex}`;
+      }
+    }
+  } // return 1-4
+
+
+  const onListen = (eventCurrentTime: any) => {
+    let currentTimeLocal;
+    if (!!eventCurrentTime.target) {
+      currentTimeLocal = eventCurrentTime.target.currentTime * 1000;
+    } else {
+      currentTimeLocal = eventCurrentTime * 1000;
+    }
+
+    currentTime.current = currentTimeLocal;
+    if (callStt) {
+      const index = findWordIndex(callStt.fragments, currentTimeLocal);
+      if (index && currentIndex.current !== index) {
+        const activeWord = document.getElementById(`${index}`);
+        if (activeWord) {
+          activeWord.classList.add(classes.isActive);
+        }
+
+        // убираем раскраску с предыдущего
+        const removeElement = document.getElementById(`${prevIndex.current}`);
+        if (removeElement) {
+          removeElement.classList.remove(classes.isActive)
+        }
+
+
+        // новое предыдущее = текущее
+        prevIndex.current = index;
+
+        // @ts-ignore
+        // activeWord.scrollIntoView({
+        //   behavior: "smooth",
+        // });
+      }
+      if (!index) {
+        // убираем раскраску с предыдущего
+        const removeElement = document.getElementById(`${prevIndex.current}`);
+        if (removeElement) {
+          removeElement.classList.remove(classes.isActive)
+        }
+      }
+      currentIndex.current = index;
+    }
+    // const activeWordPosition = item.getBoundingClientRect();
+    // activeWord.scrollTo({
+    // x: activeWordPosition.x
+    // y: activeWordPosition.y - 100
+    // })
+  };
 
   return (
     <div>
-      <div className={classes.audioPlayer}>
-        <AudioPlayer
-          style={{backgroundColor: '#F8FAFC', boxShadow: 'none'}}
+      <div className={classes.audioPlayer} onClick={onListen}>
+        {/*<AudioPlayer*/}
+        {/*  style={{width: '100%'}}*/}
+        {/*  src={callAudio ? callAudio : ''}*/}
+        {/*  listenInterval={1}*/}
+        {/*  onListen={onListen}*/}
+        {/*/>*/}
+        <ReactAudioPlayer
+          style={{width: '100%'}}
           src={callAudio ? callAudio : ''}
+          controls={true}
+          listenInterval={1}
+          onListen={onListen}
+          onSeeked={onListen}
         />
+
         <div style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Volume/>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -148,11 +259,33 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
               Текстовый диалог
             </Typography>
             <div className={classes.cbDialogItems}>
-              {callStt && callStt.fragments.map((phrase: any) => {
-                return (
-                  <DialogItem person={phrase.direction} text={phrase.text}/>
-                )
-              })}
+              <ul>
+                {callStt ?
+                  callStt.fragments.map((fragment, i) => (
+                    <li key={i}>
+                      {fragment.words.map((word, j) => (
+                        <span
+                          id={`${i}-${j}`}
+                          key={j}
+                        >
+                          {word.word}{" "}
+                        </span>
+                      ))}
+                    </li>
+                  )) :
+                  <Typography variant={'h3'}>Скоро придет</Typography>}
+              </ul>
+
+              {/*{callStt && callStt.fragments.map((phrase: any, i: number) => {*/}
+              {/*  return (*/}
+              {/*    <DialogItem*/}
+              {/*      key={phrase.id}*/}
+              {/*      currentTime={currentTime}*/}
+              {/*      person={phrase.direction}*/}
+              {/*      phrase={phrase}*/}
+              {/*    />*/}
+              {/*  )*/}
+              {/*})}*/}
             </div>
           </div>
         </div>
@@ -190,7 +323,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
             <ContainedSelect
               value={checkListValue}
               options={checkListOptions}
-              onSelectChange={(event: any) => setCheckListValue(event)}
+              onSelectChange={(event: any) => {setCheckListValue(event)}}
               width="274px"
             />
 

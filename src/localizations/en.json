@@ -39,5 +39,23 @@
   "callsTag": "Tag",
   "callsTags": "Call tags",
   "callsFragments": "Fragment tags",
-  "callsEmpty": "No call filters selected"
+  "callsEmpty": "No call filters selected",
+
+  "DICTS": "DICTS",
+  "buttonDictsName_dicts": "Dictionary",
+  "buttonTagsName_dicts": "Tags",
+  "buttonChecklistsName_dicts": "Check-lists",
+  "searchInputText_dicts": "Search",
+  "nothingFound_dicts": "Nothing found",
+  "dictName_dictDetail": "Dictionary name",
+  "groupName_dictDetail": "Group name",
+  "phrasesList_dictDetail": "List of words, phrases",
+  "rulesName_dictDetail": "Rules",
+  "autocorrectDict_dictDetail": "Autocorrect Dictionary",
+  "saveButton_dictDetail": "Save",
+  "deleteButton_dictDetailMW": "Delete",
+  "cancelButton_dictDetailMW": "Cancel",
+  "cloneButton_dictDetailSelect": "Clone",
+  "deleteButton_dictDetailSelect": "Delete",
+  "makeGlobal_dictDetailSelect": "Make global"
 }

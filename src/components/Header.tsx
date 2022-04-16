@@ -1,9 +1,9 @@
 import React, {useEffect} from 'react';
-import {Button, LinearProgress, SelectChangeEvent} from '@mui/material';
+import {Button, SelectChangeEvent} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
-import {RootState} from '../store';
+import {RootState} from '../store/store';
 import {setLanguage} from '../store/lang/langActions';
 import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
@@ -16,6 +16,8 @@ import {useDispatch} from "react-redux";
 import {callsSlice} from "../store/calls/calls.slice";
 import {searchSlice} from "../store/search/search.slice";
 import {getGroups} from "../store/dicts/dicts.slice";
+import {getChildUser, getChildUsers, getMe, getUserToken} from "../store/users/users.slice";
+import ContainedSelect from "./Selects/ContainedSelect";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -54,7 +56,6 @@ const useStyles = makeStyles(({
   headerRightBlock: {
     display: 'flex',
     justifyContent: 'space-between',
-    width: '185px',
     height: '53px !important'
   },
   langHandler: {
@@ -104,16 +105,29 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 };
 
 const Header: React.FC = () => {
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+
   const classes = useStyles();
   const dispatch = useDispatch();
-  const {language} = useAppSelector((state: RootState) => state.lang);
   const handleLangChange = (event: SelectChangeEvent) => {
     const currentLang = event.target.value;
     dispatch(setLanguage(currentLang));
   };
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+
+
+  const history = useHistory();
   const historyPathArray = path.split('/');
+  const pagePath = history.location.pathname.split('/')[1];
+  const activeMarkupRulesPage = useAppSelector(state => state.dicts.activePage);
+
+  const currentUser = useAppSelector(state => state.users.currentUser);
+  const childUsers = useAppSelector(state => state.users.childUsers);
+  const currentChildUser = useAppSelector(state => state.users.currentChildUser);
+
+
   const [alignment, setAlignment] = React.useState(path ? `${historyPathArray[1]}` : 'calls');
 
   const handleRouteChange = (
@@ -123,23 +137,54 @@ const Header: React.FC = () => {
     setAlignment(newAlignment);
   };
 
+  useEffect(() => {
+    dispatch(getChildUser());
+    dispatch(getMe());
+    dispatch(getChildUsers());
+  }, []);
+
   const logout = () => {
     dispatch(removeAuthToken())
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
-  }
+  };
 
-  const history = useHistory();
-  const pagePath = history.location.pathname.split('/')[1];
 
-  const activePage = useAppSelector(state => state.dicts.activePage);
+  // users changer
+  const handleUserChange = async (e: any) => {
+    if (e.label === 'Все пользователи') {
+      const {mainToken} = JSON.parse(localStorage.getItem('mainToken') || '{}');
+      localStorage.setItem('token', JSON.stringify({
+        token: mainToken
+      }));
+    } else {
+      await dispatch(getUserToken(e.value));
+    }
+    window.location.reload();
+  };
+  const optionsConverter = () => {
+    let result = [{value: '', label: 'Все пользователи'}]
+    if (childUsers) {
+      for (let i = 0; i < childUsers.length; i++) {
+        result.push({value: childUsers[i].id, label: childUsers[i].name ? childUsers[i].name : childUsers[i].login});
+      }
+      return result;
+    }
+    return []
+  };
+  const convertedOptions = optionsConverter();
+  const convertedValue = convertedOptions.filter((item) => {
+    if (currentChildUser) {
+      return item.value === currentChildUser.id
+    }
+  })[0] || {value: '', label: 'Все пользователи'};
 
   return (
     <div className={classes.headerWrapper}>
       <div className={classes.headerInner}>
         <div className={classes.headerLeftBlock}>
           {/* Логотип */}
-          <img className={classes.headerIcon} height={25} src={LogoPng} alt=""/>
+          <img className={classes.headerIcon} height={55} src={LogoPng} alt=""/>
 
           {/* Навигация */}
           <ToggleButtonGroup
@@ -182,9 +227,9 @@ const Header: React.FC = () => {
               disabled={pagePath === 'markuprules' && pagePath === alignment}
               value={'markuprules'}
               onClick={async () => {
-                await dispatch(getGroups());
                 history.location.pathname = '/'
-                history.replace(`markuprules/${activePage}/1`);
+                history.replace(`markuprules/${activeMarkupRulesPage}`);
+                await dispatch(getGroups());
               }}
               className={classes.headerItemText}
             >
@@ -208,8 +253,9 @@ const Header: React.FC = () => {
             {/* Alert */}
             <ToggleButton
               key={4}
-              disabled={'alert' === alignment}
+              disabled={true}
               value={'alert'}
+              style={{cursor: 'default !important'}}
               onClick={() => {
                 history.location.pathname = '/'
                 history.replace('alert');
@@ -237,14 +283,25 @@ const Header: React.FC = () => {
           </ToggleButtonGroup>
         </div>
 
+
         <div className={classes.headerRightBlock}>
-          {/* Смена языка */}
-          <Select MenuProps={{
-            disableScrollLock: true
-          }} className={classes.langHandler} variant='standard' value={language} onChange={handleLangChange}>
-            <MenuItem className={classes.langHandlerItem} value={'RU'}>RU</MenuItem>
-            <MenuItem className={classes.langHandlerItem} value={'EN'}>EN</MenuItem>
-          </Select>
+          <div style={{display: 'flex', marginRight: '30px'}}>
+            {currentChildUser && currentUser && currentUser.accessRights.includes('admin') &&
+            <ContainedSelect
+              width={'220px'}
+              onSelectChange={handleUserChange}
+              options={convertedOptions}
+              value={convertedValue}
+            />
+            }
+            {/* Смена языка */}
+            <Select MenuProps={{
+              disableScrollLock: true
+            }} className={classes.langHandler} variant='standard' value={language} onChange={handleLangChange}>
+              <MenuItem className={classes.langHandlerItem} value={'RU'}>RU</MenuItem>
+              <MenuItem className={classes.langHandlerItem} value={'EN'}>EN</MenuItem>
+            </Select>
+          </div>
 
           {/* Выход из аккаунта */}
           <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={logout}>

@@ -64,8 +64,10 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
           <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
         </IconButton>
       </div>
-      <Typography className={cn(classes.mwHelp, classes.mwText)}>Ввидите email для восстановление пароля,на него будет
-        выслано письмо.</Typography>
+      <Typography className={cn(classes.mwHelp, classes.mwText)}>
+        Ввидите email для восстановление пароля,на него будет
+        выслано письмо.
+      </Typography>
       <form onSubmit={formik.handleSubmit}>
         <Input
           name={"email"}

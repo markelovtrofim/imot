@@ -9,7 +9,7 @@ import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
 import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../../store/search/search.slice";
 import {translate} from "../../localizations";
-import {RootState} from "../../store";
+import {RootState} from "../../store/store";
 import {getAllTemplates, templateSlice} from "../../store/search/template.slice";
 import {TemplateType} from "../../store/search/template.types";
 import {CriteriasType} from "../../store/search/search.types";
@@ -211,7 +211,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
 
   return (
     <div style={{margin: '24px 0'}}>
-      <BlockBox padding="34px 24px 10px 24px">
+      <BlockBox padding="24px 24px 10px 24px">
         <div className={classes.searchTitle}>
           <div className={classes.searchTitleLeft}>
             <Typography className={classes.searchTitleLeftText} variant="h5">

@@ -30,20 +30,14 @@ export const getDefaultCriterias = createAsyncThunk(
 )
 
 type InitialStateType = {
-  date: {
-    startDate: string | null,
-    endDate: string | null
-  },
+  date: Date[],
   allCriterias: CriteriasType[] | null,
   defaultCriterias: RequestDataType[],
   activeCriterias: CriteriasType[]
 }
 
 const initialState: InitialStateType = {
-  date: {
-    startDate: null,
-    endDate: null
-  },
+  date: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())],
   allCriterias: null,
   defaultCriterias: [],
   activeCriterias: []
@@ -54,6 +48,7 @@ export const searchSlice = createSlice({
   initialState,
   reducers: {
     setDate(state, action: PayloadAction<typeof initialState.date>) {
+      debugger
       state.date = action.payload;
     },
 
@@ -104,13 +99,10 @@ export const searchSlice = createSlice({
       state.activeCriterias = [];
     },
     removeAllState(state, action: PayloadAction<null>) {
-      state.date = {
-        startDate: null,
-        endDate: null
-      };
+      state.date = [new Date(), new Date()];
       state.allCriterias = null;
       state.defaultCriterias = [];
       state.activeCriterias = [];
     }
   }
-});
+})

@@ -8,6 +8,10 @@ import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
 import {useDispatch} from "react-redux";
 import LoadCall from "./pages/LoadCall";
+import Settings from "./pages/Settings";
+import "rsuite/dist/rsuite.min.css";
+import 'antd/dist/antd.css';
+
 
 export const useStyles = makeStyles(({
   wrapper: {
@@ -77,7 +81,7 @@ const App = () => {
         </Route>
 
         {/* Загрузить звонок */}
-        <Route path="/markuprules/:page/:id">
+        <Route path="/markuprules">
           <MarkupRules/>
         </Route>
 
@@ -102,9 +106,7 @@ const App = () => {
         <Route path="/settings">
           <Header/>
           <div className={classes.container}>
-            <div>
-              <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h3">Settings</Typography>
-            </div>
+            <Settings/>
           </div>
         </Route>
 

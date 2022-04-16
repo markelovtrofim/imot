@@ -3,9 +3,10 @@ import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 
 
-const Field: FC<{ label: string, labelBrother?: any, bgColor?: string }> = memo(({children, label, labelBrother, bgColor}) => {
+const Field: FC<{ label: string, labelBrother?: any, bgColor?: string, height?: string }> = memo(({children, label, labelBrother, bgColor, height}) => {
   const useStyles = makeStyles(({
     fieldBox: {
+      height: height,
       cursor: 'default',
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
       border: '1px solid #EEF2F6',
@@ -18,7 +19,6 @@ const Field: FC<{ label: string, labelBrother?: any, bgColor?: string }> = memo(
       fontWeight: '700 !important',
       fontSize: '13px !important'
     },
-    fieldBody: {}
   }));
   const classes = useStyles();
   return (
@@ -28,7 +28,7 @@ const Field: FC<{ label: string, labelBrother?: any, bgColor?: string }> = memo(
         {labelBrother}
       </div>
       <div className={classes.fieldBox}>
-        <Typography className={classes.fieldBody}>
+        <Typography>
           {children}
         </Typography>
       </div>

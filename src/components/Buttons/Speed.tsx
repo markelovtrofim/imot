@@ -1,5 +1,5 @@
 import React, {FC, useState} from 'react';
-import IconButton from "../../../../components/IconButton";
+import IconButton from "../IconButton";
 import {makeStyles} from "@mui/styles";
 
 const useStyles = makeStyles(({

@@ -1,11 +1,18 @@
 import React from 'react';
 import {makeStyles} from '@mui/styles';
 import {Button} from '@mui/material';
-import {useSelector} from "react-redux";
-import {RootState} from "../store";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../store/store";
 import {translate} from '../localizations';
 import cn from 'classnames';
-import Calendar from "./Calendar";
+import {DateRangePicker} from 'rsuite';
+import ButtonGroup from "./ButtonGroup";
+import {useAppSelector} from "../hooks/redux";
+import {searchSlice} from "../store/search/search.slice";
+import { DatePicker, Space } from 'antd';
+
+const { RangePicker } = DatePicker;
+
 
 // Svg
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -17,7 +24,6 @@ const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-
 const CaseSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill={props.fill ? props.fill : "#738094"}
@@ -29,7 +35,6 @@ const CaseSvg = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-
 const DownloadSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="12" height="14" viewBox="0 0 12 14" xmlns="http://www.w3.org/2000/svg"
@@ -42,10 +47,11 @@ const DownloadSvg = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
+
 // Styles
 const useStyles = makeStyles(({
   controlBlockWrapper: {
-    margin: '24px 0',
+    marginTop: '24px',
     display: 'flex',
     justifyContent: 'space-between'
   },
@@ -90,21 +96,56 @@ const useStyles = makeStyles(({
     '& .MuiButton-startIcon svg': {
       fill: '#738094',
     }
+  },
+  dateRangePicker: {
+
+    zIndex: '10000 !important'
   }
+
 }));
 
+export const unitsOfTime = {
+  today: [new Date(Date.now()), new Date(Date.now())],
+  yesterday: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)],
+  week: [new Date(Date.now() - 168 * 60 * 60 * 1000), new Date(Date.now())],
+  month: [new Date(Date.now() - 720 * 60 * 60 * 1000), new Date(Date.now())],
+  year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())]
+}
 
 const ControlBlock = () => {
   const {language} = useSelector((state: RootState) => state.lang);
-
-
   const classes = useStyles();
+  const date = useAppSelector(state => state.search.date);
+  const dispatch = useDispatch();
+
   return (
     <div className={classes.controlBlockWrapper}>
       <div className={classes.controlBlockDate}>
         {/* Ввод точной даты */}
-        <div style={{height: '40px'}}>
-          <Calendar/>
+        <div style={{height: '40px', display: 'flex'}}>
+          <DateRangePicker
+            ranges={[]}
+            appearance="subtle"
+            placeholder="Subtle"
+            className={classes.dateRangePicker}
+            format={'dd/MM/yyyy'}
+            onChange={(event: any) => {
+              dispatch(searchSlice.actions.setDate(event));
+            }}
+            value={[date[0], date[1]]}
+          />
+          <div style={{position: 'absolute'}}>
+
+          </div>
+          <ButtonGroup
+            items={[
+              {value: 'today', onClick: () => {dispatch(searchSlice.actions.setDate(unitsOfTime.today))}, unitOfTime: unitsOfTime.today},
+              {value: 'yesterday', onClick: () => {dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday))}, unitOfTime: unitsOfTime.yesterday},
+              {value: 'week', onClick: () => {dispatch(searchSlice.actions.setDate(unitsOfTime.week))}, unitOfTime: unitsOfTime.week},
+              {value: 'month', onClick: () => {dispatch(searchSlice.actions.setDate(unitsOfTime.month))}, unitOfTime: unitsOfTime.month},
+              {value: 'year', onClick: () => {dispatch(searchSlice.actions.setDate(unitsOfTime.year))}, unitOfTime: unitsOfTime.year}
+            ]}
+          />
         </div>
       </div>
       <Button

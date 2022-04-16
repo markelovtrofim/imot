@@ -19,7 +19,7 @@ const Input: FC<InputPropsType> = (props) => {
   const useStyles = makeStyles(({
     inputRoot: {
       backgroundColor: props.bcColor,
-      height: `33px !important`,
+      height: `${props.height ? props.height : '33px'} !important`,
       borderRadius: '5px',
       width: '100%',
       border: props.border ?`${props.border} !important` : 'none !important',

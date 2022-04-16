@@ -1,26 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {BlockBox, Search, СontrolBlock} from "../../components";
-import {CircularProgress, Select, Skeleton, Slider, Typography} from "@mui/material";
+import {CircularProgress, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
-import {CallsType} from "../../store/calls/calls.types";
+import {CallType} from "../../store/calls/calls.types";
 import CallStubMiddleware from "./Call";
-import {RootState} from "../../store";
+import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
 import ContainedSelect from "../../components/Selects/ContainedSelect";
-import Skip from "./Body/Buttons/Skip";
-import PlayButton from "./Body/Buttons/Play";
-import Speed from "./Body/Buttons/Speed";
-import Plus from "./Body/Buttons/Plus";
-import Reboot from "./Body/Buttons/Reboot";
-import History from "./Body/Buttons/History";
-import Download from "./Body/Buttons/Download";
-import Back from "./Body/Buttons/Back";
-import Time from "./Body/Buttons/Time";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -165,12 +156,12 @@ const Calls = React.memo(() => {
 
         <div>
           {calls.length !== 0 ?
-            calls.map((callsArrays: CallsType[]) => {
+            calls.map((callsArrays: CallType[]) => {
               // @ts-ignore
               const callsArrayIndex = calls.indexOf(callsArrays)
               return (
                 <div>
-                  {callsArrays.map((call: CallsType) => {
+                  {callsArrays.map((call: CallType) => {
                     return (
                       <CallStubMiddleware
                         callInfo={call.info} callAudio={call.audio} callStt={call.stt}

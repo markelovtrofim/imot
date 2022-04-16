@@ -72,11 +72,12 @@ const CloneSvg = (props: React.SVGProps<SVGSVGElement>) => {
 type CustomControlSelectPropsType = {
   handleSelectChange: (event: any) => void,
   svg: 'horizontal' | 'vertical',
-  options: {value: any, label: string}[],
-  optionsPosition: 'top' | 'bottom'
+  options: {value: any, label: any}[],
+  optionsPosition: 'top' | 'bottom',
+  disabled?: boolean
 };
 
-const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChange, svg, options, optionsPosition}) => {
+const CustomControlSelect: FC<CustomControlSelectPropsType> = ({disabled, handleSelectChange, svg, options, optionsPosition}) => {
   // STYLES BLOCK
   const customDotsStyles = {
     container: (base: any) => ({
@@ -177,6 +178,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({handleSelectChan
 
   return (
     <Select
+      isDisabled={disabled}
       menuPlacement={optionsPosition}
       styles={customDotsStyles}
       placeholder={''}

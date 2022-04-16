@@ -6,11 +6,13 @@ import {callsSlice} from "./calls/calls.slice";
 import {searchSlice} from "./search/search.slice";
 import {templateSlice} from "./search/template.slice";
 import {dictsSlice} from "./dicts/dicts.slice";
+import {usersSlice} from "./users/users.slice";
 
 
 const rootReducer = combineReducers({
   lang: langReducer,
   auth: authSlice.reducer,
+  users: usersSlice.reducer,
   calls: callsSlice.reducer,
   search: searchSlice.reducer,
   template: templateSlice.reducer,

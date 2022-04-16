@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, memo, useState} from 'react';
 import {makeStyles} from "@mui/styles";
 import {BlockBox} from "../../../components";
 import {Typography} from "@mui/material";
@@ -83,17 +83,28 @@ const useStyles = makeStyles(({
     justifyContent: 'space-between',
     margin: '0 16px'
   },
+
+  isActive: {
+    backgroundColor: 'black'
+  }
 }));
 
 type DialogItemType = {
   person: 'operator' | 'client',
-  text: string
+  phrase: any,
+  currentTime: number
 };
 
-const DialogItem: FC<DialogItemType> = ({person, text}) => {
+const DialogItem: FC<DialogItemType> = memo(({person, phrase, currentTime}) => {
   const classes = useStyles();
   const condition = person === 'client'
   const svgStyles = {backgroundColor: '#ffffff', padding: '8px', borderRadius: '5px', margin: '0 8px'}
+
+  const words = phrase.words.map((word: any) => ({
+    ...word,
+    isActive: word.begin <= currentTime && currentTime <= word.end
+  }))
+
   return (
     <div className={cn(classes.diItem, condition ? classes.diCustomer : null)}>
       {/* Icon */}
@@ -102,10 +113,12 @@ const DialogItem: FC<DialogItemType> = ({person, text}) => {
         : <HeadphoneIcon style={svgStyles}/>
       }
       {/* DIBody */}
-      <BlockBox padding={'16px 26px 16px 16px'}>
+      <BlockBox padding={'10px'}>
         <div className={classes.diBodyInner}>
           <Typography className={classes.diBodyText}>
-            {text}
+            {words.map((word: any, i: number) => {
+              return <span key={i} className={cn({[classes.isActive]: word.isActive})}>{word.word} </span>
+            })}
           </Typography>
         </div>
       </BlockBox>
@@ -120,6 +133,6 @@ const DialogItem: FC<DialogItemType> = ({person, text}) => {
       </div>
     </div>
   );
-};
+});
 
 export default DialogItem;

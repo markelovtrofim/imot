@@ -11,7 +11,7 @@ import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import {TwoTags, Fragment} from "../../components/Tag";
-import {CallsInfoType, CallsType, TagType} from "../../store/calls/calls.types";
+import {CallInfoType, CallSttType, CallType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
@@ -143,9 +143,9 @@ const useStyles = makeStyles(({
 }));
 
 type CallStubMiddlewarePropsType = {
-  callInfo: CallsInfoType | null,
+  callInfo: CallInfoType | null,
   callAudio: string | null,
-  callStt: any | null,
+  callStt: CallSttType | null,
   bundleIndex: number,
 
   expanded: boolean,
@@ -162,10 +162,12 @@ const CallStubMiddleware = memo(({
                                    handleExpandedChange
                                  }: CallStubMiddlewarePropsType) => {
   const classes = useStyles();
+
+
   // Заглушки пока не пришли звонки с сервака.
   if (!callInfo) {
     return (
-      <Accordion style={{border: 'none'}}>
+      <Accordion style={{border: 'none', zIndex: '1'}}>
         {/* Первичная информация о звонке. */}
         <AccordionSummary className={classes.accordion} disabled>
           <Grid container className={classes.callInner}>
@@ -229,16 +231,23 @@ const CallStubMiddleware = memo(({
       </Accordion>
     );
   }
-  return <Call callInfo={callInfo} callAudio={callAudio} callStt={callStt}
-               bundleIndex={bundleIndex}
-               handleExpandedChange={handleExpandedChange} expanded={expanded}/>
+  return (
+    <Call
+      callInfo={callInfo}
+      callAudio={callAudio}
+      callStt={callStt}
+      bundleIndex={bundleIndex}
+      handleExpandedChange={handleExpandedChange}
+      expanded={expanded}
+    />
+  )
 });
 
 
 type CallPropsType = {
-  callInfo: CallsInfoType,
+  callInfo: CallInfoType,
   callAudio: string | null,
-  callStt: any | null,
+  callStt: CallSttType | null,
   bundleIndex: number,
 
   expanded: boolean,
@@ -260,14 +269,10 @@ const Call = memo((props: CallPropsType) => {
   // устанавливает пришело ли аудио и stt.
   const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
   useEffect(() => {
-    if (props.callAudio) {
-      setIsCallBodyData(true);
-      setProgress(false);
-    }
     return () => {
       setIsCallBodyData(false);
     }
-  }, [props.callAudio]);
+  }, []);
 
   // конвертирует время для показа
   const timeConverter = (s: number) => {
@@ -334,12 +339,11 @@ const Call = memo((props: CallPropsType) => {
   //   window.addEventListener("resize", heightTracker);
   //   return () => window.removeEventListener("resize", heightTracker);
   // })
-  const [progress, setProgress] = React.useState<boolean>(false);
 
   return (
     <Accordion
       tabIndex={-1}
-      style={{border: 'none'}}
+      style={{border: 'none', zIndex: '1'}}
       expanded={props.expanded && isCallBodyData}
     >
       {/* Первичная информация о звонке. */}
@@ -352,7 +356,7 @@ const Call = memo((props: CallPropsType) => {
               props.handleExpandedChange(props.callInfo.id);
               dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
               dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
-              setProgress(true);
+              setIsCallBodyData(true);
             } else {
               dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
               setIsCallBodyData(false);
@@ -361,8 +365,14 @@ const Call = memo((props: CallPropsType) => {
         }}
       >
         <Grid container className={classes.callInner}>
-          <div style={{position: 'absolute', top: '0', height: '4px !important', backgroundColor: '#F8FAFC', width:'96%'}}>
-            {progress && <LinearProgress style={{height: '4px !important', width: '100%'}} color="primary"/>}
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            height: '4px !important',
+            backgroundColor: '#F8FAFC',
+            width: '96%'
+          }}>
+            {/* {progress && <LinearProgress style={{height: '4px !important', width: '100%'}} color="primary"/>}*/}
           </div>
           {/* Сотрудник. */}
           <Grid item xs={1.8} style={{minWidth: '145px'}}>
@@ -434,8 +444,13 @@ const Call = memo((props: CallPropsType) => {
       </AccordionSummary>
       {/* Основная информация о звонке. */}
       <AccordionDetails className={classes.accordionDetails}>
-        <CallBody callInfo={props.callInfo} callAudio={props.callAudio} callStt={props.callStt} bundleIndex={props.bundleIndex}
-                  expanded={props.expanded}/>
+        <CallBody
+          callInfo={props.callInfo}
+          callAudio={props.callAudio}
+          callStt={props.callStt}
+          bundleIndex={props.bundleIndex}
+          expanded={props.expanded}
+        />
       </AccordionDetails>
     </Accordion>
   );

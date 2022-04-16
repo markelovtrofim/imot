@@ -3,7 +3,7 @@ import {Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import {BlockBox} from "../../../../components";
 
-const Tags = () => {
+const TagsDetail = () => {
   const useStyles = makeStyles(({
     // tt - tagsDetails
 
@@ -11,15 +11,15 @@ const Tags = () => {
   const classes = useStyles()
 
   return (
-    <div>
+    <BlockBox padding={'0 24px'}>
       <Typography
-        style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}}
+        style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)', paddingTop: '300px'}}
         variant="h3"
       >
-        Tags
+        in this place will be tags details
       </Typography>
-    </div>
+    </BlockBox>
   );
 };
 
-export default Tags;
+export default TagsDetail;

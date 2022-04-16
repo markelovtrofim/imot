@@ -22,6 +22,9 @@ export const fetchAuthToken = createAsyncThunk(
       localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));
+      localStorage.setItem('mainToken', JSON.stringify({
+        mainToken: response.data.access_token
+      }));
       thunkAPI.dispatch(authSlice.actions.setAuth(true));
     } catch (error) {
       // @ts-ignore

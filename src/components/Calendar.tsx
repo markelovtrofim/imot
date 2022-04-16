@@ -6,7 +6,7 @@ import {Dialog, InputBase, Typography} from "@mui/material";
 import {translate} from "../localizations";
 import {makeStyles} from "@mui/styles";
 import {useAppSelector} from "../hooks/redux";
-import {RootState} from "../store";
+import {RootState} from "../store/store";
 import {searchSlice} from "../store/search/search.slice";
 import {useDispatch} from "react-redux";
 import ToggleButton from '@mui/material/ToggleButton';
@@ -125,41 +125,30 @@ const CustomCalendar = React.memo(() => {
     }
   };
 
-  const convertDateFromDateType = (date: Date) => {
-    const yyyy = date.getFullYear();
-    const mm = date.getMonth() + 1; // Months start at 0!
-    let strMm = '';
 
-    const dd = date.getDate();
-    let strDd = '';
-
-    if (mm < 10) strMm = `0${mm}`
-    if (dd < 10) strDd = `0${dd}`;
-    return `${mm}/${dd}/${yyyy}`;
-  };
 
   useEffect(() => {
-    const startDate = convertDateFromDateType(localDate[0]);
-    const endDate = convertDateFromDateType(localDate[1]);
-
-    let newDateFormat = {
-      startDate: null as string | null,
-      endDate: null as string | null
-    };
-
-    if (startDate === endDate) {
-      newDateFormat = {
-        startDate: startDate,
-        endDate: ''
-      }
-    } else {
-      newDateFormat = {
-        startDate: startDate,
-        endDate: endDate
-      };
-    }
-    dispatch(searchSlice.actions.setDate(newDateFormat));
-  }, [localDate]);
+    // const startDate = convertDateFromDateType(localDate[0]);
+    // const endDate = convertDateFromDateType(localDate[1]);
+    //
+    // let newDateFormat = {
+    //   startDate: null as string | null,
+    //   endDate: null as string | null
+    // };
+    //
+    // if (startDate === endDate) {
+    //   newDateFormat = {
+    //     startDate: startDate,
+    //     endDate: ''
+    //   }
+    // } else {
+    //   newDateFormat = {
+    //     startDate: startDate,
+    //     endDate: endDate
+    //   };
+    // }
+    // dispatch(searchSlice.actions.setDate(newDateFormat));
+  }, [localDate])
 
   const classes = useStyles();
   const {language} = useAppSelector((state: RootState) => state.lang);
@@ -198,29 +187,28 @@ const CustomCalendar = React.memo(() => {
   };
   return (
     <div style={{display: 'flex', alignItems: 'center', height: '40px'}}>
+
       <BlockBox padding={"0"} borderRadius={'5px'} border={'1px solid #E3E8EF'}>
         <div className={classes.cbDateItems} onScroll={scrollHandler}>
           <div className={classes.controlBlockDateItem}>
-            <Typography>{translate('from', language)}</Typography>
-            <InputBase className={classes.calendarInput} disabled value={convertDate(date.startDate, 'display')}
-                       onClick={handleClickOpen}/>
-            <ArrowSvg/>
+            {/*<Typography>{translate('from', language)}</Typography>*/}
+            {/*<InputBase className={classes.calendarInput} disabled value={convertDate(date.startDate, 'display')}*/}
+            {/*           onClick={handleClickOpen}/>*/}
+            {/*<ArrowSvg/>*/}
           </div>
           <div className={classes.controlBlockDateItem}>
-            <Typography>{translate('to', language)}</Typography>
-            <InputBase className={classes.calendarInput} disabled value={convertDate(date.endDate, 'display')}
-                       onClick={handleClickOpen}/>
-            <CaseSvg/>
+            {/*<Typography>{translate('to', language)}</Typography>*/}
+            {/*<InputBase className={classes.calendarInput} disabled value={convertDate(date.endDate, 'display')}*/}
+            {/*           onClick={handleClickOpen}/>*/}
+            {/*<CaseSvg/>*/}
           </div>
+
           <Dialog className={classes.calendar} disableScrollLock={true}
                   open={open} onClose={handleClose} BackdropProps={{style: {backgroundColor: "transparent"}}}
           >
-            <Calendar
-              locale={"ru-RU"}
-              onChange={setLocalDate}
-              value={localDate}
-              selectRange={true}
-            />
+            <div style={{display: 'flex'}}>
+
+            </div>
           </Dialog>
         </div>
       </BlockBox>

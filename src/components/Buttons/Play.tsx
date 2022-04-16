@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import IconButton from "../../../../components/IconButton";
+import IconButton from "../IconButton";
 
 const PlaySvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (

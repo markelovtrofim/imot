@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import IconButton from "../../../../components/IconButton";
+import IconButton from "../IconButton";
 
 type TimePropsType = {
   side: 'left' | 'right',

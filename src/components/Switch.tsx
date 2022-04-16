@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { styled } from '@mui/system';
-import SwitchUnstyled, { switchUnstyledClasses } from '@mui/base/SwitchUnstyled';
+import {FC} from 'react';
+import {styled} from '@mui/system';
+import SwitchUnstyled, {switchUnstyledClasses} from '@mui/base/SwitchUnstyled';
 
 const grey = {
   400: '#BFC7CF',
@@ -9,7 +10,7 @@ const grey = {
 };
 
 const Root = styled('span')(
-  ({ theme }) => `
+  ({theme}) => `
   font-size: 0;
   position: relative;
   display: inline-block;
@@ -74,8 +75,21 @@ const Root = styled('span')(
   `,
 );
 
-export default function UnstyledSwitches() {
-  const label = { componentsProps: { input: { 'aria-label': 'Demo switch' } } };
+type CustomSwitchPropsType = {
+  disabled: boolean,
+  onChecked: (e: any) => void,
+  checked: boolean
+};
 
-  return <SwitchUnstyled component={Root} {...label} defaultChecked />
+const CustomSwitch: FC<CustomSwitchPropsType> = ({onChecked, disabled, checked}) => {
+  const label = {componentsProps: {input: {'aria-label': 'Demo switch'}}};
+  return <SwitchUnstyled
+    disabled={disabled}
+    onChange={onChecked}
+    component={Root}
+    checked={checked}
+    {...label}
+  />
 }
+
+export default CustomSwitch;

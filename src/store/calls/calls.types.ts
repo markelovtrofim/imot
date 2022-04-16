@@ -11,7 +11,7 @@ export type TagType = {
   direction: string
 }
 
-export type CallsInfoType = {
+export type CallInfoType = {
   id: string,
   callTime: string,
   callTimeReadable: string,
@@ -24,17 +24,35 @@ export type CallsInfoType = {
   tags: TagType[]
 };
 
-
-export type CallsType = {
+export type CallType = {
   id: string | null,
-  info: CallsInfoType | null,
-  stt: CallsSttType | null,
-  audio: CallsAudioType | null
+  info: CallInfoType | null,
+  stt: CallSttType | null,
+  audio: CallAudioType | null
 };
 
+// Stt
+export type CallSttType = {
+  all_engines: string[],
+  engine: string,
+  fragments: CallSttFragmentType[]
+};
 
-// for the future
-export type CallsSttType = any;
+export type CallSttFragmentType = {
+  id: string,
+  direction: string,
+  text: string,
+  begin: number,
+  end: number,
+  words: CallSttWordType[]
+}
 
-// for the future
-export type CallsAudioType = any;
+export type CallSttWordType = {
+  begin: number,
+  end: number,
+  word: string,
+  conf: number
+}
+
+// Audio
+export type CallAudioType = string;

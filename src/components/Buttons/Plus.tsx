@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import IconButton from "../../../../components/IconButton";
+import IconButton from "../IconButton";
 
 const PlusSvg = () => {
   return (
@@ -12,12 +12,14 @@ const PlusSvg = () => {
 
 type PlusPropsType = {
   margin?: string,
-  handleClick?: any
+  handleClick?: any,
+  disabled?: boolean
 }
 
-const Plus: FC<PlusPropsType> = ({margin, handleClick}) => {
+const Plus: FC<PlusPropsType> = ({disabled, margin, handleClick}) => {
   return (
     <IconButton
+      disabled={disabled}
       margin={margin ? margin : '0 15px 0 0'}
       backgroundColor="#D9F7BE"
       icon={<PlusSvg/>}

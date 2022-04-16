@@ -1,8 +1,7 @@
 {
   "HEADER": "HEADER",
-
   "calls": "Звонки",
-  "reports": "Мои отсчеты",
+  "reports": "Мои отчёты",
   "markupRules": "Правила разметки",
   "loadCall": "Загрузить звонок",
   "alert": "Оповещение",
@@ -11,7 +10,6 @@
 
 
   "CONTROL_BLOCK": "CONTROL_BLOCK",
-
   "from": "C",
   "to": "По",
   "today": "Сегодня",
@@ -23,7 +21,6 @@
 
 
   "SEARCH": "SEARCH",
-
   "searchTitle": "Звонок",
   "searchClear": "Очистить",
   "searchSaveTemp": "Сохранить как шаблон",
@@ -32,12 +29,41 @@
 
 
   "CALLS": "CALLS",
-
   "callsLastCalls": "Последние звонки",
   "callsEmployee": "Сотрудник",
   "callsCustomer": "Клиент",
   "callsTag": "Тег",
   "callsTags": "Теги звонка",
   "callsFragments": "Теги фрагмента",
-  "callsEmpty": "Фильтры звонков не выбраны"
+  "callsEmpty": "Фильтры звонков не выбраны",
+
+
+  "DICTS": "DICTS",
+  "buttonDictsName_dicts": "Словари",
+  "buttonTagsName_dicts": "Теги",
+  "buttonChecklistsName_dicts": "Чек-листы",
+  "searchInputText_dicts": "Поиск",
+  "nothingFound_dicts": "Ничего не найдено",
+  "searchLabelDict_dictsMW": "Словарь",
+  "searchLabelGroup_dictsMW": "Группа",
+
+
+  "dictName_dictDetail": "Название словаря",
+  "groupName_dictDetail": "Название группы",
+  "phrasesList_dictDetail": "Список слов, фраз",
+  "rulesName_dictDetail": "Правила",
+  "autocorrectDict_dictDetail": "Словарь автозамены",
+  "saveButton_dictDetail": "Сохранить",
+  "deleteButton_dictDetailMW": "Удалить",
+  "cancelButton_dictDetailMW": "Отмена",
+  "cloneButton_dictDetailSelect": "Клонировать",
+  "deleteButton_dictDetailSelect": "Удалить",
+  "makeGlobal_dictDetailSelect": "Сделать глобальным",
+
+  "BUTTONS": "BUTTONS",
+  "sendButton": "Отправить",
+  "saveButton": "Сохранить",
+  "deleteButton": "Удалить",
+  "cancelButton": "Отмена"
+
 }
