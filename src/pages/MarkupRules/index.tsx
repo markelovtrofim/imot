@@ -168,15 +168,15 @@ export const MarkupRulesButtons = () => {
         {translate('buttonTagsName_dicts', language)}
       </ToggleButton>
 
-      <ToggleButton
-        className={classes.button} disabled={"checklists" === activePage} value="checklists"
-        onClick={() => {
-          history.location.pathname = '/'
-          history.replace('markuprules/checklists')
-        }}
-      >
-        {translate('buttonChecklistsName_dicts', language)}
-      </ToggleButton>
+      {/*<ToggleButton*/}
+      {/*  className={classes.button} disabled={"checklists" === activePage} value="checklists"*/}
+      {/*  onClick={() => {*/}
+      {/*    history.location.pathname = '/'*/}
+      {/*    history.replace('markuprules/checklists')*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  {translate('buttonChecklistsName_dicts', language)}*/}
+      {/*</ToggleButton>*/}
     </ToggleButtonGroup>
   );
 };
@@ -227,7 +227,6 @@ const MarkupRules = memo(() => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    debugger
     if (path) {
       // @ts-ignore
       dispatch(dictsSlice.actions.setActivePage(path));

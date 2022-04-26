@@ -4,7 +4,6 @@ import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
 import LogoPng from '../assets/images/logo.png';
 import {RootState} from '../store/store';
-import {setLanguage} from '../store/lang/langActions';
 import {translate} from '../localizations';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -18,6 +17,7 @@ import {searchSlice} from "../store/search/search.slice";
 import {getGroups} from "../store/dicts/dicts.slice";
 import {getChildUser, getChildUsers, getMe, getUserToken} from "../store/users/users.slice";
 import ContainedSelect from "./Selects/ContainedSelect";
+import {getLang, langSlice} from "../store/lang/lang.slice";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -112,7 +112,7 @@ const Header: React.FC = () => {
   const dispatch = useDispatch();
   const handleLangChange = (event: SelectChangeEvent) => {
     const currentLang = event.target.value;
-    dispatch(setLanguage(currentLang));
+    dispatch(getLang(currentLang));
   };
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
@@ -298,8 +298,8 @@ const Header: React.FC = () => {
             <Select MenuProps={{
               disableScrollLock: true
             }} className={classes.langHandler} variant='standard' value={language} onChange={handleLangChange}>
-              <MenuItem className={classes.langHandlerItem} value={'RU'}>RU</MenuItem>
-              <MenuItem className={classes.langHandlerItem} value={'EN'}>EN</MenuItem>
+              <MenuItem className={classes.langHandlerItem} value={'ru'}>RU</MenuItem>
+              <MenuItem className={classes.langHandlerItem} value={'en'}>EN</MenuItem>
             </Select>
           </div>
 

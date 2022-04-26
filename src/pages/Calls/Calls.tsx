@@ -60,14 +60,15 @@ const Calls = React.memo(() => {
   const dispatch = useDispatch();
   const [fetching, setFetching] = useState<boolean>(false);
 
-  const calls = useAppSelector(state => state.calls.calls);
+  const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
 
   const found = useAppSelector(state => state.calls.found);
   const total = useAppSelector(state => state.calls.total);
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
-  const handleExpandedChange = (panel: string) => {
+  console.log(expanded);
+  const handleExpandedChange = (panel: string | false) => {
     setExpanded(panel);
   };
 
@@ -105,13 +106,6 @@ const Calls = React.memo(() => {
     });
   }, []);
 
-  // sort select test
-  const sortOptions = [
-    {value: 'По звонкам', label: 'По звонкам'},
-    {value: 'Сначала новое', label: 'Сначала новое'},
-    {value: 'Сначала старые', label: 'Сначала старые'},
-  ];
-  const [sortOptionsValue, setSortOptionsValue] = useState(sortOptions[0]);
 
   return (
     <div style={{cursor: 'default'}}>
@@ -121,13 +115,6 @@ const Calls = React.memo(() => {
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
             <Typography className={classes.callsTitleText}>Найдено звонков {found} из {total}</Typography>
-            <ContainedSelect
-              width={'200px'}
-
-              options={sortOptions}
-              onSelectChange={(event: any) => setSortOptionsValue(event)}
-              value={sortOptionsValue}
-            />
           </div>
           <Grid container className={classes.callsCols}>
 
@@ -138,26 +125,44 @@ const Calls = React.memo(() => {
 
             <Grid item xs={1.23} style={{minWidth: '100px', display: 'flex', alignItems: 'center'}}>
               <Typography style={{marginRight: '15px'}}>{translate('callsEmployee', language)}</Typography>
-              <ArrowsSvg/>
             </Grid>
 
             <Grid item xs={3.5} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
               <Typography style={{marginRight: '15px'}}>{translate('callsCustomer', language)}</Typography>
-              <ArrowsSvg/>
             </Grid>
 
             <Grid item xs={1} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
               <Typography style={{marginRight: '15px'}}>{translate('callsTag', language)}</Typography>
-              <ArrowsSvg/>
             </Grid>
 
           </Grid>
         </div>
 
         <div>
+          {/*<InfiniteScroll*/}
+          {/*  // @ts-ignore*/}
+          {/*  dataLength={found} //This is important field to render the next data*/}
+          {/*  next={() => null}*/}
+          {/*  hasMore={true}*/}
+          {/*  loader={<h4>Loading...</h4>}*/}
+          {/*  endMessage={*/}
+          {/*    <p style={{ textAlign: 'center' }}>*/}
+          {/*      <b>Yay! You have seen it all</b>*/}
+          {/*    </p>*/}
+          {/*  }*/}
+          {/*  // below props only if you need pull down functionality*/}
+          {/*  refreshFunction={pushNewCalls}*/}
+          {/*  pullDownToRefresh*/}
+          {/*  pullDownToRefreshThreshold={50}*/}
+          {/*  pullDownToRefreshContent={*/}
+          {/*    <h3 style={{ textAlign: 'center' }}>&#8595; Pull down to refresh</h3>*/}
+          {/*  }*/}
+          {/*  releaseToRefreshContent={*/}
+          {/*    <h3 style={{ textAlign: 'center' }}>&#8593; Release to refresh</h3>*/}
+          {/*  }*/}
+          {/*>*/}
           {calls.length !== 0 ?
             calls.map((callsArrays: CallType[]) => {
-              // @ts-ignore
               const callsArrayIndex = calls.indexOf(callsArrays)
               return (
                 <div>

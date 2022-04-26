@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {IconButton, Typography} from "@mui/material";
 import {ModalWindowBox} from "../index";
 import cn from "classnames";
@@ -11,6 +11,7 @@ import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
 import {createTemplate, updateTemplate} from "../../store/search/template.slice";
 import {TemplateType} from "../../store/search/template.types";
+import Snackbar from "../Snackbar";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -54,7 +55,7 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
 
   const [disabled, setDisabled] = useState<boolean>(true);
 
-  const validate = (values: {name: string}) => {
+  const validate = (values: { name: string }) => {
     if (values.name.length < 1) {
       setDisabled(true);
     } else {
@@ -68,7 +69,7 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
     },
     validate,
     onSubmit: async (values) => {
-      debugger
+      setLoading(true);
       if (method === 'put' && currentTemplate) {
         await dispatch(updateTemplate({...currentTemplate, title: values.name}));
         handleClose();
@@ -88,34 +89,53 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
         handleClose();
         values.name = '';
       }
+      setSnackbar(true);
+      setLoading(false);
+      setDisabled(true);
     },
   });
   const classes = useStyles();
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [snackbar, setSnackbar] = useState<boolean>(false);
+
   return (
-    <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
-      <div className={classes.mwTitle}>
-        <Typography className={cn(classes.mwTitleText, classes.mwText)}>Введите имя шаблона</Typography>
-        <IconButton className={classes.mwIconButton} onClick={handleClose}>
-          <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-        </IconButton>
-      </div>
-      <form onSubmit={formik.handleSubmit}>
-        <Input
-          name={"name"}
-          type={"text"}
-          handleChange={formik.handleChange}
-          value={formik.values.name}
-          bcColor={"#EEF2F6"}
-          label={"Название"}
-          autoComplete="off"
-        />
-        <div className={classes.mwButtonBox}>
-          <LoadingButton disabled={disabled} type="submit" variant="contained" color="primary">
-            Сохранить
-          </LoadingButton>
+    <div>
+      <Snackbar
+        type={'success'}
+        open={snackbar}
+        onClose={() => {
+          setSnackbar(false);
+        }}
+        text={method === 'put' ? 'Имя шаблона изменено' : 'Новый шаблон создан'}
+        time={2000}
+      />
+
+      <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
+        <div className={classes.mwTitle}>
+          <Typography className={cn(classes.mwTitleText, classes.mwText)}>Введите имя шаблона</Typography>
+          <IconButton className={classes.mwIconButton} onClick={handleClose}>
+            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
+          </IconButton>
         </div>
-      </form>
-    </ModalWindowBox>
+        <form onSubmit={formik.handleSubmit}>
+          <Input
+            name={"name"}
+            type={"text"}
+            handleChange={formik.handleChange}
+            value={formik.values.name}
+            bcColor={"#EEF2F6"}
+            label={"Название"}
+            autoComplete="off"
+          />
+          <div className={classes.mwButtonBox}>
+            <LoadingButton loading={loading} disabled={disabled} type="submit" variant="contained" color="primary">
+              Сохранить
+            </LoadingButton>
+          </div>
+        </form>
+      </ModalWindowBox>
+    </div>
   );
 };
 

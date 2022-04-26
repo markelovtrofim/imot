@@ -1,3 +1,5 @@
+import {LangType} from "../lang/lang.slice";
+
 export type UserType = {
   id: string,
   role: 'admin' | 'user' | 'operator',
@@ -9,7 +11,7 @@ export type UserType = {
   searchHideTags: string[],
   clientTags: string[],
   fastManualTags: string[],
-  language: string
+  language: LangType
 };
 
 export type ChildUserType = {

@@ -2,15 +2,24 @@ import React, {FC, memo} from "react";
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 
+type FieldPropsType = {
+  label: string,
+  labelBrother?: any,
+  bgColor?: string,
+  height?: string,
+  width?: string,
+  margin?: string,
+  padding?: string
+}
 
-const Field: FC<{ label: string, labelBrother?: any, bgColor?: string, height?: string }> = memo(({children, label, labelBrother, bgColor, height}) => {
+const Field: FC<FieldPropsType> = memo(({children, label, labelBrother, bgColor, height, width, margin, padding}) => {
   const useStyles = makeStyles(({
     fieldBox: {
       height: height,
       cursor: 'default',
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
       border: '1px solid #EEF2F6',
-      padding: '8px 15px',
+      padding: padding ? padding : '8px 15px',
       borderRadius: '5px',
       marginTop: '10px'
     },
@@ -22,7 +31,7 @@ const Field: FC<{ label: string, labelBrother?: any, bgColor?: string, height?: 
   }));
   const classes = useStyles();
   return (
-    <div style={{marginTop: '24px'}}>
+    <div style={{marginTop: '24px', width: width}}>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
         <Typography className={classes.fieldLabel}>{label}</Typography>
         {labelBrother}

@@ -1,5 +1,6 @@
 import React, {FC, memo} from 'react';
 import {Alert, CircularProgress, Snackbar} from "@mui/material";
+import {makeStyles} from "@mui/styles";
 
 const InfoSvg = () => {
   return (
@@ -48,6 +49,13 @@ type SnackbarPropsType = {
 };
 
 const CustomSnackbar: FC<SnackbarPropsType> = memo(({type, open, onClose, text, time}) => {
+  const useStyles = makeStyles(({
+    snackbar: {
+      testAlign: 'center !important'
+    }
+  }));
+  const classes = useStyles();
+
   const getIcon = () => {
     if (type === 'info') {
       return <InfoSvg/>
@@ -68,15 +76,15 @@ const CustomSnackbar: FC<SnackbarPropsType> = memo(({type, open, onClose, text, 
         open={open}
         onClose={onClose}
         autoHideDuration={time}
+        className={classes.snackbar}
       >
         <Alert
           icon={icon}
           sx={{
-            padding: '0 16px',
-            height: '40px',
-            width: '100%',
+            padding: '15px 40px',
+            fontSize: '15px',
             backgroundColor: '#fff',
-            boxShadow: '0px 9px 28px 8px rgba(0, 0, 0, 0.05), 0px 6px 16px rgba(0, 0, 0, 0.08), 0px 3px 6px -4px rgba(0, 0, 0, 0.12)',
+            boxShadow: '0px 9px 28px 8px rgba(0, 0, 0, 0.15), 0px 6px 16px rgba(0, 0, 0, 0.18), 0px 3px 6px -4px rgba(0, 0, 0, 0.22)',
             '& .MuiAlert-icon': {
               paddingTop: '10px !important'
             }

@@ -34,10 +34,10 @@ const DictDetailsStubMiddleware: FC = () => {
   if (currentDict === null) {
     return (
       <BlockBox padding={'5px 24px 0 24px'}>
-        <Field label={'Название словаря'} height={'30px'}>
+        <Field label={'Название словаря'} height={'45px'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>
-        <Field label={'Название группы'} height={'30px'}>
+        <Field label={'Название группы'} height={'45px'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>
         <Field
@@ -309,9 +309,9 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
   const [checkedDisable, setCheckedDisable] = useState<boolean>(false);
 
   return (
-    <BlockBox padding={'5px 24px 0 24px'}>
+    <BlockBox padding={'5px 24px'}>
       <form onSubmit={formik.handleSubmit}>
-        <Field label={translate("dictName_dictDetail", language)} height={'30px'}>
+        <Field label={translate("dictName_dictDetail", language)} height={'45px'}>
           <InputBase
             disabled={!currentDict.group}
             style={{width: '100%'}}
@@ -321,7 +321,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
             onChange={formik.handleChange}
           />
         </Field>
-        <Field label={translate("groupName_dictDetail", language)} height={'30px'}>
+        <Field label={translate("groupName_dictDetail", language)} height={'45px'}>
           <InputBase
             disabled={!currentDict.group}
             style={{width: '100%'}}
@@ -334,7 +334,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         <Field
           label={translate("phrasesList_dictDetail", language)}
           labelBrother={
-            <div style={{display: 'flex', justifyContent: "space-between", width: '240px', alignItems: 'center'}}>
+            <div style={{display: 'flex', justifyContent: "space-between", width: '140px', alignItems: 'center'}}>
               <div>
                 {currentDict.allowedActions.includes('enable') && currentDict.allowedActions.includes('disable') &&
                 <div>

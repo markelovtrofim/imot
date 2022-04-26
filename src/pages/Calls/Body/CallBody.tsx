@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {Dispatch, FC, useEffect, useRef, useState} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 import 'react-h5-audio-player/lib/styles.css';
@@ -7,26 +7,19 @@ import {useDispatch} from "react-redux";
 import {
   CallAudioType,
   CallInfoType,
+  CallSttFragmentType,
   CallSttType,
+  TagType,
 } from "../../../store/calls/calls.types";
-import PlayButton from "../../../components/Buttons/Play";
-import Skip from "../../../components/Buttons/Skip";
-import Speed from "../../../components/Buttons/Speed";
-import Time from "../../../components/Buttons/Time";
-import Volume from "../../../components/Volume";
 import Plus from "../../../components/Buttons/Plus";
 import Reboot from "../../../components/Buttons/Reboot";
 import History from "../../../components/Buttons/History";
 import Download from "../../../components/Buttons/Download";
 import Back from "../../../components/Buttons/Back";
 import {BlockBox} from "../../../components";
-import ContainedSelect from "../../../components/Selects/ContainedSelect";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ToggleButton from "@mui/material/ToggleButton";
-
-import ReactAudioPlayer from 'react-audio-player';
-import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';
+import {BaseTag, Fragment} from "../../../components/Tag";
+import AudioPlayer from "../../../components/AudioPlayer";
+import DialogItem from "./DialogItem";
 
 type CallBodyPropsType = {
   callInfo: CallInfoType,
@@ -34,26 +27,48 @@ type CallBodyPropsType = {
   callStt: CallSttType | null,
   bundleIndex: number,
   expanded: boolean,
+  fragments: TagType[],
+  audioRef: any,
+  onFragmentClick: any,
+  prevActiveFragment: any,
+  audioPlayerRef: any,
+  activeFragmentRef: any
 };
 
-const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callStt, bundleIndex, expanded}) => {
+const CallBody: FC<CallBodyPropsType> = React.memo(({
+                                                      callInfo,
+                                                      callAudio,
+                                                      callStt,
+                                                      fragments,
+                                                      bundleIndex,
+                                                      expanded,
+                                                      audioRef,
+                                                      onFragmentClick,
+                                                      audioPlayerRef,
+                                                      prevActiveFragment,
+                                                      activeFragmentRef
+                                                    }) => {
   const useStyles = makeStyles(({
+    callBodyWrapper: {},
     cbDialogWrapper: {
-      height: '765px',
+      borderRadius: '5px',
+      height: '100%',
       width: '100%',
-      backgroundColor: '#EEF2F6'
+      backgroundColor: '#EEF2F6',
+      overflow: 'hidden'
     },
     cbDialogInner: {
       padding: '12.5px 12px'
     },
     cbDialogItems: {
       overflowY: 'auto',
-      height: '765px',
+      padding: '5px 0',
+      height: '800px',
       '&::-webkit-scrollbar': {
         width: '4px',
-        backgroundColor: 'f1f1f1',
+        height: '4px',
+        backgroundColor: '#f1f1f1',
         outline: 'none',
-
       },
       '&::-webkit-scrollbar-thumb': {
         background: '#A3AEBE',
@@ -64,13 +79,11 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
         background: '#555'
       }
     },
-    audioPlayer: {
-      // overflow: 'hidden',
-      // position: 'sticky',
-      // top: `100px`,
-      // zIndex: '101',
-      // height: '250px',
-      // backgroundColor: '#fff'
+    audioPlayerBox: {
+      overflow: 'hidden',
+      position: 'sticky',
+      top: '-200px',
+      zIndex: '100'
     },
 
     controlBlockButtonBox: {
@@ -94,10 +107,16 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
       }
     },
     isActive: {
-      backgroundColor: 'black'
+      backgroundColor: '#CDD5DF',
+      color: '#000'
     },
-    test: {
-
+    typographyTitle: {
+      color: '#738094 !important',
+      fontWeight: '700 !important',
+      minWidth: '110px !important',
+    },
+    activeFragment: {
+      backgroundColor: '#F5F5DC'
     }
   }));
   const classes = useStyles();
@@ -109,39 +128,11 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
       dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex}));
     }
   }, [expanded]);
-  // test check list state.
-  const checkListOptions = [
-    {value: 'Чек лист 1', label: 'Чек лист 1'},
-    {value: 'Чек лист 2', label: 'Чек лист 2'},
-    {value: 'Чек лист 3', label: 'Чек лист 3'}
-  ];
-  const [checkListValue, setCheckListValue] = useState(checkListOptions[0]);
-  const [alignment, setAlignment] = useState<string | null>('year');
-  const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string,
-  ) => {
-    setAlignment(newAlignment);
-  };
 
-  // почитать про:
-  // useCallback
-  // useMemo
-  // memo
-
-  const currentTime = useRef(0);
   const callId = callInfo.id;
 
-  const prevIndex = useRef<string[] | undefined | null>(undefined);
-  const currentIndex = useRef<string[] | undefined | null>(undefined);
-
-  useEffect(() => {
-    return () => {
-      currentTime.current = 0;
-      prevIndex.current = undefined;
-      currentIndex.current = undefined;
-    }
-  })
+  const prevIndex = useRef<string[] | undefined>(undefined);
+  const currentIndex = useRef<string[] | undefined>(undefined);
 
   const getIndices = (array: Array<any>, necessaryElements: any) => {
     let indices: number[] = []
@@ -152,7 +143,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
   }
 
   // Возвращает строку с индексом фрагмента/фразы и слова.
-  function findWordIndex(phrases: any[] | undefined, currentTime: number) {
+  function findWordIndexes(phrases: any[] | undefined, currentTime: number) {
     if (phrases) {
       const currentFragments = phrases.filter(phrase => phrase.begin <= currentTime && currentTime <= phrase.end);
       const currentFragmentsIndices = getIndices(phrases, currentFragments);
@@ -185,10 +176,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
     } else {
       currentTimeLocal = eventCurrentTime * 1000;
     }
-
-    currentTime.current = currentTimeLocal;
     if (callStt) {
-      const indices = findWordIndex(callStt.fragments, currentTimeLocal);
+      const indices = findWordIndexes(callStt.fragments, currentTimeLocal);
 
       if (indices && JSON.stringify(indices) !== JSON.stringify(prevIndex.current)) {
 
@@ -212,13 +201,6 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
 
         // новоепредыдущее = текущее
         prevIndex.current = indices;
-
-        // if (activeWord) {
-        //   activeWord.scrollIntoView({
-        //     behavior: "smooth",
-        //   });
-        // }
-
       }
       if (!indices) {
         // убираем раскраску с предыдущего
@@ -229,174 +211,100 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({callInfo, callAudio, callSt
       }
       currentIndex.current = indices;
     }
-    // const activeWordPosition = item.getBoundingClientRect();
-    // activeWord.scrollTo({
-    // x: activeWordPosition.x
-    // y: activeWordPosition.y - 100
-    // })
-  };
+  }
 
   return (
-    <div>
-      <div className={classes.audioPlayer} onClick={onListen}>
-        <ReactAudioPlayer
-          style={{width: '100%'}}
-          src={callAudio ? callAudio : ''}
-          controls={true}
-          listenInterval={1}
+    <div className={classes.callBodyWrapper}>
+      <div ref={audioRef} className={classes.audioPlayerBox}>
+        <AudioPlayer
           onListen={onListen}
-          onSeeked={onListen}
+          callAudio={callAudio}
+          audioPlayerRef={audioPlayerRef}
         />
-
-        <div style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-          <Volume/>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <Time side={"left"} value={0}/>
-            <Skip side={"left"}/>
-            <PlayButton/>
-            <Skip side={"right"}/>
-            <Time side={"right"} value={1214000}/>
-          </div>
-          <div style={{width: '50px', marginRight: '15px'}}>
-            <Speed/>
-          </div>
-        </div>
-
       </div>
       <div style={{display: 'flex'}}>
         <div className={classes.cbDialogWrapper}>
           <div className={classes.cbDialogInner}>
-            <Typography style={{
-              color: '#738094',
-              fontSize: '14px',
-              fontWeight: '700'
-            }}>
-              Текстовый диалог
+            {fragments.length > 0 &&
+            <>
+              <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+                Теги:
+              </Typography>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                {fragments.map((fragment) => (
+                  <div
+                    onClick={(event: any) => {
+                      onFragmentClick(fragment);
+                    }}
+                  >
+                    <Fragment matchData={fragment.matchData}>
+                      {fragment.name}
+                    </Fragment>
+                  </div>
+                ))}
+              </div>
+            </>
+            }
+            <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+              Текстовый диалог:
             </Typography>
-            <div className={classes.cbDialogItems}>
-              <ul>
-                {callStt ?
-                  callStt.fragments.map((fragment, i) => (
-                    <li key={i}>
-                      {fragment.words.map((word, j) => (
-                        <span
-                          id={`${callId}-${i}-${j}`}
-                          className={classes.test}
-                          key={j}
-                        >
-                          {word.word}{" "}
-                        </span>
-                      ))}
-                    </li>
-                  )) :
-                  <Typography variant={'h3'}>Скоро придет</Typography>}
-              </ul>
-
-              {/*{callStt && callStt.fragments.map((phrase: any, i: number) => {*/}
-              {/*  return (*/}
-              {/*    <DialogItem*/}
-              {/*      key={phrase.id}*/}
-              {/*      currentTime={currentTime}*/}
-              {/*      person={phrase.direction}*/}
-              {/*      phrase={phrase}*/}
-              {/*    />*/}
-              {/*  )*/}
-              {/*})}*/}
+            <div className={classes.cbDialogItems} id={callId}>
+              {callStt ?
+                <div>
+                  {callStt.fragments.map((phrase, i, array) => {
+                    return (
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+                           id={`${phrase.id}-phrase`}>
+                        <div style={{width: '85%'}}>
+                          <DialogItem
+                            audioPlayerRef={audioPlayerRef}
+                            prevFragment={array[i - 1] ? array[i - 1] : {direction: phrase.direction === 'client' ? 'operator' : 'client'}}
+                            fragment={phrase}
+                            callId={callId}
+                            fragmentIndex={i}
+                          />
+                        </div>
+                        <div style={{textAlign: 'center', width: '15%'}}>
+                          {fragments.map((fragment, j) => {
+                            if (phrase.begin === fragment.fBegin && phrase.end === fragment.fEnd) {
+                              return <div>
+                                <Fragment matchData={fragment.matchData}>{fragment.name}</Fragment>
+                              </div>;
+                            }
+                            return null;
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div> : null
+              }
             </div>
           </div>
         </div>
-        <div style={{backgroundColor: 'fff', width: '370px'}}>
-          <div style={{display: 'flex', justifyContent: 'right'}}>
-            <Plus/>
-            <Reboot/>
-            <History/>
-            <Download/>
+        <div style={{backgroundColor: 'fff', width: '370px', marginTop: '20px'}}>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
             <Back/>
+            <Download/>
+            <History/>
+            <Reboot/>
+            <Plus margin={'0'}/>
           </div>
 
           {/* Params block*/}
-          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px'}>
+          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px 14px 24px 24px'}>
             <div style={{display: 'flex'}}>
-              <Typography>Сотрудник:</Typography>
-              <Typography>Имя Фамилия</Typography>
+              <Typography className={classes.typographyTitle}>Сотрудник:</Typography>
+              <Typography>{callInfo.operatorPhone}</Typography>
             </div>
             <div style={{display: 'flex'}}>
-              <Typography>Клиент:</Typography>
-              <Typography>79607807211</Typography>
+              <Typography className={classes.typographyTitle}>Клиент:</Typography>
+              <Typography>{callInfo.clientPhone}</Typography>
             </div>
             <div style={{display: 'flex'}}>
-              <Typography>Дата и время:</Typography>
-              <div style={{display: 'flex'}}>
-                <Typography>28/12/2021</Typography>
-                <Typography>10:14</Typography>
-              </div>
+              <Typography className={classes.typographyTitle}>Дата и время:</Typography>
+              <Typography>{callInfo.callTimeReadable}</Typography>
             </div>
-          </BlockBox>
-
-          {/* Check list block */}
-          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px'}>
-            <Typography>Чек лист</Typography>
-            <ContainedSelect
-              value={checkListValue}
-              options={checkListOptions}
-              onSelectChange={(event: any) => {
-                setCheckListValue(event)
-              }}
-              width="274px"
-            />
-
-            <ToggleButtonGroup
-              className={classes.controlBlockButtonBox}
-              value={alignment}
-              exclusive
-              onChange={handleChange}
-            >
-              <ToggleButton
-                disabled={"today" === alignment}
-                className={classes.controlBlockButton} value="today"
-                onClick={() => {
-                }}
-              >
-                1
-              </ToggleButton>
-
-              <ToggleButton disabled={"yesterday" === alignment}
-                            className={classes.controlBlockButton} value="yesterday"
-                            onClick={() => {
-                            }}
-              >
-                2
-              </ToggleButton>
-
-              <ToggleButton
-                className={classes.controlBlockButton} disabled={"week" === alignment} value="week"
-                onClick={() => {
-                }}
-              >
-                3
-              </ToggleButton>
-
-              <ToggleButton
-                className={classes.controlBlockButton} disabled={"month" === alignment} value="month"
-                onClick={() => {
-                }}
-              >
-                4
-              </ToggleButton>
-
-              <ToggleButton
-                className={classes.controlBlockButton} disabled={"year" === alignment} value="year"
-                onClick={() => {
-                }}
-              >
-                5
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </BlockBox>
-
-          {/* Comments input */}
-          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px'}>
-            Params block
           </BlockBox>
 
         </div>

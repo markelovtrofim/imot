@@ -1,5 +1,5 @@
-import React, {memo, useEffect, useState} from 'react';
-import {LinearProgress, Skeleton, Typography} from "@mui/material";
+import React, {memo, useEffect, useRef, useState} from 'react';
+import {Skeleton, Typography, useMediaQuery} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -11,11 +11,11 @@ import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import {TwoTags, Fragment} from "../../components/Tag";
-import {CallInfoType, CallSttType, CallType, TagType} from "../../store/calls/calls.types";
+import {CallInfoType, CallSttType, TagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
-import cn from 'classnames';
+import Scroll from 'react-scroll';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props}/>
@@ -64,84 +64,6 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-const useStyles = makeStyles(({
-  accordion: {
-    // @ts-ignore
-    position: 'sticky !important',
-    top: '0 !important',
-    zIndex: '101 !important',
-    backgroundColor: '#ffffff !important',
-    borderTop: '2px solid #F8FAFC !important',
-    padding: '18px 24px 10px 24px !important',
-    cursor: 'default !important',
-    '& .MuiAccordionSummary-content': {
-      margin: '0 !important',
-    },
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start !important',
-    '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
-      margin: '25px !important',
-      position: 'relative',
-      fill: '#818D9F'
-    },
-    '&.Mui-disabled': {
-      opacity: '1 !important'
-    }
-  },
-  slave: {
-    position: 'absolute',
-    top: '35px',
-    right: '40px',
-    borderRadius: '5px',
-    width: '32px',
-    height: '32px',
-    backgroundColor: '#E3E8EF',
-  },
-  callInner: {},
-  employee: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  employeeText: {
-    marginRight: '20px !important',
-    minWidth: '40px !important'
-  },
-  callDateBox: {
-    display: 'flex',
-    marginTop: '8px'
-  },
-  callDate: {
-    marginRight: '5px !important',
-    color: '#738094 !important'
-  },
-  callTime: {
-    color: '#738094 !important'
-  },
-  callDurationBox: {
-    marginTop: '8px'
-  },
-  callDuration: {
-    color: '#738094 !important'
-  },
-  callMNumberBox: {
-    minWidth: '120px',
-    paddingTop: '12px'
-  },
-  callMNumber: {
-    fontSize: '15px !important'
-  },
-  callTagsTitle: {
-    margin: '5px !important',
-    color: '#738094 !important',
-    minWidth: '120px'
-  },
-  accordionDetails: {
-    backgroundColor: '#F8FAFC',
-    border: 'none',
-  }
-}));
-
 type CallStubMiddlewarePropsType = {
   callInfo: CallInfoType | null,
   callAudio: string | null,
@@ -149,7 +71,7 @@ type CallStubMiddlewarePropsType = {
   bundleIndex: number,
 
   expanded: boolean,
-  handleExpandedChange: (panel: string) => void
+  handleExpandedChange: (panel: string | false) => void
 };
 
 
@@ -161,6 +83,86 @@ const CallStubMiddleware = memo(({
                                    expanded,
                                    handleExpandedChange
                                  }: CallStubMiddlewarePropsType) => {
+  const useStyles = makeStyles(({
+    accordion: {
+      backgroundColor: '#ffffff !important',
+      borderTop: '2px solid #F8FAFC !important',
+      padding: '18px 24px 10px 24px !important',
+      cursor: 'default !important',
+      '& .MuiAccordionSummary-content': {
+        margin: '0 !important',
+      },
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start !important',
+      '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
+        margin: '25px !important',
+        position: 'relative',
+        fill: '#818D9F'
+      },
+      '&.Mui-disabled': {
+        opacity: '1 !important'
+      }
+    },
+    slave: {
+      position: 'absolute',
+      top: '35px',
+      right: '40px',
+      borderRadius: '5px',
+      width: '32px',
+      height: '32px',
+      backgroundColor: '#E3E8EF',
+    },
+    callInner: {},
+    employee: {
+      display: 'flex',
+      alignItems: 'center'
+    },
+    employeeText: {
+      marginRight: '20px !important',
+      minWidth: '40px !important'
+    },
+    callDateBox: {
+      display: 'flex',
+      marginTop: '8px'
+    },
+    callDate: {
+      marginRight: '5px !important',
+      color: '#738094 !important'
+    },
+    callTime: {
+      color: '#738094 !important'
+    },
+    callDurationBox: {
+      marginTop: '8px'
+    },
+    callDuration: {
+      color: '#738094 !important'
+    },
+    callMNumberBox: {
+      minWidth: '120px',
+      paddingTop: '12px'
+    },
+    callMNumber: {
+      fontSize: '15px !important'
+    },
+    callTagsTitle: {
+      margin: '5px !important',
+      color: '#738094 !important',
+      minWidth: '120px'
+    },
+    accordionDetails: {
+      backgroundColor: '#F8FAFC',
+      border: 'none',
+    },
+
+    '@media (width: 1024px)': {
+      callInner: {
+        display: 'block',
+      }
+    }
+  }));
+
   const classes = useStyles();
 
 
@@ -251,10 +253,141 @@ type CallPropsType = {
   bundleIndex: number,
 
   expanded: boolean,
-  handleExpandedChange: (panel: string) => void
+  handleExpandedChange: (panel: string | false) => void
 };
 
+// конвертирует время для показа
+export const timeConverter = (s: number, hoursIsDisplay: boolean) => {
+  const pad = (n: number) => {
+    return ('00' + n).slice(-2);
+  };
+  let ms = s % 1000;
+  s = (s - ms) / 1000;
+  let secs = s % 60;
+  s = (s - secs) / 60;
+  let mins = s % 60;
+  let hrs = (s - mins) / 60;
+  if (hoursIsDisplay) {
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  }
+  return `${pad(mins)}:${pad(secs)}`;
+};
+
+function areEqual(prevProps: CallPropsType, nextProps: CallPropsType) {
+  return prevProps.callAudio === nextProps.callAudio && prevProps.callStt === nextProps.callStt && prevProps.expanded === nextProps.expanded;
+}
+
 const Call = memo((props: CallPropsType) => {
+  const useStyles = makeStyles(({
+    accordion: {
+      border: 'none !important',
+      zIndex: '1 !important'
+    },
+    accordionSummary: {
+      // @ts-ignore
+      position: `sticky !important`,
+      top: '0 !important',
+      // @ts-ignore
+      userSelect: 'auto !important',
+      zIndex: '100 !important',
+      backgroundColor: '#ffffff !important',
+      borderTop: '2px solid #F8FAFC !important',
+      padding: '18px 24px 10px 24px !important',
+      cursor: 'default !important',
+      '& .MuiAccordionSummary-content': {
+        margin: '0 !important',
+      },
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start !important',
+      '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
+        margin: '25px !important',
+        position: 'relative',
+        fill: '#818D9F'
+      },
+      '&.Mui-disabled': {
+        opacity: '1 !important'
+      }
+    },
+    slave: {
+      position: 'absolute',
+      top: '35px',
+      right: '40px',
+      borderRadius: '5px',
+      width: '32px',
+      height: '32px',
+      backgroundColor: '#E3E8EF',
+    },
+    callInner: {
+      display: 'flex',
+      ['@media (max-width:1024px)']: { // eslint-disable-line no-useless-computed-key
+        display: 'block',
+      }
+    },
+    callEmAndCl: {
+      display: 'flex'
+    },
+    employee: {
+      minWidth: '200px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    employeeText: {
+      fontSize: '13px !important',
+      marginRight: '20px !important',
+      minWidth: '40px !important'
+    },
+    tagsAndFragmentsBlock: {
+      ['@media (max-width:1024px)']: { // eslint-disable-line no-useless-computed-key
+        marginTop: '10px'
+      }
+    },
+    callDateBox: {
+      display: 'flex',
+      marginTop: '8px'
+    },
+    callDate: {
+      marginRight: '5px !important',
+      color: '#738094 !important'
+    },
+    callTime: {
+      fontSize: '13px !important',
+      color: '#738094 !important'
+    },
+    callDurationBox: {
+      display: 'flex',
+      marginTop: '8px'
+    },
+    callDuration: {
+      fontSize: '13px !important',
+      color: '#738094 !important'
+    },
+    callMNumberBox: {
+      minWidth: '200px',
+    },
+    callMNumber: {
+      fontSize: '13px !important'
+    },
+    callTagsTitle: {
+      color: '#738094 !important',
+      minWidth: '120px'
+    },
+    accordionDetails: {
+      backgroundColor: '#F8FAFC',
+      border: 'none',
+      margin: '0px !important'
+    },
+    typographyTitle: {
+      fontSize: '13px !important',
+      color: '#738094 !important',
+      fontWeight: '700 !important',
+      marginRight: '5px !important'
+    },
+    activeFragment: {
+      backgroundColor: '#F5F5DC'
+    }
+  }));
+
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -274,187 +407,254 @@ const Call = memo((props: CallPropsType) => {
     }
   }, []);
 
-  // конвертирует время для показа
-  const timeConverter = (s: number) => {
-    const pad = (n: number) => {
-      return ('00' + n).slice(-2);
-    };
-    let ms = s % 1000;
-    s = (s - ms) / 1000;
-    let secs = s % 60;
-    s = (s - secs) / 60;
-    let mins = s % 60;
-    let hrs = (s - mins) / 60;
-    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
-  };
-
   // разделяет теги на теги и фрагменты
   const tagsAndFragmentsSeparator = () => {
     let tags = [];
     let fragments = [];
     for (let i = 0; i < props.callInfo.tags?.length; i++) {
+      // debugger
+      // if (props.callInfo.tags[i].tagType === 'api_callback') {
+      //   clientTags.push(props.callInfo.tags[i]);
+      // }{
       if (props.callInfo.tags[i].fragment) {
         fragments.push(props.callInfo.tags[i]);
       } else {
         tags.push(props.callInfo.tags[i]);
       }
+
     }
     return {tags, fragments};
   };
   const tagsAndFragmentsArray = tagsAndFragmentsSeparator();
 
+  const scroll = (currentTarget: any) => {
+    if (currentTarget) {
+      setTimeout(() => {
+        const topValue = window.pageYOffset + currentTarget.getBoundingClientRect().top - 10;
+        window.scrollTo({
+          top: topValue,
+          behavior: "smooth"
+        });
+      }, 400);
+    }
+  }
 
-  // const [click, setClick] = useState(false);
-  // useEffect(() => {
-  //   document.addEventListener('scroll', scrollHandler);
-  //   return () => {
-  //     document.removeEventListener('scroll', scrollHandler)
-  //   }
-  // }, [click]);
-  // const scrollHandler = (e: any) => {
-  //   if (click) {
-  //
-  //     window.scrollTo(window.innerHeight, 0)
-  //   }
-  //   console.log(e.target.documentElement.scrollHeight);
-  //   console.log(e.target.documentElement.scrollTop);
-  //   console.log(window.innerHeight);
-  // };
+  const accordionSummary = useRef<any | null>(null);
+  const audioRef = useRef<any | null>(null);
+
+  useEffect(() => {
+    function onResize() {
+      if (accordionSummary.current && audioRef.current) {
+        audioRef.current.style.top = `${accordionSummary.current.offsetHeight}px`;
+      }
+    }
+
+    onResize()
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      window.addEventListener('resize', onResize)
+    }
+  });
+
+  const activeFragmentRef = useRef<any>(null);
+  const prevActiveFragment = useRef<any>(null);
+
+  const audioPlayerRef = useRef<any>(props.callAudio);
 
 
-  // const [height, setHeight] = useState<number | null>(null);
-  //
-  // const heightTracker = () => {
-  //   let acc = document.getElementById('acc');
-  //   if (acc) {
-  //     setHeight(acc.offsetHeight);
-  //   }
-  // }
-  //
-  // useEffect(() => {
-  //   heightTracker();
-  // });
-  //
-  // useEffect(() => {
-  //   window.addEventListener("resize", heightTracker);
-  //   return () => window.removeEventListener("resize", heightTracker);
-  // })
+  const onFragmentClick = (activeFragment: TagType) => {
+    activeFragmentRef.current = activeFragment;
+    if (props.callStt) {
+      if (prevActiveFragment.current && prevActiveFragment.current !== activeFragment) {
+        const removeFragment = document.getElementById(`${prevActiveFragment.current.fragment}-phrase`);
+        if (removeFragment) {
+          removeFragment.classList.remove(classes.activeFragment);
+        }
+      }
+
+      const activePhrase = props.callStt.fragments.find(fragment => fragment.begin === activeFragment.fBegin && fragment.end === activeFragment.fEnd);
+      const allPhrases = document.getElementById(`${props.callInfo.id}`);
+      let activePhraseHtmlEl;
+
+      if (activePhrase) {
+        activePhraseHtmlEl = document.getElementById(`${activePhrase.id}-phrase`);
+      }
+
+      if (activePhraseHtmlEl && allPhrases) {
+        activePhraseHtmlEl.classList.add(classes.activeFragment);
+        activePhraseHtmlEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
+
+      prevActiveFragment.current = activeFragment;
+
+      audioPlayerRef.current.audioEl.current.play();
+      audioPlayerRef.current.audioEl.current.currentTime = activeFragment.fBegin / 1000;
+
+    }
+  }
+
+  useEffect(() => {
+    if (activeFragmentRef.current && props.callAudio && props.callStt) {
+      onFragmentClick(activeFragmentRef.current);
+    }
+  }, [props.callAudio, props.callStt])
 
   return (
     <Accordion
+      id={props.callInfo.id}
+      className={classes.accordion}
       tabIndex={-1}
-      style={{border: 'none', zIndex: '1'}}
       expanded={props.expanded && isCallBodyData}
     >
       {/* Первичная информация о звонке. */}
-      <AccordionSummary
-        id={'acc'}
-        className={cn(classes.accordion)} tabIndex={-1}
-        onClick={async () => {
-          if (index || index === 0) {
-            if (!isCallBodyData) {
-              props.handleExpandedChange(props.callInfo.id);
-              dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
-              dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
-              setIsCallBodyData(true);
-            } else {
-              dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
-              setIsCallBodyData(false);
+      <div style={{position: 'sticky', top: '0', zIndex: '101'}} ref={accordionSummary}>
+        <AccordionSummary
+          id={'accordionSummary'}
+          className={classes.accordionSummary} tabIndex={-1}
+          onClick={async (e) => {
+            if (index || index === 0) {
+              if (!isCallBodyData) {
+                props.handleExpandedChange(props.callInfo.id);
+                dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
+                dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
+                await setIsCallBodyData(true);
+              } else {
+                dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
+                setIsCallBodyData(false);
+                audioPlayerRef.current.audioEl.current.currentTime = 0;
+                prevActiveFragment.current = null;
+                activeFragmentRef.current = null;
+                props.handleExpandedChange(false);
+              }
+              scroll(e.target);
             }
-          }
-        }}
-      >
-        <Grid container className={classes.callInner}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            height: '4px !important',
-            backgroundColor: '#F8FAFC',
-            width: '96%'
-          }}>
-            {/* {progress && <LinearProgress style={{height: '4px !important', width: '100%'}} color="primary"/>}*/}
+          }}
+        >
+          <div className={classes.callInner}>
+            <div className={classes.callEmAndCl}>
+              {/* Сотрудник. */}
+              <div>
+
+                {/* Имя и фамилия. */}
+                <div className={classes.employee}>
+                  <Typography className={classes.typographyTitle}>Сотрудник:</Typography>
+                  <Typography className={classes.employeeText}>
+                    {props.callInfo.operatorPhone}
+                  </Typography>
+                  <CallSvg/>
+                </div>
+
+                {/* Дата звонка.*/}
+                <div className={classes.callDateBox}>
+                  <Typography className={classes.typographyTitle}>Время:</Typography>
+                  <Typography className={classes.callDate}>
+                    {props.callInfo.callTimeReadable}
+                  </Typography>
+                </div>
+
+                {/*<div>*/}
+                {/*  {tagsAndFragmentsArray.clientTags.map(tag => {*/}
+                {/*    return (*/}
+                {/*      <div style={{margin: 0, display: 'flex'}}>*/}
+                {/*        <TwoTagsMini title={tag.name} body={tag.value}/>*/}
+                {/*      </div>*/}
+                {/*    )*/}
+                {/*  })}*/}
+                {/*</div>*/}
+
+              </div>
+
+              {/* Клиент. */}
+              <div className={classes.callMNumberBox}>
+                {/* Номер телефона. */}
+                <div style={{display: 'flex'}}>
+                  <Typography className={classes.typographyTitle}>Клиент:</Typography>
+                  <Typography className={classes.callMNumber}>
+                    {props.callInfo.clientPhone}
+                  </Typography>
+                </div>
+
+                {/* Время звонка. */}
+                <div className={classes.callDurationBox}>
+                  <Typography className={classes.typographyTitle}>Длительность:</Typography>
+                  <Typography className={classes.callDuration}>
+                    {timeConverter(props.callInfo.duration, true)}
+                  </Typography>
+                </div>
+              </div>
+            </div>
+
+            <div className={classes.tagsAndFragmentsBlock}>
+              {/* Tags */}
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
+                <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+                  {tagsAndFragmentsArray.tags.map((tag: TagType) => {
+                    return (
+                      <div style={{margin: 0, display: 'flex'}}>
+                        <TwoTags title={tag.name} body={tag.value}/>
+                      </div>
+                    )
+                  })}
+                </Stack>
+              </div>
+
+              {/* Fragments */}
+              {tagsAndFragmentsArray.fragments.length > 0 &&
+              <div style={{display: 'flex'}}>
+                <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
+                <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
+
+                  {tagsAndFragmentsArray.fragments.map((tag: TagType) => {
+                    return (
+                      <div
+                        onClick={async (event) => {
+                          if (!props.expanded) {
+                            await props.handleExpandedChange(props.callInfo.id);
+                          } else {
+                            event.stopPropagation();
+                          }
+                          debugger
+                          onFragmentClick(tag);
+                        }}
+                      >
+                        <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
+                      </div>
+                    )
+                  })}
+                </Stack>
+              </div>
+              }
+              <div className={classes.slave}>
+              </div>
+
+            </div>
           </div>
-          {/* Сотрудник. */}
-          <Grid item xs={1.8} style={{minWidth: '145px'}}>
-
-            {/* Имя и фамилия. */}
-            <div className={classes.employee}>
-              <Typography className={classes.employeeText}>
-                {props.callInfo.operatorPhone}
-              </Typography>
-              <CallSvg/>
-            </div>
-
-            {/* Дата звонка.*/}
-            <div className={classes.callDateBox}>
-              <Typography className={classes.callDate}>
-                {props.callInfo.callTimeReadable}
-              </Typography>
-            </div>
-
-            {/* Время звонка. */}
-            <div className={classes.callDurationBox}>
-              <Typography className={classes.callDuration}>
-                {timeConverter(props.callInfo.duration)}
-              </Typography>
-            </div>
-          </Grid>
-
-          {/* Клиент. */}
-          <Grid item xs={1.5} className={classes.callMNumberBox}>
-            {/* Номер телефона. */}
-            <Typography className={classes.callMNumber}>
-              {props.callInfo.clientPhone}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={6.5}>
-            {/* Tags */}
-            <div style={{display: 'flex'}}>
-              <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
-              <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                {tagsAndFragmentsArray.tags.map((tag: TagType) => {
-                  return (
-                    <div style={{margin: 0, display: 'flex'}}>
-                      <TwoTags title={tag.name} body={tag.value}/>
-                    </div>
-                  )
-                })}
-              </Stack>
-            </div>
-
-            {/* Fragments */}
-            {tagsAndFragmentsArray.fragments.length > 1 &&
-            <div style={{display: 'flex'}}>
-              <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
-              <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                {tagsAndFragmentsArray.fragments.map((tag: TagType) => {
-                  return (
-                    <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
-                  )
-                })}
-              </Stack>
-            </div>
-            }
-            <div className={classes.slave}>
-            </div>
-
-          </Grid>
-        </Grid>
-      </AccordionSummary>
+        </AccordionSummary>
+      </div>
       {/* Основная информация о звонке. */}
       <AccordionDetails className={classes.accordionDetails}>
         <CallBody
+          onFragmentClick={onFragmentClick}
+          audioRef={audioRef}
           callInfo={props.callInfo}
           callAudio={props.callAudio}
           callStt={props.callStt}
+          fragments={tagsAndFragmentsArray.fragments}
           bundleIndex={props.bundleIndex}
           expanded={props.expanded}
+          audioPlayerRef={audioPlayerRef}
+
+          prevActiveFragment={prevActiveFragment}
+          activeFragmentRef={activeFragmentRef}
         />
       </AccordionDetails>
     </Accordion>
   );
-});
-
+}, areEqual)
 
 export default CallStubMiddleware;

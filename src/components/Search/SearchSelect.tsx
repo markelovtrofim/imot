@@ -56,7 +56,7 @@ export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
             fill="#237804"/>
       <path fillRule="evenodd" clipRule="evenodd"
             d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
-            />
+      />
     </svg>
   );
 };
@@ -71,10 +71,10 @@ type SelectPropsType = {
 
 
 const SearchSelect: FC<SelectPropsType> = ({
-                                        criteriaFull,
-                                        criteriaCurrent,
-                                        isDefaultCriteria,
-                                      }) => {
+                                             criteriaFull,
+                                             criteriaCurrent,
+                                             isDefaultCriteria,
+                                           }) => {
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {
@@ -221,7 +221,7 @@ const SearchSelect: FC<SelectPropsType> = ({
       borderRadius: '5px !important',
       margin: '2.5px !important',
       backgroundColor: '#E9ECEF !important',
-      color: `#000000 !important`
+      color: `#000000 !important`,
     }),
     multiValueRemove: (provided: any) => ({
       ...provided,
@@ -229,7 +229,9 @@ const SearchSelect: FC<SelectPropsType> = ({
     }),
     valueContainer: (provided: any) => ({
       ...provided,
-      display: 'flex'
+      display: 'flex',
+      paddingRight: '20px',
+
     })
   }
   const classes = useStyles();
@@ -280,16 +282,21 @@ const SearchSelect: FC<SelectPropsType> = ({
     return <OnBottomArrow className={classes.selectArrow}/>
   });
   const CustomOption = memo((props: any) => {
-    return <div>
-      <components.Option {...props} className={classes.selectOption}>
-        {props.children}
-        <Checkbox
-          disableRipple
-          checked={criteriaCurrent.values.indexOf(props.children) >= 0}
-        />
-      </components.Option>
-    </div>
-  });
+    if (props.children.length > 0) {
+      return <div>
+        <components.Option {...props} className={classes.selectOption}>
+          {props.children}
+          <Checkbox
+            disableRipple
+            checked={criteriaCurrent.values.indexOf(props.children) >= 0}
+          />
+        </components.Option>
+      </div>
+    }
+    return null;
+  })
+
+
   const CustomMenuList = memo(({selectProps, ...props}: any) => {
     const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
     return (
@@ -387,9 +394,14 @@ const SearchSelect: FC<SelectPropsType> = ({
           <CreatableSelect
             closeMenuOnSelect={false}
             isMulti
+            createOptionPosition={'first'}
             styles={customStyles}
+            formatCreateLabel={(str) => str}
             value={converterCurrentResult}
             onChange={handleSelectChange}
+
+            tabIndex={0}
+            isValidNewOption={(str) => true}
             options={converterFullResult}
             hideSelectedOptions={false}
             components={{
@@ -399,15 +411,15 @@ const SearchSelect: FC<SelectPropsType> = ({
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
-              ValueContainer: LimitedChipsContainer,
+              // ValueContainer: LimitedChipsContainer,
             }}
-            placeholder={''}
+            placeholder={'Все'}
             menuIsOpen={menuIsOpen}
-            isSearchable={false}
+
           />
-          {converterCurrentResult.length < 1 &&
-          <Typography className={classes.selectPlaceholder}>Все</Typography>
-          }
+          {/*{converterCurrentResult.length < 1 &&*/}
+          {/*<Typography className={classes.selectPlaceholder}>Все</Typography>*/}
+          {/*}*/}
         </div> :
         <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
           <Select
@@ -415,7 +427,7 @@ const SearchSelect: FC<SelectPropsType> = ({
             menuIsOpen={menuIsOpen}
             className={classes.selectItem}
             name="color"
-            placeholder={''}
+            placeholder={'Все'}
             components={{
               MenuList: CustomMenuList,
               Option: CustomOption,

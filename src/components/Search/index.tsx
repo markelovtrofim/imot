@@ -18,6 +18,8 @@ import DeleteTemplateModalWindow from "./DeleteTemplateModalWindow";
 import TextSelect from "../Selects/TextSelect";
 import SearchSelect from './SearchSelect';
 import CustomControlSelect from "../Selects/CustomControlSelect";
+import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
 const useStyles = makeStyles(({
   searchTitle: {
@@ -166,9 +168,9 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   };
 
   useEffect(() => {
-    if (isAuth && defaultCriterias.length < 1 && activeCriterias.length < 1) {
-      dispatch(getDefaultCriterias());
+    if (isAuth && activeCriterias.length < 1) {
       dispatch(getAllSearchCriterias());
+      dispatch(getDefaultCriterias());
       dispatch(getAllTemplates());
     }
   }, []);
@@ -259,43 +261,42 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
           </div>
           {(activeCriterias.length > 0 || defaultCriterias.some(item => item.values.length > 0)) &&
           <div>
-            {
-              currentTemplate ?
-                <div>
-                  <CustomControlSelect
-                    optionsPosition={"bottom"}
-                    options={[
-                      {value: 'rename', label: 'Переименовать'},
-                      {value: 'delete', label: 'Удалить'}
-                    ]}
-                    svg={'vertical'}
-                    handleSelectChange={(event: any) => {
-                      if (event.value === 'rename') {
-                        setIsOpenRenameMethod('put');
-                        setIsOpenRenameWindow(true);
-                      } else if (event.value === 'delete') {
-                        setIsOpenDeleteWindow(true);
-                      }
-                    }}
-                  />
-                </div> :
-                <div className={classes.searchTitleRight}>
-                  <div onClick={removeAllCriteriasHandler} className={classes.searchDeleteAllButton}>
-                    <CrossSvg style={{marginRight: '5px'}}/>
-                    <Typography className={classes.searchDeleteAllButtonText}>
-                      {translate('searchClear', language)}
-                    </Typography>
-                  </div>
-                  <Button
-                    className={classes.searchButton}
-                    startIcon={<FolderPlusSvg className={classes.searchButtonIcon}/>}
-                    color="secondary"
-                    variant="contained"
-                    onClick={handleCreateNewTemplateButtonClick}
-                  >
-                    {translate('searchSaveTemp', language)}
-                  </Button>
+            {currentTemplate ?
+              <div>
+                <CustomControlSelect
+                  optionsPosition={"bottom"}
+                  options={[
+                    {value: 'rename', label: 'Переименовать'},
+                    {value: 'delete', label: 'Удалить'}
+                  ]}
+                  svg={'vertical'}
+                  handleSelectChange={(event: any) => {
+                    if (event.value === 'rename') {
+                      setIsOpenRenameMethod('put');
+                      setIsOpenRenameWindow(true);
+                    } else if (event.value === 'delete') {
+                      setIsOpenDeleteWindow(true);
+                    }
+                  }}
+                />
+              </div> :
+              <div className={classes.searchTitleRight}>
+                <div onClick={removeAllCriteriasHandler} className={classes.searchDeleteAllButton}>
+                  <CrossSvg style={{marginRight: '5px'}}/>
+                  <Typography className={classes.searchDeleteAllButtonText}>
+                    {translate('searchClear', language)}
+                  </Typography>
                 </div>
+                <Button
+                  className={classes.searchButton}
+                  startIcon={<FolderPlusSvg className={classes.searchButtonIcon}/>}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleCreateNewTemplateButtonClick}
+                >
+                  {translate('searchSaveTemp', language)}
+                </Button>
+              </div>
             }
           </div>
           }
@@ -330,7 +331,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
               )
             }) : null}
           </div>
-          <div style={{display: 'flex', alignItems: 'center'}}>
+          <div style={{display: 'flex', alignItems: 'center', minHeight: '54px'}}>
             <LoadingButton
               className={classes.searchSearchButton}
               startIcon={<SearchIcon/>}

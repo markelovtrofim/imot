@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import IconButton from "../IconButton";
 import {makeStyles} from "@mui/styles";
 
@@ -9,12 +9,23 @@ const useStyles = makeStyles(({
   }
 }));
 
-const Speed: FC = () => {
+const Speed: FC<{audioPlayerRef: any}> = ({audioPlayerRef}) => {
   const classes = useStyles();
+
+  const speedChanger = (speed: number) => {
+    audioPlayerRef.current.audioEl.current.playbackRate = speed;
+  }
+
   const speedUnits = [
-    '1x', '1.25x', '1.75x', '2x'
+    0.5, 1, 1.5, 2
   ];
-  const [currentSpeedUnit, setCurrentSpeedUnit] = useState<string>(speedUnits[0]);
+  const [currentSpeedUnit, setCurrentSpeedUnit] = useState<number>(speedUnits[1]);
+
+  useEffect(() => {
+    return () => {
+      setCurrentSpeedUnit(speedUnits[1]);
+    }
+  })
 
   return (
     <IconButton
@@ -22,12 +33,13 @@ const Speed: FC = () => {
       width="auto"
       backgroundColor="#E3E8EF"
       icon={<div className={classes.speedUnit}>{currentSpeedUnit}</div>}
-      onClick={(event: any) => {
-        let index = speedUnits.indexOf(currentSpeedUnit) + 1;
-        if (index > 3) {
-          index = 0;
+      onClick={() => {
+        let speedIndex = speedUnits.indexOf(currentSpeedUnit) + 1;
+        if (speedIndex > 3) {
+          speedIndex = 0;
         }
-        setCurrentSpeedUnit(speedUnits[index]);
+        speedChanger(speedUnits[speedIndex]);
+        setCurrentSpeedUnit(speedUnits[speedIndex]);
       }}
     />
   );

@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {ChildUserType, UserType} from "./users.types";
+import {langSlice} from '../lang/lang.slice';
 
 export const getMe = createAsyncThunk(
   'users/getMe',
@@ -12,6 +13,7 @@ export const getMe = createAsyncThunk(
       }
     });
     thunkAPI.dispatch(usersSlice.actions.setCurrentUser(response.data));
+    thunkAPI.dispatch(langSlice.actions.setLang(response.data.language));
   }
 );
 

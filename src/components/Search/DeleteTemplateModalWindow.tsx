@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {IconButton, Typography} from "@mui/material";
 import {ModalWindowBox} from "../index";
 import cn from "classnames";
@@ -12,6 +12,7 @@ import {useAppSelector} from "../../hooks/redux";
 import {deleteTemplate, templateSlice, updateTemplate} from "../../store/search/template.slice";
 import {searchSlice} from "../../store/search/search.slice";
 import {TemplateType} from "../../store/search/template.types";
+import Snackbar from "../Snackbar";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -57,6 +58,9 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
     }
   };
 
+  const [loading, setLoading] = useState<boolean>(false);
+  const [snackbar, setSnackbar] = useState<boolean>(false);
+
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -64,35 +68,58 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
     onSubmit: async (values) => {
       const template = getTemplate();
       if (template) {
+        setLoading(true);
         await dispatch(deleteTemplate(template.id));
         dispatch(templateSlice.actions.setCurrentTemplate(null));
         dispatch(searchSlice.actions.setClearDefaultCriteriasValues(null));
         dispatch(searchSlice.actions.removeAllActiveCriterias(null));
         handleClose();
+        setLoading(false);
+        setSnackbar(true);
       }
     },
   });
   const classes = useStyles();
+
+  useEffect(() => {
+    return () => {
+      setSnackbar(false);
+    }
+  }, [])
+
   return (
-    <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
-      <div className={classes.mwTitle}>
-        <Typography className={cn(classes.mwTitleText, classes.mwText)}>Вы уверены, что хотите удалить
-          шаблон?</Typography>
-        <IconButton className={classes.mwIconButton} onClick={handleClose}>
-          <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-        </IconButton>
-      </div>
-      <form onSubmit={formik.handleSubmit}>
-        <div className={classes.mwButtonBox}>
-          <LoadingButton type="submit" style={{marginRight: '15px'}} variant="contained" color="error">
-            Удалить
-          </LoadingButton>
-          <LoadingButton onClick={handleClose} variant="contained" color="secondary">
-            Отмена
-          </LoadingButton>
+    <div>
+      <Snackbar
+        type={'success'}
+        open={snackbar}
+        onClose={() => {
+          setSnackbar(false);
+        }}
+        text={'Шаблон удален'}
+        time={2000}
+      />
+      
+      <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
+        <div className={classes.mwTitle}>
+          <Typography className={cn(classes.mwTitleText, classes.mwText)}>
+            Вы уверены, что хотите удалить шаблон?
+          </Typography>
+          <IconButton className={classes.mwIconButton} onClick={handleClose}>
+            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
+          </IconButton>
         </div>
-      </form>
-    </ModalWindowBox>
+        <form onSubmit={formik.handleSubmit}>
+          <div className={classes.mwButtonBox}>
+            <LoadingButton loading={loading} type="submit" style={{marginRight: '15px'}} variant="contained" color="error">
+              Удалить
+            </LoadingButton>
+            <LoadingButton onClick={handleClose} variant="contained" color="secondary">
+              Отмена
+            </LoadingButton>
+          </div>
+        </form>
+      </ModalWindowBox>
+    </div>
   );
 };
 

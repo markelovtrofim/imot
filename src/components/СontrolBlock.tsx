@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@mui/styles';
 import {Button} from '@mui/material';
 import {useDispatch, useSelector} from "react-redux";
@@ -10,6 +10,7 @@ import ButtonGroup from "./ButtonGroup";
 import {useAppSelector} from "../hooks/redux";
 import {searchSlice} from "../store/search/search.slice";
 import { DatePicker, Space } from 'antd';
+import Snackbar from "./Snackbar";
 
 const { RangePicker } = DatePicker;
 
@@ -113,10 +114,13 @@ export const unitsOfTime = {
 }
 
 const ControlBlock = () => {
+
   const {language} = useSelector((state: RootState) => state.lang);
   const classes = useStyles();
   const date = useAppSelector(state => state.search.date);
   const dispatch = useDispatch();
+
+  const [errorSnackbar, setErrorSnackbar] = useState<boolean>(false);
 
   return (
     <div className={classes.controlBlockWrapper}>
@@ -151,9 +155,20 @@ const ControlBlock = () => {
       <Button
         className={cn(classes.controlBlockButton, classes.cbButtonWithIcon)}
         variant="contained"
-        startIcon={<DownloadSvg fill="#212121"/>}>
+        startIcon={<DownloadSvg fill="#212121"/>}
+        onClick={() => setErrorSnackbar(true)}
+      >
         {translate('download', language)}
       </Button>
+      <Snackbar
+        type={'error'}
+        open={errorSnackbar}
+        onClose={() => {
+          setErrorSnackbar(false);
+        }}
+        text={'Эта функция пока не работает'}
+        time={2000}
+      />
     </div>
   );
 };

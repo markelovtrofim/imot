@@ -7,6 +7,7 @@ export const getAllSearchCriterias = createAsyncThunk(
   'search/getBaseSearchCriterias',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+
     const response = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/`, {
       headers: {
         'Authorization': `Bearer ${token}`

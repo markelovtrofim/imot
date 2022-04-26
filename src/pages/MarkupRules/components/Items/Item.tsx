@@ -6,6 +6,7 @@ import {useDispatch} from "react-redux";
 import {InfoCircle, InfoCircleActive} from "../../index";
 import {Skeleton} from "@mui/material";
 import {useHistory} from "react-router-dom";
+import {BaseTag} from "../../../../components/Tag";
 
 
 type DictPropsType = {
@@ -82,7 +83,11 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
           await dispatch(dictsSlice.actions.setActivePage('tags'));
         } : () => null}>
           {body
-            ? <i style={{marginRight: '3px'}}>{body.usedRules.map((rule) => rule.title)}</i>
+            ? <div>
+              {body.usedRules.map((rule) =>
+                <BaseTag body={rule.title}/>
+              )}
+          </div>
             : <Skeleton variant="text" width={60} height={11}/>
           }
         </div>

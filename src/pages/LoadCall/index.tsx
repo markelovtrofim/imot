@@ -2,8 +2,9 @@ import React, {useState} from 'react';
 import IconButton from "../../components/IconButton";
 import {makeStyles} from "@mui/styles";
 import {BlockBox} from "../../components";
-import {Alert, Button, Snackbar, Typography} from "@mui/material";
+import {Alert, Button, Typography} from "@mui/material";
 import ContainedSelect from "../../components/Selects/ContainedSelect";
+import Snackbar from "../../components/Snackbar";
 
 const DownloadSvg = () => {
   return (
@@ -121,27 +122,12 @@ const LoadCall = () => {
         </div>
       </div>
       <Snackbar
-        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+        type={'error'}
         open={snackbarIsOpen}
         onClose={handleClose}
-        autoHideDuration={1000}
-      >
-        <Alert
-          icon={<ErrorSvg/>}
-          sx={{
-            padding: '0 16px',
-            height: '40px',
-            width: '100%',
-            backgroundColor: '#fff',
-            boxShadow: '0px 9px 28px 8px rgba(0, 0, 0, 0.05), 0px 6px 16px rgba(0, 0, 0, 0.08), 0px 3px 6px -4px rgba(0, 0, 0, 0.12)',
-            '& .MuiAlert-icon': {
-              paddingTop: '10px !important'
-            }
-          }}
-        >
-          Данная функция пока не работает
-        </Alert>
-      </Snackbar>
+        text={'Эта функция пока не работает'}
+        time={2000}
+      />
     </BlockBox>
   );
 };

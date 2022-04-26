@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {CallType} from "./calls.types";
 import {RootState} from "../store";
@@ -68,6 +68,7 @@ export const getCallAudio = createAsyncThunk(
     const blob = new Blob([data], {
       type: 'audio/wav'
     });
+    const source = new MediaSource();
     const blobUrl = URL.createObjectURL(blob);
     thunkAPI.dispatch(callsSlice.actions.setAudio({audio: blobUrl, id: payload.id, index: payload.bundleIndex}))
   }
@@ -203,10 +204,14 @@ export const callsSlice = createSlice({
       }
     },
     setEmptyState(state, action: PayloadAction<{ leaveBundles: number }>) {
+      debugger
       if (action.payload.leaveBundles === 0) {
         state.calls = [];
+      } else {
+        const currentCalls = current(state.calls);
+        state.calls = currentCalls.slice(0, action.payload.leaveBundles);
+        state.skip = 10;
       }
-      state.calls.slice(0, action.payload.leaveBundles);
     },
     setAudio(state, action: PayloadAction<any>) {
       state.calls[action.payload.index].map((item) => {
