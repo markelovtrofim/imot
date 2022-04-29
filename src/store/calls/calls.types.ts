@@ -1,4 +1,4 @@
-export type TagType = {
+export type CallTagType = {
   name: string,
   value: string,
   tagType: string,
@@ -9,7 +9,7 @@ export type TagType = {
   fEnd: number,
   matchData: string,
   direction: string
-}
+};
 
 export type CallInfoType = {
   id: string,
@@ -21,7 +21,7 @@ export type CallInfoType = {
   uniqueId: string,
   conversationId: string,
   duration: number,
-  tags: TagType[]
+  tags: CallTagType[]
 };
 
 export type CallType = {

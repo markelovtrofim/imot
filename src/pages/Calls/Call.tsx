@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useRef, useState} from 'react';
-import {Skeleton, Typography, useMediaQuery} from "@mui/material";
+import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
@@ -10,12 +10,11 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import {TwoTags, Fragment} from "../../components/Tag";
-import {CallInfoType, CallSttType, TagType} from "../../store/calls/calls.types";
+import {TwoTags, Fragment} from "../../components/common/Tag";
+import {CallInfoType, CallSttType, CallTagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
-import Scroll from 'react-scroll';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props}/>
@@ -463,7 +462,7 @@ const Call = memo((props: CallPropsType) => {
   const audioPlayerRef = useRef<any>(props.callAudio);
 
 
-  const onFragmentClick = (activeFragment: TagType) => {
+  const onFragmentClick = (activeFragment: CallTagType) => {
     activeFragmentRef.current = activeFragment;
     if (props.callStt) {
       if (prevActiveFragment.current && prevActiveFragment.current !== activeFragment) {
@@ -593,7 +592,7 @@ const Call = memo((props: CallPropsType) => {
               <div style={{display: 'flex'}}>
                 <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
                 <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
-                  {tagsAndFragmentsArray.tags.map((tag: TagType) => {
+                  {tagsAndFragmentsArray.tags.map((tag: CallTagType) => {
                     return (
                       <div style={{margin: 0, display: 'flex'}}>
                         <TwoTags title={tag.name} body={tag.value}/>
@@ -609,7 +608,7 @@ const Call = memo((props: CallPropsType) => {
                 <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
                 <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
 
-                  {tagsAndFragmentsArray.fragments.map((tag: TagType) => {
+                  {tagsAndFragmentsArray.fragments.map((tag: CallTagType) => {
                     return (
                       <div
                         onClick={async (event) => {

@@ -9,16 +9,16 @@ import {
   CallInfoType,
   CallSttFragmentType,
   CallSttType,
-  TagType,
+  CallTagType,
 } from "../../../store/calls/calls.types";
-import Plus from "../../../components/Buttons/Plus";
-import Reboot from "../../../components/Buttons/Reboot";
-import History from "../../../components/Buttons/History";
-import Download from "../../../components/Buttons/Download";
-import Back from "../../../components/Buttons/Back";
-import {BlockBox} from "../../../components";
-import {BaseTag, Fragment} from "../../../components/Tag";
-import AudioPlayer from "../../../components/AudioPlayer";
+import Plus from "../../../components/common/Buttons/Plus";
+import Reboot from "../../../components/common/Buttons/Reboot";
+import History from "../../../components/common/Buttons/History";
+import Download from "../../../components/common/Buttons/Download";
+import Back from "../../../components/common/Buttons/Back";
+import {BlockBox} from "../../../components/common";
+import {BaseTag, Fragment} from "../../../components/common/Tag";
+import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
 
 type CallBodyPropsType = {
@@ -27,7 +27,7 @@ type CallBodyPropsType = {
   callStt: CallSttType | null,
   bundleIndex: number,
   expanded: boolean,
-  fragments: TagType[],
+  fragments: CallTagType[],
   audioRef: any,
   onFragmentClick: any,
   prevActiveFragment: any,

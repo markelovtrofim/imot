@@ -1,9 +1,9 @@
 import React, {FC, memo, MutableRefObject, useState} from 'react';
 import {makeStyles} from "@mui/styles";
-import {BlockBox} from "../../../components";
+import {BlockBox} from "../../../components/common";
 import {Typography} from "@mui/material";
 import cn from 'classnames';
-import {BaseTag} from "../../../components/Tag";
+import {BaseTag} from "../../../components/common/Tag";
 import {CallSttFragmentType} from "../../../store/calls/calls.types";
 import {timeConverter} from "../Call";
 

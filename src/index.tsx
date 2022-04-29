@@ -20,16 +20,16 @@ declare global {
 
 window.__store__ = store;
 
-ReactDOM.render(
-  <React.StrictMode>
-    <StylesProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <HashRouter>
-            <App/>
-          </HashRouter>
-        </Provider>
-      </ThemeProvider>
-    </StylesProvider>
-  </React.StrictMode>, document.getElementById('root')
-);
+      ReactDOM.render(
+        <React.StrictMode>
+          <StylesProvider injectFirst>
+            <ThemeProvider theme={theme}>
+              <Provider store={store}>
+                <HashRouter>
+                  <App/>
+                </HashRouter>
+              </Provider>
+            </ThemeProvider>
+          </StylesProvider>
+        </React.StrictMode>, document.getElementById('root')
+      );

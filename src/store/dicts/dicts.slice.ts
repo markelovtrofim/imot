@@ -147,7 +147,7 @@ type InitialStateType = {
   dicts: DictType[] | null[] | null,
   currentDict: DictTypeDetailed | null | false,
 
-  error: string | null,
+  error: string | null
 };
 
 const createNullArray = (count: number) => {

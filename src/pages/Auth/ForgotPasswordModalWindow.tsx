@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import ModalWindowBox from "../../components/ModalWindowBox";
+import ModalWindowBox from "../../components/common/ModalWindowBox";
 import {IconButton, Typography} from "@mui/material";
 import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
-import Input from "../../components/Input";
+import Input from "../../components/common/Input";
 import {LoadingButton} from "@mui/lab";
 import {makeStyles} from "@mui/styles";
 import {useFormik} from "formik";

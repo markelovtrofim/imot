@@ -27,17 +27,20 @@ const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   return requestArray;
 };
 
-const convertDate = (date: Date) => {
-  const yyyy = date.getFullYear();
-  const mm = date.getMonth() + 1; // Months start at 0!
-  let strMm = `${mm}`;
+const convertDate = (date: Date | null) => {
+  if (date) {
+    const yyyy = date.getFullYear();
+    const mm = date.getMonth() + 1; // Months start at 0!
+    let strMm = `${mm}`;
 
-  const dd = date.getDate();
-  let strDd = `${dd}`;
+    const dd = date.getDate();
+    let strDd = `${dd}`;
 
-  if (mm < 10) strMm = `0${mm}`;
-  if (dd < 10) strDd = `0${dd}`;
-  return `${yyyy}-${strMm}-${strDd}`;
+    if (mm < 10) strMm = `0${mm}`;
+    if (dd < 10) strDd = `0${dd}`;
+    return `${yyyy}-${strMm}-${strDd}`;
+  }
+  return date;
 };
 
 export const getCallStt = createAsyncThunk(

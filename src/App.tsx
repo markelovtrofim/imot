@@ -2,15 +2,18 @@ import React, {useEffect} from 'react';
 import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
-import {Header} from './components';
-import {Auth, Calls, MarkupRules} from './pages';
+import {Header} from './components/common';
+import {
+  Auth,
+  Calls,
+  MarkupRules,
+  LoadCall,
+  Settings
+} from './pages';
 import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
 import {useDispatch} from "react-redux";
-import LoadCall from "./pages/LoadCall";
-import Settings from "./pages/Settings";
 import "rsuite/dist/rsuite.min.css";
-import 'antd/dist/antd.css';
 
 
 export const useStyles = makeStyles(({

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {BlockBox, Search, СontrolBlock} from "../../components";
+import {BlockBox, Search, СontrolBlock} from "../../components/common";
 import {CircularProgress, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
@@ -11,7 +11,7 @@ import CallStubMiddleware from "./Call";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
-import ContainedSelect from "../../components/Selects/ContainedSelect";
+import ContainedSelect from "../../components/common/Selects/ContainedSelect";
 
 const useStyles = makeStyles(({
   callsHeader: {},
