@@ -23,7 +23,7 @@ export const getTags = createAsyncThunk(
   async (payload: { filter?: string, group?: string }, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const generateEndUrlPart = (payload: {filter?: string, group?: string}): string => {
+      const generateEndUrlPart = (payload: { filter?: string, group?: string }): string => {
         if (payload.filter && payload.group) {
           return `?filter=${payload.filter}&group=${payload.group}`;
         } else if (payload.filter) {
@@ -51,13 +51,13 @@ export const getTag = createAsyncThunk(
   'tags/getTag',
   async (id: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    debugger
     const {data} = await axios.get(`https://imot-api.pyzzle.ru/tag_rule/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
+    return data
   }
 )
 
@@ -73,7 +73,7 @@ type initialStateType = {
   error: string | null
 };
 
-const createNullArray = (count: number) => {
+export const createNullArray = (count: number) => {
   let result = [];
   for (let i = 0; i < count; i++) {
     result.push(null);
@@ -104,10 +104,10 @@ export const tagsSlice = createSlice({
       state.currentTagGroup = action.payload;
     },
 
-    setTags(state, action: PayloadAction<TagType[]>) {
+    setTags(state, action: PayloadAction<TagType[] | null[]>) {
       state.tags = action.payload;
     },
-    setCurrentTag(state, action: PayloadAction<TagDetailedType>) {
+    setCurrentTag(state, action: PayloadAction<TagDetailedType | null>) {
       state.currentTag = action.payload;
     },
   }

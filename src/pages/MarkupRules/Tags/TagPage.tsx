@@ -10,6 +10,8 @@ import {getTag, getTagGroups, getTags, tagsSlice} from "../../../store/tags/tags
 import {TagGroupType, TagType} from "../../../store/tags/tags.types";
 import {useTagsStyles} from './TagPage.jss';
 import {useAppSelector} from "../../../hooks/redux";
+import TagGroups from "./TagGroups/TagGroups";
+import TagItems from "./TagItems/TagItems";
 
 const TagPage = () => {
   const classes = useTagsStyles();
@@ -61,10 +63,7 @@ const TagPage = () => {
 
           {/* groups */}
           <div className={classes.dpBothBox}>
-            <Groups
-              groups={tagGroups}
-              currentGroup={currentTagGroup}
-            />
+            <TagGroups/>
           </div>
         </div>
 
@@ -72,10 +71,7 @@ const TagPage = () => {
         <div className={classes.dpLeftBlockDicts}>
           <SearchInput handleMWOpen={handleMWOpen}/>
           <div className={classes.dpBothBox}>
-            <Items
-              items={tags}
-              currentItem={currentTag}
-            />
+            <TagItems/>
           </div>
         </div>
       </div>
