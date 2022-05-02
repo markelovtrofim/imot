@@ -19,7 +19,7 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
 
   const onTagGroupClick = async () => {
     if (group) {
-      dispatch(tagsSlice.actions.setTags(createNullArray(10)));
+      dispatch(tagsSlice.actions.setTags(createNullArray(20)));
       dispatch(tagsSlice.actions.setCurrentTag(null));
 
       dispatch(tagsSlice.actions.setCurrentTagGroup(group));

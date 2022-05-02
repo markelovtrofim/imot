@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
-import {TagDetailedType, TagGroupType, TagType} from "./tags.types";
+import {GlobalFilterItemDetailed, TagDetailedType, TagGroupType, TagType} from "./tags.types";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
@@ -47,6 +47,7 @@ export const getTags = createAsyncThunk(
   }
 );
 
+// детальная информация о теге.
 export const getTag = createAsyncThunk(
   'tags/getTag',
   async (id: string, thunkAPI) => {
@@ -61,6 +62,20 @@ export const getTag = createAsyncThunk(
   }
 )
 
+// все критерии для глобаного фильтра.
+export const getAllGlobalTagFilters = createAsyncThunk(
+  'tags/getAllGlobalTagFilters',
+  async (payload, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    const {data} = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/?extended=true`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    thunkAPI.dispatch(tagsSlice.actions.setAllGlobalFilterCriterias(data));
+  }
+)
+
 type initialStateType = {
   activeTagId: string | null,
 
@@ -69,6 +84,9 @@ type initialStateType = {
 
   tags: TagType[] | null[] | null,
   currentTag: TagDetailedType | null | false,
+
+  allGlobalFilterCriterias: GlobalFilterItemDetailed[],
+  activeGlobalFilterCriterias: GlobalFilterItemDetailed[],
 
   error: string | null
 };
@@ -90,6 +108,8 @@ const initialState: initialStateType = {
   tags: createNullArray(15),
   currentTag: null,
 
+  allGlobalFilterCriterias: [],
+
   error: null
 };
 
@@ -109,6 +129,13 @@ export const tagsSlice = createSlice({
     },
     setCurrentTag(state, action: PayloadAction<TagDetailedType | null>) {
       state.currentTag = action.payload;
+    },
+
+    setAllGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
+      state.allGlobalFilterCriterias = action.payload;
+    },
+    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
+      state.allGlobalFilterCriterias = action.payload;
     },
   }
 });

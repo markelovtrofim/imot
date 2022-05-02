@@ -34,10 +34,10 @@ const DictDetailsStubMiddleware: FC = () => {
   if (currentDict === null) {
     return (
       <BlockBox padding={'5px 24px 0 24px'}>
-        <Field label={'Название словаря'} height={'45px'}>
+        <Field label={'Название словаря'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>
-        <Field label={'Название группы'} height={'45px'}>
+        <Field label={'Название группы'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>
         <Field
@@ -53,7 +53,6 @@ const DictDetailsStubMiddleware: FC = () => {
               <InfoCircle/>
             </div>
           }
-          height={'340px'}
         >
           <div style={{height: '340px'}}>
             <Skeleton variant={"rectangular"} height={'100%'} width={'100%'}/>
@@ -311,7 +310,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
   return (
     <BlockBox padding={'5px 24px'}>
       <form onSubmit={formik.handleSubmit}>
-        <Field label={translate("dictName_dictDetail", language)} height={'45px'}>
+        <Field label={translate("dictName_dictDetail", language)}>
           <InputBase
             disabled={!currentDict.group}
             style={{width: '100%'}}
@@ -321,7 +320,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
             onChange={formik.handleChange}
           />
         </Field>
-        <Field label={translate("groupName_dictDetail", language)} height={'45px'}>
+        <Field label={translate("groupName_dictDetail", language)}>
           <InputBase
             disabled={!currentDict.group}
             style={{width: '100%'}}
@@ -457,7 +456,6 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
               </Tooltip>
             </div>
           }
-          height={'340px'}
         >
           <textarea
             className={classes.ddTextarea}

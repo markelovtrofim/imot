@@ -21,13 +21,6 @@ const TagItems: FC = () => {
             <TagItem
               tag={tag}
               isActive={Boolean(currentTag && tag && currentTag.id === tag.id)}
-              handleClick={() => {}}
-              //   async () => {
-              //   if (item) {
-              //     dispatch(dictsSlice.actions.setCurrentDict(null));
-              //     await dispatch(getDict(item.id));
-              //   }
-              // }
             />
           )
         })

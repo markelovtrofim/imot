@@ -15,11 +15,12 @@ import {TemplateType} from "../../../store/search/template.types";
 import {CriteriasType} from "../../../store/search/search.types";
 import CreateNameTemplateModalWindow from "./CreateNameTemplateModalWindow";
 import DeleteTemplateModalWindow from "./DeleteTemplateModalWindow";
-import TextSelect from "../Selects/TextSelect";
+import TextSelect from "../Selects/TextSelect/TextSelect";
 import SearchSelect from './SearchSelect';
 import CustomControlSelect from "../Selects/CustomControlSelect";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
+import {CrossSvgWithBg} from "../Selects/TextSelect/TextSelect.svg";
 
 const useStyles = makeStyles(({
   searchTitle: {
@@ -168,7 +169,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   };
 
   useEffect(() => {
-    if (isAuth && activeCriterias.length < 1) {
+    if (isAuth && activeCriterias.length < 1 && defaultCriterias.length < 1) {
       dispatch(getAllSearchCriterias());
       dispatch(getDefaultCriterias());
       dispatch(getAllTemplates());
@@ -211,6 +212,42 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     }
   }
 
+  function onTemplateSelectValueChange(event: any) {
+    dispatch(templateSlice.actions.setCurrentTemplate(event.value));
+    dispatch(searchSlice.actions.setClearDefaultCriteriasValues(null))
+    if (allCriterias) {
+      let fullCriteriaLocal: CriteriasType[] = [];
+      for (let i = 0; i < event.value.items.length; i++) {
+        const obj = allCriterias.find((item) => {
+          return item.key === event.value.items[i].key;
+        });
+        // @ts-ignore
+        fullCriteriaLocal.push({...obj, values: event.value.items[i].values})
+      }
+
+      let activeCriteriasLocal = [];
+      for (let i = 0; i < fullCriteriaLocal.length; i++) {
+        const obj = defaultCriterias.find((item) => {
+          return item.key === fullCriteriaLocal[i].key
+        });
+        if (obj) {
+          dispatch(searchSlice.actions.setDefaultCriteriaValues({
+            key: fullCriteriaLocal[i].key,
+            values: fullCriteriaLocal[i].values
+          }))
+        } else {
+          activeCriteriasLocal.push(fullCriteriaLocal[i]);
+        }
+      }
+      dispatch(searchSlice.actions.setActiveCriterias(activeCriteriasLocal))
+    }
+  }
+
+  function onAllCriteriasSelectValueChange(event: any) {
+    dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...event.value, values: []}]));
+    dispatch(templateSlice.actions.setCurrentTemplate(null))
+  }
+
   return (
     <div style={{margin: '24px 0'}}>
       <BlockBox padding="24px 24px 10px 24px">
@@ -219,45 +256,30 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
             <Typography className={classes.searchTitleLeftText} variant="h5">
               {translate('searchTitle', language)}
             </Typography>
-            <TextSelect
-              name={"template"}
-              inputValue={currentTemplate ? {value: currentTemplate, label: currentTemplate.title} : null}
-              inputValueColor="#722ED1"
-              arrowPosition="right"
-              placeholder={'Шаблоны поиска'}
-              options={convertedTemplate}
-              customControl={allTemplates.length}
-              handleInputValueChange={(e: any) => {
-                dispatch(templateSlice.actions.setCurrentTemplate(e.value));
-                dispatch(searchSlice.actions.setClearDefaultCriteriasValues(null))
-                if (allCriterias) {
-                  let fullCriteriaLocal: CriteriasType[] = [];
-                  for (let i = 0; i < e.value.items.length; i++) {
-                    const obj = allCriterias.find((item) => {
-                      return item.key === e.value.items[i].key;
-                    });
-                    // @ts-ignore
-                    fullCriteriaLocal.push({...obj, values: e.value.items[i].values})
-                  }
-
-                  let activeCriteriasLocal = [];
-                  for (let i = 0; i < fullCriteriaLocal.length; i++) {
-                    const obj = defaultCriterias.find((item) => {
-                      return item.key === fullCriteriaLocal[i].key
-                    });
-                    if (obj) {
-                      dispatch(searchSlice.actions.setDefaultCriteriaValues({
-                        key: fullCriteriaLocal[i].key,
-                        values: fullCriteriaLocal[i].values
-                      }))
-                    } else {
-                      activeCriteriasLocal.push(fullCriteriaLocal[i]);
+            <div style={{marginTop: '3px', borderLeft: '1px solid #CDD5DF', paddingLeft: '10px'}}>
+              <TextSelect
+                name={'templatesSelect'}
+                value={currentTemplate ? {value: currentTemplate, label: currentTemplate.title} : null}
+                handleValueChange={onTemplateSelectValueChange}
+                options={convertedTemplate}
+                iconPosition={'right'}
+                customControl={
+                  <div style={{display: 'flex'}}>
+                    {currentTemplate ?
+                      <>
+                        <Typography style={{color: '#722ED1'}}>{currentTemplate.title}</Typography>
+                      </> :
+                      <>
+                        <Typography>Шаблоны поиска</Typography>
+                        <span>({allTemplates.length})</span>
+                      </>
                     }
-                  }
-                  dispatch(searchSlice.actions.setActiveCriterias(activeCriteriasLocal))
+                  </div>
                 }
-              }}
-            />
+                ifArrowColor={currentTemplate ? '#722ED1' : '#000'}
+                menuPosition={'left'}
+              />
+            </div>
           </div>
           {(activeCriterias.length > 0 || defaultCriterias.some(item => item.values.length > 0)) &&
           <div>
@@ -343,23 +365,30 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
             >
               {translate('searchButton', language)}
             </LoadingButton>
-            <TextSelect
-              inputValue={{value: 'Еще', label: 'Еще'}}
-              options={op}
-              name={'more'}
-              handleInputValueChange={(e: any) => {
-                dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...e.value, values: []}]));
-                dispatch(templateSlice.actions.setCurrentTemplate(null))
-              }}
-              inputValueColor={'#722ED1'}
-              arrowPosition={'left'}
-              customControl={activeCriterias.length}
-              notClose={true}
-              height="400px"
-              menuPosition={'right'}
-              optionWithPlus={true}
-            />
-
+            <div style={{margin: '0 5px 0 20px'}}>
+              <TextSelect
+                name={'moreSelect'}
+                value={null}
+                handleValueChange={onAllCriteriasSelectValueChange}
+                options={op}
+                iconPosition={'left'}
+                customControl={
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <Typography style={{color: '#722ED1', fontWeight: '700'}}>Еще</Typography>
+                    {activeCriterias.length > 0 &&
+                    <span style={{marginLeft: '3px', color: '#722ED1'}}>
+                      ({activeCriterias.length})
+                    </span>
+                    }
+                  </div>
+                }
+                ifArrowColor={'#722ED1'}
+                notClose={true}
+                optionWithPlus={true}
+                menuPosition={'right'}
+                height={"400px"}
+              />
+            </div>
           </div>
         </div>
       </BlockBox>

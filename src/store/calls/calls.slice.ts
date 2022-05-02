@@ -71,7 +71,7 @@ export const getCallAudio = createAsyncThunk(
     const blob = new Blob([data], {
       type: 'audio/wav'
     });
-    const source = new MediaSource();
+    // const source = new MediaSource();
     const blobUrl = URL.createObjectURL(blob);
     thunkAPI.dispatch(callsSlice.actions.setAudio({audio: blobUrl, id: payload.id, index: payload.bundleIndex}))
   }

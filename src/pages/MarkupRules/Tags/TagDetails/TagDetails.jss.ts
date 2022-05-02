@@ -18,6 +18,11 @@ export const useTagDetailsStyles = makeStyles(({
     color: '#2F3747 !important',
     fontWeight: '700 !important',
     fontSize: '16px !important',
-    margin: '24px 0 19px 0 !important'
+    margin: '15px 0 !important'
+  },
+  typographyTitleMini: {
+    color: '#738094 !important',
+    fontWeight: '700 !important',
+    fontSize: '13px !important',
   }
 }));

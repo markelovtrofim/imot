@@ -5,29 +5,26 @@ import {useHistory} from "react-router-dom";
 import {useTagItemStyles} from "./TagItem.jss";
 import {TagType} from "../../../../../store/tags/tags.types";
 import {InfoCircle, InfoCircleActive} from "../../../MarkupRules";
+import {getTag, tagsSlice} from "../../../../../store/tags/tags.slice";
 
 type TagItemPropsType = {
   tag: TagType | null,
-  isActive: boolean,
-  handleClick: () => void
+  isActive: boolean
 };
 
-const TagItem: FC<TagItemPropsType> = memo(({tag, isActive, handleClick}) => {
+const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
 
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = useTagItemStyles({tag, isActive});
 
-  function onTagItemClick () {
-    // isActive
-    //   ? () => null
-    //   : () => {
-    //     handleClick();
-    //     history.location.pathname = '/'
-    //     if (tag) {
-    //       history.replace(`markuprules/dictionaries/${tag.id}`)
-    //     }
-    //   }
+  async function onTagItemClick() {
+    if (!isActive && tag) {
+      dispatch(tagsSlice.actions.setCurrentTag(null));
+      await dispatch(getTag(tag.id));
+      history.location.pathname = '/';
+      history.replace(`markuprules/tags/${tag.id}`);
+    }
   }
 
   return (

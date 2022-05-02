@@ -19,10 +19,10 @@ export const useTagItemStyles = makeStyles<Theme, TagItemStylesType>((theme: The
     justifyContent: 'space-between',
     alignItems: 'center',
     borderRight: '4px solid #FFFFFF',
-    borderColor: props => props.isActive ? '#9254DE !important' : '#FFFFFF !important',
+    borderColor: props => props.isActive ? '#9254DE' : '#FFFFFF',
     '&:hover': {
-      borderColor: props => props.tag ? props.isActive ? '#9254DE !important' : '#F9F0FF !important' : '#F8FAFC',
-      backgroundColor: props => props.tag ? '#F9F0FF' : '#F8FAFC'
+      borderColor: props => props.isActive ? '#722ED1' : '#F9F0FF',
+      backgroundColor: '#F9F0FF'
     },
     '&:hover div': {
       color: "#722ED1",

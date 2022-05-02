@@ -6,20 +6,22 @@ type FieldPropsType = {
   label: string,
   labelBrother?: any,
   bgColor?: string,
-  height?: string,
   width?: string,
   margin?: string,
   padding?: string
 }
 
-const Field: FC<FieldPropsType> = memo(({children, label, labelBrother, bgColor, height, width, margin, padding}) => {
+const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, margin, padding}) => {
   const useStyles = makeStyles(({
     fieldBox: {
-      height: height,
+      margin: margin ? margin : '0',
+      width: width ? width : 'auto'
+    },
+    fieldText: {
       cursor: 'default',
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
       border: '1px solid #EEF2F6',
-      padding: padding ? padding : '8px 15px',
+      padding: padding ? padding : '3px 10px',
       borderRadius: '5px',
       marginTop: '10px'
     },
@@ -31,15 +33,14 @@ const Field: FC<FieldPropsType> = memo(({children, label, labelBrother, bgColor,
   }));
   const classes = useStyles();
   return (
-    <div style={{marginTop: '24px', width: width}}>
+    <div className={classes.fieldBox}>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <Typography className={classes.fieldLabel}>{label}</Typography>
-        {labelBrother}
-      </div>
-      <div className={classes.fieldBox}>
-        <Typography>
-          {children}
+        <Typography className={classes.fieldLabel}>
+          {label}
         </Typography>
+      </div>
+      <div className={classes.fieldText}>
+        {children}
       </div>
     </div>
   );

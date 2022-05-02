@@ -106,11 +106,10 @@ export const unitsOfTime = {
 
 const ControlBlock = () => {
 
-    const element = document.getElementById("dateRangePicker");
-    if (element) {
-      debugger
-      element.classList.remove("rs-picker-toggle-active");
-    }
+  const element = document.getElementById("dateRangePicker");
+  if (element) {
+    element.classList.remove("rs-picker-toggle-active");
+  }
 
   const {language} = useSelector((state: RootState) => state.lang);
   const classes = useStyles();
@@ -135,7 +134,7 @@ const ControlBlock = () => {
             className={classes.dateRangePickerInputs}
             // @ts-ignore
             value={date}
-            onChange={(value, ) => {
+            onChange={(value,) => {
               // @ts-ignore
               dispatch(searchSlice.actions.setDate(value));
             }}
@@ -144,9 +143,9 @@ const ControlBlock = () => {
             }}
           />
           {
-          <div style={{}}>
+            <div style={{}}>
 
-          </div>
+            </div>
           }
           <ButtonGroup
             items={[

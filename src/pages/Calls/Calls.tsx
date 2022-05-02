@@ -67,7 +67,6 @@ const Calls = React.memo(() => {
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
-  console.log(expanded);
   const handleExpandedChange = (panel: string | false) => {
     setExpanded(panel);
   };

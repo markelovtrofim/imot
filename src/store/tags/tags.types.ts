@@ -1,5 +1,3 @@
-import {DictTypeDetailed} from "../dicts/dicts.types";
-
 export type TagGroupType = {
   group: string,
   count: number
@@ -12,11 +10,19 @@ export type TagType = {
 }
 
 
-type GlobalFilterItem = {
+export type GlobalFilterItem = {
   key: string,
   values: string[]
 }
-type FragmentRulesItem = {
+export type GlobalFilterItemDetailed = {
+  title: string,
+  key: string,
+  selectType: string,
+  addMulti: boolean,
+  values: string[]
+}
+
+export type FragmentRulesItem = {
   phrases: string[],
   dicts: string[],
   direction: string,
@@ -25,7 +31,8 @@ type FragmentRulesItem = {
   silentAfter: string,
   interruptTime: string
 }
-type SetTagsItem = {
+
+export type SetTagsItem = {
   name: string,
   value: string,
   visible: boolean
