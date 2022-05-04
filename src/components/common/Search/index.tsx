@@ -21,6 +21,7 @@ import CustomControlSelect from "../Selects/CustomControlSelect";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import {CrossSvgWithBg} from "../Selects/TextSelect/TextSelect.svg";
+import {optionsCreator} from "../../../utils/optionsCreator";
 
 const useStyles = makeStyles(({
   searchTitle: {
@@ -149,17 +150,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   };
 
   // template select
-  const converter = (state: TemplateType[] | null) => {
-    if (state) {
-      let local: { value: any, label: string }[] = [];
-      for (let i = 0; i < state.length; i++) {
-        local.push({value: state[i], label: state[i].title});
-      }
-      return local
-    }
-    return [];
-  };
-  const convertedTemplate = converter(allTemplates);
+  const convertedTemplate = optionsCreator(allTemplates);
 
 
   const removeAllCriteriasHandler = () => {
@@ -330,7 +321,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
               const compResult = allCriterias.filter(v => v.key === criteria.key);
               return (
                 <div className={classes.searchItem}>
-                  <Typography className={classes.searchText}>{criteriaKey}</Typography>
+                  <Typography className={classes.searchText}>{compResult[0].title}</Typography>
                   <SearchSelect
                     criteriaFull={compResult[0]}
                     criteriaCurrent={criteria}

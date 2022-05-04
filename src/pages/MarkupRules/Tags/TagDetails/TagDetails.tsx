@@ -6,8 +6,12 @@ import ContainedSelect from "../../../../components/common/Selects/ContainedSele
 import TextSelect from "../../../../components/common/Selects/TextSelect/TextSelect";
 import {useTagDetailsStyles} from './TagDetails.jss';
 import {useAppSelector} from "../../../../hooks/redux";
-import {getAllGlobalTagFilters} from "../../../../store/tags/tags.slice";
+import {getAllGlobalTagFilters, tagsSlice} from "../../../../store/tags/tags.slice";
 import {useDispatch} from "react-redux";
+import Alert from "../../../../components/common/Alert/Alert";
+import {optionsCreator, optionsCreatorVEL} from "../../../../utils/optionsCreator";
+import SearchSelect from "../../../../components/common/Search/SearchSelect";
+import TagPageSelect from "../../../../components/common/Selects/TagPageSelect";
 
 const PlusSvg = (props: any) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -28,7 +32,9 @@ const TagDetails = () => {
     {value: 'test', label: 'test'}
   ];
 
+  const classes = useTagDetailsStyles();
   const dispatch = useDispatch();
+
   const allGlobalFilterCriterias = useAppSelector(state => state.tags.allGlobalFilterCriterias);
   const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
   const currentTag = useAppSelector(state => state.tags.currentTag);
@@ -40,9 +46,9 @@ const TagDetails = () => {
 
   const handleGlobalFilterSelectClick = () => {
     let state = allGlobalFilterCriterias;
+    let localCriterias = []
     if (state && currentTag) {
-      let localCriterias = []
-      const defAcCriterias = [...activeCriterias, ...currentTag.globalFilter]
+      const defAcCriterias = [...activeGlobalFilterCriterias, ...currentTag.globalFilter]
       for (let i = 0; i < state.length; i++) {
         if (!defAcCriterias.find((item) => {
           if (state) {
@@ -52,11 +58,12 @@ const TagDetails = () => {
           localCriterias.push({value: state[i], label: state[i].title})
         }
       }
-      return local
+      return localCriterias;
     }
+    return [];
   }
+  const globalFilterOptions = handleGlobalFilterSelectClick();
 
-  const classes = useTagDetailsStyles();
 
   return (
     <BlockBox padding={'0 24px 24px 24px'}>
@@ -96,21 +103,40 @@ const TagDetails = () => {
       <div style={{width: '100%'}}>
         <Typography className={classes.typographyTitle}>Глобальные настройки тега</Typography>
         <div>
-          <Typography className={classes.typographyTitleMini}>Телефон</Typography>
-          <ContainedSelect
-            width={'60%'}
-            height={'39px'}
-            onSelectChange={() => {}}
-            options={testOptions}
-            value={{value: 'test', label: 'test'}}
-          />
+          {activeGlobalFilterCriterias.length > 0 ?
+            <div>
+              {activeGlobalFilterCriterias.map((criteria) => {
+                const criteriaKey = criteria.key.slice(4);
+                return (
+                  <div>
+                    <Typography className={classes.typographyTitleMini}>{criteria.title}</Typography>
+                    <div style={{display: 'flex'}}>
+                      <TagPageSelect
+                        width={'60%'}
+                        criteriaCurrent={criteria}
+                        criteriaFull={criteria}
+                        isDefaultCriteria={false}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div> :
+            <Alert
+              iconType={'info'}
+              text={'У этой критерии нет глобальных фильтров'}
+            />
+          }
         </div>
       </div>
       <TextSelect
         value={null}
-        handleValueChange={() => {}}
-        options={testOptions}
+        handleValueChange={(event: any) => {
+          dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias(event.value));
+        }}
+        options={globalFilterOptions}
         iconPosition={'left'}
+        height={'300px'}
         icon={<PlusSvg style={{marginRight: '10px'}}/>}
         customControl={
           <div style={{display: 'flex', alignItems: 'center'}}>

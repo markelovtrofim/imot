@@ -1,6 +1,7 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {GlobalFilterItemDetailed, TagDetailedType, TagGroupType, TagType} from "./tags.types";
+import cloneDeep from "lodash.clonedeep";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
@@ -109,6 +110,7 @@ const initialState: initialStateType = {
   currentTag: null,
 
   allGlobalFilterCriterias: [],
+  activeGlobalFilterCriterias: [],
 
   error: null
 };
@@ -134,8 +136,18 @@ export const tagsSlice = createSlice({
     setAllGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
       state.allGlobalFilterCriterias = action.payload;
     },
-    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
-      state.allGlobalFilterCriterias = action.payload;
+    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed>) {
+      state.activeGlobalFilterCriterias.push(action.payload);
     },
+    setActiveGlobalFilterCriteriasValues(state, action: PayloadAction<GlobalFilterItemDetailed>) {
+      let activeCriterias = cloneDeep(current(state.activeGlobalFilterCriterias));
+      const activeCriteria = activeCriterias.find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const activeCriteriaIndex = activeCriterias.indexOf(activeCriteria);
+
+      state.activeGlobalFilterCriterias[activeCriteriaIndex].values = action.payload.values;
+    }
   }
 });

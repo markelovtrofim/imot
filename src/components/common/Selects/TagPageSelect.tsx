@@ -11,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import cn from 'classnames';
 import Checkbox from "../Checkbox";
 import {templateSlice} from "../../../store/search/template.slice";
+import {tagsSlice} from "../../../store/tags/tags.slice";
 
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -67,14 +68,18 @@ type SelectPropsType = {
   criteriaCurrent: CriteriasType | RequestDataType,
   isDefaultCriteria: boolean,
 
+  width: string
 };
 
 
-const SearchSelect: FC<SelectPropsType> = ({
-                                             criteriaFull,
-                                             criteriaCurrent,
-                                             isDefaultCriteria,
-                                           }) => {
+const SearchSelect: FC<SelectPropsType> = (
+  {
+    criteriaFull,
+    criteriaCurrent,
+    isDefaultCriteria,
+
+    width
+  }) => {
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {
@@ -188,16 +193,9 @@ const SearchSelect: FC<SelectPropsType> = ({
       "&:hover": {
         borderColor: '#E3E8EF'
       },
-      minWidth: '70px',
+      minWidth: width,
       borderRadius: '5px',
       backgroundColor: '#F8FAFC'
-    }),
-    dropdownIndicator: (provided: any) => ({
-      ...provided,
-      color: '#738094',
-      '&:hover': {
-        color: '#738094'
-      }
     }),
     placeholder: (provided: any) => ({
       ...provided,
@@ -295,8 +293,6 @@ const SearchSelect: FC<SelectPropsType> = ({
     }
     return null;
   })
-
-
   const CustomMenuList = memo(({selectProps, ...props}: any) => {
     const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
     return (
@@ -336,6 +332,7 @@ const SearchSelect: FC<SelectPropsType> = ({
     );
   });
 
+
   // LOGIC BLOCK
   // диспатч
   const dispatch = useDispatch();
@@ -349,9 +346,8 @@ const SearchSelect: FC<SelectPropsType> = ({
     dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
   };
 
-  // выполняется когда меняется значение.
+  // добавление критерии.
   const handleSelectChange = (event: any) => {
-    dispatch(templateSlice.actions.setCurrentTemplate(null));
     const eventConverter = () => {
       let result = [];
       for (let i = 0; i < event.length; i++) {
@@ -365,11 +361,12 @@ const SearchSelect: FC<SelectPropsType> = ({
     if (isDefaultCriteria) {
       dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}))
     } else {
-      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      dispatch(tagsSlice.actions.setActiveGlobalFilterCriteriasValues({...criteriaFull, values: [...eventConverterResult]}));
     }
   };
 
   const converter = (state: any) => {
+    debugger
     let local: { value: string, label: string }[] = [];
     for (let i = 0; i < state.values.length; i++) {
       local.push({value: state.values[i], label: state.values[i]});
@@ -386,6 +383,7 @@ const SearchSelect: FC<SelectPropsType> = ({
       document.removeEventListener("mousedown", () => setMenuIsOpen(false));
     };
   }, []);
+
 
   return (
     <div className={classes.selectBox}>
