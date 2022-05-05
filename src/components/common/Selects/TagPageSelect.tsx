@@ -412,7 +412,6 @@ const SearchSelect: FC<SelectPropsType> = (
             }}
             placeholder={'Все'}
             menuIsOpen={menuIsOpen}
-
           />
         </div> :
         <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>

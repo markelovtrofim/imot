@@ -2,16 +2,15 @@ import React, {useEffect} from 'react';
 import {InputBase, Typography} from "@mui/material";
 import {BlockBox} from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
-import ContainedSelect from "../../../../components/common/Selects/ContainedSelect";
 import TextSelect from "../../../../components/common/Selects/TextSelect/TextSelect";
 import {useTagDetailsStyles} from './TagDetails.jss';
 import {useAppSelector} from "../../../../hooks/redux";
 import {getAllGlobalTagFilters, tagsSlice} from "../../../../store/tags/tags.slice";
 import {useDispatch} from "react-redux";
 import Alert from "../../../../components/common/Alert/Alert";
-import {optionsCreator, optionsCreatorVEL} from "../../../../utils/optionsCreator";
-import SearchSelect from "../../../../components/common/Search/SearchSelect";
 import TagPageSelect from "../../../../components/common/Selects/TagPageSelect";
+import CustomSelect from "../../../../components/common/Selects/CustomSelect/CustomSelect";
+import {searchSlice} from "../../../../store/search/search.slice";
 
 const PlusSvg = (props: any) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -41,7 +40,7 @@ const TagDetails = () => {
 
   useEffect(() => {
     dispatch(getAllGlobalTagFilters());
-  }, [])
+  }, []);
 
 
   const handleGlobalFilterSelectClick = () => {
@@ -63,6 +62,28 @@ const TagDetails = () => {
     return [];
   }
   const globalFilterOptions = handleGlobalFilterSelectClick();
+
+  // select functions.
+  // добавление критерия.
+  function addValueHandler(event: any, isDefaultCriteria: boolean, fullCriteria: any) {
+    const eventConverter = () => {
+      let result = [];
+      for (let i = 0; i < event.length; i++) {
+        result.push(event[i].value);
+      }
+      return result;
+    };
+
+    const eventConverterResult = eventConverter();
+
+    debugger
+
+    if (isDefaultCriteria) {
+      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: fullCriteria.key, values: [...eventConverterResult]}))
+    } else {
+      dispatch(tagsSlice.actions.setActiveGlobalFilterCriteriasValues({...fullCriteria, values: [...eventConverterResult]}));
+    }
+  }
 
 
   return (
@@ -111,11 +132,14 @@ const TagDetails = () => {
                   <div>
                     <Typography className={classes.typographyTitleMini}>{criteria.title}</Typography>
                     <div style={{display: 'flex'}}>
-                      <TagPageSelect
-                        width={'60%'}
-                        criteriaCurrent={criteria}
-                        criteriaFull={criteria}
-                        isDefaultCriteria={false}
+                      <CustomSelect
+                        addValueHandler={addValueHandler}
+                        // removeValuesHandler={}
+                        // canBeDeleted={}
+                        // activeCriteria={}
+                        // fullCriteria={}
+                        // width={}
+                        // height={}
                       />
                     </div>
                   </div>
@@ -151,4 +175,4 @@ const TagDetails = () => {
   );
 };
 
-export default TagDetails;
+export default TagDetails

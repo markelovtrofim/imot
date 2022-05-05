@@ -7,14 +7,6 @@ import {templateSlice} from "../../../../store/search/template.slice";
 import {searchSlice} from "../../../../store/search/search.slice";
 import {useDispatch} from "react-redux";
 
-//         {name === "template" ? <span>({customControl})</span> : null}
-
-
-// <span style={{marginLeft: '3px'}}>
-//           {customControl && name === 'more' ? <span>({customControl})</span> : null}
-//         </span>
-
-
 // TYPES BLOCK
 type SelectValueFormat = {
   value: any | null, label: string | null
