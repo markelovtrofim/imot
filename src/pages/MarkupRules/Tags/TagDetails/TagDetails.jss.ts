@@ -1,6 +1,11 @@
 import {makeStyles} from "@mui/styles";
 
 export const useTagDetailsStyles = makeStyles(({
+  tdWrapper: {
+    height: '85.5vh',
+    overflow: 'hidden',
+    overflowY: 'auto',
+  },
   tdNameAdnPriority: {
     display: 'flex',
     justifyContent: 'space-between',

@@ -1,6 +1,13 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
-import {GlobalFilterItemDetailed, TagDetailedType, TagGroupType, TagType} from "./tags.types";
+import {
+  FragmentRulesItem,
+  GlobalFilterItem,
+  GlobalFilterItemDetailed,
+  TagDetailedType,
+  TagGroupType,
+  TagType
+} from "./tags.types";
 import cloneDeep from "lodash.clonedeep";
 
 // группы.
@@ -40,7 +47,7 @@ export const getTags = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      await thunkAPI.dispatch(tagsSlice.actions.setTags(data));
+      thunkAPI.dispatch(tagsSlice.actions.setTags(data));
       return data;
     } catch (error) {
       console.log(error);
@@ -53,12 +60,14 @@ export const getTag = createAsyncThunk(
   'tags/getTag',
   async (id: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get(`https://imot-api.pyzzle.ru/tag_rule/${id}`, {
+    const {data} = await axios.get<TagDetailedType>(`https://imot-api.pyzzle.ru/tag_rule/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
+    thunkAPI.dispatch(tagsSlice.actions.setDefaultGlobalFilterCriterias(data.globalFilter));
+    thunkAPI.dispatch(tagsSlice.actions.setActiveFragments(data.fragmentRules));
     return data
   }
 )
@@ -77,6 +86,14 @@ export const getAllGlobalTagFilters = createAsyncThunk(
   }
 )
 
+export const createNullArray = (count: number) => {
+  let result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(null);
+  }
+  return result;
+};
+
 type initialStateType = {
   activeTagId: string | null,
 
@@ -87,17 +104,12 @@ type initialStateType = {
   currentTag: TagDetailedType | null | false,
 
   allGlobalFilterCriterias: GlobalFilterItemDetailed[],
+  defaultGlobalFilterCriterias: GlobalFilterItem[],
   activeGlobalFilterCriterias: GlobalFilterItemDetailed[],
 
-  error: string | null
-};
+  activeFragments: string[][],
 
-export const createNullArray = (count: number) => {
-  let result = [];
-  for (let i = 0; i < count; i++) {
-    result.push(null);
-  }
-  return result;
+  error: string | null
 };
 
 const initialState: initialStateType = {
@@ -110,7 +122,10 @@ const initialState: initialStateType = {
   currentTag: null,
 
   allGlobalFilterCriterias: [],
+  defaultGlobalFilterCriterias: [],
   activeGlobalFilterCriterias: [],
+
+  activeFragments: [],
 
   error: null
 };
@@ -119,6 +134,7 @@ export const tagsSlice = createSlice({
   name: 'tags',
   initialState,
   reducers: {
+    // группы
     setTagGroups(state, action: PayloadAction<TagGroupType[]>) {
       state.tagGroups = action.payload;
     },
@@ -126,6 +142,8 @@ export const tagsSlice = createSlice({
       state.currentTagGroup = action.payload;
     },
 
+
+    // теги
     setTags(state, action: PayloadAction<TagType[] | null[]>) {
       state.tags = action.payload;
     },
@@ -133,21 +151,61 @@ export const tagsSlice = createSlice({
       state.currentTag = action.payload;
     },
 
+
+    // детали тега
+    // глобальные фильтры
+    // все критерии
     setAllGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
       state.allGlobalFilterCriterias = action.payload;
     },
-    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed>) {
+    // дефолтные критерии
+    setDefaultGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItem[]>) {
+      state.defaultGlobalFilterCriterias = action.payload;
+    },
+    setDefaultGlobalFilterCriteriaValues(state, action: PayloadAction<GlobalFilterItem>) {
+      const criteria = state.defaultGlobalFilterCriterias.find(criteria => (
+        criteria.key === action.payload.key
+      ));
+      if (criteria) {
+        const index = state.defaultGlobalFilterCriterias.indexOf(criteria);
+        state.defaultGlobalFilterCriterias[index].values = action.payload.values;
+      }
+    },
+    // активные критерии
+    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
+      state.activeGlobalFilterCriterias = action.payload;
+    },
+    setActiveGlobalFilterCriteria(state, action: PayloadAction<GlobalFilterItemDetailed>) {
       state.activeGlobalFilterCriterias.push(action.payload);
     },
-    setActiveGlobalFilterCriteriasValues(state, action: PayloadAction<GlobalFilterItemDetailed>) {
+    removeActiveGlobalFilterCriteria(state, action: PayloadAction<GlobalFilterItemDetailed>) {
+      const currentActiveCriterias = current(state.activeGlobalFilterCriterias);
+      const currentActiveCriteria = currentActiveCriterias.find(criteria => criteria.key === action.payload.key);
+      if (currentActiveCriterias) {
+        // @ts-ignore
+        const criteriaIndex = currentActiveCriterias.indexOf(currentActiveCriteria);
+        state.activeGlobalFilterCriterias.splice(criteriaIndex, 1)
+      }
+    },
+    setActiveGlobalFilterCriteriaValues(state, action: PayloadAction<GlobalFilterItemDetailed>) {
       let activeCriterias = cloneDeep(current(state.activeGlobalFilterCriterias));
       const activeCriteria = activeCriterias.find(item => {
         return item.key === action.payload.key
       });
-      // @ts-ignore
-      const activeCriteriaIndex = activeCriterias.indexOf(activeCriteria);
+      if (activeCriteria) {
+        const activeCriteriaIndex = activeCriterias.indexOf(activeCriteria);
+        state.activeGlobalFilterCriterias[activeCriteriaIndex].values = action.payload.values;
+      }
+    },
 
-      state.activeGlobalFilterCriterias[activeCriteriaIndex].values = action.payload.values;
+
+    // фрагементы
+    setActiveFragments(state, action: PayloadAction<FragmentRulesItem[]>) {
+      state.activeFragments.length = 0;
+      const fragmentRulesArrayLength = action.payload.length;
+      for (let i = 0; i < fragmentRulesArrayLength; i++) {
+        state.activeFragments.push([action.payload[0].direction]);
+      }
     }
   }
 });

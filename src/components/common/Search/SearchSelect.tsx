@@ -1,6 +1,6 @@
 import * as React from 'react';
 import CreatableSelect from 'react-select/creatable';
-import {FC, memo, useEffect, useState} from "react";
+import {FC, memo, useEffect, useRef, useState} from "react";
 import {CriteriasType, RequestDataType} from "../../../store/search/search.types";
 import {searchSlice} from "../../../store/search/search.slice";
 import {useDispatch} from "react-redux";
@@ -11,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import cn from 'classnames';
 import Checkbox from "../Checkbox";
 import {templateSlice} from "../../../store/search/template.slice";
+import useOnClickOutside from "use-onclickoutside";
 
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -296,13 +297,22 @@ const SearchSelect: FC<SelectPropsType> = ({
     return null;
   })
 
-
   const CustomMenuList = memo(({selectProps, ...props}: any) => {
+    const selectSearch = useRef<HTMLInputElement | null>(null);
+
+
+    useEffect(() => {
+      if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
+        selectSearch.current.focus();
+      }
+    }, [setMenuIsOpen])
+
     const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
     return (
       <div>
         <div>
           <input
+            ref={selectSearch}
             className={classes.selectMenuListInput}
             autoCorrect="off"
             autoComplete="off"
@@ -371,8 +381,10 @@ const SearchSelect: FC<SelectPropsType> = ({
 
   const converter = (state: any) => {
     let local: { value: string, label: string }[] = [];
-    for (let i = 0; i < state.values.length; i++) {
-      local.push({value: state.values[i], label: state.values[i]});
+    if (state) {
+      for (let i = 0; i < state.values.length; i++) {
+        local.push({value: state.values[i], label: state.values[i]});
+      }
     }
     return local
   };
@@ -417,7 +429,7 @@ const SearchSelect: FC<SelectPropsType> = ({
 
           />
         </div> :
-        <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
+        <div className={classes.selectSelectBox}  onClick={() => setMenuIsOpen(true)}>
           <Select
             openMenuOnFocus={true}
             menuIsOpen={menuIsOpen}

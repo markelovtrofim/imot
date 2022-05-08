@@ -107,16 +107,15 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const Header: React.FC = () => {
   const {language} = useAppSelector((state: RootState) => state.lang);
 
-
   const classes = useStyles();
   const dispatch = useDispatch();
-  const handleLangChange = (event: SelectChangeEvent) => {
+  async function handleLangChange(event: SelectChangeEvent) {
     const currentLang = event.target.value;
-    dispatch(getLang(currentLang));
-  };
+    await dispatch(getLang(currentLang));
+    window.location.reload();
+  }
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
-
 
   const history = useHistory();
   const historyPathArray = path.split('/');
@@ -148,7 +147,6 @@ const Header: React.FC = () => {
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
   };
-
 
   // users changer
   const handleUserChange = async (e: any) => {
@@ -312,6 +310,6 @@ const Header: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Header;

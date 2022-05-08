@@ -9,8 +9,6 @@ import {getAllGlobalTagFilters, tagsSlice} from "../../../../store/tags/tags.sli
 import {useDispatch} from "react-redux";
 import Alert from "../../../../components/common/Alert/Alert";
 import TagPageSelect from "../../../../components/common/Selects/TagPageSelect";
-import CustomSelect from "../../../../components/common/Selects/CustomSelect/CustomSelect";
-import {searchSlice} from "../../../../store/search/search.slice";
 
 const PlusSvg = (props: any) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -25,18 +23,16 @@ const PlusSvg = (props: any) => (
 
 const TagDetails = () => {
 
-  const testOptions = [
-    {value: 'test', label: 'test'},
-    {value: 'test', label: 'test'},
-    {value: 'test', label: 'test'}
-  ];
-
   const classes = useTagDetailsStyles();
   const dispatch = useDispatch();
 
+  const currentTag = useAppSelector(state => state.tags.currentTag);
+
   const allGlobalFilterCriterias = useAppSelector(state => state.tags.allGlobalFilterCriterias);
   const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
-  const currentTag = useAppSelector(state => state.tags.currentTag);
+  const defaultGlobalFilterCriterias = useAppSelector(state => state.tags.defaultGlobalFilterCriterias);
+
+  const activeFragments = useAppSelector(state => state.tags.activeFragments);
 
   useEffect(() => {
     dispatch(getAllGlobalTagFilters());
@@ -63,113 +59,171 @@ const TagDetails = () => {
   }
   const globalFilterOptions = handleGlobalFilterSelectClick();
 
-  // select functions.
-  // добавление критерия.
-  function addValueHandler(event: any, isDefaultCriteria: boolean, fullCriteria: any) {
-    const eventConverter = () => {
-      let result = [];
-      for (let i = 0; i < event.length; i++) {
-        result.push(event[i].value);
-      }
-      return result;
-    };
-
-    const eventConverterResult = eventConverter();
-
-    debugger
-
-    if (isDefaultCriteria) {
-      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: fullCriteria.key, values: [...eventConverterResult]}))
-    } else {
-      dispatch(tagsSlice.actions.setActiveGlobalFilterCriteriasValues({...fullCriteria, values: [...eventConverterResult]}));
-    }
-  }
-
-
   return (
-    <BlockBox padding={'0 24px 24px 24px'}>
-      <div className={classes.tdNameAdnPriority}>
-        {/* Название тега */}
-        <Field
-          label={"Название тега"}
-          width={"60%"}
-        >
-          <InputBase
-            className={classes.tdTagNameInput}
-            type="text"
-          />
-        </Field>
-        {/* Приоритет */}
-        <Field
-          label={"Приоритет"}
-          width={'15%'}
-        >
-          <InputBase
-            className={classes.tdPriorityInput}
-            type="text"
-          />
-        </Field>
-      </div>
-      {/* Название группы */}
-      <Field
-        label={"Название группы тега"}
-        width={"60%"}
-      >
-        <InputBase
-          className={classes.tdTagNameInput}
-          type="text"
-        />
-      </Field>
+    <BlockBox padding={'0 24px 24px 24px'} height={'100%'}>
+      <div className={classes.tdWrapper}>
 
-      <div style={{width: '100%'}}>
-        <Typography className={classes.typographyTitle}>Глобальные настройки тега</Typography>
+        {/* Шапка */}
         <div>
-          {activeGlobalFilterCriterias.length > 0 ?
-            <div>
-              {activeGlobalFilterCriterias.map((criteria) => {
-                const criteriaKey = criteria.key.slice(4);
-                return (
-                  <div>
-                    <Typography className={classes.typographyTitleMini}>{criteria.title}</Typography>
-                    <div style={{display: 'flex'}}>
-                      <CustomSelect
-                        addValueHandler={addValueHandler}
-                        // removeValuesHandler={}
-                        // canBeDeleted={}
-                        // activeCriteria={}
-                        // fullCriteria={}
-                        // width={}
-                        // height={}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div> :
-            <Alert
-              iconType={'info'}
-              text={'У этой критерии нет глобальных фильтров'}
-            />
-          }
-        </div>
-      </div>
-      <TextSelect
-        value={null}
-        handleValueChange={(event: any) => {
-          dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias(event.value));
-        }}
-        options={globalFilterOptions}
-        iconPosition={'left'}
-        height={'300px'}
-        icon={<PlusSvg style={{marginRight: '10px'}}/>}
-        customControl={
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            <Typography className={classes.typographyTitleMini}>Добавить фильтр</Typography>
+          <div className={classes.tdNameAdnPriority}>
+            {/* Название тега */}
+            <Field
+              label={"Название тега"}
+              width={"60%"}
+            >
+              <InputBase
+                className={classes.tdTagNameInput}
+                type="text"
+              />
+            </Field>
+            {/* Приоритет */}
+            <Field
+              label={"Приоритет"}
+              width={'15%'}
+            >
+              <InputBase
+                className={classes.tdPriorityInput}
+                type="text"
+              />
+            </Field>
           </div>
-        }
-        menuPosition={'left'}
-        name={'tagsGlobalSelect'}
-      />
+          {/* Название группы */}
+          <Field
+            label={"Название группы тега"}
+            width={"60%"}
+          >
+            <InputBase
+              className={classes.tdTagNameInput}
+              type="text"
+            />
+          </Field>
+        </div>
+
+        {/* Глобальные фильтры */}
+        <div style={{width: '100%'}}>
+          <Typography className={classes.typographyTitle}>Глобальные настройки тега</Typography>
+          <div>
+            <div>
+              <div>
+                {defaultGlobalFilterCriterias.length > 0 &&
+                defaultGlobalFilterCriterias.map((currentCriteria) => {
+
+                  const criteriaFull = allGlobalFilterCriterias.find((fullCriteria) => {
+                    return currentCriteria.key === fullCriteria.key;
+                  })
+                  if (criteriaFull) {
+                    return (
+                      <div>
+                        <Typography className={classes.typographyTitleMini}>{criteriaFull.title}</Typography>
+                        <div style={{display: 'flex'}}>
+                          {criteriaFull &&
+                          <TagPageSelect
+                            criteriaFull={criteriaFull}
+                            criteriaCurrent={currentCriteria}
+                            isDefaultCriteria={true}
+                            width={'60%'}
+                          />
+                          }
+                        </div>
+                      </div>
+                    )
+                  }
+                })}
+              </div>
+              <div>
+                {activeGlobalFilterCriterias.map((currentCriteria) => {
+
+                  const criteriaFull = allGlobalFilterCriterias.find((fullCriteria) => {
+                    return currentCriteria.key === fullCriteria.key;
+                  })
+                  return (
+                    <div>
+                      <Typography className={classes.typographyTitleMini}>{currentCriteria.title}</Typography>
+                      <div style={{display: 'flex'}}>
+                        {criteriaFull &&
+                        <TagPageSelect
+                          criteriaFull={criteriaFull}
+                          criteriaCurrent={currentCriteria}
+                          isDefaultCriteria={false}
+                          width={'60%'}
+                        />
+                        }
+                      </div>
+                    </div>
+                  )
+                })}
+                {activeGlobalFilterCriterias.length < 1 && defaultGlobalFilterCriterias.length < 1 &&
+                <Alert
+                  iconType={'warning'}
+                  text={'У этой критерии нет глобальных фильтров'}
+                />
+                }
+                <TextSelect
+                  value={null}
+                  handleValueChange={(event: any) => {
+                    dispatch(tagsSlice.actions.setActiveGlobalFilterCriteria({...event.value, values: []}));
+                  }}
+                  options={globalFilterOptions}
+                  iconPosition={'left'}
+                  height={'300px'}
+                  icon={<PlusSvg style={{marginRight: '10px'}}/>}
+                  customControl={
+                    <div style={{display: 'flex', alignItems: 'center'}}>
+                      <Typography className={classes.typographyTitleMini}>Добавить фильтр</Typography>
+                    </div>
+                  }
+                  menuPosition={'left'}
+                  name={'tagsGlobalSelect'}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Фрагменты */}
+        <div style={{display: 'flex'}}>
+          <div style={{width: '5%', textAlign: 'center'}}>
+            <Typography variant={'h6'}>1.</Typography>
+          </div>
+          <div>
+            <div>
+              {activeFragments.length > 0 ?
+                activeFragments.map((fragmentArray) => (
+                  <>
+                    {fragmentArray.map((fragmentFiled) => {
+                      return (
+                        <div>{fragmentFiled}</div>
+                      )
+                    })}
+                  </>
+                )) :
+                <div>У этого тега нет фрагментов </div>
+              }
+            </div>
+            <div>
+
+              <TextSelect
+                value={null}
+                handleValueChange={(event: any) => {
+                  dispatch(tagsSlice.actions.setActiveGlobalFilterCriteria({...event.value, values: []}));
+                }}
+                options={globalFilterOptions}
+                iconPosition={'left'}
+                height={'300px'}
+                icon={<PlusSvg style={{marginRight: '10px'}}/>}
+                customControl={
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <Typography className={classes.typographyTitleMini}>Добавить правило</Typography>
+                  </div>
+                }
+                menuPosition={'left'}
+                name={'tagsGlobalSelect'}
+              />
+            </div>
+          </div>
+        </div>
+
+      </div>
 
     </BlockBox>
   );

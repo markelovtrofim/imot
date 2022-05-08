@@ -83,12 +83,14 @@ const CustomSelect: FC<CustomSelect> = (
 
   // удаление критерии.
   const converter = (state: any) => {
-    debugger;
-    let local: { value: string, label: string }[] = [];
-    for (let i = 0; i < state.values.length; i++) {
-      local.push({value: state.values[i], label: state.values[i]});
+    if (state) {
+      let local: { value: string, label: string }[] = [];
+      for (let i = 0; i < state.values.length; i++) {
+        local.push({value: state.values[i], label: state.values[i]});
+      }
+      return local
     }
-    return local
+    return [];
   };
   const valueArray = converter(activeCriteria);
   const options = converter(activeCriteria);
@@ -101,10 +103,10 @@ const CustomSelect: FC<CustomSelect> = (
     };
   }, []);
 
-
+  debugger
   return (
     <div className={classes.selectBox}>
-      {fullCriteria.selectType === "multiString" ?
+      {fullCriteria && fullCriteria.selectType === "multiString" ?
         <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
           <CreatableSelect
             closeMenuOnSelect={false}
@@ -123,8 +125,8 @@ const CustomSelect: FC<CustomSelect> = (
             components={{
               MenuList: CustomMenuList,
               Option: CustomOption,
-              // @ts-ignore
-              DropdownIndicator: <CustomInd menuIsOpen={menuIsOpen}/>,
+              // // @ts-ignore
+              // DropdownIndicator: <CustomInd menuIsOpen={menuIsOpen}/>,
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
