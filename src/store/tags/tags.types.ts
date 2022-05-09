@@ -47,3 +47,5 @@ export type TagDetailedType = {
   fragmentRules: FragmentRulesItem[],
   setTags: SetTagsItem[]
 }
+
+export type FragmentsSelectType = 'multiValue' | 'multiString' | 'input' | 'checkbox';

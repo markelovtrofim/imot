@@ -61,8 +61,8 @@ export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
 
 // TYPES BLOCK
 type SelectPropsType = {
-  criteriaFull: GlobalFilterItemDetailed | any,
-  criteriaCurrent: GlobalFilterItemDetailed | GlobalFilterItem | any,
+  criteriaFull: GlobalFilterItemDetailed,
+  criteriaCurrent: GlobalFilterItemDetailed | GlobalFilterItem,
   isDefaultCriteria: boolean,
 
   width: string

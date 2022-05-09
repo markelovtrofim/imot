@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {
-  FragmentRulesItem,
+  FragmentRulesItem, FragmentsSelectType,
   GlobalFilterItem,
   GlobalFilterItemDetailed,
   TagDetailedType,
@@ -94,6 +94,7 @@ export const createNullArray = (count: number) => {
   return result;
 };
 
+
 type initialStateType = {
   activeTagId: string | null,
 
@@ -107,7 +108,13 @@ type initialStateType = {
   defaultGlobalFilterCriterias: GlobalFilterItem[],
   activeGlobalFilterCriterias: GlobalFilterItemDetailed[],
 
-  activeFragments: string[][],
+  activeFragments: {
+    key: string,
+    value: any,
+    options: string[] | null,
+    selectType: FragmentsSelectType,
+    visible: boolean
+  }[][],
 
   error: string | null
 };
@@ -203,8 +210,66 @@ export const tagsSlice = createSlice({
     setActiveFragments(state, action: PayloadAction<FragmentRulesItem[]>) {
       state.activeFragments.length = 0;
       const fragmentRulesArrayLength = action.payload.length;
+
       for (let i = 0; i < fragmentRulesArrayLength; i++) {
-        state.activeFragments.push([action.payload[0].direction]);
+        const fragmentRulesLocalArray = [];
+        for (let ii = 0; ii < Object.keys(action.payload[i]).length; ii++) {
+          const key = Object.keys(action.payload[i])[ii];
+          // phrasesAndDicts phrases dicts direction fromStart silentBefore silentAfter interruptTime
+          if (key === 'phrasesAndDicts') {
+            const criteria = current(state.allGlobalFilterCriterias).find(criteria => criteria.key === 'client_text');
+            let dictsArray: string[] = [];
+            if (criteria) {
+              dictsArray = criteria.values;
+            }
+            fragmentRulesLocalArray.push({
+              key: key,
+              // @ts-ignore
+              value: action.payload[i][key],
+              options: [...dictsArray],
+              selectType: 'multiString',
+              visible: true
+            })
+          } else if (key === 'direction') {
+            fragmentRulesLocalArray.push({
+              key: key,
+              // @ts-ignore
+              value: action.payload[i][key],
+              options: ['client_say', 'operator_say', 'client_not_say', 'operator_not_say', 'any_not_say'],
+              selectType: 'multiValue',
+              visible: false
+            })
+          } else if (key === 'fromStart') {
+            fragmentRulesLocalArray.push({
+              key: key,
+              // @ts-ignore
+              value: action.payload[i][key],
+              option: null,
+              selectType: 'checkbox',
+              visible: false
+            })
+          } else if (key === 'phrases' || key === 'dicts') {
+            fragmentRulesLocalArray.push({
+              key: key,
+              // @ts-ignore
+              value: action.payload[i][key],
+              option: null,
+              selectType: 'doNotDisplay',
+              visible: false
+            })
+          } else {
+            fragmentRulesLocalArray.push({
+              key: key,
+              // @ts-ignore
+              value: action.payload[i][key],
+              option: null,
+              selectType: 'input',
+              visible: false
+            })
+          }
+        }
+        // @ts-ignore
+        state.activeFragments.push(fragmentRulesLocalArray);
       }
     }
   }

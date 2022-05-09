@@ -9,6 +9,7 @@ import {getAllGlobalTagFilters, tagsSlice} from "../../../../store/tags/tags.sli
 import {useDispatch} from "react-redux";
 import Alert from "../../../../components/common/Alert/Alert";
 import TagPageSelect from "../../../../components/common/Selects/TagPageSelect";
+import CustomSelect from "../../../../components/common/Selects/CustomSelect/CustomSelect";
 
 const PlusSvg = (props: any) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -141,12 +142,17 @@ const TagDetails = () => {
                       <Typography className={classes.typographyTitleMini}>{currentCriteria.title}</Typography>
                       <div style={{display: 'flex'}}>
                         {criteriaFull &&
-                        <TagPageSelect
-                          criteriaFull={criteriaFull}
-                          criteriaCurrent={currentCriteria}
-                          isDefaultCriteria={false}
-                          width={'60%'}
-                        />
+                        <>
+                          <TagPageSelect
+                            criteriaFull={criteriaFull}
+                            criteriaCurrent={currentCriteria}
+                            isDefaultCriteria={false}
+                            width={'60%'}
+                          />
+                          <CustomSelect
+                            addValueHandler={}
+                          />
+                        </>
                         }
                       </div>
                     </div>
@@ -188,15 +194,25 @@ const TagDetails = () => {
           <div>
             <div>
               {activeFragments.length > 0 ?
-                activeFragments.map((fragmentArray) => (
-                  <>
-                    {fragmentArray.map((fragmentFiled) => {
-                      return (
-                        <div>{fragmentFiled}</div>
-                      )
-                    })}
-                  </>
-                )) :
+                <div>
+                  {activeFragments.map((displayFragment) => {
+                    return <>
+                      {displayFragment.map((fragmentField) => {
+                        if (fragmentField.visible) {
+                          return (
+                            <TagPageSelect
+                              criteriaFull={{values: fragmentField.options, selectType: fragmentField.selectType}}
+                              criteriaCurrent={{values: fragmentField.value, selectType: fragmentField.selectType}}
+                              isDefaultCriteria={fragmentField.key === 'phrasesAndDicts'}
+                              width={'100%'}
+                            />
+                          )
+                        }
+                      })}
+                    </>
+                  })}
+                </div>
+                :
                 <div>У этого тега нет фрагментов </div>
               }
             </div>
