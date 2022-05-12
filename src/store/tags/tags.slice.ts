@@ -153,15 +153,18 @@ type FragmentsArrayType = {
   silentAfter: string,
   interruptTime: string
 }
+
+
+
 const fragmentsArray: FragmentsArrayType = {
-  phrasesAndDicts: [],
-  phrases: [],
-  dicts: [],
   direction: '',
+  phrasesAndDicts: [],
   fromStart: false,
   silentBefore: '',
   silentAfter: '',
-  interruptTime: ''
+  phrases: [],
+  interruptTime: '',
+  dicts: []
 };
 
 
@@ -318,7 +321,6 @@ export const tagsSlice = createSlice({
        state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
     },
     setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem }>) {
-      debugger
       // @ts-ignore
       state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = true;
     }

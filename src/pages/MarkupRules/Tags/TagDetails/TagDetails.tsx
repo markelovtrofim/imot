@@ -122,8 +122,9 @@ const TagDetails = () => {
     if (values) {
       let local: { value: any, label: string }[] = [];
       for (let i = 0; i < values.length; i++) {
-        local.push({value: values[i], label: values[i].label});
+        local.push({value: values[i], label: values[i].title});
       }
+      debugger
       return local;
     }
     return [];
@@ -168,7 +169,7 @@ const TagDetails = () => {
             />
           </Field>
         </div>
-
+        1
         {/* Глобальные фильтры */}
         <div style={{width: '100%', margin: '30px 0'}}>
           <Typography className={classes.typographyTitle}>Глобальные настройки тега</Typography>
@@ -180,7 +181,7 @@ const TagDetails = () => {
                   const isDefault = true;
                   const criteriaFull = allGlobalFilterCriterias.find((fullCriteria) => {
                     return currentCriteria.key === fullCriteria.key;
-                  })
+                  });
                   if (criteriaFull) {
                     return (
                       <div>
@@ -272,7 +273,7 @@ const TagDetails = () => {
                       return (
                         <div style={{display: 'flex'}}>
                           <div style={{width: '5%', textAlign: 'center', paddingTop: '5px'}}>
-                            <Typography variant={'h6'}>{arrayIndex+ 1}</Typography>
+                            <Typography variant={'h6'}>{arrayIndex + 1}</Typography>
                           </div>
                           <div>
                             {displayFragment.map((fragmentField) => {
@@ -281,15 +282,40 @@ const TagDetails = () => {
                                 return (
                                   <div>
                                     <Typography>{fragmentField.title}</Typography>
-                                    <ContainedSelect
-                                      width={'200px'}
-                                      onSelectChange={(event: any) => {
-                                        dispatch(tagsSlice.actions.setFragmentFieldValue({arrayIndex: arrayIndex, fieldIndex: fragmentFieldIndex, value: event}))
-                                      }}
-                                      // @ts-ignore
-                                      options={fragmentField.options}
-                                      value={fragmentField.value}
-                                    />
+                                    {
+                                      (fragmentField.key === 'direction' &&
+                                        <ContainedSelect
+                                          width={'200px'}
+                                          onSelectChange={(event: any) => {
+                                            dispatch(tagsSlice.actions.setFragmentFieldValue({
+                                              arrayIndex: arrayIndex,
+                                              fieldIndex: fragmentFieldIndex,
+                                              value: event
+                                            }))
+                                          }}
+                                          // @ts-ignore
+                                          options={fragmentField.options}
+                                          value={fragmentField.value}
+                                        />
+                                      ) ||
+                                      (fragmentField.key === 'phrasesAndDicts' &&
+                                        <CustomSelect
+                                          value={fragmentField.value}
+                                          // @ts-ignore
+                                          options={fragmentField.options}
+                                          selectType={fragmentField.selectType}
+                                          isDefaultField={false}
+                                          valueHandler={(event: any) => {
+                                            dispatch(tagsSlice.actions.setFragmentFieldValue({
+                                              arrayIndex: arrayIndex,
+                                              fieldIndex: fragmentFieldIndex,
+                                              value: event
+                                            }));
+                                          }}
+                                        />
+                                      ) ||
+                                      (fragmentField.key === 'f' && <div></div>)
+                                    }
                                   </div>
                                 )
                               }

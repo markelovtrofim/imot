@@ -2,7 +2,7 @@ import {makeStyles} from "@mui/styles";
 
 export const useTagDetailsStyles = makeStyles(({
   tdWrapper: {
-    height: '85.5vh',
+    height: '100%',
     overflow: 'hidden',
     overflowY: 'auto',
   },

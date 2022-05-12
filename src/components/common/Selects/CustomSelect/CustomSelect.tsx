@@ -1,6 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
 import {selectCustomStylesCreator, useMuiCustomSelectStyles} from "./CustomSelect.jss";
-import {useDispatch} from "react-redux";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
 import {Typography} from "@mui/material";
@@ -76,11 +75,8 @@ const CustomSelect: FC<CustomSelect> = (
   // logic block
   // LOGIC BLOCK
   // диспатч
-  const dispatch = useDispatch();
-
   // открыте и закрытие менюшки.
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
-
 
   // костылечек для загрытия селектов
   useEffect(() => {
