@@ -1,12 +1,15 @@
 import {makeStyles} from "@mui/styles";
+import {Theme} from "@mui/material";
 
-export const useMuiCustomSelectStyles = makeStyles(({
+type SelectCustomPropsType = {
+  width?: string
+}
+export const useMuiCustomSelectStyles = makeStyles<Theme, SelectCustomPropsType>((theme: Theme) => ({
   selectBox: {
     display: 'flex !important',
     alignItems: 'center',
     cursor: 'pointer'
   },
-  selectItem: {},
   selectMenuListInput: {
     width: "228px",
     margin: '16px 24px',
@@ -59,11 +62,11 @@ export const useMuiCustomSelectStyles = makeStyles(({
     alignItems: 'center',
   },
   selectSelectBox: {
-    position: 'relative'
+    position: 'relative',
+    minWidth: props => props.width ? props.width : 'auto'
   },
   selectPlaceholder: {
-    // @ts-ignore
-    position: 'absolute !important',
+    position: 'absolute',
     left: '11px !important',
     top: '9px !important'
   }

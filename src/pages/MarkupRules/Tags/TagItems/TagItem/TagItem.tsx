@@ -6,6 +6,7 @@ import {useTagItemStyles} from "./TagItem.jss";
 import {TagType} from "../../../../../store/tags/tags.types";
 import {InfoCircle, InfoCircleActive} from "../../../MarkupRules";
 import {getTag, tagsSlice} from "../../../../../store/tags/tags.slice";
+import {useAppSelector} from "../../../../../hooks/redux";
 
 type TagItemPropsType = {
   tag: TagType | null,
@@ -17,8 +18,12 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = useTagItemStyles({tag, isActive});
+  const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
 
   async function onTagItemClick() {
+    if (activeGlobalFilterCriterias.length > 0) {
+      dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
+    }
     if (!isActive && tag) {
       dispatch(tagsSlice.actions.setCurrentTag(null));
       await dispatch(getTag(tag.id));

@@ -65,9 +65,12 @@ export const getTag = createAsyncThunk(
         'Authorization': `Bearer ${token}`
       }
     });
+
+    for (let i = 0; i < data.fragmentRules.length; i++) {
+      thunkAPI.dispatch(tagsSlice.actions.setFragment(data.fragmentRules[i]));
+    }
     thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
     thunkAPI.dispatch(tagsSlice.actions.setDefaultGlobalFilterCriterias(data.globalFilter));
-    thunkAPI.dispatch(tagsSlice.actions.setActiveFragments(data.fragmentRules));
     return data
   }
 )
@@ -94,6 +97,14 @@ export const createNullArray = (count: number) => {
   return result;
 };
 
+type ActiveFragmentItem = {
+  key: string,
+  title: string,
+  value: any,
+  options: string[] | null,
+  selectType: FragmentsSelectType,
+  visible: boolean
+}
 
 type initialStateType = {
   activeTagId: string | null,
@@ -108,13 +119,7 @@ type initialStateType = {
   defaultGlobalFilterCriterias: GlobalFilterItem[],
   activeGlobalFilterCriterias: GlobalFilterItemDetailed[],
 
-  activeFragments: {
-    key: string,
-    value: any,
-    options: string[] | null,
-    selectType: FragmentsSelectType,
-    visible: boolean
-  }[][],
+  activeFragments: ActiveFragmentItem[][],
 
   error: string | null
 };
@@ -136,6 +141,37 @@ const initialState: initialStateType = {
 
   error: null
 };
+
+
+type FragmentsArrayType = {
+  phrasesAndDicts: string[],
+  phrases: string[],
+  dicts: string[],
+  direction: string,
+  fromStart: boolean,
+  silentBefore: string,
+  silentAfter: string,
+  interruptTime: string
+}
+const fragmentsArray: FragmentsArrayType = {
+  phrasesAndDicts: [],
+  phrases: [],
+  dicts: [],
+  direction: '',
+  fromStart: false,
+  silentBefore: '',
+  silentAfter: '',
+  interruptTime: ''
+};
+
+
+const DirectionOptions = [
+  {label: 'Клиент сказал', value: 'client_say'},
+  {label: 'Оператор сказал', value: 'operator_say'},
+  {label: 'Клиент не сказал', value: 'client_not_say'},
+  {label: 'Оператор не сказал', value: 'operator_not_say'},
+  {label: 'Любой не сказал', value: 'any_not_say'},
+]
 
 export const tagsSlice = createSlice({
   name: 'tags',
@@ -179,7 +215,7 @@ export const tagsSlice = createSlice({
       }
     },
     // активные критерии
-    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
+    setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[] | []>) {
       state.activeGlobalFilterCriterias = action.payload;
     },
     setActiveGlobalFilterCriteria(state, action: PayloadAction<GlobalFilterItemDetailed>) {
@@ -206,71 +242,85 @@ export const tagsSlice = createSlice({
     },
 
 
-    // фрагементы
-    setActiveFragments(state, action: PayloadAction<FragmentRulesItem[]>) {
-      state.activeFragments.length = 0;
-      const fragmentRulesArrayLength = action.payload.length;
+    setFragment(state, action: PayloadAction<FragmentRulesItem | null>) {
 
-      for (let i = 0; i < fragmentRulesArrayLength; i++) {
-        const fragmentRulesLocalArray = [];
-        for (let ii = 0; ii < Object.keys(action.payload[i]).length; ii++) {
-          const key = Object.keys(action.payload[i])[ii];
-          // phrasesAndDicts phrases dicts direction fromStart silentBefore silentAfter interruptTime
-          if (key === 'phrasesAndDicts') {
-            const criteria = current(state.allGlobalFilterCriterias).find(criteria => criteria.key === 'client_text');
-            let dictsArray: string[] = [];
-            if (criteria) {
-              dictsArray = criteria.values;
-            }
-            fragmentRulesLocalArray.push({
-              key: key,
-              // @ts-ignore
-              value: action.payload[i][key],
-              options: [...dictsArray],
-              selectType: 'multiString',
-              visible: true
-            })
-          } else if (key === 'direction') {
-            fragmentRulesLocalArray.push({
-              key: key,
-              // @ts-ignore
-              value: action.payload[i][key],
-              options: ['client_say', 'operator_say', 'client_not_say', 'operator_not_say', 'any_not_say'],
-              selectType: 'multiValue',
-              visible: false
-            })
-          } else if (key === 'fromStart') {
-            fragmentRulesLocalArray.push({
-              key: key,
-              // @ts-ignore
-              value: action.payload[i][key],
-              option: null,
-              selectType: 'checkbox',
-              visible: false
-            })
-          } else if (key === 'phrases' || key === 'dicts') {
-            fragmentRulesLocalArray.push({
-              key: key,
-              // @ts-ignore
-              value: action.payload[i][key],
-              option: null,
-              selectType: 'doNotDisplay',
-              visible: false
-            })
-          } else {
-            fragmentRulesLocalArray.push({
-              key: key,
-              // @ts-ignore
-              value: action.payload[i][key],
-              option: null,
-              selectType: 'input',
-              visible: false
-            })
-          }
-        }
-        // @ts-ignore
-        state.activeFragments.push(fragmentRulesLocalArray);
+      // первоначальный обьект
+      let fragmentRulesItemLocal: any = {};
+      if (!action.payload) {
+        fragmentRulesItemLocal = fragmentsArray;
+      } else {
+        fragmentRulesItemLocal = action.payload;
       }
+
+      // массив с объектами
+      let activeFragment = [];
+      for (let i = 0; i < Object.keys(fragmentRulesItemLocal).length; i++) {
+        const key = Object.keys(fragmentRulesItemLocal)[i];
+        if (key === 'direction') {
+          activeFragment.push({
+            key: key,
+            title: 'Поиск по словам',
+            value: DirectionOptions[0],
+            options: DirectionOptions,
+            selectType: 'multiValue',
+            visible: true
+          })
+        } else if (key === 'phrasesAndDicts') {
+          const criteria = current(state.allGlobalFilterCriterias).find(criteria => criteria.key === 'client_text');
+          let dictsArray: { label: string, value: string }[] = [];
+          if (criteria) {
+            for (let i = 0; i < criteria.values.length; i++) {
+              dictsArray.push({label: criteria.values[i], value: criteria.values[i]});
+            }
+          }
+          activeFragment.push({
+            key: key,
+            title: 'Фразы или словари',
+            value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
+            options: dictsArray,
+            selectType: 'multiString',
+            visible: false
+          });
+        } else if (key === 'fromStart') {
+          activeFragment.push({
+            key: key,
+            title: 'Искать с начала разговора',
+            value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
+            option: [],
+            selectType: 'checkbox',
+            visible: false
+          })
+        } else if (key === 'phrases' || key === 'dicts') {
+          activeFragment.push({
+            key: key,
+            value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
+            selectType: 'doNotDisplay',
+            option: [],
+            visible: false
+          })
+        } else {
+          activeFragment.push({
+            key: key,
+            title: (key === 'silentBefore' && 'Тихо до') ||
+              (key === 'silentAfter' && 'Тихо после') ||
+              (key === 'interruptTime' && 'Интерептед время'),
+            value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
+            option: fragmentRulesItemLocal[key],
+            selectType: 'input',
+            visible: false
+          })
+        }
+      }
+      // @ts-ignore
+      state.activeFragments.push(activeFragment);
+    },
+    setFragmentFieldValue(state, action: PayloadAction<{arrayIndex: number, fieldIndex: number, value: { value: any, label: string } }>) {
+       state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
+    },
+    setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem }>) {
+      debugger
+      // @ts-ignore
+      state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = true;
     }
   }
 });

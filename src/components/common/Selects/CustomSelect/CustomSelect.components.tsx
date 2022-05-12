@@ -22,7 +22,7 @@ export const CustomMultiValueRemove = memo((props: any) => {
 });
 
 export const LimitedChipsContainer = ({children, hasValue, ...props}: any) => {
-  const classes = useMuiCustomSelectStyles();
+  const classes = useMuiCustomSelectStyles({});
   if (!hasValue) {
     return (
       <components.ValueContainer {...props}>
@@ -48,24 +48,28 @@ export const LimitedChipsContainer = ({children, hasValue, ...props}: any) => {
   );
 };
 
-export const CustomInd = memo((props: { menuIsOpen: boolean }) => {
-  const classes = useMuiCustomSelectStyles();
+export const CustomInd = memo((props: any) => {
+  const classes = useMuiCustomSelectStyles({});
   if (props.menuIsOpen) {
-    return <div className={cn(classes.selectArrowOnArrow, classes.selectArrow)}><OnTopArrow/></div>
+    return <components.DropdownIndicator {...props}>
+      <div className={cn(classes.selectArrowOnArrow, classes.selectArrow)}>
+        <OnTopArrow/>
+      </div>
+    </components.DropdownIndicator>
   }
   return <OnBottomArrow className={classes.selectArrow}/>
 });
 
 export const CustomOption = memo((props: any) => {
-  const classes = useMuiCustomSelectStyles();
+  const classes = useMuiCustomSelectStyles({});
   if (props.children.length > 0) {
     return <div>
       <components.Option {...props} className={classes.selectOption}>
         {props.children}
-        <Checkbox
-          disableRipple
-          checked={props.activeCriteria.values.indexOf(props.children) >= 0}
-        />
+        {/*<Checkbox*/}
+        {/*  disableRipple*/}
+        {/*  checked={props.activeCriteria.values.indexOf(props.children) >= 0}*/}
+        {/*/>*/}
       </components.Option>
     </div>
   }
@@ -75,7 +79,7 @@ export const CustomOption = memo((props: any) => {
 
 export const CustomMenuList = memo(({selectProps, ...props}: any) => {
   const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
-  const classes = useMuiCustomSelectStyles()
+  const classes = useMuiCustomSelectStyles({})
 
   return (
     <div>
