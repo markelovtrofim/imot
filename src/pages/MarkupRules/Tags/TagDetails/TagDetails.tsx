@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {InputBase, Typography} from "@mui/material";
 import {BlockBox} from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
@@ -10,6 +10,11 @@ import {useDispatch} from "react-redux";
 import Alert from "../../../../components/common/Alert/Alert";
 import CustomSelect from "../../../../components/common/Selects/CustomSelect/CustomSelect";
 import ContainedSelect from "../../../../components/common/Selects/ContainedSelect";
+import CustomCheckbox from "../../../../components/common/Checkbox";
+import {useFormik} from "formik";
+import {dictsSlice, getDicts, getGroups, updateDict} from "../../../../store/dicts/dicts.slice";
+import {GroupType} from "../../../../store/dicts/dicts.types";
+import Checkbox from "../../../../components/common/Checkbox";
 
 const TrashSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -118,20 +123,47 @@ const TagDetails = () => {
     return [];
   };
 
-  const selectFragmentsConverter = (values: any) => {
+  const addRuleSelectConverter = (values: any) => {
     if (values) {
       let local: { value: any, label: string }[] = [];
       for (let i = 0; i < values.length; i++) {
-        local.push({value: values[i], label: values[i].title});
+        if (values[i].key === 'dicts' || values[i].key === 'phrases') {
+          continue
+        }
+        if (!values[i].visible) {
+          local.push({value: values[i], label: values[i].title});
+        }
       }
-      debugger
       return local;
     }
     return [];
   };
 
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      group: '',
+      priority: '' as string | number
+    },
+    onSubmit: async (values) => {
+
+    }
+  });
+
+  const [render, setRender] = useState(false);
+  useEffect(() => {
+    if (currentTag) {
+      formik.values.name = currentTag.title;
+      formik.values.group = 'Название группы';
+      formik.values.priority = currentTag.calculatedRulePriority;
+    }
+    setRender(!render);
+  }, [currentTag]);
+
+
   return (
-    <BlockBox padding={'0 24px 24px 24px'} height={'100%'}>
+    <BlockBox padding={'0'} height={'100%'}>
       <div className={classes.tdWrapper}>
 
         {/* Шапка */}
@@ -143,6 +175,10 @@ const TagDetails = () => {
               width={"60%"}
             >
               <InputBase
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                name={"name"}
+
                 className={classes.tdTagNameInput}
                 type="text"
               />
@@ -153,6 +189,10 @@ const TagDetails = () => {
               width={'15%'}
             >
               <InputBase
+                value={formik.values.priority}
+                onChange={formik.handleChange}
+                name={"priority"}
+
                 className={classes.tdPriorityInput}
                 type="text"
               />
@@ -164,12 +204,16 @@ const TagDetails = () => {
             width={"60%"}
           >
             <InputBase
+              value={formik.values.group}
+              onChange={formik.handleChange}
+              name={"group"}
+
               className={classes.tdTagNameInput}
               type="text"
             />
           </Field>
         </div>
-        1
+
         {/* Глобальные фильтры */}
         <div style={{width: '100%', margin: '30px 0'}}>
           <Typography className={classes.typographyTitle}>Глобальные настройки тега</Typography>
@@ -190,7 +234,7 @@ const TagDetails = () => {
                           <CustomSelect
                             value={selectConverter(currentCriteria.values)}
                             options={selectConverter(criteriaFull.values, currentCriteria.values)}
-                            selectType={'multiString'}
+                            selectType={criteriaFull.selectType}
 
                             valueHandler={(event) => globalFilterValueHandler(event, isDefault, criteriaFull)}
 
@@ -281,40 +325,65 @@ const TagDetails = () => {
                               if (fragmentField.visible) {
                                 return (
                                   <div>
-                                    <Typography>{fragmentField.title}</Typography>
                                     {
-                                      (fragmentField.key === 'direction' &&
-                                        <ContainedSelect
-                                          width={'200px'}
-                                          onSelectChange={(event: any) => {
-                                            dispatch(tagsSlice.actions.setFragmentFieldValue({
-                                              arrayIndex: arrayIndex,
-                                              fieldIndex: fragmentFieldIndex,
-                                              value: event
-                                            }))
-                                          }}
-                                          // @ts-ignore
-                                          options={fragmentField.options}
-                                          value={fragmentField.value}
-                                        />
+                                      (fragmentField.selectType === 'multiValue' &&
+                                        <div>
+                                          <Typography>{fragmentField.title}</Typography>
+                                          <ContainedSelect
+                                            width={'200px'}
+                                            onSelectChange={(event: any) => {
+                                              dispatch(tagsSlice.actions.setFragmentFieldValue({
+                                                arrayIndex: arrayIndex,
+                                                fieldIndex: fragmentFieldIndex,
+                                                value: event
+                                              }))
+                                            }}
+                                            // @ts-ignore
+                                            options={fragmentField.options}
+                                            value={fragmentField.value}
+                                          />
+                                        </div>
                                       ) ||
-                                      (fragmentField.key === 'phrasesAndDicts' &&
-                                        <CustomSelect
-                                          value={fragmentField.value}
-                                          // @ts-ignore
-                                          options={fragmentField.options}
-                                          selectType={fragmentField.selectType}
-                                          isDefaultField={false}
-                                          valueHandler={(event: any) => {
-                                            dispatch(tagsSlice.actions.setFragmentFieldValue({
-                                              arrayIndex: arrayIndex,
-                                              fieldIndex: fragmentFieldIndex,
-                                              value: event
-                                            }));
-                                          }}
-                                        />
+                                      (fragmentField.selectType === 'multiString' &&
+                                        <div>
+                                          <Typography>{fragmentField.title}</Typography>
+                                          <CustomSelect
+                                            value={fragmentField.value}
+                                            // @ts-ignore
+                                            options={fragmentField.options}
+                                            selectType={fragmentField.selectType}
+                                            isDefaultField={false}
+                                            valueHandler={(event: any) => {
+                                              dispatch(tagsSlice.actions.setFragmentFieldValue({
+                                                arrayIndex: arrayIndex,
+                                                fieldIndex: fragmentFieldIndex,
+                                                value: event
+                                              }));
+                                            }}
+                                            removeSelectHandler={(event: any) => {
+                                              dispatch(tagsSlice.actions.setFragmentField({
+                                                index: arrayIndex,
+                                                value: fragmentField,
+                                                visible: false
+                                              }))
+                                            }}
+                                            deleteIcon={<TrashSvg/>}
+                                          />
+                                        </div>
+
                                       ) ||
-                                      (fragmentField.key === 'f' && <div></div>)
+                                      (fragmentField.selectType === 'checkbox' &&
+                                        <div style={{display: 'flex'}}>
+                                          <Typography>{fragmentField.title}</Typography>
+                                          <CustomCheckbox/>
+                                        </div>
+                                      ) ||
+                                      (fragmentField.selectType === 'input' &&
+                                        <div>
+                                          <Typography>{fragmentField.title}</Typography>
+                                          <input type="text"/>
+                                        </div>
+                                      )
                                     }
                                   </div>
                                 )
@@ -325,10 +394,11 @@ const TagDetails = () => {
                               handleValueChange={(event: any) => {
                                 dispatch(tagsSlice.actions.setFragmentField({
                                   index: activeFragments.indexOf(displayFragment),
-                                  value: event.value
+                                  value: event.value,
+                                  visible: true
                                 }));
                               }}
-                              options={selectFragmentsConverter(displayFragment)}
+                              options={addRuleSelectConverter(displayFragment)}
                               iconPosition={'left'}
                               height={'300px'}
                               icon={<PlusSvg style={{marginRight: '10px'}}/>}
@@ -366,10 +436,39 @@ const TagDetails = () => {
           </div>
         </div>
 
-      </div>
 
+        {/* Внутренние теги*/}
+        <div>
+          <Typography className={classes.typographyTitle}>Теги</Typography>
+          {currentTag && currentTag.setTags &&
+          <div>
+            {currentTag.setTags.map(tag => (
+              <div>
+                <Field
+                  label={tag.name}
+                  width={"60%"}
+                >
+                  <InputBase
+                    value={tag.value}
+                    className={classes.tdTagNameInput}
+                    type="text"
+                  />
+                </Field>
+                <div style={{display: 'flex'}}>
+                  <Checkbox checked={tag.visible} style={{marginRight: '10px'}}/>
+                  <Typography className={classes.typographyTitleMini}>Скрыть</Typography>
+                </div>
+              </div>
+            ))}
+          </div>
+          }
+
+        </div>
+
+
+      </div>
     </BlockBox>
   );
 };
 
-export default TagDetails
+export default TagDetails;

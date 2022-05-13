@@ -144,7 +144,7 @@ const initialState: initialStateType = {
 
 
 type FragmentsArrayType = {
-  phrasesAndDicts: string[],
+  phrasesAndDicts: string[] | null,
   phrases: string[],
   dicts: string[],
   direction: string,
@@ -158,7 +158,7 @@ type FragmentsArrayType = {
 
 const fragmentsArray: FragmentsArrayType = {
   direction: '',
-  phrasesAndDicts: [],
+  phrasesAndDicts: null,
   fromStart: false,
   silentBefore: '',
   silentAfter: '',
@@ -320,9 +320,9 @@ export const tagsSlice = createSlice({
     setFragmentFieldValue(state, action: PayloadAction<{arrayIndex: number, fieldIndex: number, value: { value: any, label: string } }>) {
        state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
     },
-    setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem }>) {
+    setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem, visible: boolean }>) {
       // @ts-ignore
-      state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = true;
+      state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = action.payload.visible;
     }
   }
 });
