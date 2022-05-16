@@ -3,12 +3,13 @@ import axios from "axios";
 import {
   FragmentRulesItem, FragmentsSelectType,
   GlobalFilterItem,
-  GlobalFilterItemDetailed,
+  GlobalFilterItemDetailed, SetTagsItem,
   TagDetailedType,
   TagGroupType,
   TagType
 } from "./tags.types";
 import cloneDeep from "lodash.clonedeep";
+import {Tag} from "rsuite";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
@@ -65,13 +66,18 @@ export const getTag = createAsyncThunk(
         'Authorization': `Bearer ${token}`
       }
     });
+    thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
 
+    // @ts-ignore
+    thunkAPI.dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias(data.globalFilter));
     for (let i = 0; i < data.fragmentRules.length; i++) {
       thunkAPI.dispatch(tagsSlice.actions.setFragment(data.fragmentRules[i]));
     }
-    thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
-    thunkAPI.dispatch(tagsSlice.actions.setDefaultGlobalFilterCriterias(data.globalFilter));
-    return data
+    for (let i = 0; i < data.setTags.length; i++) {
+      thunkAPI.dispatch(tagsSlice.actions.setSetTag(data.setTags[i]));
+    }
+
+    return data;
   }
 )
 
@@ -104,7 +110,7 @@ type ActiveFragmentItem = {
   options: string[] | null,
   selectType: FragmentsSelectType,
   visible: boolean
-}
+};
 
 type initialStateType = {
   activeTagId: string | null,
@@ -120,6 +126,7 @@ type initialStateType = {
   activeGlobalFilterCriterias: GlobalFilterItemDetailed[],
 
   activeFragments: ActiveFragmentItem[][],
+  activeSetTags: SetTagsItem[]
 
   error: string | null
 };
@@ -138,6 +145,7 @@ const initialState: initialStateType = {
   activeGlobalFilterCriterias: [],
 
   activeFragments: [],
+  activeSetTags: [],
 
   error: null
 };
@@ -155,15 +163,14 @@ type FragmentsArrayType = {
 }
 
 
-
 const fragmentsArray: FragmentsArrayType = {
-  direction: '',
   phrasesAndDicts: null,
+  direction: '',
   fromStart: false,
   silentBefore: '',
   silentAfter: '',
-  phrases: [],
   interruptTime: '',
+  phrases: [],
   dicts: []
 };
 
@@ -199,26 +206,22 @@ export const tagsSlice = createSlice({
 
 
     // детали тега
+
+
     // глобальные фильтры
+
     // все критерии
     setAllGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[]>) {
       state.allGlobalFilterCriterias = action.payload;
     },
-    // дефолтные критерии
-    setDefaultGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItem[]>) {
-      state.defaultGlobalFilterCriterias = action.payload;
-    },
-    setDefaultGlobalFilterCriteriaValues(state, action: PayloadAction<GlobalFilterItem>) {
-      const criteria = state.defaultGlobalFilterCriterias.find(criteria => (
-        criteria.key === action.payload.key
-      ));
-      if (criteria) {
-        const index = state.defaultGlobalFilterCriterias.indexOf(criteria);
-        state.defaultGlobalFilterCriterias[index].values = action.payload.values;
-      }
-    },
     // активные критерии
     setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[] | []>) {
+      for (let i = 0; i < action.payload.length; i++) {
+        const fullCriteria = state.allGlobalFilterCriterias.find(item => item.key === action.payload[i].key);
+        if (fullCriteria) {
+          state.activeGlobalFilterCriterias.push(fullCriteria);
+        }
+      }
       state.activeGlobalFilterCriterias = action.payload;
     },
     setActiveGlobalFilterCriteria(state, action: PayloadAction<GlobalFilterItemDetailed>) {
@@ -244,7 +247,7 @@ export const tagsSlice = createSlice({
       }
     },
 
-
+    // фрагменты
     setFragment(state, action: PayloadAction<FragmentRulesItem | null>) {
 
       // первоначальный обьект
@@ -317,12 +320,36 @@ export const tagsSlice = createSlice({
       // @ts-ignore
       state.activeFragments.push(activeFragment);
     },
-    setFragmentFieldValue(state, action: PayloadAction<{arrayIndex: number, fieldIndex: number, value: { value: any, label: string } }>) {
-       state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
+    setFragmentFieldValue(state, action: PayloadAction<{ arrayIndex: number, fieldIndex: number, value: { value: any, label: string } }>) {
+      state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
     },
     setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem, visible: boolean }>) {
       // @ts-ignore
       state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = action.payload.visible;
+    },
+    removeFragments(state, action: PayloadAction<null>) {
+      state.activeFragments.length = 0;
+    },
+
+    // теги
+    setSetTag(state, action: PayloadAction<SetTagsItem | null>) {
+      // первоначальный обьект
+
+      let tag: any = {};
+      if (!action.payload) {
+        tag = {
+          name: '',
+          value: '',
+          visible: false
+        }
+      } else {
+        tag = action.payload;
+      }
+
+      state.activeSetTags.push(tag);
+    },
+    removeSetTags(state, action: PayloadAction<null>) {
+      state.activeSetTags.length = 0;
     }
   }
 });

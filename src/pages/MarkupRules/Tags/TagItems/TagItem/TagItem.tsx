@@ -21,11 +21,11 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
   const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
 
   async function onTagItemClick() {
-    if (activeGlobalFilterCriterias.length > 0) {
-      dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
-    }
     if (!isActive && tag) {
       dispatch(tagsSlice.actions.setCurrentTag(null));
+      dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
+      dispatch(tagsSlice.actions.removeFragments(null));
+      dispatch(tagsSlice.actions.removeSetTags(null));
       await dispatch(getTag(tag.id));
       history.location.pathname = '/';
       history.replace(`markuprules/tags/${tag.id}`);

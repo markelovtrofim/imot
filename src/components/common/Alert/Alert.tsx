@@ -4,36 +4,38 @@ import {InfoSvg, WarningSvg, ErrorSvg, SuccessSvg} from './Alert.svg';
 
 type AlertType = {
   iconType: 'info' | 'warning' | 'error' | 'loading' | 'success',
+  text: string,
+
   padding?: string,
   boxShadow?: string,
-  text: string
+  width?: string
 }
 
 const CustomAlert: FC<AlertType> = (
   {
     iconType,
 
+    text,
     padding,
     boxShadow,
-
-    text
+    width
   }
 ) => {
   const getIcon = () => {
     if (iconType === 'info') {
       return {
         icon: <InfoSvg/>,
-        color: '#fff'
+        color: '#0388D1'
       }
     } else if (iconType === 'warning') {
       return {
-        icon: <WarningSvg/>,
-        color: '#fff'
+        icon: <WarningSvg fill={'#fff'}/>,
+        color: '#F57C00'
       }
     } else if (iconType === 'error') {
       return {
         icon: <ErrorSvg/>,
-        color: '#fff'
+        color: '#D32F2F'
       }
     } else if (iconType === 'loading') {
       return {
@@ -57,9 +59,11 @@ const CustomAlert: FC<AlertType> = (
     <Alert
       icon={alertObject.icon}
       sx={{
-        padding: padding ? padding : '0',
+        padding: padding ? padding : '0 10px',
+        width: width ? width : 'auto',
         fontSize: '15px',
         backgroundColor: alertObject.color,
+        color: '#fff',
         boxShadow: boxShadow ? boxShadow : 'none',
         '& .MuiAlert-icon': {
           paddingTop: '10px !important'

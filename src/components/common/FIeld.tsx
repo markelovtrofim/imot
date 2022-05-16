@@ -7,14 +7,16 @@ type FieldPropsType = {
   labelBrother?: any,
   bgColor?: string,
   width?: string,
+  height?: string,
   margin?: string,
   padding?: string
 }
 
-const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, margin, padding}) => {
+const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height, margin, padding}) => {
   const useStyles = makeStyles(({
     fieldBox: {
       margin: margin ? margin : '0',
+      height: height ? height : 'auto',
       width: width ? width : 'auto'
     },
     fieldText: {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, FC} from 'react';
 import {InputBase, Typography} from "@mui/material";
 import {BlockBox} from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
@@ -12,46 +12,33 @@ import CustomSelect from "../../../../components/common/Selects/CustomSelect/Cus
 import ContainedSelect from "../../../../components/common/Selects/ContainedSelect";
 import CustomCheckbox from "../../../../components/common/Checkbox";
 import {useFormik} from "formik";
-import {dictsSlice, getDicts, getGroups, updateDict} from "../../../../store/dicts/dicts.slice";
-import {GroupType} from "../../../../store/dicts/dicts.types";
 import Checkbox from "../../../../components/common/Checkbox";
+import {PlusSvg, TrashSvg} from "./TagDetails.svg";
+import Preloader from '../../../../assets/loading.svg';
+import {LoadingButton} from "@mui/lab";
+import {translate} from "../../../../localizations";
+import {RootState} from "../../../../store/store";
 
-const TrashSvg = (props: React.SVGProps<SVGSVGElement>) => {
+export const AddButton: FC<{ onClick?: () => void }> = ({onClick, children}) => {
+  const classes = useTagDetailsStyles();
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path
-        d="M6.9375 2.25C6.9375 1.93934 7.18934 1.6875 7.5 1.6875H10.5C10.8106 1.6875 11.0625 1.93934 11.0625 2.25V2.8125H14.25C14.5606 2.8125 14.8125 3.06434 14.8125 3.375C14.8125 3.68566 14.5606 3.9375 14.25 3.9375H3.75C3.43934 3.9375 3.1875 3.68566 3.1875 3.375C3.1875 3.06434 3.43934 2.8125 3.75 2.8125H6.9375V2.25Z"
-        fill="#F5222D"/>
-      <path fillRule="evenodd" clipRule="evenodd"
-            d="M4.68118 5.95858C4.70227 5.76868 4.8628 5.625 5.05388 5.625H12.9487C13.1397 5.625 13.3003 5.76868 13.3213 5.95858L13.4714 7.3096C13.742 9.74483 13.742 12.2026 13.4714 14.6378L13.4566 14.7708C13.3581 15.6577 12.6707 16.3649 11.787 16.4887C9.93883 16.7474 8.06368 16.7474 6.21556 16.4887C5.33178 16.3649 4.64439 15.6577 4.54584 14.7708L4.53106 14.6378C4.26048 12.2026 4.26048 9.74483 4.53106 7.3096L4.68118 5.95858ZM8.06375 8.55C8.06375 8.23935 7.8119 7.9875 7.50125 7.9875C7.19059 7.9875 6.93875 8.23935 6.93875 8.55V13.8C6.93875 14.1107 7.19059 14.3625 7.50125 14.3625C7.8119 14.3625 8.06375 14.1107 8.06375 13.8V8.55ZM11.0638 8.55C11.0638 8.23935 10.8119 7.9875 10.5013 7.9875C10.1906 7.9875 9.93875 8.23935 9.93875 8.55V13.8C9.93875 14.1107 10.1906 14.3625 10.5013 14.3625C10.8119 14.3625 11.0638 14.1107 11.0638 13.8V8.55Z"
-            fill="#FF4D4F"/>
-    </svg>
+    <div onClick={onClick} style={{display: 'flex', alignItems: 'center', marginTop: '20px', cursor: 'pointer'}}>
+      <PlusSvg style={{marginRight: '10px'}}/>
+      <Typography className={classes.typographyTitleMini}>{children}</Typography>
+    </div>
   );
 };
 
-const PlusSvg = (props: any) => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path fillRule="evenodd" clipRule="evenodd"
-          d="M8.00034 2.66602C8.38454 2.66602 8.69599 2.97747 8.69599 3.36167V12.637C8.69599 13.0212 8.38454 13.3327 8.00034 13.3327C7.61614 13.3327 7.30469 13.0212 7.30469 12.637V3.36167C7.30469 2.97747 7.61614 2.66602 8.00034 2.66602Z"
-          fill="#73D13D"/>
-    <path fillRule="evenodd" clipRule="evenodd"
-          d="M2.66602 8.00034C2.66602 7.61614 2.97747 7.30469 3.36167 7.30469H12.637C13.0212 7.30469 13.3327 7.61614 13.3327 8.00034C13.3327 8.38454 13.0212 8.69599 12.637 8.69599H3.36167C2.97747 8.69599 2.66602 8.38454 2.66602 8.00034Z"
-          fill="#73D13D"/>
-  </svg>
-)
-
-const TagDetails = () => {
-
+const TagDetails: FC = () => {
   const classes = useTagDetailsStyles();
   const dispatch = useDispatch();
 
   const currentTag = useAppSelector(state => state.tags.currentTag);
-
   const allGlobalFilterCriterias = useAppSelector(state => state.tags.allGlobalFilterCriterias);
   const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
   const defaultGlobalFilterCriterias = useAppSelector(state => state.tags.defaultGlobalFilterCriterias);
-
   const activeFragments = useAppSelector(state => state.tags.activeFragments);
+  const activeSetTags = useAppSelector(state => state.tags.activeSetTags);
 
   useEffect(() => {
     dispatch(getAllGlobalTagFilters());
@@ -91,17 +78,10 @@ const TagDetails = () => {
       return result;
     };
     const eventConverterResult = eventConverter();
-    if (isDefault) {
-      dispatch(tagsSlice.actions.setDefaultGlobalFilterCriteriaValues({
-        key: criteriaFull.key,
-        values: [...eventConverterResult]
-      }))
-    } else {
-      dispatch(tagsSlice.actions.setActiveGlobalFilterCriteriaValues({
-        ...criteriaFull,
-        values: [...eventConverterResult]
-      }));
-    }
+    dispatch(tagsSlice.actions.setActiveGlobalFilterCriteriaValues({
+      ...criteriaFull,
+      values: [...eventConverterResult]
+    }));
   };
   // удаление поле.
   const removeGlobalFilterField = (event: any, criteriaFull: any) => {
@@ -142,14 +122,20 @@ const TagDetails = () => {
 
   const formik = useFormik({
     initialValues: {
+      // название, группа, приоритет.
       name: '',
       group: '',
-      priority: '' as string | number
+      priority: '' as string | number,
+
+      fragmentsInputArray: [] as any[]
     },
     onSubmit: async (values) => {
 
     }
   });
+
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
 
   const [render, setRender] = useState(false);
   useEffect(() => {
@@ -161,6 +147,17 @@ const TagDetails = () => {
     setRender(!render);
   }, [currentTag]);
 
+  if (!currentTag) {
+    return (
+      <BlockBox padding={'0'} height={'100%'}>
+        <div style={{position: 'relative', height: '100%'}}>
+          <div style={{position: 'absolute', top: '30%', left: '32%'}}>
+            <img src={Preloader} alt=""/>
+          </div>
+        </div>
+      </BlockBox>
+    )
+  }
 
   return (
     <BlockBox padding={'0'} height={'100%'}>
@@ -171,6 +168,7 @@ const TagDetails = () => {
           <div className={classes.tdNameAdnPriority}>
             {/* Название тега */}
             <Field
+              margin={'0 0 15px 0'}
               label={"Название тега"}
               width={"60%"}
             >
@@ -194,7 +192,7 @@ const TagDetails = () => {
                 name={"priority"}
 
                 className={classes.tdPriorityInput}
-                type="text"
+                type="number"
               />
             </Field>
           </div>
@@ -278,27 +276,30 @@ const TagDetails = () => {
                 })}
                 {activeGlobalFilterCriterias.length < 1 && defaultGlobalFilterCriterias.length < 1 &&
                 <Alert
-                  iconType={'warning'}
-                  text={'У этой критерии нет глобальных фильтров'}
+                  iconType={'error'}
+                  width={'60%'}
+                  text={'У этого тега нет глобальных фильтров'}
                 />
                 }
-                <TextSelect
-                  value={null}
-                  handleValueChange={(event: any) => {
-                    dispatch(tagsSlice.actions.setActiveGlobalFilterCriteria({...event.value, values: []}));
-                  }}
-                  options={globalFilterOptions}
-                  iconPosition={'left'}
-                  height={'300px'}
-                  icon={<PlusSvg style={{marginRight: '10px'}}/>}
-                  customControl={
-                    <div style={{display: 'flex', alignItems: 'center'}}>
-                      <Typography className={classes.typographyTitleMini}>Добавить фильтр</Typography>
-                    </div>
-                  }
-                  menuPosition={'left'}
-                  name={'tagsGlobalSelect'}
-                />
+                <div style={{marginTop: '19px'}}>
+                  <TextSelect
+                    value={null}
+                    handleValueChange={(event: any) => {
+                      dispatch(tagsSlice.actions.setActiveGlobalFilterCriteria({...event.value, values: []}));
+                    }}
+                    options={globalFilterOptions}
+                    iconPosition={'left'}
+                    height={'300px'}
+                    icon={<PlusSvg style={{marginRight: '10px'}}/>}
+                    customControl={
+                      <div style={{display: 'flex', alignItems: 'center'}}>
+                        <Typography className={classes.typographyTitleMini}>Добавить фильтр</Typography>
+                      </div>
+                    }
+                    menuPosition={'left'}
+                    name={'tagsGlobalSelect'}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -317,20 +318,21 @@ const TagDetails = () => {
                       return (
                         <div style={{display: 'flex'}}>
                           <div style={{width: '5%', textAlign: 'center', paddingTop: '5px'}}>
-                            <Typography variant={'h6'}>{arrayIndex + 1}</Typography>
+                            <Typography>{arrayIndex + 1}.</Typography>
                           </div>
-                          <div>
+                          <div style={{width: '100%'}}>
                             {displayFragment.map((fragmentField) => {
                               const fragmentFieldIndex = displayFragment.indexOf(fragmentField);
                               if (fragmentField.visible) {
                                 return (
-                                  <div>
+                                  <div style={{width: '100%'}}>
                                     {
                                       (fragmentField.selectType === 'multiValue' &&
-                                        <div>
+                                        <div style={{width: '100%'}}>
                                           <Typography>{fragmentField.title}</Typography>
                                           <ContainedSelect
-                                            width={'200px'}
+                                            width={'60%'}
+                                            height={'30px'}
                                             onSelectChange={(event: any) => {
                                               dispatch(tagsSlice.actions.setFragmentFieldValue({
                                                 arrayIndex: arrayIndex,
@@ -345,7 +347,7 @@ const TagDetails = () => {
                                         </div>
                                       ) ||
                                       (fragmentField.selectType === 'multiString' &&
-                                        <div>
+                                        <div style={{width: '100%'}}>
                                           <Typography>{fragmentField.title}</Typography>
                                           <CustomSelect
                                             value={fragmentField.value}
@@ -373,15 +375,29 @@ const TagDetails = () => {
 
                                       ) ||
                                       (fragmentField.selectType === 'checkbox' &&
-                                        <div style={{display: 'flex'}}>
+                                        <div style={{display: 'flex', width: '100%'}}>
                                           <Typography>{fragmentField.title}</Typography>
                                           <CustomCheckbox/>
                                         </div>
                                       ) ||
                                       (fragmentField.selectType === 'input' &&
-                                        <div>
-                                          <Typography>{fragmentField.title}</Typography>
-                                          <input type="text"/>
+                                        <div style={{width: '100%'}}>
+                                          <Field
+                                            label={fragmentField.title}
+                                            width={"60%"}
+                                          >
+                                            <InputBase
+                                              onChange={(event: any) => {
+                                                dispatch(tagsSlice.actions.setFragmentFieldValue({
+                                                  arrayIndex: arrayIndex,
+                                                  fieldIndex: fragmentFieldIndex,
+                                                  value: event.target.value
+                                                }));
+                                              }}
+                                              className={classes.tdTagNameInput}
+                                              type="text"
+                                            />
+                                          </Field>
                                         </div>
                                       )
                                     }
@@ -417,54 +433,94 @@ const TagDetails = () => {
                     })}
                   </>
                   :
-                  <>У этого тега нет фрагментов </>
+                  <Alert
+                    iconType={'error'}
+                    width={'60%'}
+                    text={'У этого тега нет фрагментов'}
+                  />
                 }
               </div>
             </div>
           </div>
           <div>
-            <button
-              style={{marginTop: '10px'}}
+            <AddButton
               onClick={() => {
                 if (currentTag) {
                   dispatch(tagsSlice.actions.setFragment(null))
                 }
               }}
             >
-              add fragment
-            </button>
+              Добавить фрагмент
+            </AddButton>
           </div>
         </div>
 
 
         {/* Внутренние теги*/}
-        <div>
+        <div style={{margin: '30px 0'}}>
           <Typography className={classes.typographyTitle}>Теги</Typography>
-          {currentTag && currentTag.setTags &&
           <div>
-            {currentTag.setTags.map(tag => (
-              <div>
-                <Field
-                  label={tag.name}
-                  width={"60%"}
-                >
-                  <InputBase
-                    value={tag.value}
-                    className={classes.tdTagNameInput}
-                    type="text"
-                  />
-                </Field>
-                <div style={{display: 'flex'}}>
-                  <Checkbox checked={tag.visible} style={{marginRight: '10px'}}/>
-                  <Typography className={classes.typographyTitleMini}>Скрыть</Typography>
-                </div>
-              </div>
-            ))}
+            <div>
+              {activeSetTags.length > 0 ? activeSetTags.map(tag => {
+                  return (
+                    <div>
+                      <Field
+                        label={'Название тега'}
+                        width={"60%"}
+                      >
+                        <InputBase
+                          value={tag.name}
+                          className={classes.tdTagNameInput}
+                          type="text"
+                        />
+                      </Field>
+                      <Field
+                        label={'Значение тега'}
+                        width={"60%"}
+                      >
+                        <InputBase
+                          value={tag.value}
+                          className={classes.tdTagNameInput}
+                          type="text"
+                        />
+                      </Field>
+                      <div style={{display: 'flex'}}>
+                        <Checkbox checked={tag.visible} style={{marginRight: '10px'}}/>
+                        <Typography className={classes.typographyTitleMini}>Скрыть</Typography>
+                      </div>
+                    </div>
+                  )
+                }) :
+                <Alert
+                  iconType={'error'}
+                  width={'60%'}
+                  text={'У этого тега нет привязанных тегов'}
+                />
+              }
+            </div>
+            <AddButton
+              onClick={() => {
+                if (currentTag) {
+                  dispatch(tagsSlice.actions.setSetTag(null))
+                }
+              }}
+            >
+              Добавить тег
+            </AddButton>
           </div>
-          }
 
         </div>
-
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <LoadingButton
+            type={"submit"}
+            style={{marginRight: '24px'}}
+            variant={"contained"}
+          >
+            {translate("saveButton_dictDetail", language)}
+          </LoadingButton>
+          <div style={{width: '40px', height: '40px'}}>
+          </div>
+        </div>
 
       </div>
     </BlockBox>

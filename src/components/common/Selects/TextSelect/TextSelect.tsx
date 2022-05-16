@@ -25,7 +25,6 @@ type TextSelectPropsType = {
   notClose?: boolean,
   menuPosition: 'left' | 'right',
 
-
   width?: string,
   height?: string,
   optionWithPlus?: boolean,
