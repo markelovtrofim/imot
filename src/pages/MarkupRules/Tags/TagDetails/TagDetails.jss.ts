@@ -2,9 +2,24 @@ import {makeStyles} from "@mui/styles";
 
 export const useTagDetailsStyles = makeStyles(({
   tdWrapper: {
-    height: '85.5vh',
+    height: '100%',
+    padding: '24px',
+
     overflow: 'hidden',
     overflowY: 'auto',
+
+    '&::-webkit-scrollbar': {
+      width: '4px',
+      outline: 'none',
+      background: '#CDD5DF'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: '#A3AEBE',
+      height: '50px',
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      background: '#9298A1'
+    }
   },
   tdNameAdnPriority: {
     display: 'flex',

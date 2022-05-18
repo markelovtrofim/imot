@@ -33,7 +33,7 @@ const DictDetailsStubMiddleware: FC = () => {
   const classes = useStyles();
   if (currentDict === null) {
     return (
-      <BlockBox padding={'24px 24px 0 24px'}>
+      <BlockBox padding={'24px'}>
         <Field label={'Название словаря'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>
@@ -308,7 +308,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
   const [checkedDisable, setCheckedDisable] = useState<boolean>(false);
 
   return (
-    <BlockBox padding={'5px 24px'}>
+    <BlockBox padding={'24px'}>
       <form onSubmit={formik.handleSubmit}>
         <Field label={translate("dictName_dictDetail", language)}>
           <InputBase

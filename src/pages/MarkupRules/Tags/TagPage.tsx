@@ -9,18 +9,12 @@ import {useDispatch} from "react-redux";
 import {getTag, getTagGroups, getTags, tagsSlice} from "../../../store/tags/tags.slice";
 import {TagGroupType, TagType} from "../../../store/tags/tags.types";
 import {useTagsStyles} from './TagPage.jss';
-import {useAppSelector} from "../../../hooks/redux";
 import TagGroups from "./TagGroups/TagGroups";
 import TagItems from "./TagItems/TagItems";
 
 const TagPage = () => {
   const classes = useTagsStyles();
   const dispatch = useDispatch();
-
-  const tagGroups = useAppSelector(state => state.tags.tagGroups);
-  const currentTagGroup = useAppSelector(state => state.tags.currentTagGroup);
-  const tags = useAppSelector(state => state.tags.tags);
-  const currentTag = useAppSelector(state => state.tags.currentTag);
 
   // логика открытия модально окна (MW - Modal Window).
   const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);

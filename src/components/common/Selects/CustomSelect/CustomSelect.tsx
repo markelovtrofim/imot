@@ -1,6 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
 import {selectCustomStylesCreator, useMuiCustomSelectStyles} from "./CustomSelect.jss";
-import {useDispatch} from "react-redux";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
 import {Typography} from "@mui/material";
@@ -30,70 +29,54 @@ const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
 type OptionType = {
   label: string,
   value: any
-}
+};
 
 type CustomSelect = {
-  // добавление значения
-  addValueHandler: (event: any, isDefaultCriteria: boolean, fullCriteria: any) => void,
+  // значение
+  value: OptionType[] | any,
+  // все предлогаемые значения
+  options: OptionType[],
+  // тип селекта
+  selectType: string,
+  // поле по умолчанию?
+  isDefaultField: boolean,
 
-  // удааление всех означений
-  removeValuesHandler?: () => void,
+  // при изменении значений селекта
+  valueHandler: (event: any) => void,
+  // удаление всего поля
+  removeSelectHandler?: (event: any) => void,
 
-  // дефолтная ли это критерия
-  isDefaultCriteria?: boolean,
-  // иконка удаления
-  deleteIcon?: React.FC,
-  // и функция при клике на иконку
-  removeSelectHandler?: () => void,
+  // иконка удаления (по дефолту крестик с бэкграундом)
+  deleteIcon?: React.ReactElement,
 
-  // текущая/активная версия критерия
-  activeCriteria?: any,
-  // её полная версия
-  fullCriteria?: any,
-
-  // styles
+  // стили
   width?: string,
   height?: string
 }
 
 const CustomSelect: FC<CustomSelect> = (
   {
-    addValueHandler,
-    removeValuesHandler,
-    isDefaultCriteria,
+    value,
+    options,
+    selectType,
+
+    valueHandler,
+    isDefaultField,
     deleteIcon,
     removeSelectHandler,
-    activeCriteria,
-    fullCriteria,
     width,
     height
   }
 ) => {
   // styles
-  const classes = useMuiCustomSelectStyles();
+  const classes = useMuiCustomSelectStyles({width: width});
 
 
   // logic block
   // LOGIC BLOCK
   // диспатч
-  const dispatch = useDispatch();
-
   // открыте и закрытие менюшки.
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
-
-  // удаление критерии.
-  const converter = (state: any) => {
-    if (state) {
-      let local: { value: string, label: string }[] = [];
-      for (let i = 0; i < state.values.length; i++) {
-        local.push({value: state.values[i], label: state.values[i]});
-      }
-      return local
-    }
-    return [];
-  };
-  const valueArray = converter(activeCriteria);
-  const options = converter(activeCriteria);
 
   // костылечек для загрытия селектов
   useEffect(() => {
@@ -103,10 +86,9 @@ const CustomSelect: FC<CustomSelect> = (
     };
   }, []);
 
-  debugger
   return (
     <div className={classes.selectBox}>
-      {fullCriteria && fullCriteria.selectType === "multiString" ?
+      {selectType === "multiString" ?
         <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
           <CreatableSelect
             closeMenuOnSelect={false}
@@ -114,10 +96,8 @@ const CustomSelect: FC<CustomSelect> = (
             createOptionPosition={'first'}
             styles={selectCustomStylesCreator({menuIsOpen: menuIsOpen})}
             formatCreateLabel={(str) => str}
-            value={valueArray}
-            onChange={(event) => {
-              addValueHandler(event, Boolean(isDefaultCriteria), fullCriteria);
-            }}
+            value={value}
+            onChange={valueHandler}
             tabIndex={0}
             isValidNewOption={(str) => true}
             options={options}
@@ -125,8 +105,8 @@ const CustomSelect: FC<CustomSelect> = (
             components={{
               MenuList: CustomMenuList,
               Option: CustomOption,
-              // // @ts-ignore
-              // DropdownIndicator: <CustomInd menuIsOpen={menuIsOpen}/>,
+              // @ts-ignore
+              DropdownIndicator: CustomInd,
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
@@ -146,32 +126,35 @@ const CustomSelect: FC<CustomSelect> = (
             components={{
               MenuList: CustomMenuList,
               Option: CustomOption,
-              // @ts-ignore
-              DropdownIndicator: <CustomInd menuIsOpen={menuIsOpen}/>,
+              DropdownIndicator: CustomInd,
               IndicatorSeparator: () => null,
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
               ValueContainer: LimitedChipsContainer,
             }}
-            onChange={(event) => {
-              addValueHandler(event, Boolean(isDefaultCriteria), fullCriteria);
-            }}
+            onChange={valueHandler}
             isClearable={true}
             closeMenuOnSelect={false}
             styles={selectCustomStylesCreator({menuIsOpen: menuIsOpen})}
             isMulti
             isSearchable={false}
-            value={valueArray}
+            value={value}
             options={options}
             hideSelectedOptions={false}
           />
-          {valueArray.length < 1 &&
+          {value.length < 1 &&
           <Typography className={classes.selectPlaceholder}>Все</Typography>
           }
         </div>
       }
-      {!isDefaultCriteria
-        ? <CrossSvg onClick={removeSelectHandler} style={{cursor: 'pointer', marginLeft: '8px'}}/>
+      {!isDefaultField
+        ?
+        <div onClick={removeSelectHandler}>
+          {deleteIcon ?
+            deleteIcon :
+            <CrossSvg style={{cursor: 'pointer', marginLeft: '8px'}}/>
+          }
+        </div>
         : null
       }
     </div>
