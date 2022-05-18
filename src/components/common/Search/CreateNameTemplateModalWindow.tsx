@@ -32,7 +32,14 @@ const useStyles = makeStyles(({
   },
   mwButtonBox: {
     marginTop: '25px',
-    textAlign: 'right'
+    textAlign: 'right',
+    '& .MuiButton-contained': {
+      textTransform: 'none !important'
+    },
+    '& .MuiButton-contained.Mui-disabled': {
+      backgroundColor: 'rgba(114, 46, 209, 0.3)',
+      color: '#fff !important'
+    }
   }
 }));
 
@@ -114,8 +121,8 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
       <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
         <div className={classes.mwTitle}>
           <Typography className={cn(classes.mwTitleText, classes.mwText)}>Введите имя шаблона</Typography>
-          <IconButton className={classes.mwIconButton} onClick={handleClose}>
-            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
+          <IconButton className={classes.mwIconButton} onClick={handleClose} style={{padding: '4px'}}>
+            <CloseIcon style={{color: '#000000', width: '20px', height: '20px'}}/>
           </IconButton>
         </div>
         <form onSubmit={formik.handleSubmit}>

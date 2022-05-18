@@ -38,7 +38,9 @@ const useStyles = makeStyles(({
     alignItems: 'center'
   },
   searchTitleLeftText: {
-    marginRight: '16px !important'
+    marginRight: '16px !important',
+    color: '#2F3747 !important',
+    fontWeight: '500 !important',
   },
   searchTitleLeftStick: {
     marginLeft: '16px !important',
@@ -63,7 +65,11 @@ const useStyles = makeStyles(({
     fontSize: '14px !important',
     // @ts-ignore
     textTransform: 'none !important',
-    color: '#22075E !important'
+    color: '#22075E !important',
+    '&:hover ': {
+      textDecoration: 'underline !important',
+      backgroundColor: '#e0b8ff !important'
+    }
   },
   searchButtonIcon: {
     fill: '#722ED1 !important'
@@ -91,7 +97,8 @@ const useStyles = makeStyles(({
   },
   searchSearchButton: {
     // @ts-ignore
-    textTransform: 'none !important'
+    textTransform: 'none !important',
+    borderRadius: '5px !important'
   },
   selectArrow: {
     marginRight: '10px'
@@ -247,7 +254,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
             <Typography className={classes.searchTitleLeftText} variant="h5">
               {translate('searchTitle', language)}
             </Typography>
-            <div style={{marginTop: '3px', borderLeft: '1px solid #CDD5DF', paddingLeft: '10px'}}>
+            <div style={{marginTop: '3px', borderLeft: '1px solid #CDD5DF', paddingLeft: '16px'}}>
               <TextSelect
                 name={'templatesSelect'}
                 value={currentTemplate ? {value: currentTemplate, label: currentTemplate.title} : null}
@@ -255,14 +262,14 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
                 options={convertedTemplate}
                 iconPosition={'right'}
                 customControl={
-                  <div style={{display: 'flex'}}>
+                  <div style={{display: 'flex', fontSize: '16px', lineHeight: '24px', color: '#2F3747', marginRight: '5px'}}>
                     {currentTemplate ?
                       <>
                         <Typography style={{color: '#722ED1'}}>{currentTemplate.title}</Typography>
                       </> :
                       <>
-                        <Typography>Шаблоны поиска</Typography>
-                        <span>({allTemplates.length})</span>
+                        <Typography style={{fontSize: '16px', lineHeight: '24px', marginRight: '3px', color: '#2F3747'}}>Шаблоны поиска</Typography>
+                        <span style={{fontFamily: '"Inter", sans-serif'}}>({allTemplates.length})</span>
                       </>
                     }
                   </div>
@@ -365,9 +372,9 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
                 iconPosition={'left'}
                 customControl={
                   <div style={{display: 'flex', alignItems: 'center'}}>
-                    <Typography style={{color: '#722ED1', fontWeight: '700'}}>Еще</Typography>
+                    <Typography style={{color: '#722ED1', fontWeight: '700', marginLeft: '5px'}}>Еще</Typography>
                     {activeCriterias.length > 0 &&
-                    <span style={{marginLeft: '3px', color: '#722ED1'}}>
+                    <span style={{marginLeft: '3px', color: '#722ED1', fontWeight: '700'}}>
                       ({activeCriterias.length})
                     </span>
                     }

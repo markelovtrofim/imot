@@ -62,8 +62,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({
     },
     cbDialogItems: {
       overflowY: 'auto',
-      padding: '5px 0',
-      height: '800px',
+      padding: '5px 0 40px 0',
+     // height: '800px',
       '&::-webkit-scrollbar': {
         width: '4px',
         height: '4px',
@@ -293,17 +293,17 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({
 
           {/* Params block*/}
           <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px 14px 24px 24px'}>
-            <div style={{display: 'flex'}}>
+            <div style={{display: 'flex', marginBottom: '12px'}}>
               <Typography className={classes.typographyTitle}>Сотрудник:</Typography>
-              <Typography>{callInfo.operatorPhone}</Typography>
+              <Typography style={{color: '#1B202B'}}>{callInfo.operatorPhone}</Typography>
             </div>
-            <div style={{display: 'flex'}}>
+            <div style={{display: 'flex', marginBottom: '12px'}}>
               <Typography className={classes.typographyTitle}>Клиент:</Typography>
-              <Typography>{callInfo.clientPhone}</Typography>
+              <Typography style={{color: '#1B202B'}}>{callInfo.clientPhone}</Typography>
             </div>
-            <div style={{display: 'flex'}}>
+            <div style={{display: 'flex', marginBottom: '12px'}}>
               <Typography className={classes.typographyTitle}>Дата и время:</Typography>
-              <Typography>{callInfo.callTimeReadable}</Typography>
+              <Typography style={{color: '#1B202B'}}>{callInfo.callTimeReadable}</Typography>
             </div>
           </BlockBox>
 

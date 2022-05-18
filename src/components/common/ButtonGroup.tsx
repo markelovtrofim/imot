@@ -43,7 +43,7 @@ const useStyles = makeStyles(({
   controlBlockButtonBox: {
     boxShadow: 'none !important',
     padding: '0 5px',
-    marginLeft: '20px'
+    marginLeft: '45px'
   },
   controlBlockButton: {
     border: 'none !important',
@@ -51,6 +51,7 @@ const useStyles = makeStyles(({
     outline: 'none !important',
     height: '40px',
     fontSize: '14px !important',
+    padding: '8px 16px !important',
     // @ts-ignore
     textTransform: 'none !important',
     color: '#738094 !important',

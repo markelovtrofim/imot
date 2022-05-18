@@ -43,7 +43,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({callAudio, onListen, audioPlayer
   }
 
   return (
-    <div tabIndex={1} style={{display: 'flex'}}>
+    <div tabIndex={1} style={{display: 'flex', backgroundColor: '#fff'}}>
       <ReactAudioPlayer
         ref={audioPlayerRef}
         className={classes.audioPlayer}

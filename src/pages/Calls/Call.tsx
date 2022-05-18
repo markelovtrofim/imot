@@ -38,7 +38,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
       ? 'rgba(255, 255, 255, .05)'
       : 'rgba(0, 0, 0, .03)',
   '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-    transform: 'rotate(90deg)',
+    transform: 'rotate(180deg)',
   },
   '& .MuiAccordionSummary-content': {
     marginLeft: theme.spacing(1),
@@ -97,7 +97,8 @@ const CallStubMiddleware = memo(({
       '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
         margin: '25px !important',
         position: 'relative',
-        fill: '#818D9F'
+        fill: '#818D9F',
+        transform: 'rotate(90deg)'
       },
       '&.Mui-disabled': {
         opacity: '1 !important'
@@ -148,7 +149,8 @@ const CallStubMiddleware = memo(({
     callTagsTitle: {
       margin: '5px !important',
       color: '#738094 !important',
-      minWidth: '120px'
+      minWidth: '120px',
+      fontSize: '12px !important',
     },
     accordionDetails: {
       backgroundColor: '#F8FAFC',
@@ -302,7 +304,8 @@ const Call = memo((props: CallPropsType) => {
       '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
         margin: '25px !important',
         position: 'relative',
-        fill: '#818D9F'
+        fill: '#818D9F',
+        transform: 'rotate(90deg)'
       },
       '&.Mui-disabled': {
         opacity: '1 !important'
@@ -332,7 +335,7 @@ const Call = memo((props: CallPropsType) => {
       alignItems: 'center',
     },
     employeeText: {
-      fontSize: '13px !important',
+      fontSize: '14px !important',
       marginRight: '20px !important',
       minWidth: '40px !important'
     },
@@ -358,18 +361,19 @@ const Call = memo((props: CallPropsType) => {
       marginTop: '8px'
     },
     callDuration: {
-      fontSize: '13px !important',
+      fontSize: '14px !important',
       color: '#738094 !important'
     },
     callMNumberBox: {
       minWidth: '200px',
     },
     callMNumber: {
-      fontSize: '13px !important'
+      fontSize: '14px !important'
     },
     callTagsTitle: {
       color: '#738094 !important',
-      minWidth: '120px'
+      minWidth: '120px',
+      fontSize: '12px !important',
     },
     accordionDetails: {
       backgroundColor: '#F8FAFC',
@@ -377,8 +381,8 @@ const Call = memo((props: CallPropsType) => {
       margin: '0px !important'
     },
     typographyTitle: {
-      fontSize: '13px !important',
-      color: '#738094 !important',
+      fontSize: '14px !important',
+      color: '#2F3747 !important',
       fontWeight: '700 !important',
       marginRight: '5px !important'
     },

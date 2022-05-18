@@ -23,7 +23,7 @@ export const useStyles = makeStyles(({
   container: {
     maxWidth: '1610px',
     margin: '0 auto',
-    padding: '0 10px'
+    padding: '0 15px'
   }
 }));
 

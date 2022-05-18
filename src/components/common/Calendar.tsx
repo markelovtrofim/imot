@@ -229,11 +229,12 @@ const CustomCalendar = React.memo(() => {
           {translate('today', language)}
         </ToggleButton>
 
-        <ToggleButton disabled={"yesterday" === alignment}
-                      className={classes.controlBlockButton} value="yesterday"
-                      onClick={() => {
-                        setLocalDate([new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)])
-                      }}
+        <ToggleButton 
+          disabled={"yesterday" === alignment}
+          className={classes.controlBlockButton} value="yesterday"
+          onClick={() => {
+            setLocalDate([new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)])
+          }}
         >
           {translate('yesterday', language)}
         </ToggleButton>

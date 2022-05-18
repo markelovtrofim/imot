@@ -37,7 +37,7 @@ const ErrorSvg = () => {
 const LoadCall = () => {
   const useStyles = makeStyles(({
     loadCallInner: {
-      padding: '40px 0',
+      padding: '40px 20px',
       margin: '0 auto',
     },
     loadCallTitle: {
@@ -50,7 +50,9 @@ const LoadCall = () => {
     },
     loadCallSelectLabel: {
       cursor: 'default',
-      marginBottom: '10px !important'
+      marginBottom: '5px !important',
+      color: '#738094 !important',
+      fontWeight: '500 !important',      
     },
     loadCallButton: {
       width: '100% !important',
@@ -83,7 +85,7 @@ const LoadCall = () => {
   };
 
   return (
-    <BlockBox margin={'60px auto'} width={'540px'} height={'480px'}>
+    <BlockBox margin={'60px auto 110px auto'} width={'540px'}>
       <div className={classes.loadCallInner}>
         <div style={{textAlign: 'center'}}>
           <IconButton
