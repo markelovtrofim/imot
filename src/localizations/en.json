@@ -20,7 +20,10 @@
   "month": "Month",
   "year": "Year",
   "download": "Download",
-
+  "lastWeek": "Last week",
+  "lastMonth": "Last month",
+  "lastYear": "Last year",
+  "placeholderCalendar": "dd.mm.yyyy ~ dd.mm.yyyy",
 
   "SEARCH": "SEARCH",
 

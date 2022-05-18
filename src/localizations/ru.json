@@ -6,7 +6,7 @@
   "loadCall": "Загрузить звонок",
   "alert": "Оповещение",
   "settings": "Настройки",
-  "logout": "Выход",
+  "logout": "Выйти",
 
 
   "CONTROL_BLOCK": "CONTROL_BLOCK",
@@ -18,6 +18,10 @@
   "month": "Месяц",
   "year": "Год",
   "download": "Скачать",
+  "lastWeek": "Последняя неделя",
+  "lastMonth": "Последний месяц",
+  "lastYear": "Последний год",
+  "placeholderCalendar": "дд.мм.гггг ~ дд.мм.гггг",
 
 
   "SEARCH": "SEARCH",
