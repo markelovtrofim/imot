@@ -17,7 +17,6 @@ const BlockBox: FC<BoxPropsType> = ({bcColor, margin, width, padding = '0', bord
   const useStyles = makeStyles(({
     boxWrapper: {
       backgroundColor: bcColor ? bcColor : '#FFFFFF',
-      height: height,
       margin: margin ? margin : '0px',
       width,
       padding,

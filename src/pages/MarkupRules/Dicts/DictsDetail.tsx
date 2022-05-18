@@ -33,7 +33,7 @@ const DictDetailsStubMiddleware: FC = () => {
   const classes = useStyles();
   if (currentDict === null) {
     return (
-      <BlockBox padding={'5px 24px 0 24px'}>
+      <BlockBox padding={'24px 24px 0 24px'}>
         <Field label={'Название словаря'}>
           <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
         </Field>

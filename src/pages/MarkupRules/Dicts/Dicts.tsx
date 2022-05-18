@@ -26,7 +26,7 @@ const DictsPage = () => {
     dpContainer: {
       width: '100%',
       height: '810px',
-      margin: '40px 10px',
+      margin: '40px 10px 60px 10px',
       display: 'flex'
     },
 

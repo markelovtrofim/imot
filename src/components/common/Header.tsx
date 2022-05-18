@@ -36,7 +36,7 @@ const useStyles = makeStyles(({
     display: 'flex',
   },
   headerIcon: {
-    padding: '14px 35px'
+    padding: '14px 35px 14px 22px'
   },
   headerItemText: {
     color: '#738094 !important',
@@ -80,16 +80,19 @@ const useStyles = makeStyles(({
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    padding: '0 26px !important',
+    padding: '0 17px 0 26px !important',
     // @ts-ignore
     textTransform: 'none !important',
     color: '#738094 !important',
     '&:hover': {
       backgroundColor: '#fff !important'
     },
+    '& .MuiButton-startIcon': {
+      marginRight: '10px',
+    },
     '& .MuiButton-startIcon svg': {
       fill: '#738094',
-    }
+    },
   },
 }));
 

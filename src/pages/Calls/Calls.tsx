@@ -19,7 +19,7 @@ const useStyles = makeStyles(({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '15px 24px'
+    padding: '24px'
   },
   callsCols: {
     borderTop: '2px solid #F8FAFC',
@@ -123,15 +123,15 @@ const Calls = React.memo(() => {
             </Grid>
 
             <Grid item xs={1.23} style={{minWidth: '100px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px'}}>{translate('callsEmployee', language)}</Typography>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsEmployee', language)}</Typography>
             </Grid>
 
             <Grid item xs={3.5} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px'}}>{translate('callsCustomer', language)}</Typography>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsCustomer', language)}</Typography>
             </Grid>
 
             <Grid item xs={1} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px'}}>{translate('callsTag', language)}</Typography>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsTag', language)}</Typography>
             </Grid>
 
           </Grid>
