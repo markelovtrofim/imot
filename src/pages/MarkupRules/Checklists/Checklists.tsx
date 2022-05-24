@@ -39,7 +39,10 @@ const ChecklistsPage = () => {
         {/* local url handler */}
         <MarkupRulesButtons/>
         <div style={{marginTop: '25px'}}>
-          <SearchInput handleMWOpen={handleMWOpen}/>
+          <SearchInput
+            onSubmit={(values) => {}}
+            handleMWOpen={handleMWOpen}
+          />
         </div>
       </div>
 

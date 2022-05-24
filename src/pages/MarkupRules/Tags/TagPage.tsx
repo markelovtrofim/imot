@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import ModalWindow from "../../../components/common/ModalWindowBox";
-import {Input} from "../../../components/common";
-import Groups from "../../../components/MarkupRules/Groups/Groups";
-import Items from "../../../components/MarkupRules/Items/Items";
 import {MarkupRulesButtons, SearchInput} from "../MarkupRules";
 import TagDetails from "./TagDetails/TagDetails";
 import {useDispatch} from "react-redux";
-import {getTag, getTagGroups, getTags, tagsSlice} from "../../../store/tags/tags.slice";
+import {createNullArray, getTag, getTagGroups, getTags, tagsSlice} from "../../../store/tags/tags.slice";
 import {TagGroupType, TagType} from "../../../store/tags/tags.types";
 import {useTagsStyles} from './TagPage.jss';
 import TagGroups from "./TagGroups/TagGroups";
 import TagItems from "./TagItems/TagItems";
+import {useAppSelector} from "../../../hooks/redux";
+import PostModalWindow from "./TagDetails/PostModalWindow";
 
 const TagPage = () => {
   const classes = useTagsStyles();
   const dispatch = useDispatch();
+
+  const currentGroup = useAppSelector(state => state.tags.currentTagGroup);
 
   // логика открытия модально окна (MW - Modal Window).
   const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);
@@ -24,6 +24,7 @@ const TagPage = () => {
   const handleMWClose = () => {
     setAddDictMWIsOpen(false);
   };
+
 
   // запросы сразу после отрисовки компонента.
   const getStartTagsData = async () => {
@@ -44,6 +45,7 @@ const TagPage = () => {
     // устанавливаю первый тег как текущий.
     await dispatch(getTag(tags[0].id));
   }
+
   useEffect(() => {
     getStartTagsData().then();
   }, []);
@@ -61,9 +63,27 @@ const TagPage = () => {
           </div>
         </div>
 
-        {/* dicts */}
+        {/* tags */}
         <div className={classes.dpLeftBlockDicts}>
-          <SearchInput handleMWOpen={handleMWOpen}/>
+          <SearchInput
+            onSubmit={async(values) => {
+              if (currentGroup) {
+                dispatch(tagsSlice.actions.setTags(createNullArray(20)));
+                dispatch(tagsSlice.actions.setCurrentTag(null));
+                const tagsData = await dispatch(getTags({group: currentGroup.group, filter: values.search}));
+                // @ts-ignore
+                const tags: TagType[] = tagsData.payload;
+                if (tags.length < 1) {
+                  await dispatch(tagsSlice.actions.setCurrentTag(false));
+                } else {
+                  await dispatch(getTag(tags[0].id));
+                }
+              }
+            }}
+            handleMWOpen={() => {
+              setAddDictMWIsOpen(true);
+            }}
+          />
           <div className={classes.dpBothBox}>
             <TagItems/>
           </div>
@@ -75,10 +95,10 @@ const TagPage = () => {
         <TagDetails/>
       </div>
 
-      {/* modal window */}
-      <ModalWindow isOpen={addDictMWIsOpen} handleClose={() => handleMWClose()}>
-        <Input name={'dict'} type={'text'} bcColor={'#F8FAFC'} label={'Добавить словарь'}/>
-      </ModalWindow>
+      <PostModalWindow
+        isOpen={addDictMWIsOpen}
+        handleMWClose={handleMWClose}
+      />
 
     </div>
   );

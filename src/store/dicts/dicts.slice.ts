@@ -1,18 +1,17 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {DictActionType, DictType, DictTypeDetailed, GroupType, MarkupRulesPagesType} from "./dicts.types";
+import {instance} from "../api";
 
 export const getGroups = createAsyncThunk(
   'dicts/getGroups',
   async (payload, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.get<GroupType[]>(`https://imot-api.pyzzle.ru/dict_groups/`, {
+      const {data} = await instance.get<GroupType[]>(`dict_groups/`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      debugger
       await thunkAPI.dispatch(dictsSlice.actions.setGroups(data));
       return data;
     } catch (error) {
@@ -26,11 +25,11 @@ export const getDicts = createAsyncThunk(
   async (payload: { activeDictIndex?: number, filter?: string, group?: string }, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const url = `https://imot-api.pyzzle.ru/dicts/` +
+      const url = `dicts/` +
         `?show_disabled=true` +
         `${payload.filter ? `&filter=${payload.filter}` : ''}` +
         `${payload.group ? `&group=${payload.group}` : ''}`
-      const {data} = await axios.get(url, {
+      const {data} = await instance.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -48,7 +47,7 @@ export const getDict = createAsyncThunk(
   async (payload: string, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.get(`https://imot-api.pyzzle.ru/dict/${payload}`, {
+      const {data} = await instance.get(`dict/${payload}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -66,7 +65,7 @@ export const postDict = createAsyncThunk(
   async (payload: DictTypeDetailed, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.post(`https://imot-api.pyzzle.ru/dict/`, payload,{
+      const {data} = await instance.post(`dict/`, payload,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -85,7 +84,7 @@ export const deleteDict = createAsyncThunk(
   async (payload: string, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.delete(`https://imot-api.pyzzle.ru/dict/${payload}`, {
+      const {data} = await instance.delete(`dict/${payload}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -103,7 +102,7 @@ export const updateDict = createAsyncThunk(
   async (payload: DictTypeDetailed, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.put(`https://imot-api.pyzzle.ru/dict/${payload.id}`, payload, {
+      const {data} = await instance.put(`dict/${payload.id}`, payload, {
         headers: {
           'accept': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -122,7 +121,7 @@ export const dictActions = createAsyncThunk(
   async (payload: {dictId: string, action: DictActionType}, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await axios.post(`https://imot-api.pyzzle.ru/dict/${payload.dictId}/action`, {action: payload.action}, {
+      const {data} = await instance.post(`dict/${payload.dictId}/action`, {action: payload.action}, {
         headers: {
           'accept': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -202,6 +201,8 @@ export const dictsSlice = createSlice({
     },
     setCurrentDict(state, action: PayloadAction<DictTypeDetailed | null | false>) {
       state.currentDict = action.payload;
-    }
+    },
+
+    dictsReset: () => initialState
   }
 });

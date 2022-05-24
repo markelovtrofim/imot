@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
+import {instance} from "../api";
 
 export type LangType = 'ru' | 'en';
 
@@ -8,12 +8,11 @@ export const getLang = createAsyncThunk(
   async (payload: string, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      await axios.get(`https://imot-api.pyzzle.ru/set_language?language=${payload}`, {
+      await instance.get(`set_language?language=${payload}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      debugger
       thunkAPI.dispatch(langSlice.actions.setLang(payload))
     } catch (e) {
       console.error(e);
@@ -36,6 +35,8 @@ export const langSlice = createSlice({
   reducers: {
     setLang(state, action: PayloadAction<string>) {
       state.language = action.payload;
-    }
+    },
+
+    langReset: () => initialState
   }
 })

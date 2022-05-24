@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {AuthResponseErrors} from "./auth.types";
+import {instance} from "../api";
 
 type AuthType = {
   access_token: "string",
@@ -14,7 +14,7 @@ export const fetchAuthToken = createAsyncThunk(
       let bodyFormData = new FormData();
       bodyFormData.append('username', authData.username);
       bodyFormData.append('password', authData.password);
-      const response = await axios.post<AuthType>('https://imot-api.pyzzle.ru/token', bodyFormData, {
+      const response = await instance.post<AuthType>('token', bodyFormData, {
         headers: {
           'Content-Security-Policy': 'block-all-mixed-content'
         }
@@ -66,11 +66,10 @@ export const authSlice = createSlice({
     setAuth(state, action: PayloadAction<boolean>) {
       state.isAuth = action.payload;
     },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload;
-    },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
-    }
+    },
+
+    authReset: () => initialState
   }
 });

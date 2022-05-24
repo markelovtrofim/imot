@@ -21,7 +21,7 @@ export const useStyles = makeStyles(({
     width: 'auto',
   },
   container: {
-    maxWidth: '1610px',
+    maxWidth: '1655px',
     margin: '0 auto',
     padding: '0 15px'
   }

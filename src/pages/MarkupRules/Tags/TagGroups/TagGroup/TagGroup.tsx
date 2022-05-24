@@ -21,6 +21,10 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
     if (group) {
       dispatch(tagsSlice.actions.setTags(createNullArray(20)));
       dispatch(tagsSlice.actions.setCurrentTag(null));
+      dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
+      dispatch(tagsSlice.actions.removeFragments(null));
+      await dispatch(tagsSlice.actions.removeSetTags(null));
+
 
       dispatch(tagsSlice.actions.setCurrentTagGroup(group));
 

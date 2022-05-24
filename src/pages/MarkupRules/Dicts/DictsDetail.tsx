@@ -27,68 +27,16 @@ import {useHistory} from "react-router-dom";
 import noResultsPng from '../../../assets/images/no-results.png';
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
+import Preloader from "../../../assets/loading.svg";
 
 const DictDetailsStubMiddleware: FC = () => {
   const currentDict = useAppSelector(state => state.dicts.currentDict);
-  const classes = useStyles();
   if (currentDict === null) {
     return (
       <BlockBox padding={'24px'}>
-        <Field label={'Название словаря'}>
-          <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
-        </Field>
-        <Field label={'Название группы'}>
-          <Skeleton variant={"text"} height={'22px'} width={'100%'} style={{marginTop: '3px'}}/>
-        </Field>
-        <Field
-          label={'Список слов, фраз'}
-          labelBrother={
-            <div style={{display: 'flex', justifyContent: "space-between", width: '80px', alignItems: 'center'}}>
-              <Switch
-                onChecked={() => {
-                }}
-                checked={false}
-                disabled={true}
-              />
-              <InfoCircle/>
-            </div>
-          }
-        >
-          <div style={{height: '340px'}}>
-            <Skeleton variant={"rectangular"} height={'100%'} width={'100%'}/>
-          </div>
-        </Field>
-
-        <div style={{marginTop: '45px'}}>
-          <div style={{display: 'flex', justifyContent: "space-between", alignItems: 'center'}}>
-            <div>
-              <Typography className={classes.rulesText}>Правила</Typography>
-              {/* Checkbox block */}
-              <div style={{margin: '18px 0 24px 0'}}>
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
-                  <Checkbox disabled={true} style={{marginRight: '8px'}}/>
-                  <Typography>Словарь автозамены</Typography>
-                </div>
-              </div>
-            </div>
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <LoadingButton
-                type={"submit"}
-                style={{marginRight: '24px'}}
-                variant={"contained"}
-                disabled={true}
-              >
-                Сохранить
-              </LoadingButton>
-              <CustomControlSelect
-                disabled={true}
-                optionsPosition={"top"}
-                options={[{value: 'тс не ругайся', label: 'тс завязывай'}]}
-                svg={'horizontal'}
-                handleSelectChange={() => {
-                }}
-              />
-            </div>
+        <div style={{position: 'relative', height: '100%'}}>
+          <div style={{position: 'absolute', top: '30%', left: '32%'}}>
+            <img src={Preloader} alt=""/>
           </div>
         </div>
       </BlockBox>

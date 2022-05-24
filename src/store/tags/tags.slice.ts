@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {
   FragmentRulesItem, FragmentsSelectType,
   GlobalFilterItem,
@@ -9,14 +8,15 @@ import {
   TagType
 } from "./tags.types";
 import cloneDeep from "lodash.clonedeep";
-import {Tag} from "rsuite";
+import {instance} from "../api";
+import {DictActionType} from "../dicts/dicts.types";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
   'tags/getTagGroups',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get<TagGroupType[]>(`https://imot-api.pyzzle.ru/tag_rule_groups/`, {
+    const {data} = await instance.get<TagGroupType[]>(`tag_rule_groups/`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -42,8 +42,7 @@ export const getTags = createAsyncThunk(
         }
         return '';
       }
-      const url = `https://imot-api.pyzzle.ru/tag_rules/${generateEndUrlPart(payload)}`
-      const {data} = await axios.get(url, {
+      const {data} = await instance.get(`tag_rules/${generateEndUrlPart(payload)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -61,7 +60,7 @@ export const getTag = createAsyncThunk(
   'tags/getTag',
   async (id: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get<TagDetailedType>(`https://imot-api.pyzzle.ru/tag_rule/${id}`, {
+    const {data} = await instance.get<TagDetailedType>(`tag_rule/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -73,6 +72,8 @@ export const getTag = createAsyncThunk(
     for (let i = 0; i < data.fragmentRules.length; i++) {
       thunkAPI.dispatch(tagsSlice.actions.setFragment(data.fragmentRules[i]));
     }
+
+    thunkAPI.dispatch(tagsSlice.actions.removeSetTags(null));
     for (let i = 0; i < data.setTags.length; i++) {
       thunkAPI.dispatch(tagsSlice.actions.setSetTag(data.setTags[i]));
     }
@@ -81,17 +82,50 @@ export const getTag = createAsyncThunk(
   }
 )
 
+// обновление тега
+export const updateTag = createAsyncThunk(
+  'tags/getTag',
+  async (payload: any) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const {data} = await instance.put<TagDetailedType>(`tag_rule/${payload.id}`, payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return data;
+    } catch (e) {
+      console.log(e)
+    }
+  }
+)
+
 // все критерии для глобаного фильтра.
 export const getAllGlobalTagFilters = createAsyncThunk(
   'tags/getAllGlobalTagFilters',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/?extended=true`, {
+    const {data} = await instance.get(`search_criterias/?extended=true`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     thunkAPI.dispatch(tagsSlice.actions.setAllGlobalFilterCriterias(data));
+  }
+)
+
+export type TagActionType = 'clone' | 'enable' | 'disable' | 'delete' | 'make_global';
+
+// теговые активности
+export const tagsActions = createAsyncThunk(
+  'tags/getAllGlobalTagFilters',
+  async (payload: {tagId: string, action: TagActionType}, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    const {data} = await instance.post(`tag_rule/${payload.tagId}/action`, {action: payload.action} ,{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   }
 )
 
@@ -162,10 +196,17 @@ type FragmentsArrayType = {
   interruptTime: string
 }
 
+const DirectionOptions = [
+  {label: 'Клиент сказал', value: 'client_say'},
+  {label: 'Оператор сказал', value: 'operator_say'},
+  {label: 'Клиент не сказал', value: 'client_not_say'},
+  {label: 'Оператор не сказал', value: 'operator_not_say'},
+  {label: 'Любой не сказал', value: 'any_not_say'},
+];
 
 const fragmentsArray: FragmentsArrayType = {
   phrasesAndDicts: null,
-  direction: '',
+  direction: DirectionOptions[0].value,
   fromStart: false,
   silentBefore: '',
   silentAfter: '',
@@ -173,15 +214,6 @@ const fragmentsArray: FragmentsArrayType = {
   phrases: [],
   dicts: []
 };
-
-
-const DirectionOptions = [
-  {label: 'Клиент сказал', value: 'client_say'},
-  {label: 'Оператор сказал', value: 'operator_say'},
-  {label: 'Клиент не сказал', value: 'client_not_say'},
-  {label: 'Оператор не сказал', value: 'operator_not_say'},
-  {label: 'Любой не сказал', value: 'any_not_say'},
-]
 
 export const tagsSlice = createSlice({
   name: 'tags',
@@ -200,7 +232,7 @@ export const tagsSlice = createSlice({
     setTags(state, action: PayloadAction<TagType[] | null[]>) {
       state.tags = action.payload;
     },
-    setCurrentTag(state, action: PayloadAction<TagDetailedType | null>) {
+    setCurrentTag(state, action: PayloadAction<TagDetailedType | null | false>) {
       state.currentTag = action.payload;
     },
 
@@ -216,13 +248,13 @@ export const tagsSlice = createSlice({
     },
     // активные критерии
     setActiveGlobalFilterCriterias(state, action: PayloadAction<GlobalFilterItemDetailed[] | []>) {
+      state.activeGlobalFilterCriterias.length = 0;
       for (let i = 0; i < action.payload.length; i++) {
         const fullCriteria = state.allGlobalFilterCriterias.find(item => item.key === action.payload[i].key);
         if (fullCriteria) {
-          state.activeGlobalFilterCriterias.push(fullCriteria);
+          state.activeGlobalFilterCriterias.push({...fullCriteria, values: action.payload[i].values});
         }
       }
-      state.activeGlobalFilterCriterias = action.payload;
     },
     setActiveGlobalFilterCriteria(state, action: PayloadAction<GlobalFilterItemDetailed>) {
       state.activeGlobalFilterCriterias.push(action.payload);
@@ -249,7 +281,6 @@ export const tagsSlice = createSlice({
 
     // фрагменты
     setFragment(state, action: PayloadAction<FragmentRulesItem | null>) {
-
       // первоначальный обьект
       let fragmentRulesItemLocal: any = {};
       if (!action.payload) {
@@ -257,16 +288,16 @@ export const tagsSlice = createSlice({
       } else {
         fragmentRulesItemLocal = action.payload;
       }
-
       // массив с объектами
       let activeFragment = [];
       for (let i = 0; i < Object.keys(fragmentRulesItemLocal).length; i++) {
         const key = Object.keys(fragmentRulesItemLocal)[i];
         if (key === 'direction') {
+          const value = DirectionOptions.find(item => item.value === fragmentRulesItemLocal[key]);
           activeFragment.push({
             key: key,
             title: 'Поиск по словам',
-            value: DirectionOptions[0],
+            value: value,
             options: DirectionOptions,
             selectType: 'multiValue',
             visible: true
@@ -327,6 +358,9 @@ export const tagsSlice = createSlice({
       // @ts-ignore
       state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = action.payload.visible;
     },
+    removeFragment(state, action: PayloadAction<number>) {
+      state.activeFragments.splice(action.payload, 1);
+    },
     removeFragments(state, action: PayloadAction<null>) {
       state.activeFragments.length = 0;
     },
@@ -334,7 +368,6 @@ export const tagsSlice = createSlice({
     // теги
     setSetTag(state, action: PayloadAction<SetTagsItem | null>) {
       // первоначальный обьект
-
       let tag: any = {};
       if (!action.payload) {
         tag = {
@@ -348,8 +381,17 @@ export const tagsSlice = createSlice({
 
       state.activeSetTags.push(tag);
     },
+    setSetTagFieldValue(state, action: PayloadAction<{ tagIndex: number, fieldKey: string, value: string | boolean }>) {
+      // @ts-ignore
+      state.activeSetTags[action.payload.tagIndex][action.payload.fieldKey] = action.payload.value;
+    },
+    removeSetTag(state, action: PayloadAction<number>) {
+      state.activeSetTags.splice(action.payload, 1);
+    },
     removeSetTags(state, action: PayloadAction<null>) {
       state.activeSetTags.length = 0;
-    }
+    },
+
+    tagsReset: () => initialState
   }
 });

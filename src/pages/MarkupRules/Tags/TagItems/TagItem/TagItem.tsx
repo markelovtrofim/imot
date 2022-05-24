@@ -18,7 +18,6 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = useTagItemStyles({tag, isActive});
-  const activeGlobalFilterCriterias = useAppSelector(state => state.tags.activeGlobalFilterCriterias);
 
   async function onTagItemClick() {
     if (!isActive && tag) {
