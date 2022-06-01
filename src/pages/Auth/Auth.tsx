@@ -3,7 +3,7 @@ import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 import cn from 'classnames';
 import {PhonePng, DashboardPng, SoundPng} from '../../assets/images/Auth';
-import LogoPng from '../../assets/images/logo.png';
+import LogoImg from '../../assets/images/logo.svg';
 import {authSlice, fetchAuthToken} from "../../store/auth/auth.slice";
 import {useAppSelector} from "../../hooks/redux";
 import {useFormik} from 'formik';
@@ -207,7 +207,7 @@ const Auth = () => {
       <div className={cn(classes.authFormSide, classes.authBothSides)}>
         <div className={classes.authFormInner}>
           <div className={classes.authLogoBox}>
-            <img src={LogoPng} height={30} alt="This is Logo icon."/>
+            <img src={LogoImg} height={30} alt="This is Logo icon."/>
           </div>
           <form onSubmit={formik.handleSubmit}>
             <div className={classes.authInputBox}>

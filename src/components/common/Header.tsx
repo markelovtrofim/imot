@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {Button, SelectChangeEvent} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
-import LogoPng from '../../assets/images/logo.png';
+import LogoImg from '../../assets/images/logo.svg';
 import {RootState} from '../../store/store';
 import {translate} from '../../localizations';
 import MenuItem from '@mui/material/MenuItem';
@@ -34,9 +34,18 @@ const useStyles = makeStyles(({
   },
   headerLeftBlock: {
     display: 'flex',
+    alignItems: 'center'
+  },
+  headerIconWrapper: {
+    maxWidth: '73px',
+    width: '73px',
+    margin: '0 24px'
   },
   headerIcon: {
-    padding: '14px 35px 14px 22px'
+    display: 'block',
+    maxWidth: '100%',
+    width: '100%',
+    height: 'auto',
   },
   headerItemText: {
     color: '#738094 !important',
@@ -185,8 +194,9 @@ const Header: React.FC = () => {
       <div className={classes.headerInner}>
         <div className={classes.headerLeftBlock}>
           {/* Логотип */}
-          <img className={classes.headerIcon} height={55} src={LogoPng} alt=""/>
-
+          <div className={classes.headerIconWrapper}>
+            <img className={classes.headerIcon} height={55} src={LogoImg} alt="Imot.io"/>
+          </div>
           {/* Навигация */}
           <ToggleButtonGroup
             value={alignment}
