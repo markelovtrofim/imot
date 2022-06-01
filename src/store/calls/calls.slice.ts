@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {CallType} from "./calls.types";
 import {RootState} from "../store";
+import {instance} from "../api";
 
 // get all calls
 type ResponseBaseCallsDataType = {
@@ -47,7 +47,7 @@ export const getCallStt = createAsyncThunk(
   'calls/getCallAudio',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/stt`, {
+    const {data} = await instance.get(`call/${payload.id}/stt`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -61,7 +61,7 @@ export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await axios.get(`https://imot-api.pyzzle.ru/call/${payload.id}/audio`, {
+    const {data} = await instance.get(`call/${payload.id}/audio`, {
       responseType: 'arraybuffer',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -89,8 +89,8 @@ export const getBaseCallsData = createAsyncThunk(
       let startDate = convertDate(state.search.date[0]);
       let endDate = convertDate(state.search.date[1]);
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
-      const response = await axios.post<ResponseBaseCallsDataType>(
-        `https://imot-api.pyzzle.ru/search_calls/?` +
+      const response = await instance.post<ResponseBaseCallsDataType>(
+        `search_calls/?` +
         `skip=${state.calls.skip}&limit=${state.calls.limit}` +
         `&start_date=${startDate}` +
         `&end_date=${endDate}`,
@@ -118,7 +118,7 @@ export const getCallsInfo = createAsyncThunk(
       let localCalls = [];
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       for (let i = 0; i < payload.length; i++) {
-        const response = await axios.get(`https://imot-api.pyzzle.ru/call/${payload[i].id}`, {
+        const response = await instance.get(`call/${payload[i].id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -207,7 +207,6 @@ export const callsSlice = createSlice({
       }
     },
     setEmptyState(state, action: PayloadAction<{ leaveBundles: number }>) {
-      debugger
       if (action.payload.leaveBundles === 0) {
         state.calls = [];
       } else {
@@ -247,6 +246,8 @@ export const callsSlice = createSlice({
     },
     incrementSkip(state, action: PayloadAction<null>) {
       state.skip += state.limit;
-    }
+    },
+
+    callsReset: () => initialState
   }
 });

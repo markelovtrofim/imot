@@ -1,14 +1,14 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {CriteriasType, RequestDataType} from "./search.types";
 import cloneDeep from "lodash.clonedeep";
+import {instance} from "../api";
 
 export const getAllSearchCriterias = createAsyncThunk(
   'search/getBaseSearchCriterias',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
 
-    const response = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/`, {
+    const response = await instance.get(`search_criterias/`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -21,7 +21,7 @@ export const getDefaultCriterias = createAsyncThunk(
   'search/getBaseSearchCriterias',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get(`https://imot-api.pyzzle.ru/search_criterias/default_keys`, {
+    const response = await instance.get(`search_criterias/default_keys`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -49,7 +49,6 @@ export const searchSlice = createSlice({
   initialState,
   reducers: {
     setDate(state, action: PayloadAction<typeof initialState.date | null[]>) {
-      debugger
       state.date = action.payload;
     },
 
@@ -104,6 +103,9 @@ export const searchSlice = createSlice({
       state.allCriterias = null;
       state.defaultCriterias = [];
       state.activeCriterias = [];
-    }
+    },
+
+    searchReset: () => initialState
+
   }
 })

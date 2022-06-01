@@ -231,6 +231,20 @@ const DictsPage = () => {
         {/* dicts */}
         <div className={classes.dpLeftBlockDicts}>
           <SearchInput
+            onSubmit={async (values: any) => {
+              if (currentGroup) {
+                dispatch(dictsSlice.actions.setEmptyDicts(null));
+                dispatch(dictsSlice.actions.setCurrentDict(null));
+                const dictsData = await dispatch(getDicts({group: currentGroup.group, filter: values.search}));
+                // @ts-ignore
+                const dicts: DictType[] = dictsData.payload;
+                if (dicts.length < 1) {
+                  await dispatch(dictsSlice.actions.setCurrentDict(false));
+                } else {
+                  await dispatch(getDict(dicts[0].id));
+                }
+              }
+            }}
             handleMWOpen={handleMWOpen}/>
           <Snackbar
             type={'error'}

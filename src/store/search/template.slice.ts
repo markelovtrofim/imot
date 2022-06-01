@@ -1,12 +1,13 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {TemplateType} from "./template.types";
+import {instance} from "../api";
 
 export const getAllTemplates = createAsyncThunk(
   'template/getAllTemplates',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get(`https://imot-api.pyzzle.ru/search_filters/`, {
+    const response = await instance.get(`search_filters/`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -20,7 +21,7 @@ export const getTemplate = createAsyncThunk(
   'template/getTemplate',
   async (payload: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get(`https://imot-api.pyzzle.ru/search_filter/${payload}`, {
+    const response = await instance.get(`search_filter/${payload}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -33,7 +34,7 @@ export const createTemplate = createAsyncThunk(
   'template/createTemplate',
   async (payload: { title: string, items: any[] }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.post(`https://imot-api.pyzzle.ru/search_filter`, payload, {
+    const response = await instance.post(`search_filter`, payload, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -47,7 +48,7 @@ export const updateTemplate = createAsyncThunk(
   'template/updateTemplate',
   async (payload: TemplateType, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.put(`https://imot-api.pyzzle.ru/search_filter/${payload.id}`, payload, {
+    const response = await instance.put(`search_filter/${payload.id}`, payload, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -61,7 +62,7 @@ export const deleteTemplate = createAsyncThunk(
   'template/updateTemplate',
   async (payload: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.delete(`https://imot-api.pyzzle.ru/search_filter/${payload}`, {
+    const response = await instance.delete(`search_filter/${payload}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -90,6 +91,8 @@ export const templateSlice = createSlice({
     },
     setCurrentTemplate(state, action: PayloadAction<TemplateType | null>) {
       state.currentTemplate = action.payload;
-    }
+    },
+
+    templateReset: () => initialState
   }
 });

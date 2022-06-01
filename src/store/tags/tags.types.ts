@@ -45,7 +45,8 @@ export type TagDetailedType = {
   calculatedRulePriority: number,
   globalFilter: GlobalFilterItem[],
   fragmentRules: FragmentRulesItem[],
-  setTags: SetTagsItem[]
+  setTags: SetTagsItem[],
+  allowedActions: string[]
 }
 
 export type FragmentsSelectType = 'multiValue' | 'multiString' | 'input' | 'checkbox';

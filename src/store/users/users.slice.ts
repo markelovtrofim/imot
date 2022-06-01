@@ -2,12 +2,13 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import axios from "axios";
 import {ChildUserType, UserType} from "./users.types";
 import {langSlice} from '../lang/lang.slice';
+import {instance} from "../api";
 
 export const getMe = createAsyncThunk(
   'users/getMe',
   async (payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get<UserType>(`https://imot-api.pyzzle.ru/user/me`, {
+    const response = await instance.get<UserType>(`user/me`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -21,7 +22,7 @@ export const getChildUsers = createAsyncThunk(
   'users/getChildUsers',
   async(payload, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get<ChildUserType[]>(`https://imot-api.pyzzle.ru/users/?with_childs=false`, {
+    const response = await instance.get<ChildUserType[]>(`users/?with_childs=false`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -35,7 +36,7 @@ export const getUserToken = createAsyncThunk(
   async(payload: string, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     debugger
-    const response = await axios.get(`https://imot-api.pyzzle.ru/set_filter_user?user_id=${payload ? payload : ''}`, {
+    const response = await instance.get(`set_filter_user?user_id=${payload ? payload : ''}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -51,7 +52,7 @@ export const getChildUser = createAsyncThunk(
   'users/getChildUser',
   async(payload: string | void, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await axios.get(`https://imot-api.pyzzle.ru/user/filter`, {
+    const response = await instance.get(`user/filter`, {
       headers: {
         'Authorization': `Bearer ${payload ? payload : token}`
       }

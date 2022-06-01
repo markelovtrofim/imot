@@ -19,11 +19,14 @@ import {RootState} from "../../store/store";
 import {translate} from '../../localizations';
 
 // CUSTOM COMMON COMPONENTS
-export const SearchInput: FC<{ handleMWOpen: () => void }> = ({handleMWOpen}) => {
+type SearchInputType = {
+  onSubmit: (values: any) => void,
+  handleMWOpen: () => void
+};
+
+export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
   const currentGroup = useAppSelector(state => state.dicts.currentGroup);
   const currentDict = useAppSelector(state => state.dicts.currentDict);
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     formik.values.search = ''
@@ -34,18 +37,7 @@ export const SearchInput: FC<{ handleMWOpen: () => void }> = ({handleMWOpen}) =>
       search: ''
     },
     onSubmit: async (values) => {
-      if (currentGroup) {
-        dispatch(dictsSlice.actions.setEmptyDicts(null));
-        dispatch(dictsSlice.actions.setCurrentDict(null));
-        const dictsData = await dispatch(getDicts({group: currentGroup.group, filter: values.search}));
-        // @ts-ignore
-        const dicts: DictType[] = dictsData.payload;
-        if (dicts.length < 1) {
-          await dispatch(dictsSlice.actions.setCurrentDict(false));
-        } else {
-          await dispatch(getDict(dicts[0].id));
-        }
-      }
+      onSubmit(values);
     },
   });
   const useStyles = makeStyles(({
@@ -56,7 +48,7 @@ export const SearchInput: FC<{ handleMWOpen: () => void }> = ({handleMWOpen}) =>
     },
     searchInputInputBox: {
       position: 'relative',
-      width: '100%'
+      width: '100%',
     },
     searchInputSvgBox: {
       textAlign: 'center',
@@ -75,16 +67,16 @@ export const SearchInput: FC<{ handleMWOpen: () => void }> = ({handleMWOpen}) =>
     <div className={classes.searchInputBox}>
       <form onSubmit={formik.handleSubmit} style={{width: '100%'}}>
         <div className={classes.searchInputInputBox}>
-          <Input
-            handleChange={formik.handleChange}
-            value={formik.values.search}
-            name={'search'}
-            type={'text'}
-            height={'30px'}
-            bcColor={'#F8FAFC'}
-            border={'1px solid #E3E8EF'}
-            label={translate('searchInputText_dicts', language)}
-          />
+            <Input
+              handleChange={formik.handleChange}
+              value={formik.values.search}
+              name={'search'}
+              type={'text'}
+              height={'35px'}
+              bcColor={'#F8FAFC'}
+              border={'1px solid #E3E8EF'}
+              label={translate('searchInputText_dicts', language)}
+            />
           <div className={classes.searchInputSvgBox}>
             <IconButton type={"submit"}>
               <SearchSvg/>
@@ -92,7 +84,7 @@ export const SearchInput: FC<{ handleMWOpen: () => void }> = ({handleMWOpen}) =>
           </div>
         </div>
       </form>
-      <Plus margin={'0 0 0 16px'} disabled={!currentDict} handleClick={handleMWOpen}/>
+      <Plus margin={'0 0 0 16px'} handleClick={handleMWOpen}/>
     </div>
   );
 };
