@@ -98,7 +98,8 @@ const CallStubMiddleware = memo(({
         margin: '25px !important',
         position: 'relative',
         fill: '#818D9F',
-        transform: 'rotate(90deg)'
+        transform: 'rotate(90deg)',
+        cursor: 'pointer'
       },
       '&.Mui-disabled': {
         opacity: '1 !important'
@@ -305,7 +306,8 @@ const Call = memo((props: CallPropsType) => {
         margin: '25px !important',
         position: 'relative',
         fill: '#818D9F',
-        transform: 'rotate(90deg)'
+        transform: 'rotate(90deg)',
+        cursor: 'pointer'
       },
       '&.Mui-disabled': {
         opacity: '1 !important'

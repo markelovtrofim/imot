@@ -164,6 +164,9 @@ const useStyles = makeStyles(({
         backgroundColor: 'rgba(114, 46, 209, 0.15)'
       }
     },
+    '.rs-calendar-table-cell-is-today .rs-calendar-table-cell-content': {
+      boxShadow: 'inset 0 0 0 1px #722ED1 !important'
+    },
   }
 }))
 

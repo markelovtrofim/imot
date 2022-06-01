@@ -8,20 +8,23 @@ type BoxPropsType = {
   border?: string,
   height?: string,
   margin?: string,
-  bcColor?: string
+  bcColor?: string,
+  boxShadow?: string,
 };
 
 const BlockBox: FC<BoxPropsType> = ({bcColor, margin, width, padding = '0', border,
-                                     borderRadius = '10px', height = '100%', children
+                                     borderRadius = '10px', height = '100%', boxShadow, children
                                    }) => {
   const useStyles = makeStyles(({
     boxWrapper: {
       backgroundColor: bcColor ? bcColor : '#FFFFFF',
       margin: margin ? margin : '0px',
       width,
+      height,
       padding,
       border,
-      borderRadius
+      borderRadius,
+      boxShadow,
     }
   }));
   const classes = useStyles();
