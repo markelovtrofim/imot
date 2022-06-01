@@ -12,7 +12,9 @@ import cn from 'classnames';
 import Checkbox from "../Checkbox";
 import {templateSlice} from "../../../store/search/template.slice";
 import useOnClickOutside from "use-onclickoutside";
-
+import {useAppSelector} from "../../../hooks/redux";
+import {translate} from '../../../localizations';
+import {RootState} from "../../../store/store";
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -81,7 +83,8 @@ const SearchSelect: FC<SelectPropsType> = ({
     selectBox: {
       display: 'flex !important',
       alignItems: 'center',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      width: '75%'
     },
     selectItem: {},
     selectMenuListInput: {
@@ -136,7 +139,8 @@ const SearchSelect: FC<SelectPropsType> = ({
       alignItems: 'center',
     },
     selectSelectBox: {
-      position: 'relative'
+      position: 'relative',
+      width: '100%'
     },
     selectPlaceholder: {
       // @ts-ignore
@@ -335,7 +339,7 @@ const SearchSelect: FC<SelectPropsType> = ({
               e.target.focus();
             }}
             onFocus={onMenuInputFocus}
-            placeholder="Поиск"
+            placeholder={translate('searchTag', language)}
           />
           <SearchIcon className={classes.selectMenuListInputIcon}/>
         </div>
@@ -349,6 +353,7 @@ const SearchSelect: FC<SelectPropsType> = ({
   // LOGIC BLOCK
   // диспатч
   const dispatch = useDispatch();
+  const {language} = useAppSelector((state: RootState) => state.lang);
 
   // открыте и закрытие менюшки.
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
@@ -424,7 +429,7 @@ const SearchSelect: FC<SelectPropsType> = ({
               MultiValueLabel: CustomMultiValueLabel,
               MultiValueRemove: CustomMultiValueRemove,
             }}
-            placeholder={'Все'}
+            placeholder={translate('allTags', language)}
             menuIsOpen={menuIsOpen}
 
           />
@@ -435,7 +440,7 @@ const SearchSelect: FC<SelectPropsType> = ({
             menuIsOpen={menuIsOpen}
             className={classes.selectItem}
             name="color"
-            placeholder={'Все'}
+            placeholder={translate('allTags', language)}
             components={{
               MenuList: CustomMenuList,
               Option: CustomOption,
@@ -456,14 +461,14 @@ const SearchSelect: FC<SelectPropsType> = ({
             hideSelectedOptions={false}
           />
           {converterCurrentResult.length < 1 &&
-          <Typography className={classes.selectPlaceholder}>Все</Typography>
+          <Typography className={classes.selectPlaceholder}>{translate('allTags', language)}</Typography>
           }
         </div>
       }
-      {isDefaultCriteria
+      {/* {isDefaultCriteria
         ? null
         : <CrossSvg onClick={removeCriteria} style={{cursor: 'pointer', marginLeft: '8px'}}/>
-      }
+      } */}
     </div>
   );
 };

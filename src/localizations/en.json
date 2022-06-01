@@ -31,8 +31,10 @@
   "searchClear": "Clear",
   "searchSaveTemp": "Save as template",
   "searchButton": "Search",
-  "searchMore": "More",
-
+  "searchMore": "Add filters",
+  "searchTemp": "Search patterns",
+  "allTags": "All",
+  "searchTag": "Search",
 
   "CALLS": "CALLS",
 

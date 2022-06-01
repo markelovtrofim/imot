@@ -35,7 +35,17 @@ export const PlusSvg = (props: React.SVGProps<SVGSVGElement>) => {
             fill="#73D13D"/>
     </svg>
   );
-}
+};
+
+export const MinusSvg = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path fillRule="evenodd" clipRule="evenodd"
+            d="M0 6.00038C0 5.56816 0.350386 5.21777 0.782609 5.21777H11.2174C11.6496 5.21777 12 5.56816 12 6.00038C12 6.4326 11.6496 6.78299 11.2174 6.78299H0.782609C0.350386 6.78299 0 6.4326 0 6.00038Z"
+            fill="#597EF7"/>
+    </svg>
+  );
+};
 
 export const CrossSvgWithBg = (props: React.SVGProps<SVGSVGElement>) => {
   return (

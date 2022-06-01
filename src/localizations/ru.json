@@ -29,7 +29,10 @@
   "searchClear": "Очистить",
   "searchSaveTemp": "Сохранить как шаблон",
   "searchButton": "Искать",
-  "searchMore": "Еще",
+  "searchMore": "Добавить фильтры",
+  "searchTemp": "Шаблоны поиска",
+  "allTags": "Все",
+  "searchTag": "Поиск",
 
 
   "CALLS": "CALLS",

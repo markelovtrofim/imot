@@ -78,15 +78,54 @@ const useStyles = makeStyles(({
   searchItems: {
     display: 'flex',
     width: '100%',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    // display: 'grid'
   },
   searchItem: {
     display: 'flex',
     alignItems: 'center',
-    margin: '0 22px 16px 0'
+    justifyContent: 'space-between',
+    margin: '0 22px 16px 0',
+    width: '100%',
+  },
+  searchItemBlock_1:{
+    gridRowStart: 1,
+    gridRowEnd: 2,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchItemBlock_2:{
+    gridRowStart: 2,
+    gridRowEnd: 3,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchItemBlock_3:{
+    gridRowStart: 3,
+    gridRowEnd: 4,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchItemBlock_4:{
+    gridRowStart: 4,
+    gridRowEnd: 5,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchItemBlock_noWide: {
+    width: '30%',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchItemBlock_Wide: {
+    width: '70%',
+    display: 'flex',
+    alignItems: 'center',
   },
   searchText: {
-    marginRight: '8px !important'
+    marginRight: '8px !important',
+    color: '#2F3747 !important',
+    whiteSpace: 'nowrap'
   },
   tagsBox: {
     minWidth: '70px',
@@ -156,6 +195,17 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     setLoading(false);
   };
 
+  function switchSearchItemCLassName(className: string) {
+    const classSwitcher: {[id: string]: any} = {};
+    classSwitcher['searchItemBlock_1'] = classes.searchItemBlock_1;
+    classSwitcher['searchItemBlock_2'] = classes.searchItemBlock_2;
+    classSwitcher['searchItemBlock_3'] = classes.searchItemBlock_3;
+    classSwitcher['searchItemBlock_4'] = classes.searchItemBlock_4;
+    classSwitcher['searchItemBlock_Wide'] = classes.searchItemBlock_Wide;
+    classSwitcher['searchItemBlock_noWide'] = classes.searchItemBlock_noWide;
+    return classSwitcher[className];
+  }
+
   // template select
   const convertedTemplate = optionsCreator(allTemplates);
 
@@ -193,17 +243,37 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   }, [allCriterias, activeCriterias, defaultCriterias])
 
   const handleMoreSelectClick = () => {
-    let state = allCriterias;
-    if (state) {
-      let local = []
-      const defAcCriterias = [...activeCriterias, ...defaultCriterias]
-      for (let i = 0; i < state.length; i++) {
-        if (!defAcCriterias.find((item) => {
-          if (state) {
-            return item.key === state[i].key
-          }
-        })) {
-          local.push({value: state[i], label: state[i].title})
+    // let state = allCriterias;
+    // if (state) {
+    //   let local = []
+    //   const defAcCriterias = [...activeCriterias, ...defaultCriterias]
+    //   for (let i = 0; i < state.length; i++) {
+    //     if (!defAcCriterias.find((item) => {
+    //       if (state) {
+    //         return item.key === state[i].key
+    //       }
+    //     })) {
+    //       local.push({value: state[i], label: state[i].title})
+    //     }
+    //   }
+    //   return local
+    // }
+
+    if (allCriterias) {
+      interface keyable {
+        [key: string]: any  
+      } 
+      let local: Array<keyable> = [];
+
+      allCriterias.forEach((item, i)=> {
+        local.push({value: allCriterias[i], label: allCriterias[i].title});
+      })
+
+      for (let i = 0; i < local.length; i++) {
+        if (activeCriterias.find((item) => item.key === local[i].value.key)) {
+          local[i].icon = 'minus';         
+        } else {
+          local[i].icon = 'plus';  
         }
       }
       return local
@@ -242,8 +312,19 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   }
 
   function onAllCriteriasSelectValueChange(event: any) {
-    dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...event.value, values: []}]));
-    dispatch(templateSlice.actions.setCurrentTemplate(null))
+    let index = -1;
+    for (let i in activeCriterias) {
+      if (event.value.key === activeCriterias[i].key) {
+        index = parseInt(i, 10);
+        dispatch(templateSlice.actions.setCurrentTemplate(null));
+        dispatch(searchSlice.actions.removeActiveCriteria(activeCriterias[index]));
+        break
+      }
+    }
+    if (index < 0) {
+      dispatch(searchSlice.actions.setActiveCriterias([...activeCriterias, {...event.value, values: []}]));
+      dispatch(templateSlice.actions.setCurrentTemplate(null));   
+    }    
   }
 
   return (
@@ -268,7 +349,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
                         <Typography style={{color: '#722ED1'}}>{currentTemplate.title}</Typography>
                       </> :
                       <>
-                        <Typography style={{fontSize: '16px', lineHeight: '24px', marginRight: '3px', color: '#2F3747'}}>Шаблоны поиска</Typography>
+                        <Typography style={{fontSize: '16px', lineHeight: '24px', marginRight: '3px', color: '#2F3747'}}>{translate('searchTemp', language)}</Typography>
                         <span style={{fontFamily: '"Inter", sans-serif'}}>({allTemplates.length})</span>
                       </>
                     }
@@ -328,66 +409,71 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
               const compResult = allCriterias.filter(v => v.key === criteria.key);
               return (
                 <div className={classes.searchItem}>
-                  <Typography className={classes.searchText}>{compResult[0].title}</Typography>
-                  <SearchSelect
-                    criteriaFull={compResult[0]}
-                    criteriaCurrent={criteria}
-                    isDefaultCriteria={true}
-                  />
+                    <Typography className={classes.searchText}>{compResult[0].title}</Typography>
+                    <SearchSelect
+                      criteriaFull={compResult[0]}
+                      criteriaCurrent={criteria}
+                      isDefaultCriteria={true}
+                    />
                 </div>
               )
             }) : null}
             {activeCriterias && allCriterias ? activeCriterias.map(criteria => {
               const compResult = allCriterias.filter(v => v.key === criteria.key);
-              return (
-                <div className={classes.searchItem}>
-                  <Typography className={classes.searchText}>{criteria.title}</Typography>
-                  <SearchSelect
-                    criteriaFull={compResult[0]}
-                    criteriaCurrent={criteria}
-                    isDefaultCriteria={false}
-                  />
+              const criteriaWide = criteria.wide ? 'searchItemBlock_Wide' : 'searchItemBlock_noWide';
+              const criteriaBlock = `searchItemBlock_${criteria.block}`;
+              return ( 
+                // <div className={switchSearchItemCLassName(criteriaBlock)}> 
+                  <div className={switchSearchItemCLassName(criteriaWide)}>
+                    <div className={classes.searchItem}>
+                      <Typography className={classes.searchText}>{criteria.title}</Typography>
+                      <SearchSelect
+                        criteriaFull={compResult[0]}
+                        criteriaCurrent={criteria}
+                        isDefaultCriteria={false}
+                      />
+                    </div>
+                  {/* </div> */}
                 </div>
               )
             }) : null}
           </div>
-          <div style={{display: 'flex', alignItems: 'center', minHeight: '54px'}}>
-            <LoadingButton
-              className={classes.searchSearchButton}
-              startIcon={<SearchIcon/>}
-              color="primary"
-              variant="contained"
-              loading={loading}
-              loadingPosition="start"
-              onClick={searchRequest}
-            >
-              {translate('searchButton', language)}
-            </LoadingButton>
-            <div style={{margin: '0 5px 0 20px'}}>
-              <TextSelect
-                name={'moreSelect'}
-                value={null}
-                handleValueChange={onAllCriteriasSelectValueChange}
-                options={op}
-                iconPosition={'left'}
-                customControl={
-                  <div style={{display: 'flex', alignItems: 'center'}}>
-                    <Typography style={{color: '#722ED1', fontWeight: '700', marginLeft: '5px'}}>Еще</Typography>
-                    {activeCriterias.length > 0 &&
-                    <span style={{marginLeft: '3px', color: '#722ED1', fontWeight: '700'}}>
-                      ({activeCriterias.length})
-                    </span>
+              <div style={{display: 'flex', alignItems: 'center', minHeight: '54px'}}>
+                <LoadingButton
+                  className={classes.searchSearchButton}
+                  startIcon={<SearchIcon/>}
+                  color="primary"
+                  variant="contained"
+                  loading={loading}
+                  loadingPosition="start"
+                  onClick={searchRequest}
+                >
+                  {translate('searchButton', language)}
+                </LoadingButton>
+                <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
+                  <TextSelect
+                    name={'moreSelect'}
+                    value={null}
+                    handleValueChange={onAllCriteriasSelectValueChange}
+                    options={op}
+                    iconPosition={'left'}
+                    customControl={
+                      <div style={{display: 'flex', alignItems: 'center'}}>
+                        <Typography style={{color: '#722ED1', fontWeight: '700', marginLeft: '5px'}}>{translate('searchMore', language)}</Typography>
+                        {/* {activeCriterias.length > 0 &&
+                        <span style={{marginLeft: '3px', color: '#722ED1', fontWeight: '700'}}>
+                          ({activeCriterias.length})
+                        </span>
+                        } */}
+                      </div>
                     }
-                  </div>
-                }
-                ifArrowColor={'#722ED1'}
-                notClose={true}
-                optionWithPlus={true}
-                menuPosition={'right'}
-                height={"400px"}
-              />
-            </div>
-          </div>
+                    ifArrowColor={'#722ED1'}
+                    notClose={true}
+                    menuPosition={'right'}
+                    height={"400px"}
+                  />
+                </div>
+              </div>
         </div>
       </BlockBox>
 

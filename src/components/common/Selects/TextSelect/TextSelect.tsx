@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState, memo} from 'react';
 import Select, {components} from "react-select";
 import {useMuiTextSelectStyles} from "./TextSelect.jss";
 import {createTextSelectStyles} from './TextSelect.jss';
-import {CrossSvgWithBg, OnBottomArrow, OnTopArrow, PlusSvg} from "./TextSelect.svg";
+import {CrossSvgWithBg, OnBottomArrow, OnTopArrow, PlusSvg, MinusSvg} from "./TextSelect.svg";
 import {templateSlice} from "../../../../store/search/template.slice";
 import {searchSlice} from "../../../../store/search/search.slice";
 import {useDispatch} from "react-redux";
@@ -27,7 +27,6 @@ type TextSelectPropsType = {
 
   width?: string,
   height?: string,
-  optionWithPlus?: boolean,
   ifArrowColor?: string,
 
   name: string
@@ -46,7 +45,6 @@ const TextSelect: FC<TextSelectPropsType> = (
     menuPosition,
     width,
     height,
-    optionWithPlus,
     ifArrowColor,
 
     name
@@ -92,19 +90,13 @@ const TextSelect: FC<TextSelectPropsType> = (
     );
   });
   const CustomOption: FC<any> = ({children, ...props}) => {
-    if (optionWithPlus) {
-      return (
-        <components.Option {...props}>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
-            {children}
-            {optionWithPlus && <PlusSvg/>}
-          </div>
-        </components.Option>
-      );
-    }
+
     return (
       <components.Option {...props}>
-        {children}
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
+          {children}
+          {props.data.icon === 'plus' ? <PlusSvg/> : <MinusSvg/>}
+        </div>          
       </components.Option>
     );
   };
