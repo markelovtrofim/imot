@@ -83,7 +83,7 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
         body.usedRules &&
         <div className={classes.rule} onClick={isActive ? async () => {
           history.location.pathname = '/'
-          history.replace(`markuprules/tags/1`)
+          history.replace(`markuprules/tags/${body.id}`)
           await dispatch(dictsSlice.actions.setActivePage('tags'));
         } : () => null}>
           {body

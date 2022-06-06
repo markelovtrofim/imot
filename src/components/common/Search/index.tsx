@@ -420,7 +420,9 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
             }) : null}
             {activeCriterias && allCriterias ? activeCriterias.map(criteria => {
               const compResult = allCriterias.filter(v => v.key === criteria.key);
+              // @ts-ignore
               const criteriaWide = criteria.wide ? 'searchItemBlock_Wide' : 'searchItemBlock_noWide';
+              // @ts-ignore
               const criteriaBlock = `searchItemBlock_${criteria.block}`;
               return ( 
                 // <div className={switchSearchItemCLassName(criteriaBlock)}> 

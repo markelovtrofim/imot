@@ -36,6 +36,8 @@
 
 
   "CALLS": "CALLS",
+  "callsFindCalls": "Найдено звонков",
+  "callsOf": " из",
   "callsLastCalls": "Последние звонки",
   "callsEmployee": "Сотрудник",
   "callsCustomer": "Клиент",
@@ -43,6 +45,8 @@
   "callsTags": "Теги звонка",
   "callsFragments": "Теги фрагмента",
   "callsEmpty": "Фильтры звонков не выбраны",
+  "callsTime": "Время",
+  "callsDuration": "Длительность",
 
 
   "DICTS": "DICTS",

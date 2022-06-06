@@ -37,14 +37,17 @@
   "searchTag": "Search",
 
   "CALLS": "CALLS",
-
+  "callsFindCalls": "Calls found",
+  "callsOf": " out of",
   "callsLastCalls": "Last calls",
   "callsEmployee": "Employee",
-  "callsCustomer": "Customer",
+  "callsCustomer": "Client",
   "callsTag": "Tag",
   "callsTags": "Call tags",
   "callsFragments": "Fragment tags",
   "callsEmpty": "No call filters selected",
+  "callsTime": "Time",
+  "callsDuration": "Duration",
 
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Dictionary",

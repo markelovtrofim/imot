@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
 import {Button, Typography} from '@mui/material';
@@ -14,6 +14,7 @@ import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
 import {useDispatch} from "react-redux";
 import "rsuite/dist/rsuite.min.css";
+import LinearDeterminate from "./components/common/LinearDeterminate";
 
 
 export const useStyles = makeStyles(({
@@ -56,9 +57,13 @@ const App = () => {
     }
   }, [])
 
+  const [loading, setLoading] = useState(false);
   const markupRulesPages = 'dictionaries' || 'tags' || 'checklists'
   return (
     <div className={classes.wrapper}>
+      <div style={{position: 'absolute', top: '0', left: '0', height: '4px', zIndex: '1000'}}>
+        {loading && <LinearDeterminate progressIsOver={false}/>}
+      </div>
       <Switch>
 
         {/* Авторизация */}

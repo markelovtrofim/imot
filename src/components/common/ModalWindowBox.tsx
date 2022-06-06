@@ -5,23 +5,6 @@ import Slide from '@mui/material/Slide';
 import {TransitionProps} from '@mui/material/transitions';
 import BlockBox from "./BlockBox";
 
-const useStyles = makeStyles(({
-  mwWrapper: {
-    height: '100%',
-    '& .MuiPaper-root': {
-      borderRadius: '10px !important',
-
-      width: '400px !important',
-      margin: '0'
-    }
-  }
-}));
-
-type AuthModalWindowPropsType = {
-  isOpen: boolean,
-  handleClose: () => void
-}
-
 const Transition = React.forwardRef((
     props: TransitionProps & {
       children: React.ReactElement<any, any>;
@@ -30,7 +13,30 @@ const Transition = React.forwardRef((
   ) => <Slide direction="up" ref={ref} {...props}/>
 );
 
-export const ModalWindow: React.FC<AuthModalWindowPropsType> = ({isOpen, handleClose, children}) => {
+type AuthModalWindowPropsType = {
+  isOpen: boolean,
+  handleClose: () => void,
+  width?: string,
+  height?: string
+}
+
+export const ModalWindow: React.FC<AuthModalWindowPropsType> = ({
+                                                                  isOpen, handleClose,
+                                                                  width, height,
+                                                                  children
+}) => {
+  const useStyles = makeStyles(({
+    mwWrapper: {
+      height: '100% !important',
+      '& .MuiPaper-root': {
+        overflow: 'hidden',
+        borderRadius: '10px !important',
+        height: height ? `${height} !important` : 'auto',
+        width: width ? `${width} !important` : 'auto',
+        margin: '0'
+      }
+    }
+  }));
   const classes = useStyles();
   return (
     <Dialog disableScrollLock={true} className={classes.mwWrapper} open={isOpen} onClose={handleClose} TransitionComponent={Transition}>

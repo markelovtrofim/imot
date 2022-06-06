@@ -11,7 +11,6 @@ import CallStubMiddleware from "./Call";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
-import ContainedSelect from "../../components/common/Selects/ContainedSelect";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -113,7 +112,10 @@ const Calls = React.memo(() => {
       <BlockBox>
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
-            <Typography className={classes.callsTitleText}>Найдено звонков {found} из {total}</Typography>
+            <Typography className={classes.callsTitleText}>
+              {translate('callsFindCalls', language)} {found}
+              {translate('callsOf', language)} {total}
+            </Typography>
           </div>
           <Grid container className={classes.callsCols}>
 

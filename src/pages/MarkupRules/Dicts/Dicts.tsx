@@ -18,6 +18,7 @@ import {useHistory} from "react-router-dom";
 import {Input} from "../../../components/common";
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
+import {tagsSlice} from "../../../store/tags/tags.slice";
 
 const DictsPage = () => {
   // STYLES BLOCK
@@ -120,23 +121,24 @@ const DictsPage = () => {
     const groupsData = await dispatch(getGroups());
     // @ts-ignore
     const groups: GroupType[] = groupsData.payload;
-    dispatch(dictsSlice.actions.setCurrentGroup(groups[activeGroupIndex]));
-    const dictsData = await dispatch(getDicts({group: groups[activeGroupIndex].group}));
     if (!urlId) {
-
+      dispatch(dictsSlice.actions.setCurrentGroup(groups[activeGroupIndex]));
+      const dictsData = await dispatch(getDicts({group: groups[activeGroupIndex].group}));
       // @ts-ignore
       const dicts: DictType[] = dictsData.payload;
       history.push(`dictionaries/${dicts[activeDictsIndex].id}`)
       await dispatch(getDict(dicts[activeDictsIndex].id));
     } else {
-      await dispatch(getDict(urlId));
-      // // @ts-ignore
-      // const currentDict: DictTypeDetailed = dictData.payload;
-      // const groupsData = await dispatch(getGroups());
-      // // @ts-ignore
-      // const currentGroup = groupsData.payload.filter((item: GroupType) => item.group === currentDict.group)[0];
-      // dispatch(dictsSlice.actions.setCurrentGroup(currentGroup));
-      // await dispatch(getDicts({group: currentGroup.group}));
+      const dictData = await dispatch(getDict(urlId));
+      // @ts-ignore
+      const dict: DictType = dictData.payload
+      const currentGroup = groups.find(item => item.group === dict.group);
+      if (currentGroup) {
+        dispatch(dictsSlice.actions.setCurrentGroup(currentGroup));
+        await dispatch(getDicts({group: currentGroup.group}));
+      } else {
+        // надо че-то придумать тута.
+      }
     }
   };
   useEffect(() => {
@@ -224,7 +226,7 @@ const DictsPage = () => {
 
           {/* groups */}
           <div className={classes.dpBothBox}>
-            <Groups groups={groups} currentGroup={currentGroup}/>
+            <Groups/>
           </div>
         </div>
 

@@ -441,7 +441,7 @@ const TagDetails: FC = () => {
                                                   arrayIndex: arrayIndex,
                                                   fieldIndex: fragmentFieldIndex,
                                                   value: event
-                                                }))
+                                                }));
                                               }}
                                               // @ts-ignore
                                               options={fragmentField.options}
@@ -450,7 +450,10 @@ const TagDetails: FC = () => {
                                             <TrashSvg
                                               style={{marginLeft: '10px'}}
                                               onClick={() => {
-                                                debugger
+                                                dispatch(tagsSlice.actions.removeFragmentField({
+                                                  arrayIndex: arrayIndex,
+                                                  fieldIndex: fragmentFieldIndex
+                                                }));
                                               }}
                                             />
                                           </div>
@@ -507,6 +510,10 @@ const TagDetails: FC = () => {
                                           <TrashSvg
                                             style={{marginLeft: '10px'}}
                                             onClick={() => {
+                                              dispatch(tagsSlice.actions.removeFragmentField({
+                                                arrayIndex: arrayIndex,
+                                                fieldIndex: fragmentFieldIndex
+                                              }));
                                             }}
                                           />
                                         </div>
@@ -533,6 +540,10 @@ const TagDetails: FC = () => {
                                           <TrashSvg
                                             style={{marginLeft: '10px'}}
                                             onClick={() => {
+                                              dispatch(tagsSlice.actions.removeFragmentField({
+                                                arrayIndex: arrayIndex,
+                                                fieldIndex: fragmentFieldIndex
+                                              }));
                                             }}
                                           />
                                         </div>

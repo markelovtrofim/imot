@@ -9,7 +9,6 @@ import {
 } from "./tags.types";
 import cloneDeep from "lodash.clonedeep";
 import {instance} from "../api";
-import {DictActionType} from "../dicts/dicts.types";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
@@ -84,7 +83,7 @@ export const getTag = createAsyncThunk(
 
 // обновление тега
 export const updateTag = createAsyncThunk(
-  'tags/getTag',
+  'tags/updateTag',
   async (payload: any) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
@@ -93,6 +92,25 @@ export const updateTag = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
+      return data;
+    } catch (e) {
+      console.log(e)
+    }
+  }
+)
+
+// создание нового тега
+export const postTag = createAsyncThunk(
+  'tags/postTag',
+  async (payload: any) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const {data} = await instance.post<TagDetailedType>(`tag_rule/`, payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      debugger
       return data;
     } catch (e) {
       console.log(e)
@@ -196,7 +214,7 @@ type FragmentsArrayType = {
   interruptTime: string
 }
 
-const DirectionOptions = [
+export const DirectionOptions = [
   {label: 'Клиент сказал', value: 'client_say'},
   {label: 'Оператор сказал', value: 'operator_say'},
   {label: 'Клиент не сказал', value: 'client_not_say'},
@@ -357,6 +375,12 @@ export const tagsSlice = createSlice({
     setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem, visible: boolean }>) {
       // @ts-ignore
       state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = action.payload.visible;
+    },
+    removeFragmentField(state, action: PayloadAction<{arrayIndex: number, fieldIndex: number}>) {
+      state.activeFragments[action.payload.arrayIndex].splice(action.payload.fieldIndex, 1);
+      if (state.activeFragments[action.payload.arrayIndex].length < 1) {
+        state.activeFragments.splice(action.payload.arrayIndex, 1);
+      }
     },
     removeFragment(state, action: PayloadAction<number>) {
       state.activeFragments.splice(action.payload, 1);

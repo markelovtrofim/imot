@@ -15,6 +15,9 @@ import {CallInfoType, CallSttType, CallTagType} from "../../store/calls/calls.ty
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
 import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
+import {useAppSelector} from "../../hooks/redux";
+import {RootState} from "../../store/store";
+import {translate} from "../../localizations";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion
@@ -512,6 +515,9 @@ const Call = memo((props: CallPropsType) => {
     }
   }, [props.callAudio, props.callStt])
 
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+
   return (
     <Accordion
       id={props.callInfo.id}
@@ -550,7 +556,7 @@ const Call = memo((props: CallPropsType) => {
 
                 {/* Имя и фамилия. */}
                 <div className={classes.employee}>
-                  <Typography className={classes.typographyTitle}>Сотрудник:</Typography>
+                  <Typography className={classes.typographyTitle}>{translate("callsEmployee", language)}:</Typography>
                   <Typography className={classes.employeeText}>
                     {props.callInfo.operatorPhone}
                   </Typography>
@@ -559,7 +565,7 @@ const Call = memo((props: CallPropsType) => {
 
                 {/* Дата звонка.*/}
                 <div className={classes.callDateBox}>
-                  <Typography className={classes.typographyTitle}>Время:</Typography>
+                  <Typography className={classes.typographyTitle}>{translate("callsTime", language)}:</Typography>
                   <Typography className={classes.callDate}>
                     {props.callInfo.callTimeReadable}
                   </Typography>
@@ -581,7 +587,7 @@ const Call = memo((props: CallPropsType) => {
               <div className={classes.callMNumberBox}>
                 {/* Номер телефона. */}
                 <div style={{display: 'flex'}}>
-                  <Typography className={classes.typographyTitle}>Клиент:</Typography>
+                  <Typography className={classes.typographyTitle}>{translate("callsCustomer", language)}:</Typography>
                   <Typography className={classes.callMNumber}>
                     {props.callInfo.clientPhone}
                   </Typography>
@@ -589,7 +595,7 @@ const Call = memo((props: CallPropsType) => {
 
                 {/* Время звонка. */}
                 <div className={classes.callDurationBox}>
-                  <Typography className={classes.typographyTitle}>Длительность:</Typography>
+                  <Typography className={classes.typographyTitle}>{translate("callsDuration", language)}:</Typography>
                   <Typography className={classes.callDuration}>
                     {timeConverter(props.callInfo.duration, true)}
                   </Typography>
@@ -600,7 +606,7 @@ const Call = memo((props: CallPropsType) => {
             <div className={classes.tagsAndFragmentsBlock}>
               {/* Tags */}
               <div style={{display: 'flex'}}>
-                <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
+                <Typography className={classes.callTagsTitle}>{translate("callsTags", language)}</Typography>
                 <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
                   {tagsAndFragmentsArray.tags.map((tag: CallTagType) => {
                     return (
@@ -615,7 +621,7 @@ const Call = memo((props: CallPropsType) => {
               {/* Fragments */}
               {tagsAndFragmentsArray.fragments.length > 0 &&
               <div style={{display: 'flex'}}>
-                <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
+                <Typography className={classes.callTagsTitle}>{translate("callsFragments", language)}</Typography>
                 <Stack direction="row" style={{flexWrap: 'wrap', width: '200px !important'}}>
 
                   {tagsAndFragmentsArray.fragments.map((tag: CallTagType) => {

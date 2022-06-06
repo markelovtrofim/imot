@@ -13,7 +13,8 @@ export type DictType = {
   owner: string,
   sttAutoReplace?: boolean | null,
   title: string,
-  usedRules: {id: string, title: string}[]
+  usedRules: {id: string, title: string}[],
+  group: string
 };
 
 export type DictTypeDetailed = {
