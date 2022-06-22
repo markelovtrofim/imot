@@ -33,6 +33,8 @@ export const fetchAuthToken = createAsyncThunk(
         thunkAPI.dispatch(authSlice.actions.setError('Поля обязательны для ввода'));
       } else if (status === AuthResponseErrors.IncorrectData) {
         thunkAPI.dispatch(authSlice.actions.setError('Неверный логин или пароль'));
+      } else {
+        thunkAPI.dispatch(authSlice.actions.setError('Непредвиденная ошибка. Перезагрузите приложение.'));
       }
     }
   }

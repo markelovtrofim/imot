@@ -1,5 +1,5 @@
 import React, {useEffect, useState, FC} from 'react';
-import {InputBase, Typography} from "@mui/material";
+import {IconButton, InputBase, Typography} from "@mui/material";
 import {BlockBox} from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
 import TextSelect from "../../../../components/common/Selects/TextSelect/TextSelect";
@@ -12,7 +12,7 @@ import {
   getTag,
   tagsActions,
   tagsSlice,
-  updateTag
+  updateTag, deleteTag
 } from "../../../../store/tags/tags.slice";
 import {useDispatch} from "react-redux";
 import Alert from "../../../../components/common/Alert/Alert";
@@ -32,13 +32,17 @@ import noResultsPng from "../../../../assets/images/no-results.png";
 import CustomControlSelect from "../../../../components/common/Selects/CustomControlSelect";
 import {GroupType} from "../../../../store/dicts/dicts.types";
 import Switch from "../../../../components/common/Switch";
+import CloseIcon from "@mui/icons-material/Close";
+import ModalWindow from "../../../../components/common/ModalWindowBox";
+import {TagGroupType, TagType} from "../../../../store/tags/tags.types";
+import {useHistory} from "react-router-dom";
 
 export const AddButton: FC<{ onClick?: () => void }> = ({onClick, children}) => {
   const classes = useTagDetailsStyles();
   return (
     <div onClick={onClick} style={{display: 'flex', alignItems: 'center', marginTop: '20px', cursor: 'pointer'}}>
       <PlusSvg style={{marginRight: '10px'}}/>
-      <Typography className={classes.typographyTitleMini}>{children}</Typography>
+      <Typography className={classes.typographyTitleMiniTwo}>{children}</Typography>
     </div>
   );
 };
@@ -56,6 +60,7 @@ const TagDetails: FC = () => {
   const currentGroup = useAppSelector(state => state.tags.currentTagGroup);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const history = useHistory();
 
   useEffect(() => {
     dispatch(getAllGlobalTagFilters());
@@ -120,20 +125,23 @@ const TagDetails: FC = () => {
     return [];
   };
 
-  const actionsSelectConverter = (values: any, defaultValues: any = []) => {
-    if (values) {
-      let local: { value: any, label: string }[] = [];
-      for (let i = 0; i < values.length; i++) {
-        // @ts-ignore
-        if (!defaultValues.find(item => item === values[i])) {
-          local.push({value: values[i], label: values[i]});
+  const createSelectOptions = () => {
+    let result = [];
+    if (currentTag) {
+      for (let i = 0; i < currentTag.allowedActions.length; i++) {
+        // закинуть translate
+        const action = currentTag.allowedActions[i];
+        if (action === 'clone') {
+          result.push({value: action, label: translate("cloneButton_dictDetailSelect", language)});
+        } else if (action === 'delete') {
+          result.push({value: action, label: translate("deleteButton_dictDetailSelect", language)});
+        } else if (action === 'make_global') {
+          result.push({value: action, label: translate("makeGlobal_dictDetailSelect", language)});
         }
       }
-      return local;
     }
-    return [];
+    return result;
   };
-
   const addRuleSelectConverter = (values: any) => {
     if (values) {
       let local: { value: any, label: string }[] = [];
@@ -167,9 +175,9 @@ const TagDetails: FC = () => {
 
   const [render, setRender] = useState(false);
   useEffect(() => {
-    if (currentTag) {
+    if (currentTag && currentGroup) {
       formik.values.name = currentTag.title;
-      formik.values.group = 'Название группы';
+      formik.values.group = currentTag.group ? currentTag.group : currentGroup.group
       formik.values.priority = currentTag.calculatedRulePriority;
     }
     setRender(!render);
@@ -245,6 +253,18 @@ const TagDetails: FC = () => {
     })
   }
 
+  const [deleteMWIsOpen, setDeleteMWIsOpen] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  function handleDeleteMWOpen() {
+    setDeleteMWIsOpen(true);
+  }
+
+  function handleDeleteMWClose() {
+    setDeleteMWIsOpen(false);
+  }
+
+
   if (!currentTag) {
     return (
       <BlockBox padding={'0'} height={'100%'}>
@@ -261,8 +281,9 @@ const TagDetails: FC = () => {
           }
         </div>
       </BlockBox>
-    )
+    );
   }
+
 
   return (
     <BlockBox padding={'0'} height={'100%'}>
@@ -381,7 +402,6 @@ const TagDetails: FC = () => {
                 })}
                 {activeGlobalFilterCriterias.length < 1 && defaultGlobalFilterCriterias.length < 1 &&
                 <Alert
-                  iconType={'error'}
                   width={'60%'}
                   text={'У этого тега нет глобальных фильтров'}
                 />
@@ -398,7 +418,7 @@ const TagDetails: FC = () => {
                     icon={<PlusSvg style={{marginRight: '10px'}}/>}
                     customControl={
                       <div style={{display: 'flex', alignItems: 'center'}}>
-                        <Typography className={classes.typographyTitleMini}>Добавить фильтр</Typography>
+                        <Typography className={classes.typographyTitleMiniTwo}>Добавить фильтр</Typography>
                       </div>
                     }
                     menuPosition={'left'}
@@ -421,17 +441,17 @@ const TagDetails: FC = () => {
                     {activeFragments.map((displayFragment) => {
                       const arrayIndex = activeFragments.indexOf(displayFragment);
                       return (
-                        <div style={{width: '100%', display: 'flex', alignItems: 'center', margin: '20px 0'}}>
+                        <div style={{width: '100%', display: 'flex', margin: '20px 0'}}>
                           <div style={{width: '60%'}}>
                             {displayFragment.map((fragmentField) => {
                               const fragmentFieldIndex = displayFragment.indexOf(fragmentField);
                               if (fragmentField.visible) {
                                 return (
-                                  <div style={{width: '100%'}}>
+                                  <div style={{width: '100%', marginBottom: '10px'}}>
                                     {
                                       (fragmentField.selectType === 'multiValue' &&
                                         <div style={{width: '100%'}}>
-                                          <Typography>{fragmentField.title}</Typography>
+                                          <Typography style={{marginBottom: '7px'}}>{fragmentField.title}</Typography>
                                           <div style={{display: 'flex', alignItems: 'center'}}>
                                             <ContainedSelect
                                               width={'100%'}
@@ -447,22 +467,13 @@ const TagDetails: FC = () => {
                                               options={fragmentField.options}
                                               value={fragmentField.value}
                                             />
-                                            <TrashSvg
-                                              style={{marginLeft: '10px'}}
-                                              onClick={() => {
-                                                dispatch(tagsSlice.actions.removeFragmentField({
-                                                  arrayIndex: arrayIndex,
-                                                  fieldIndex: fragmentFieldIndex
-                                                }));
-                                              }}
-                                            />
                                           </div>
 
                                         </div>
                                       ) ||
                                       (fragmentField.selectType === 'multiString' &&
-                                        <div style={{width: '100%'}}>
-                                          <Typography>{fragmentField.title}</Typography>
+                                        <div style={{width: '100%', marginBottom: '10px'}}>
+                                          <Typography style={{marginBottom: '7px'}}>{fragmentField.title}</Typography>
                                           <CustomSelect
                                             value={fragmentField.value}
                                             // @ts-ignore
@@ -483,7 +494,7 @@ const TagDetails: FC = () => {
                                                 visible: false
                                               }))
                                             }}
-                                            deleteIcon={<TrashSvg/>}
+                                            deleteIcon={<></>}
                                           />
                                         </div>
 
@@ -493,9 +504,10 @@ const TagDetails: FC = () => {
                                           display: 'flex',
                                           alignItems: 'center',
                                           width: '100%',
-                                          padding: '10px 0'
+                                          padding: '10px 0',
+                                          marginBottom: '10px'
                                         }}>
-                                          <Typography>{fragmentField.title}</Typography>
+                                          <Typography className={classes.typographyTitleMiniTwo} style={{marginBottom: '7px'}}>{fragmentField.title}</Typography>
                                           <CustomCheckbox
                                             onClick={(event) => {
                                               dispatch(tagsSlice.actions.setFragmentFieldValue({
@@ -506,15 +518,6 @@ const TagDetails: FC = () => {
                                               }));
                                             }}
                                             checked={fragmentField.value.value}
-                                          />
-                                          <TrashSvg
-                                            style={{marginLeft: '10px'}}
-                                            onClick={() => {
-                                              dispatch(tagsSlice.actions.removeFragmentField({
-                                                arrayIndex: arrayIndex,
-                                                fieldIndex: fragmentFieldIndex
-                                              }));
-                                            }}
                                           />
                                         </div>
                                       ) ||
@@ -537,15 +540,6 @@ const TagDetails: FC = () => {
                                               value={fragmentField.value.value}
                                             />
                                           </Field>
-                                          <TrashSvg
-                                            style={{marginLeft: '10px'}}
-                                            onClick={() => {
-                                              dispatch(tagsSlice.actions.removeFragmentField({
-                                                arrayIndex: arrayIndex,
-                                                fieldIndex: fragmentFieldIndex
-                                              }));
-                                            }}
-                                          />
                                         </div>
                                       )
                                     }
@@ -565,7 +559,7 @@ const TagDetails: FC = () => {
                               options={addRuleSelectConverter(displayFragment)}
                               iconPosition={'left'}
                               height={'300px'}
-                              icon={<PlusSvg style={{marginRight: '10px'}}/>}
+                              icon={<PlusSvg style={{marginRight: '10px', width: '12px', height: '12px'}}/>}
                               customControl={
                                 <div style={{display: 'flex', alignItems: 'center'}}>
                                   <Typography className={classes.typographyTitleMini}>Добавить правило</Typography>
@@ -576,7 +570,7 @@ const TagDetails: FC = () => {
                             />
                           </div>
                           <TrashSvg
-                            style={{marginLeft: '30px'}}
+                            style={{margin: '30px 0 0 30px'}}
                             onClick={() => {
                               dispatch(tagsSlice.actions.removeFragment(arrayIndex));
                             }}
@@ -587,7 +581,6 @@ const TagDetails: FC = () => {
                   </>
                   :
                   <Alert
-                    iconType={'error'}
                     width={'60%'}
                     text={'У этого тега нет фрагментов'}
                   />
@@ -616,7 +609,7 @@ const TagDetails: FC = () => {
               {activeSetTags.length > 0 ? activeSetTags.map(tag => {
                   const setTagIndex = activeSetTags.indexOf(tag);
                   return (
-                    <div style={{display: 'flex', alignItems: 'center'}}>
+                    <div style={{display: 'flex'}}>
                       <div style={{width: '60%'}}>
                         <Field
                           label={'Название тега'}
@@ -675,12 +668,11 @@ const TagDetails: FC = () => {
                         onClick={() => {
                           dispatch(tagsSlice.actions.removeSetTag(setTagIndex));
                         }}
-                        style={{marginLeft: '30px'}}/>
+                        style={{margin: '35px 0 0 30px'}}/>
                     </div>
                   )
                 }) :
                 <Alert
-                  iconType={'error'}
                   width={'60%'}
                   text={'У этого тега нет привязанных тегов'}
                 />
@@ -702,52 +694,53 @@ const TagDetails: FC = () => {
         {/* Активности */}
         <div>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <Switch
-                onChecked={async (e) => {
-                  // if (currentGroup) {
-                  //   setChecked(!checked);
-                  //   setCheckedDisable(true);
-                  //   setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null})
-                  //   await dispatch(dictActions({
-                  //     dictId: currentDict.id,
-                  //     action: currentDict.enabled ? 'disable' : 'enable'
-                  //   }));
-                  //   const groupsData = await dispatch(getGroups());
-                  //   // @ts-ignore
-                  //   const groups: GroupType[] = groupsData.payload;
-                  //   debugger
-                  //   if (currentGroup.count < 2) {
-                  //     dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
-                  //     const dictsData = await dispatch(getDicts({group: groups[0].group}))
-                  //     // @ts-ignore
-                  //     const dicts: DictType[] = dictsData.payload;
-                  //     await dispatch(getDict(dicts[0].id))
-                  //   } else {
-                  //     const dictsData = await dispatch(getDicts({group: currentGroup.group}))
-                  //     // @ts-ignore
-                  //     const dicts: DictType[] = dictsData.payload;
-                  //     await dispatch(getDict(dicts[0].id))
-                  //   }
-                  //
-                  //   setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
-                  //   setSnackbar({
-                  //     type: 'success',
-                  //     value: true,
-                  //     text: `Словарь ${currentDict.enabled ? 'выключен' : 'включён'}`,
-                  //     time: 1000
-                  //   });
-                  //   setChecked(checked);
-                  //   setCheckedDisable(false);
-                  // }
-                }}
-                checked={true}
-                disabled={false}
-              />
-              <Typography>
-                {true ? 'Вкл' : 'Выкл'}
-              </Typography>
-            </div>
+
+            {/* Активация и деактивация тега */}
+            {currentTag && currentTag.allowedActions.includes("enable") && currentTag.allowedActions.includes("disable") && (
+              <div style={{display: 'flex', alignItems: 'center'}}>
+                <Switch
+                  onChecked={async (e) => {
+                    if (currentGroup) {
+                      setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null})
+
+                      await dispatch(tagsActions({
+                        tagId: currentTag.id,
+                        action: currentTag.enabled ? 'disable' : 'enable'
+                      }));
+                      const groupsData = await dispatch(getTagGroups());
+                      // @ts-ignore
+                      const groups: TagGroupType[] = groupsData.payload;
+                      if (currentGroup.count < 1) {
+                        dispatch(tagsSlice.actions.setCurrentTagGroup(groups[0]));
+                        const dictsData = await dispatch(getTags({group: groups[0].group}));
+                        // @ts-ignore
+                        const tags: DictType[] = dictsData.payload;
+                        await dispatch(getTag(tags[0].id));
+                      } else {
+                        const dictsData = await dispatch(getTags({group: currentGroup.group}));
+                        // @ts-ignore
+                        const tags: DictType[] = dictsData.payload;
+                        // if ()
+                        await dispatch(getTag(currentTag.id))
+                      }
+
+                      setSnackbar({
+                        type: 'success',
+                        value: true,
+                        text: `Словарь ${currentTag.enabled ? 'выключен' : 'включён'}`,
+                        time: 1000
+                      });
+                    }
+                  }}
+                  checked={currentTag.enabled}
+                  disabled={false}
+                />
+                <Typography style={{fontWeight: '700', marginLeft: '10px'}}>
+                  {currentTag.enabled ? 'Вкл' : 'Выкл'}
+                </Typography>
+              </div>
+            )}
+
             <div style={{display: 'flex', alignItems: 'center'}}>
               <LoadingButton
                 type={"submit"}
@@ -762,11 +755,11 @@ const TagDetails: FC = () => {
                 <CustomControlSelect
                   disabled={false}
                   optionsPosition={"top"}
-                  options={selectConverter(currentTag.allowedActions)}
+                  options={createSelectOptions()}
                   svg={'horizontal'}
                   handleSelectChange={async (e) => {
                     if (e.value === 'delete') {
-                      debugger
+                      handleDeleteMWOpen();
                     } else if (e.value === 'clone' && currentGroup) {
                       setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null})
                       await dispatch(tagsActions({
@@ -782,16 +775,26 @@ const TagDetails: FC = () => {
                         const tagsData = await dispatch(getTags({group: groups[0].group}))
                         // @ts-ignore
                         const tags: TagType[] = tagsData.payload;
-                        debugger
                         await dispatch(getTag(tags[0].id))
+
+                        dispatch(tagsSlice.actions.setSearchParams(`?group=${groups[0].group}&id=${tags[0].id}`));
+
+                        history.location.pathname = `/`;
+                        history.replace(`markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`);
                       } else {
                         const tagsData = await dispatch(getTags({group: currentGroup.group}))
                         // @ts-ignore
                         const tags: TagType[] = tagsData.payload;
                         await dispatch(getTag(tags[0].id))
+
+                        dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tags[0].id}`));
+
+                        history.location.pathname = `/`;
+                        history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
                       }
+
                       setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
-                      setSnackbar({type: 'success', value: true, text: 'Словарь склонирован', time: 2000})
+                      setSnackbar({type: 'success', value: true, text: 'Тег склонирован', time: 2000})
                     }
                   }}
                 />
@@ -815,6 +818,64 @@ const TagDetails: FC = () => {
           </div>
 
         </div>
+
+        <ModalWindow
+          isMWOpen={deleteMWIsOpen}
+          handleMWClose={handleDeleteMWClose}
+          text={"Вы правда хотите удалить этот тег?"}
+        >
+          <div>
+            <LoadingButton
+              style={{marginRight: '15px'}}
+              loading={buttonLoading}
+              variant="contained"
+              color="error"
+              onClick={async () => {
+                if (currentGroup) {
+                  setButtonLoading(true);
+                  await dispatch(deleteTag(currentTag.id));
+
+                  const groupsData = await dispatch(getTagGroups());
+
+                  if (currentGroup.count < 2) {
+                    // @ts-ignore
+                    const groups: GroupType[] = groupsData.payload;
+                    dispatch(tagsSlice.actions.setCurrentTagGroup(groups[0]));
+                    const tagsData = await dispatch(getTags({group: groups[0].group}));
+                    // @ts-ignore
+                    const tags: TagType[] = tagsData.payload;
+                    await dispatch(getTag(tags[0].id));
+
+                    dispatch(tagsSlice.actions.setSearchParams(`?group=${groups[0].group}&id=${tags[0].id}`))
+                    history.location.pathname = '/';
+                    history.replace(`markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`)
+                  } else {
+                    const tagsDicts = await dispatch(getTags({group: currentGroup.group}));
+                    // @ts-ignore
+                    const tags: TagType[] = tagsDicts.payload;
+                    await dispatch(getTag(tags[0].id));
+
+                    dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tags[0].id}`))
+                    history.location.pathname = '/';
+                    history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
+                  }
+                  handleDeleteMWClose();
+                  // setDeleteDictMWIsOpen(false);
+                  setSnackbar({type: "success", text: 'Словарь удален', value: true, time: 2000});
+                }
+                setButtonLoading(false);
+              }}
+            >
+              {translate("deleteButton", language)}
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              color="secondary"
+            >
+              {translate("cancelButton", language)}
+            </LoadingButton>
+          </div>
+        </ModalWindow>
 
       </div>
     </BlockBox>

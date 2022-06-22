@@ -10,13 +10,14 @@ import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
 import {useFormik} from "formik";
 import {useHistory} from "react-router-dom";
-import {DictType, MarkupRulesPagesType} from "../../store/dicts/dicts.types";
+import {MarkupRulesPagesType} from "../../store/dicts/dicts.types";
 import {useStyles} from "../../App";
 import DictsPage from "./Dicts/Dicts";
-import TagPage from "./Tags/TagPage";
+import TagPage, {searchStringParserInObj} from "./Tags/TagPage";
 import ChecklistsPage from "./Checklists/Checklists";
 import {RootState} from "../../store/store";
 import {translate} from '../../localizations';
+import {tagsSlice} from "../../store/tags/tags.slice";
 
 // CUSTOM COMMON COMPONENTS
 type SearchInputType = {
@@ -25,19 +26,99 @@ type SearchInputType = {
 };
 
 export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
-  const currentGroup = useAppSelector(state => state.dicts.currentGroup);
-  const currentDict = useAppSelector(state => state.dicts.currentDict);
+  // привет, предупреждаю после просмотра этого куска кода может пойти кровь из глаз.
+  // как-нибудь порефакторю.
+
+  const searchTagsParams = useAppSelector(state => state.tags.searchParams);
+  const searchDictsParams = useAppSelector(state => state.dicts.search);
+  const search = useAppSelector(state => state.tags.searchInput);
+
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  const pathArray = path.split("/");
+  const isDtOrTg = pathArray[2];
+
+
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const searchInHistory = searchStringParserInObj(history.location.search).search;
+
 
   useEffect(() => {
-    formik.values.search = ''
-  }, [currentGroup])
+    debugger
+    if (searchInHistory) {
+      if (isDtOrTg === "dictionaries") {
+        const searchObj = searchStringParserInObj(history.location.search);
+        if (searchObj.search) {
+          dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
+          dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
+          onSubmit({search: searchObj.search});
+        } else if (searchStringParserInObj(searchDictsParams).search) {
+          dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}`));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+        }
+      } else if (isDtOrTg === "tags") {
+        const searchObj = searchStringParserInObj(history.location.search);
+        debugger
+        if (searchObj.search) {
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
+          dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
+          // onSubmit({search: searchObj.search});
+        } else {
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          onSubmit({search: ""});
+        }
+      }
+    }
+
+  }, [searchInHistory]);
 
   const formik = useFormik({
     initialValues: {
       search: ''
     },
     onSubmit: async (values) => {
-      onSubmit(values);
+      onSubmit({search: search})
+      if (search) {
+        if (isDtOrTg === "dictionaries") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          if (searchObj.search) {
+            dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+          } else {
+            dispatch(dictsSlice.actions.setSearch(`${searchDictsParams}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`markuprules/dictionaries${searchDictsParams}&search=${search}`)
+          }
+        } else if (isDtOrTg === "tags") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          if (searchObj.search) {
+            dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`markuprules/tags?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+          } else {
+            dispatch(tagsSlice.actions.setSearchParams(`${searchTagsParams}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`markuprules/tags${searchTagsParams}&search=${search}`)
+          }
+        }
+
+      } else {
+
+        if (isDtOrTg === "dictionaries") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          history.location.pathname = '/';
+          history.replace(`markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}`)
+        } else if (isDtOrTg === "tags") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          history.location.pathname = '/';
+          history.replace(`markuprules/tags?group=${searchObj.group}&id=${searchObj.id}`);
+        }
+      }
     },
   });
   const useStyles = makeStyles(({
@@ -67,16 +148,18 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
     <div className={classes.searchInputBox}>
       <form onSubmit={formik.handleSubmit} style={{width: '100%'}}>
         <div className={classes.searchInputInputBox}>
-            <Input
-              handleChange={formik.handleChange}
-              value={formik.values.search}
-              name={'search'}
-              type={'text'}
-              height={'35px'}
-              bcColor={'#F8FAFC'}
-              border={'1px solid #E3E8EF'}
-              label={translate('searchInputText_dicts', language)}
-            />
+          <Input
+            handleChange={(e) => {
+              dispatch(tagsSlice.actions.setSearchInput(e.target.value));
+            }}
+            value={search}
+            name={'search'}
+            type={'text'}
+            height={'35px'}
+            bcColor={'#F8FAFC'}
+            border={'1px solid #E3E8EF'}
+            label={translate('searchInputText_dicts', language)}
+          />
           <div className={classes.searchInputSvgBox}>
             <IconButton type={"submit"}>
               <SearchSvg/>
@@ -205,17 +288,10 @@ export const InfoCircle = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-export const Preloader = () => {
-  return (
-    <div style={{marginTop: '250px', textAlign: 'center'}}>
-      <CircularProgress size={58}/>
-    </div>
-  );
-}
-
 const MarkupRules = memo(() => {
   const history = useHistory();
   const path = history.location.pathname.split('/')[2];
+
   const dispatch = useDispatch();
 
   useEffect(() => {

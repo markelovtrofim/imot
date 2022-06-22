@@ -8,6 +8,8 @@ import {LoadingButton} from "@mui/lab";
 import {makeStyles} from "@mui/styles";
 import MuiPhoneNumber from 'mui-phone-number';
 import {Form, Formik} from "formik";
+import {useAppSelector} from "../../hooks/redux";
+import {translate} from "../../localizations";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -64,6 +66,9 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
   const classes = useStyles();
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
 
+  const {language} = useAppSelector(state => state.lang);
+
+
   const validate = (values: {
     name: string,
     email: string,
@@ -78,13 +83,11 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
   };
 
   return (
-    <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
-      <div className={classes.mwTitle}>
-        <Typography className={cn(classes.mwTitleText, classes.mwText)}>Забронировать бесплатную версию</Typography>
-        <IconButton className={classes.mwIconButton} onClick={handleClose} tabIndex={-1}>
-          <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-        </IconButton>
-      </div>
+    <ModalWindowBox
+      isMWOpen={isOpen}
+      handleMWClose={handleClose}
+      text={"Забронировать бесплатную версию"}
+    >
       <Typography className={cn(classes.mwHelp, classes.mwText)}>
         Пожалуйста, заполните форму, и наша команда свяжется с вами
       </Typography>
@@ -123,20 +126,28 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
                 />
               </div>
               <div style={{margin: '25px 0'}}>
-                <Typography style={{color: '#738094', margin: '0 0 10px 9px', fontSize: '11px'}}>Номер
-                  телефона</Typography>
+                <Typography style={{color: '#738094', margin: '0 0 10px 9px', fontSize: '11px'}}>
+                  Номер телефона</Typography>
                 <MuiPhoneNumber onChange={e => setFieldValue("phoneNumber", e)}
                                 className={classes.mwNumberInput}
                                 defaultCountry={'ru'}/>
               </div>
               <div className={classes.mwButtonBox}>
-                <LoadingButton type="submit" disabled={submitButtonDisabled} style={{marginRight: '15px'}}
-                               variant="contained"
-                               color="primary">
-                  Отправить
+                <LoadingButton
+                  type="submit"
+                  disabled={submitButtonDisabled}
+                  style={{marginRight: '15px'}}
+                  variant="contained"
+                  color="primary"
+                >
+                  {translate("sendButton", language)}
                 </LoadingButton>
-                <LoadingButton onClick={handleClose} variant="contained" color="secondary">
-                  Отмена
+                <LoadingButton
+                  onClick={handleClose}
+                  variant="contained"
+                  color="secondary"
+                >
+                  {translate("cancelButton", language)}
                 </LoadingButton>
               </div>
             </Form>

@@ -9,8 +9,6 @@ import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../../hooks/redux";
 import {dictsSlice, getDict, getDicts, getGroups, postDict} from "../../../store/dicts/dicts.slice";
 import {DictType, GroupType} from "../../../store/dicts/dicts.types";
-import {IconButton, Typography} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import {LoadingButton} from "@mui/lab";
 import Snackbar from "../../../components/common/Snackbar";
 import {useFormik} from "formik";
@@ -18,7 +16,19 @@ import {useHistory} from "react-router-dom";
 import {Input} from "../../../components/common";
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
-import {tagsSlice} from "../../../store/tags/tags.slice";
+import queryString from 'query-string';
+
+export function createQueryString(queryObj: any) {
+  let str = '';
+  for (let key in queryObj) {
+    str += `&${key}=${queryObj[key]}`;
+  }
+  if (str.length > 1) {
+    const output = str.slice(1);
+    return `?${output}`
+  }
+  return "";
+}
 
 const DictsPage = () => {
   // STYLES BLOCK
@@ -101,52 +111,100 @@ const DictsPage = () => {
       }
     }
   }));
-  const classes = useDictsStyles();
 
   // LOGIC BLOCK
-  const history = useHistory();
-  const urlArray = history.location.pathname.split('/');
-  const urlId = urlArray[3];
+  const classes = useDictsStyles();
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const dicts = useAppSelector(state => state.dicts.dicts);
-  const groups = useAppSelector(state => state.dicts.groups);
   const currentGroup = useAppSelector(state => state.dicts.currentGroup);
   const currentDict = useAppSelector(state => state.dicts.currentDict);
+  const search = useAppSelector(state => state.dicts.search);
 
-  // первый рендиринг
-  const getStartDictsData = async () => {
-    const activeGroupIndex = 0;
-    const activeDictsIndex = 0;
+  useEffect(() => {
+    return history.listen((location) => {
+      debugger
+      const currentSearch = createQueryString(queryString.parse(location.search));
+      let oldSearchConverted = search;
+      if (oldSearchConverted[0] !== '?') {
+        oldSearchConverted = `?${search}`
+      }
+      if (currentSearch !== oldSearchConverted) {
+        queryByParameters(location.search);
+      }
+    });
+  }, [search]);
 
+
+  function searchStringParserInObj(initialString: string) {
+    const searchString = initialString.slice(1);
+    const searchStringArray = searchString.split("&");
+
+    let output: any = {};
+    for (let i = 0; i < searchStringArray.length; i++) {
+      const query = queryString.parse(searchStringArray[i]);
+      output = {...output, ...query}
+    }
+    return output;
+  }
+
+  async function queryByParameters(search: string) {
     const groupsData = await dispatch(getGroups());
     // @ts-ignore
     const groups: GroupType[] = groupsData.payload;
-    if (!urlId) {
-      dispatch(dictsSlice.actions.setCurrentGroup(groups[activeGroupIndex]));
-      const dictsData = await dispatch(getDicts({group: groups[activeGroupIndex].group}));
+
+    const searchParams = searchStringParserInObj(search);
+
+    // @ts-ignore
+    const currentGroupLocal = groups.find(item => {
+      if (item) {
+        return item.group === searchParams.group
+      }
+    });
+    if (currentGroupLocal && currentGroup && currentGroupLocal.group !== currentGroup.group) {
+      dispatch(dictsSlice.actions.setEmptyDicts(null));
+    }
+    dispatch(dictsSlice.actions.setCurrentDict(null));
+
+    if (currentGroupLocal) {
+      dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
+      await dispatch(getDicts({group: currentGroupLocal.group}));
+    }
+    if (searchParams.id) {
+      await dispatch(getDict(searchParams.id));
+    }
+  }
+
+  // первый рендиринг
+  const getStartDictsData = async () => {
+    const groupsData = await dispatch(getGroups());
+    // @ts-ignore
+    const groups: GroupType[] = groupsData.payload;
+
+
+    if (search.length < 2) {
+      dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
+      const dictsData = await dispatch(getDicts({group: groups[0].group}));
       // @ts-ignore
       const dicts: DictType[] = dictsData.payload;
-      history.push(`dictionaries/${dicts[activeDictsIndex].id}`)
-      await dispatch(getDict(dicts[activeDictsIndex].id));
+      dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`));
+      history.location.pathname = '/';
+      history.replace(`markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
+      await dispatch(getDict(dicts[0].id));
     } else {
-      const dictData = await dispatch(getDict(urlId));
-      // @ts-ignore
-      const dict: DictType = dictData.payload
-      const currentGroup = groups.find(item => item.group === dict.group);
-      if (currentGroup) {
-        dispatch(dictsSlice.actions.setCurrentGroup(currentGroup));
-        await dispatch(getDicts({group: currentGroup.group}));
-      } else {
-        // надо че-то придумать тута.
+      queryByParameters(search);
+
+      history.location.pathname = '/';
+      let newSearch = search;
+      if (search[0] !== '?') {
+        newSearch = `?${search}`;
       }
+      history.replace(`markuprules/dictionaries${newSearch}`);
     }
   };
   useEffect(() => {
-    if (!currentDict) {
-      getStartDictsData().then();
-    } else {
-      history.push(`dictionaries/${currentDict.id}`)
-    }
+    getStartDictsData().then();
   }, []);
 
 
@@ -190,7 +248,6 @@ const DictsPage = () => {
   });
 
 
-
   // modal window(MW) открытие/закрытие.
   const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);
   const handleMWOpen = () => {
@@ -205,6 +262,7 @@ const DictsPage = () => {
   const [isSuccessSnackbarOpen, setSuccessSnackbarOpen] = useState<boolean>(false);
 
   const {language} = useAppSelector((state: RootState) => state.lang);
+
 
   return (
     <div className={classes.dpContainer}>
@@ -234,17 +292,17 @@ const DictsPage = () => {
         <div className={classes.dpLeftBlockDicts}>
           <SearchInput
             onSubmit={async (values: any) => {
-              if (currentGroup) {
-                dispatch(dictsSlice.actions.setEmptyDicts(null));
-                dispatch(dictsSlice.actions.setCurrentDict(null));
-                const dictsData = await dispatch(getDicts({group: currentGroup.group, filter: values.search}));
-                // @ts-ignore
-                const dicts: DictType[] = dictsData.payload;
-                if (dicts.length < 1) {
-                  await dispatch(dictsSlice.actions.setCurrentDict(false));
-                } else {
-                  await dispatch(getDict(dicts[0].id));
-                }
+              const searchObj = searchStringParserInObj(history.location.search);
+              debugger
+              dispatch(dictsSlice.actions.setEmptyDicts(null));
+              dispatch(dictsSlice.actions.setCurrentDict(null));
+              const dictsData = await dispatch(getDicts({group: searchObj.group, filter: values.search}));
+              // @ts-ignore
+              const dicts: DictType[] = dictsData.payload;
+              if (dicts.length < 1) {
+                await dispatch(dictsSlice.actions.setCurrentDict(false));
+              } else {
+                await dispatch(getDict(dicts[0].id));
               }
             }}
             handleMWOpen={handleMWOpen}/>
@@ -273,13 +331,12 @@ const DictsPage = () => {
       </div>
 
       {/* modal window */}
-      <ModalWindow isOpen={addDictMWIsOpen} handleClose={handleMWClose}>
-        <div className={classes.MWTitle}>
-          <Typography className={classes.MWTitleText}>Введите имя словаря и группы</Typography>
-          <IconButton onClick={handleMWClose}>
-            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-          </IconButton>
-        </div>
+      <ModalWindow
+        isMWOpen={addDictMWIsOpen}
+        handleMWClose={handleMWClose}
+        width={'400px'}
+        text={"Введите имя словаря и группы"}
+      >
 
         <form onSubmit={formik.handleSubmit}>
           <Input

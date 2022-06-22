@@ -138,6 +138,8 @@ export const dictActions = createAsyncThunk(
 
 type InitialStateType = {
   activePage: MarkupRulesPagesType | '',
+  search: string,
+
   activeId: string | null,
 
   groups: GroupType[] | null[],
@@ -159,6 +161,11 @@ const createNullArray = (count: number) => {
 
 const initialState: InitialStateType = {
   activePage: '',
+  search: '',
+
+
+
+
   activeId: null,
 
   groups: createNullArray(4),
@@ -182,6 +189,11 @@ export const dictsSlice = createSlice({
     // Active page
     setActivePage(state, action: PayloadAction<MarkupRulesPagesType>) {
       state.activePage = action.payload;
+    },
+
+    // Search params
+    setSearch(state, action: PayloadAction<string>) {
+      state.search = action.payload;
     },
 
     // Groups

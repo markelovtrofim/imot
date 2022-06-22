@@ -48,19 +48,21 @@ type CallBodyPropsType = {
   activeFragmentRef: any
 };
 
-const CallBody: FC<CallBodyPropsType> = React.memo(({
-                                                      callInfo,
-                                                      callAudio,
-                                                      callStt,
-                                                      fragments,
-                                                      bundleIndex,
-                                                      expanded,
-                                                      audioRef,
-                                                      onFragmentClick,
-                                                      audioPlayerRef,
-                                                      prevActiveFragment,
-                                                      activeFragmentRef
-                                                    }) => {
+const CallBody: FC<CallBodyPropsType> = React.memo((
+  {
+    callInfo,
+    callAudio,
+    callStt,
+    fragments,
+    bundleIndex,
+    expanded,
+    audioRef,
+    onFragmentClick,
+    audioPlayerRef,
+    prevActiveFragment,
+    activeFragmentRef
+  }
+) => {
   const useStyles = makeStyles(({
     callBodyWrapper: {},
     cbDialogWrapper: {
@@ -76,7 +78,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({
     cbDialogItems: {
       overflowY: 'auto',
       padding: '5px 0 40px 0',
-     // height: '800px',
+      // height: '800px',
       '&::-webkit-scrollbar': {
         width: '4px',
         height: '4px',
@@ -305,7 +307,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo(({
           </div>
 
           {/* Params block*/}
-          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px 14px 24px 24px'} borderRadius={'10px'} boxShadow={'0px 0px 4px rgba(98, 98, 98, 0.22)'}>
+          <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px 14px 24px 24px'} borderRadius={'10px'}
+                    boxShadow={'0px 0px 4px rgba(98, 98, 98, 0.22)'}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px'}}>
               <div style={{display: 'flex'}}>
                 <Typography className={classes.typographyTitle}>Сотрудник:</Typography>

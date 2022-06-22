@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {Button, SelectChangeEvent} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Button, SelectChangeEvent, Typography} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
 import LogoImg from '../../assets/images/logo.svg';
@@ -18,6 +18,7 @@ import {getGroups} from "../../store/dicts/dicts.slice";
 import {getChildUser, getChildUsers, getMe, getUserToken} from "../../store/users/users.slice";
 import ContainedSelect from "./Selects/ContainedSelect";
 import {getLang} from "../../store/lang/lang.slice";
+import queryString from "query-string";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -121,6 +122,7 @@ const Header: React.FC = () => {
 
   const classes = useStyles();
   const dispatch = useDispatch();
+
   async function handleLangChange(event: SelectChangeEvent) {
     const currentLang = event.target.value;
     await dispatch(getLang(currentLang));
@@ -130,7 +132,10 @@ const Header: React.FC = () => {
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
 
   const history = useHistory();
-  const historyPathArray = path.split('/');
+  let historyPathArray;
+  if (path) {
+    historyPathArray = path.split('/');
+  }
   const pagePath = history.location.pathname.split('/')[1];
   const activeMarkupRulesPage = useAppSelector(state => state.dicts.activePage);
 
@@ -140,6 +145,11 @@ const Header: React.FC = () => {
 
 
   const [alignment, setAlignment] = React.useState(path ? `${historyPathArray[1]}` : 'calls');
+
+  useEffect(() => {
+    const pathArray = history.location.pathname.split('/');
+    setAlignment(pathArray[1]);
+  }, [history.location.pathname]);
 
   const handleRouteChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -189,6 +199,7 @@ const Header: React.FC = () => {
     }
   })[0] || {value: '', label: 'Все пользователи'};
 
+  console.log(alignment);
   return (
     <div className={classes.headerWrapper}>
       <div className={classes.headerInner}>
@@ -264,7 +275,7 @@ const Header: React.FC = () => {
             {/* Alert */}
             <ToggleButton
               key={4}
-              disabled={true}
+              disabled={'alert' === alignment}
               value={'alert'}
               style={{cursor: 'default !important'}}
               onClick={() => {

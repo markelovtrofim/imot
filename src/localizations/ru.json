@@ -65,8 +65,6 @@
   "rulesName_dictDetail": "Правила",
   "autocorrectDict_dictDetail": "Словарь автозамены",
   "saveButton_dictDetail": "Сохранить",
-  "deleteButton_dictDetailMW": "Удалить",
-  "cancelButton_dictDetailMW": "Отмена",
   "cloneButton_dictDetailSelect": "Клонировать",
   "deleteButton_dictDetailSelect": "Удалить",
   "makeGlobal_dictDetailSelect": "Сделать глобальным",
@@ -75,6 +73,10 @@
   "sendButton": "Отправить",
   "saveButton": "Сохранить",
   "deleteButton": "Удалить",
-  "cancelButton": "Отмена"
+  "cancelButton": "Отмена",
 
+  "MW": "MW",
+  "sendButtonMW": "Отправиь",
+  "deleteButtonMW": "Удалить",
+  "cancelButtonMW": "Отмена"
 }

@@ -20,7 +20,6 @@ const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height
       width: width ? width : 'auto'
     },
     fieldText: {
-      cursor: 'default',
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
       border: '1px solid #EEF2F6',
       padding: padding ? padding : '3px 10px',
@@ -28,6 +27,7 @@ const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height
       marginTop: '10px'
     },
     fieldLabel: {
+      cursor: 'default !important',
       color: '#738094 !important',
       fontWeight: '700 !important',
       fontSize: '13px !important'

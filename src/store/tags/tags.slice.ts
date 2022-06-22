@@ -9,19 +9,25 @@ import {
 } from "./tags.types";
 import cloneDeep from "lodash.clonedeep";
 import {instance} from "../api";
+import {errorSlice} from "../error/error.slice";
 
 // группы.
 export const getTagGroups = createAsyncThunk(
   'tags/getTagGroups',
   async (payload, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await instance.get<TagGroupType[]>(`tag_rule_groups/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    thunkAPI.dispatch(tagsSlice.actions.setTagGroups(data));
-    return data;
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const {data} = await instance.get<TagGroupType[]>(`tag_rule_groups/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      thunkAPI.dispatch(tagsSlice.actions.setTagGroups(data));
+      return data;
+    } catch (error: unknown) {
+      debugger;
+      thunkAPI.dispatch(errorSlice.actions.setShowError(true));
+    }
   }
 )
 
@@ -48,8 +54,8 @@ export const getTags = createAsyncThunk(
       });
       thunkAPI.dispatch(tagsSlice.actions.setTags(data));
       return data;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      thunkAPI.dispatch(errorSlice.actions.setShowError(true));
     }
   }
 );
@@ -58,26 +64,32 @@ export const getTags = createAsyncThunk(
 export const getTag = createAsyncThunk(
   'tags/getTag',
   async (id: string, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await instance.get<TagDetailedType>(`tag_rule/${id}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const {data} = await instance.get<TagDetailedType>(`tag_rule/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
+
+      // @ts-ignore
+      thunkAPI.dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias(data.globalFilter));
+
+      thunkAPI.dispatch(tagsSlice.actions.removeFragments(null));
+      for (let i = 0; i < data.fragmentRules.length; i++) {
+        thunkAPI.dispatch(tagsSlice.actions.setFragment(data.fragmentRules[i]));
       }
-    });
-    thunkAPI.dispatch(tagsSlice.actions.setCurrentTag(data));
 
-    // @ts-ignore
-    thunkAPI.dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias(data.globalFilter));
-    for (let i = 0; i < data.fragmentRules.length; i++) {
-      thunkAPI.dispatch(tagsSlice.actions.setFragment(data.fragmentRules[i]));
+      thunkAPI.dispatch(tagsSlice.actions.removeSetTags(null));
+      for (let i = 0; i < data.setTags.length; i++) {
+        thunkAPI.dispatch(tagsSlice.actions.setSetTag(data.setTags[i]));
+      }
+
+      return data;
+    } catch (error: any) {
+      thunkAPI.dispatch(errorSlice.actions.setTextError(error));
     }
-
-    thunkAPI.dispatch(tagsSlice.actions.removeSetTags(null));
-    for (let i = 0; i < data.setTags.length; i++) {
-      thunkAPI.dispatch(tagsSlice.actions.setSetTag(data.setTags[i]));
-    }
-
-    return data;
   }
 )
 
@@ -110,7 +122,24 @@ export const postTag = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      debugger
+      return data;
+    } catch (e) {
+      console.log(e)
+    }
+  }
+)
+
+// удаление тега
+export const deleteTag = createAsyncThunk(
+  'tags/deleteTag',
+  async (id: string, thunkAPI) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const {data} = await instance.delete<TagDetailedType>(`tag_rule/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       return data;
     } catch (e) {
       console.log(e)
@@ -167,6 +196,10 @@ type ActiveFragmentItem = {
 type initialStateType = {
   activeTagId: string | null,
 
+  searchParams: string,
+
+  searchInput: string,
+
   tagGroups: TagGroupType[] | null[],
   currentTagGroup: TagGroupType | null,
 
@@ -185,6 +218,8 @@ type initialStateType = {
 
 const initialState: initialStateType = {
   activeTagId: null,
+  searchParams: "",
+  searchInput: "",
 
   tagGroups: createNullArray(4),
   currentTagGroup: null,
@@ -223,8 +258,8 @@ export const DirectionOptions = [
 ];
 
 const fragmentsArray: FragmentsArrayType = {
-  phrasesAndDicts: null,
   direction: DirectionOptions[0].value,
+  phrasesAndDicts: null,
   fromStart: false,
   silentBefore: '',
   silentAfter: '',
@@ -245,6 +280,13 @@ export const tagsSlice = createSlice({
       state.currentTagGroup = action.payload;
     },
 
+    setSearchParams(state, action: PayloadAction<string>) {
+      state.searchParams = action.payload;
+    },
+
+    setSearchInput(state, action: PayloadAction<string>) {
+      state.searchInput = action.payload;
+    },
 
     // теги
     setTags(state, action: PayloadAction<TagType[] | null[]>) {
@@ -373,8 +415,17 @@ export const tagsSlice = createSlice({
       state.activeFragments[action.payload.arrayIndex][action.payload.fieldIndex].value = action.payload.value;
     },
     setFragmentField(state, action: PayloadAction<{ index: number, value: ActiveFragmentItem, visible: boolean }>) {
-      // @ts-ignore
-      state.activeFragments[action.payload.index].find(item => item.key === action.payload.value.key).visible = action.payload.visible;
+      const fragments = current(state.activeFragments[action.payload.index]);
+      const field = fragments.find(item => item.key === action.payload.value.key);
+      let fieldIndex: number | null = null;
+      if (field) {
+        fieldIndex = fragments.indexOf(field);
+      }
+      if (fieldIndex || fieldIndex === 0) {
+        state.activeFragments[action.payload.index].splice(fieldIndex, 1);
+      }
+      debugger //@ts-ignore
+      state.activeFragments[action.payload.index].push({...field, visible: true})
     },
     removeFragmentField(state, action: PayloadAction<{arrayIndex: number, fieldIndex: number}>) {
       state.activeFragments[action.payload.arrayIndex].splice(action.payload.fieldIndex, 1);

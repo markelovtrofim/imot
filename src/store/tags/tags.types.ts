@@ -42,6 +42,8 @@ export type TagDetailedType = {
   id: string,
   owner: string,
   title: string,
+  group?: string,
+  enabled: boolean,
   calculatedRulePriority: number,
   globalFilter: GlobalFilterItem[],
   fragmentRules: FragmentRulesItem[],

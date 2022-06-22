@@ -3,7 +3,7 @@ import {Alert, CircularProgress} from "@mui/material";
 import {InfoSvg, WarningSvg, ErrorSvg, SuccessSvg} from './Alert.svg';
 
 type AlertType = {
-  iconType: 'info' | 'warning' | 'error' | 'loading' | 'success',
+  iconType?: 'info' | 'warning' | 'error' | 'loading' | 'success',
   text: string,
 
   padding?: string,
@@ -18,7 +18,7 @@ const CustomAlert: FC<AlertType> = (
     text,
     padding,
     boxShadow,
-    width
+    width,
   }
 ) => {
   const getIcon = () => {
@@ -45,12 +45,12 @@ const CustomAlert: FC<AlertType> = (
     } else if (iconType === 'success') {
       return {
         icon: <SuccessSvg/>,
-        color: '#fff'
+        color: '#389E0D'
       }
     } else {
       return {
         icon: <div></div>,
-        color: '#fff'
+        color: '#EBEFF4'
       }
     }
   };
@@ -63,7 +63,7 @@ const CustomAlert: FC<AlertType> = (
         width: width ? width : 'auto',
         fontSize: '15px',
         backgroundColor: alertObject.color,
-        color: '#fff',
+        color: iconType ? "#fff" : "#000",
         boxShadow: boxShadow ? boxShadow : 'none',
         '& .MuiAlert-icon': {
           paddingTop: '10px !important'

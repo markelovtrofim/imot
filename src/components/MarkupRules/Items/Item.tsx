@@ -8,10 +8,12 @@ import {Skeleton} from "@mui/material";
 import {useHistory} from "react-router-dom";
 import {BaseTag} from "../../common/Tag";
 import {TagType} from "../../../store/tags/tags.types";
+import {useAppSelector} from "../../../hooks/redux";
+import queryString from "query-string";
 
 
 type DictPropsType = {
-  body: DictType | TagType | null,
+  body: DictType | null,
   isActive: boolean,
   handleClick: any
 };
@@ -58,16 +60,18 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = useStyles();
+  const currentGroup = useAppSelector(state => state.dicts.currentGroup);
   return (
     <div
       className={classes.itemBox}
       onClick={isActive
         ? () => null
-        : () => {
+        : async () => {
           handleClick();
-          history.location.pathname = '/'
-          if (body) {
-            history.replace(`markuprules/dictionaries/${body.id}`)
+          if (body && currentGroup) {
+            await dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${body.id}`));
+            history.location.pathname = '/'
+            history.replace(`markuprules/dictionaries?group=${currentGroup.group}&id=${body.id}`)
           }
         }}
     >

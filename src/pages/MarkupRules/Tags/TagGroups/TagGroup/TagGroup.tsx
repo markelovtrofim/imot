@@ -19,13 +19,12 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
 
   const onTagGroupClick = async () => {
     if (group) {
+      dispatch(tagsSlice.actions.setSearchInput(""));
       dispatch(tagsSlice.actions.setTags(createNullArray(20)));
       dispatch(tagsSlice.actions.setCurrentTag(null));
       dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
       dispatch(tagsSlice.actions.removeFragments(null));
       await dispatch(tagsSlice.actions.removeSetTags(null));
-
-
       dispatch(tagsSlice.actions.setCurrentTagGroup(group));
 
       const tagsData = await dispatch(getTags({group: group.group}));
@@ -35,9 +34,9 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
         const dataTag = await dispatch(getTag(tags[0].id));
         // @ts-ignore
         const tag: TagDetailedType = dataTag.payload;
-
+        dispatch(tagsSlice.actions.setSearchParams(`?group=${group.group}&id=${tag.id}`));
         history.location.pathname = `/`;
-        history.replace(`markuprules/tags/${tag.id}`);
+        history.replace(`markuprules/tags?group=${group.group}&id=${tag.id}`);
       }
     }
   };

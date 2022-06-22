@@ -10,7 +10,6 @@ const Groups: FC = () => {
     <div style={{padding: '5px 0'}}>
       {dictGroups ?
         dictGroups.map((group) => {
-          console.log(currentGroup)
           return (
             <Group
               group={group}

@@ -8,6 +8,7 @@ import {dictsSlice} from "./dicts/dicts.slice";
 import {usersSlice} from "./users/users.slice";
 import {langSlice} from "./lang/lang.slice";
 import {tagsSlice} from './tags/tags.slice';
+import {errorSlice} from "./error/error.slice";
 
 
 const rootReducer = combineReducers({
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
   search: searchSlice.reducer,
   template: templateSlice.reducer,
   dicts: dictsSlice.reducer,
-  tags: tagsSlice.reducer
+  tags: tagsSlice.reducer,
+  error: errorSlice.reducer
 });
 
 export const setupStore = () => {

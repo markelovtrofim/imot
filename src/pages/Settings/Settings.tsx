@@ -3,7 +3,7 @@ import {makeStyles} from "@mui/styles";
 import {BlockBox} from "../../components/common";
 import {Typography} from "@mui/material";
 
-const MenuItem: FC<{ isActive: boolean, text: string, handleClick: () => void }> = ({isActive, text,handleClick}) => {
+const MenuItem: FC<{ isActive: boolean, text: string, handleClick: () => void }> = ({isActive, text, handleClick}) => {
   const useMenuItemStyles = makeStyles(({
     menuItem: {
       cursor: 'pointer',
@@ -72,10 +72,22 @@ const Settings = () => {
         <div className={classes.settingsBodyInner}>
           {settingsPageChanger === 'menu' &&
           <div>
-            <Typography>Menu page</Typography>
+            <div>
+              <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h4">Профиль пользователя</Typography>
+              <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
+                in developing
+              </Typography>
+            </div>
           </div>
           }
-          {settingsPageChanger === 'body' && <Typography>Body page</Typography>}
+          {settingsPageChanger === 'body' &&
+          <div>
+            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h4">Действия со звонком</Typography>
+            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
+              in developing
+            </Typography>
+          </div>
+          }
         </div>
       </BlockBox>
     </div>

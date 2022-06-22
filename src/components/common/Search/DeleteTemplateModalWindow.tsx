@@ -3,16 +3,16 @@ import {IconButton, Typography} from "@mui/material";
 import {ModalWindowBox} from "../index";
 import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
-import Input from "../Input";
 import {LoadingButton} from "@mui/lab";
 import {useFormik} from "formik";
 import {makeStyles} from "@mui/styles";
 import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../../hooks/redux";
-import {deleteTemplate, templateSlice, updateTemplate} from "../../../store/search/template.slice";
+import {deleteTemplate, templateSlice} from "../../../store/search/template.slice";
 import {searchSlice} from "../../../store/search/search.slice";
 import {TemplateType} from "../../../store/search/template.types";
 import Snackbar from "../Snackbar";
+import {translate} from "../../../localizations";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -43,11 +43,13 @@ type CreateNameTemplateMWPropsType = {
   currentTemplate: TemplateType | null
 };
 
-const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
-                                                                            isOpen,
-                                                                            handleClose,
-                                                                            currentTemplate
-                                                                          }) => {
+const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = (
+  {
+    isOpen,
+    handleClose,
+    currentTemplate
+  }
+) => {
   const allTemplates = useAppSelector(state => state.template.allTemplates);
   const dispatch = useDispatch();
   const getTemplate = () => {
@@ -80,6 +82,7 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
     },
   });
   const classes = useStyles();
+  const {language} = useAppSelector(state => state.lang);
 
   useEffect(() => {
     return () => {
@@ -98,23 +101,29 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
         text={'Шаблон удален'}
         time={2000}
       />
-      
-      <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
-        <div className={classes.mwTitle}>
-          <Typography className={cn(classes.mwTitleText, classes.mwText)}>
-            Вы уверены, что хотите удалить шаблон?
-          </Typography>
-          <IconButton className={classes.mwIconButton} onClick={handleClose}>
-            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-          </IconButton>
-        </div>
+
+      <ModalWindowBox
+        isMWOpen={isOpen}
+        handleMWClose={handleClose}
+        text={"Вы уверены, что хотите удалить шаблон?"}
+      >
         <form onSubmit={formik.handleSubmit}>
           <div className={classes.mwButtonBox}>
-            <LoadingButton loading={loading} type="submit" style={{marginRight: '15px'}} variant="contained" color="error">
-              Удалить
+            <LoadingButton
+              loading={loading}
+              type="submit"
+              style={{marginRight: '15px'}}
+              variant="contained"
+              color="error"
+            >
+              {translate("deleteButton", language)}
             </LoadingButton>
-            <LoadingButton onClick={handleClose} variant="contained" color="secondary">
-              Отмена
+            <LoadingButton
+              onClick={handleClose}
+              variant="contained"
+              color="secondary"
+            >
+              {translate("cancelButtonMW", language)}
             </LoadingButton>
           </div>
         </form>
