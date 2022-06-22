@@ -2,13 +2,15 @@ import {makeStyles} from "@mui/styles";
 import {Theme} from "@mui/material";
 
 type SelectCustomPropsType = {
-  width?: string
+  width?: string,
+  height?: string
 }
 export const useMuiCustomSelectStyles = makeStyles<Theme, SelectCustomPropsType>((theme: Theme) => ({
   selectBox: {
     display: 'flex !important',
     alignItems: 'center',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    width: '100%'
   },
   selectMenuListInput: {
     width: "228px",
@@ -72,7 +74,7 @@ export const useMuiCustomSelectStyles = makeStyles<Theme, SelectCustomPropsType>
   }
 }));
 
-export function selectCustomStylesCreator(props: { menuIsOpen: boolean }) {
+export function selectCustomStylesCreator(props: { menuIsOpen: boolean, height?: string }) {
   return {
     menu: (provided: any) => ({
       ...provided,
@@ -110,13 +112,13 @@ export function selectCustomStylesCreator(props: { menuIsOpen: boolean }) {
     control: (provided: any, state: any) => ({
       ...provided,
       cursor: 'pointer',
-      minHeight: '38px',
       border: '1px solid #E3E8EF',
       boxShadow: 'none',
       borderColor: props.menuIsOpen ? '#722ED1 !important' : '#E3E8EF !important',
       "&:hover": {
         borderColor: '#E3E8EF'
       },
+      minHeight: props.height ? props.height : '38px',
       minWidth: '70px',
       borderRadius: '5px',
       backgroundColor: '#F8FAFC'

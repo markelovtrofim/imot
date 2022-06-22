@@ -21,7 +21,7 @@ const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height
     },
     fieldText: {
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
-      border: '1px solid #EEF2F6',
+      border: '1px solid #E3E8EF',
       padding: padding ? padding : '3px 10px',
       borderRadius: '5px',
       marginTop: '10px'

@@ -98,6 +98,7 @@ export const updateTag = createAsyncThunk(
   'tags/updateTag',
   async (payload: any) => {
     try {
+      debugger
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       const {data} = await instance.put<TagDetailedType>(`tag_rule/${payload.id}`, payload, {
         headers: {
@@ -354,7 +355,7 @@ export const tagsSlice = createSlice({
         const key = Object.keys(fragmentRulesItemLocal)[i];
         if (key === 'direction') {
           const value = DirectionOptions.find(item => item.value === fragmentRulesItemLocal[key]);
-          activeFragment.push({
+          activeFragment.unshift({
             key: key,
             title: 'Поиск по словам',
             value: value,
@@ -370,13 +371,21 @@ export const tagsSlice = createSlice({
               dictsArray.push({label: criteria.values[i], value: criteria.values[i]});
             }
           }
+
+          let converted: {value: string, label: string}[] = []
+          if (fragmentRulesItemLocal[key]) {
+            for (let i = 0; i < fragmentRulesItemLocal[key].length; i++) {
+              converted.push({value: fragmentRulesItemLocal[key][i], label: fragmentRulesItemLocal[key][i]})
+            }
+          }
+
           activeFragment.push({
             key: key,
             title: 'Фразы или словари',
-            value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
+            value: fragmentRulesItemLocal[key] && fragmentRulesItemLocal[key].length > 0 ? converted : null,
             options: dictsArray,
             selectType: 'multiString',
-            visible: false
+            visible: true
           });
         } else if (key === 'fromStart') {
           activeFragment.push({
@@ -385,7 +394,7 @@ export const tagsSlice = createSlice({
             value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
             option: [],
             selectType: 'checkbox',
-            visible: false
+            visible: !!action.payload && !!fragmentRulesItemLocal[key]
           })
         } else if (key === 'phrases' || key === 'dicts') {
           activeFragment.push({
@@ -393,18 +402,19 @@ export const tagsSlice = createSlice({
             value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
             selectType: 'doNotDisplay',
             option: [],
-            visible: false
+            visible: !!action.payload && !!fragmentRulesItemLocal[key]
           })
         } else {
           activeFragment.push({
             key: key,
-            title: (key === 'silentBefore' && 'Тихо до') ||
-              (key === 'silentAfter' && 'Тихо после') ||
-              (key === 'interruptTime' && 'Интерептед время'),
+            title: (key === 'silentBefore' && 'Молчание до') ||
+              (key === 'silentAfter' && 'Молчание после') ||
+              (key === 'interruptTime' && 'Длительность перебивания'),
             value: {value: fragmentRulesItemLocal[key], label: fragmentRulesItemLocal[key]},
             option: fragmentRulesItemLocal[key],
             selectType: 'input',
-            visible: false
+            visible: !!action.payload && !!fragmentRulesItemLocal[key]
+
           })
         }
       }
