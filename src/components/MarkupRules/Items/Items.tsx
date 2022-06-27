@@ -9,7 +9,7 @@ import {translate} from "../../../localizations";
 
 type ItemsPropsType = {
   items: DictType[] | null[] | null,
-  currentItem: DictTypeDetailed | null | false
+  currentItem: DictTypeDetailed | null | false | undefined
 }
 
 const Items: FC<ItemsPropsType> = ({items, currentItem}) => {

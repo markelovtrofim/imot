@@ -7,6 +7,7 @@ import {DictType, DictTypeDetailed, GroupType} from "../../../store/dicts/dicts.
 import {useHistory} from "react-router-dom";
 import queryString from "query-string";
 import {tagsSlice} from "../../../store/tags/tags.slice";
+import {useAppSelector} from "../../../hooks/redux";
 
 const PurpleCircleSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -72,6 +73,10 @@ const Group: FC<GroupPropsType> = memo(({group, isActive}) => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  const {language} = useAppSelector(state => state.lang);
+
   const onGroupClick = async () => {
     if (group) {
       dispatch(tagsSlice.actions.setSearchInput(""));
@@ -86,7 +91,7 @@ const Group: FC<GroupPropsType> = memo(({group, isActive}) => {
       const dict: DictTypeDetailed = dataDict.payload;
       dispatch(dictsSlice.actions.setSearch( queryString.extract(`?group=${group.group}&id=${dict.id}`)));
       history.location.pathname = `/`;
-      history.replace(`markuprules/dictionaries?group=${group.group}&id=${dict.id}`);
+      history.replace(`${language}/${userId}/markuprules/dictionaries?group=${group.group}&id=${dict.id}`);
     }
   };
 

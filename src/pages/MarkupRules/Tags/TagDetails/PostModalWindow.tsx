@@ -128,7 +128,7 @@ const PostModalWindow: FC<PostModalWindowType> = ({isOpen, handleMWClose, setSna
 
       dispatch(tagsSlice.actions.setSearchParams(`?group=${group.group}&id=${tagId}`));
       history.location.pathname = `/`;
-      history.replace(`markuprules/tags?group=${group.group}&id=${tagId}`);
+      history.replace(`${language}/${userId}/markuprules/tags?group=${group.group}&id=${tagId}`);
       dispatch(tagsSlice.actions.setSearchInput(""));
     }
   })

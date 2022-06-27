@@ -17,6 +17,8 @@ import {Input} from "../../../components/common";
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
 import queryString from 'query-string';
+import {tagsSlice} from "../../../store/tags/tags.slice";
+import {langSlice} from "../../../store/lang/lang.slice";
 
 export function createQueryString(queryObj: any) {
   let str = '';
@@ -122,20 +124,6 @@ const DictsPage = () => {
   const currentDict = useAppSelector(state => state.dicts.currentDict);
   const search = useAppSelector(state => state.dicts.search);
 
-  useEffect(() => {
-    return history.listen((location) => {
-      debugger
-      const currentSearch = createQueryString(queryString.parse(location.search));
-      let oldSearchConverted = search;
-      if (oldSearchConverted[0] !== '?') {
-        oldSearchConverted = `?${search}`
-      }
-      if (currentSearch !== oldSearchConverted) {
-        queryByParameters(location.search);
-      }
-    });
-  }, [search]);
-
 
   function searchStringParserInObj(initialString: string) {
     const searchString = initialString.slice(1);
@@ -150,6 +138,7 @@ const DictsPage = () => {
   }
 
   async function queryByParameters(search: string) {
+    const searchParamsObject = searchStringParserInObj(search);
     const groupsData = await dispatch(getGroups());
     // @ts-ignore
     const groups: GroupType[] = groupsData.payload;
@@ -167,44 +156,80 @@ const DictsPage = () => {
     }
     dispatch(dictsSlice.actions.setCurrentDict(null));
 
-    if (currentGroupLocal) {
+    let dicts = null
+    if (currentGroupLocal && searchParamsObject.search) {
       dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
-      await dispatch(getDicts({group: currentGroupLocal.group}));
+      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group, filter: searchParamsObject.search}));
+      // @ts-ignore
+      dicts = dictsData.payload;
     }
-    if (searchParams.id) {
-      await dispatch(getDict(searchParams.id));
+    if (currentGroupLocal && !searchParamsObject.search) {
+      dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
+      dispatch(tagsSlice.actions.setSearchInput(""));
+      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group}));
+      // @ts-ignore
+      dicts = dictsData.payload;
+    }
+    if (dicts) {
+      if (dicts.find((item: any) => item.id === searchParamsObject.id)) {
+        await dispatch(getDict(searchParams.id));
+      } else {
+        dispatch(dictsSlice.actions.setCurrentDict(false));
+      }
     }
   }
 
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
+
   // первый рендиринг
   const getStartDictsData = async () => {
+    const searchParams = createQueryString(queryString.parse(search));
     const groupsData = await dispatch(getGroups());
     // @ts-ignore
     const groups: GroupType[] = groupsData.payload;
 
-
-    if (search.length < 2) {
+    if (searchParams.length < 2) {
       dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
       const dictsData = await dispatch(getDicts({group: groups[0].group}));
       // @ts-ignore
       const dicts: DictType[] = dictsData.payload;
       dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`));
       history.location.pathname = '/';
-      history.replace(`markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
-      await dispatch(getDict(dicts[0].id));
+      history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
+      if (!currentDict) {
+        await dispatch(getDict(dicts[0].id));
+      }
     } else {
       queryByParameters(search);
-
       history.location.pathname = '/';
       let newSearch = search;
       if (search[0] !== '?') {
         newSearch = `?${search}`;
       }
-      history.replace(`markuprules/dictionaries${newSearch}`);
+      history.replace(`${language}/${userId}/markuprules/dictionaries${newSearch}`);
     }
   };
+
+  useEffect(() => {
+    return history.listen((location) => {
+      const currentSearch = createQueryString(queryString.parse(location.search));
+      let oldSearchConverted = createQueryString(queryString.parse(search));
+      if (oldSearchConverted[0] !== '?') {
+        oldSearchConverted = `?${search}`
+      }
+      debugger
+      if (currentSearch !== oldSearchConverted) {
+        queryByParameters(location.search);
+      }
+    });
+  }, [search]);
+
+
   useEffect(() => {
     getStartDictsData().then();
+    dispatch(langSlice.actions.setLoading(false));
   }, []);
 
 

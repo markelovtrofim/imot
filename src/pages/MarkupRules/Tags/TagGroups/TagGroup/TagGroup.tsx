@@ -6,6 +6,8 @@ import {useTagGroupStyles} from "./TagGroup.jss";
 import {TagDetailedType, TagGroupType, TagType} from "../../../../../store/tags/tags.types";
 import {PurpleCircleSvg} from "./TagGroup.svg";
 import {createNullArray, getTag, getTags, tagsSlice} from "../../../../../store/tags/tags.slice";
+import {useAppSelector} from "../../../../../hooks/redux";
+import {RootState} from "../../../../../store/store";
 
 type TagGroupPropsType = {
   group: TagGroupType | null,
@@ -16,6 +18,12 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
   const classes = useTagGroupStyles({isActive});
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
 
   const onTagGroupClick = async () => {
     if (group) {
@@ -36,7 +44,7 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
         const tag: TagDetailedType = dataTag.payload;
         dispatch(tagsSlice.actions.setSearchParams(`?group=${group.group}&id=${tag.id}`));
         history.location.pathname = `/`;
-        history.replace(`markuprules/tags?group=${group.group}&id=${tag.id}`);
+        history.replace(`${language}/${userId}/markuprules/tags?group=${group.group}&id=${tag.id}`);
       }
     }
   };

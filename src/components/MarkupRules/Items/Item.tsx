@@ -61,6 +61,10 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
   const history = useHistory();
   const classes = useStyles();
   const currentGroup = useAppSelector(state => state.dicts.currentGroup);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  const {language} = useAppSelector(state => state.lang);
   return (
     <div
       className={classes.itemBox}
@@ -71,7 +75,7 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
           if (body && currentGroup) {
             await dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${body.id}`));
             history.location.pathname = '/'
-            history.replace(`markuprules/dictionaries?group=${currentGroup.group}&id=${body.id}`)
+            history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}&id=${body.id}`)
           }
         }}
     >
@@ -87,7 +91,7 @@ const Item: FC<DictPropsType> = memo(({body, isActive, handleClick}) => {
         body.usedRules &&
         <div className={classes.rule} onClick={isActive ? async () => {
           history.location.pathname = '/'
-          history.replace(`markuprules/tags/${body.id}`)
+          history.replace(`${language}/${userId}/markuprules/tags/${body.id}`)
           await dispatch(dictsSlice.actions.setActivePage('tags'));
         } : () => null}>
           {body

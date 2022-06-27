@@ -18,6 +18,7 @@ import ChecklistsPage from "./Checklists/Checklists";
 import {RootState} from "../../store/store";
 import {translate} from '../../localizations';
 import {tagsSlice} from "../../store/tags/tags.slice";
+import {langSlice} from "../../store/lang/lang.slice";
 
 // CUSTOM COMMON COMPONENTS
 type SearchInputType = {
@@ -35,7 +36,7 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
   const pathArray = path.split("/");
-  const isDtOrTg = pathArray[2];
+  const isDtOrTg = pathArray[4];
 
 
   const dispatch = useDispatch();
@@ -45,21 +46,21 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
 
 
   useEffect(() => {
-    debugger
     if (searchInHistory) {
       if (isDtOrTg === "dictionaries") {
         const searchObj = searchStringParserInObj(history.location.search);
         if (searchObj.search) {
           dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
           dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
-          onSubmit({search: searchObj.search});
+          debugger
         } else if (searchStringParserInObj(searchDictsParams).search) {
+          debugger
           dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}`));
           dispatch(tagsSlice.actions.setSearchInput(""));
+          onSubmit({search: ""});
         }
       } else if (isDtOrTg === "tags") {
         const searchObj = searchStringParserInObj(history.location.search);
-        debugger
         if (searchObj.search) {
           dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
           dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
@@ -74,6 +75,9 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
 
   }, [searchInHistory]);
 
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
   const formik = useFormik({
     initialValues: {
       search: ''
@@ -86,22 +90,30 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
           if (searchObj.search) {
             dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
             history.location.pathname = '/';
-            history.replace(`markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+            history.replace(`${language}/${userId}/markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
           } else {
-            dispatch(dictsSlice.actions.setSearch(`${searchDictsParams}&search=${search}`));
+            let newSearchDictsParams = searchDictsParams;
+            if (newSearchDictsParams[0] != "?") {
+              newSearchDictsParams = `?${newSearchDictsParams}`
+            }
+            dispatch(dictsSlice.actions.setSearch(`${newSearchDictsParams}&search=${search}`));
             history.location.pathname = '/';
-            history.replace(`markuprules/dictionaries${searchDictsParams}&search=${search}`)
+            history.replace(`${language}/${userId}/markuprules/dictionaries${newSearchDictsParams}&search=${search}`);
           }
         } else if (isDtOrTg === "tags") {
           const searchObj = searchStringParserInObj(history.location.search);
           if (searchObj.search) {
             dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
             history.location.pathname = '/';
-            history.replace(`markuprules/tags?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+            history.replace(`${language}/${userId}/markuprules/tags?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
           } else {
-            dispatch(tagsSlice.actions.setSearchParams(`${searchTagsParams}&search=${search}`));
+            let newSearchTagsParams = searchTagsParams;
+            if (newSearchTagsParams[0] != "?") {
+              newSearchTagsParams = `?${newSearchTagsParams}`
+            }
+            dispatch(tagsSlice.actions.setSearchParams(`${newSearchTagsParams}&search=${search}`));
             history.location.pathname = '/';
-            history.replace(`markuprules/tags${searchTagsParams}&search=${search}`)
+            history.replace(`${language}/${userId}/markuprules/tags${newSearchTagsParams}&search=${search}`)
           }
         }
 
@@ -111,12 +123,12 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
           const searchObj = searchStringParserInObj(history.location.search);
           dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
           history.location.pathname = '/';
-          history.replace(`markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}`)
+          history.replace(`${language}/${userId}/markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}`)
         } else if (isDtOrTg === "tags") {
           const searchObj = searchStringParserInObj(history.location.search);
           dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
           history.location.pathname = '/';
-          history.replace(`markuprules/tags?group=${searchObj.group}&id=${searchObj.id}`);
+          history.replace(`${language}/${userId}/markuprules/tags?group=${searchObj.group}&id=${searchObj.id}`);
         }
       }
     },
@@ -214,6 +226,13 @@ export const MarkupRulesButtons = () => {
     dispatch(dictsSlice.actions.setActivePage(page));
   };
 
+  useEffect(() => {
+    dispatch(langSlice.actions.setLoading(false));
+  }, []);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
   return (
     <ToggleButtonGroup
       className={classes.buttonsBox}
@@ -225,20 +244,25 @@ export const MarkupRulesButtons = () => {
         disabled={"dictionaries" === activePage}
         className={classes.button} value="dictionaries"
         onClick={() => {
+          dispatch(langSlice.actions.setLoading(true));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          history.location.search = "";
           history.location.pathname = '/'
-
-          history.replace('markuprules/dictionaries')
+          history.replace(`${language}/${userId}/markuprules/dictionaries`)
         }}
       >
         {translate('buttonDictsName_dicts', language)}
       </ToggleButton>
 
-      <ToggleButton disabled={"tags" === activePage}
-                    className={classes.button} value="tags"
-                    onClick={() => {
-                      history.location.pathname = '/'
-                      history.replace('markuprules/tags')
-                    }}
+      <ToggleButton
+        className={classes.button} value="tags"
+        onClick={() => {
+          dispatch(langSlice.actions.setLoading(true));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          history.location.search = "";
+          history.location.pathname = '/'
+          history.replace(`${language}/${userId}/markuprules/tags`)
+        }}
       >
         {translate('buttonTagsName_dicts', language)}
       </ToggleButton>
@@ -290,14 +314,13 @@ export const InfoCircle = (props: React.SVGProps<SVGSVGElement>) => {
 
 const MarkupRules = memo(() => {
   const history = useHistory();
-  const path = history.location.pathname.split('/')[2];
-
+  const path = history.location.pathname.split('/');
+  const pathActivePage = path[4];
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (path) {
-      // @ts-ignore
-      dispatch(dictsSlice.actions.setActivePage(path));
+    if (pathActivePage) {
+      dispatch(dictsSlice.actions.setActivePage(pathActivePage));
     } else {
       dispatch(dictsSlice.actions.setActivePage('dictionaries'));
     }
@@ -311,7 +334,6 @@ const MarkupRules = memo(() => {
       {(activePage === 'dictionaries' || activePage === 'tags' || activePage === 'checklists')
         ?
         <div>
-          <Header/>
           <div className={appClasses.container}>
             {activePage === 'dictionaries' && <DictsPage/>}
             {activePage === 'tags' && <TagPage/>}
@@ -320,7 +342,6 @@ const MarkupRules = memo(() => {
         </div>
         :
         <div>
-          <Header/>
           <div style={{
             fontWeight: '700',
             marginTop: '400px',

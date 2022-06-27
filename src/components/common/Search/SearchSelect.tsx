@@ -73,7 +73,7 @@ type SelectPropsType = {
 };
 
 
-const SearchSelect: FC<SelectPropsType> = ({
+const SearchSelect: FC<SelectPropsType> = memo(({
                                              criteriaFull,
                                              criteriaCurrent,
                                              isDefaultCriteria,
@@ -263,10 +263,10 @@ const SearchSelect: FC<SelectPropsType> = ({
         </components.ValueContainer>
       );
     }
-    let CHIPS_LIMIT = 3;
+    let CHIPS_LIMIT = 6;
     const [chips, otherChildren] = children;
     if (chips.length > CHIPS_LIMIT) {
-      CHIPS_LIMIT = 1;
+      CHIPS_LIMIT = 6;
     }
     const overflowCounter = chips.slice(CHIPS_LIMIT).length;
     const displayChips = chips.slice(overflowCounter, overflowCounter + CHIPS_LIMIT);
@@ -471,6 +471,6 @@ const SearchSelect: FC<SelectPropsType> = ({
       } */}
     </div>
   );
-};
+});
 
 export default SearchSelect;

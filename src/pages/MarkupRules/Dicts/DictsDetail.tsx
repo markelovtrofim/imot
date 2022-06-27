@@ -1,9 +1,9 @@
 import React, {FC, useEffect, useState} from 'react';
-import {IconButton, InputBase, Skeleton, Tooltip, Typography} from "@mui/material";
+import {InputBase, Tooltip, Typography} from "@mui/material";
 import Checkbox from "../../../components/common/Checkbox";
 import Switch from "../../../components/common/Switch";
 import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
-import {InfoCircleActive, InfoCircle} from "../MarkupRules";
+import {InfoCircleActive} from "../MarkupRules";
 import {useAppSelector} from "../../../hooks/redux";
 import Field from "../../../components/common/FIeld";
 import {makeStyles} from "@mui/styles";
@@ -20,7 +20,6 @@ import {
 } from "../../../store/dicts/dicts.slice";
 import {BlockBox} from "../../../components/common";
 import ModalWindow from "../../../components/common/ModalWindowBox";
-import CloseIcon from "@mui/icons-material/Close";
 import {DictType, DictTypeDetailed, GroupType} from "../../../store/dicts/dicts.types";
 import Snackbar, {SnackbarType} from "../../../components/common/Snackbar";
 import {useHistory} from "react-router-dom";
@@ -49,6 +48,8 @@ const DictDetailsStubMiddleware: FC = () => {
         </div>
       </BlockBox>
     )
+  }  else if (currentDict === undefined) {
+    return <></>
   } else {
     return <DictDetails currentDict={currentDict}/>
   }
@@ -112,6 +113,10 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
   const classes = useStyles();
 
   const dispatch = useDispatch();
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -217,7 +222,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         await dispatch(getDict(dicts[0].id));
         dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`))
         history.location.pathname = '/';
-        history.replace(`markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
+        history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
       } else {
         const dataDicts = await dispatch(getDicts({group: currentGroup.group}));
         // @ts-ignore
@@ -225,7 +230,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         await dispatch(getDict(dicts[0].id));
         dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${dicts[0].id}`))
         history.location.pathname = '/';
-        history.replace(`markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
+        history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
       }
       handleMWClose();
       setDeleteDictMWIsOpen(false);
@@ -298,18 +303,16 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
                                  const dictsData = await dispatch(getDicts({group: groups[0].group}))
                                  // @ts-ignore
                                  const dicts: DictType[] = dictsData.payload;
-                                 await dispatch(getDict(dicts[0].id));
-                                 dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`));
+                                 dispatch(dictsSlice.actions.setCurrentDict(undefined));
+                                 dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}`));
                                  history.location.pathname = '/';
-                                 history.replace(`markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`);
+                                 history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}`);
                                } else {
-                                 const dictsData = await dispatch(getDicts({group: currentGroup.group}))
-                                 // @ts-ignore
-                                 const dicts: DictType[] = dictsData.payload;
-                                 await dispatch(getDict(dicts[0].id))
-                                 dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${dicts[0].id}`))
+                                 await dispatch(getDicts({group: currentGroup.group}))
+                                 dispatch(dictsSlice.actions.setCurrentDict(undefined));
+                                 dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}`))
                                  history.location.pathname = '/';
-                                 history.replace(`markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
+                                 history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}`)
                                }
 
 
@@ -465,7 +468,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
                       await dispatch(getDict(dicts[0].id))
                       dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${dicts[0].id}`))
                       history.location.pathname = '/';
-                      history.replace(`markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
+                      history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
                       setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
                       setSnackbar({type: 'success', value: true, text: 'Словарь склонирован', time: 2000})
                     }

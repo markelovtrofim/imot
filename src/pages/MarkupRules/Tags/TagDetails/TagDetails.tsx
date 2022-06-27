@@ -190,6 +190,11 @@ const TagDetails: FC = () => {
     time: null
   });
 
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
+
   async function onClickSaveButton() {
     setLoading(true);
 
@@ -262,16 +267,19 @@ const TagDetails: FC = () => {
     return (
       <BlockBox padding={'0'} height={'100%'}>
         <div style={{position: 'relative', height: '100%'}}>
-          {currentTag === null &&
-          <div style={{position: 'absolute', top: '30%', left: '32%'}}>
-            <img src={Preloader} alt=""/>
-          </div>
-          }
-          {currentTag === false &&
-          <div style={{textAlign: 'center', paddingTop: '150px'}}>
-            <img src={noResultsPng} alt=""/>
-          </div>
-          }
+          {currentTag === null && (
+            <div style={{position: 'absolute', top: '30%', left: '32%'}}>
+              <img src={Preloader} alt=""/>
+            </div>
+          )}
+          {currentTag === false && (
+            <div style={{textAlign: 'center', paddingTop: '150px'}}>
+              <img src={noResultsPng} alt=""/>
+            </div>
+          )}
+          {currentTag === undefined && (
+            <div></div>
+          )}
         </div>
       </BlockBox>
     );
@@ -515,7 +523,8 @@ const TagDetails: FC = () => {
                                               }}
                                               checked={fragmentField.value.value}
                                             />
-                                            <Typography className={classes.typographyTitleMiniThree}>{fragmentField.title}</Typography>
+                                            <Typography
+                                              className={classes.typographyTitleMiniThree}>{fragmentField.title}</Typography>
                                           </div>
                                         </div>
                                       ) ||
@@ -622,7 +631,7 @@ const TagDetails: FC = () => {
                         <div style={{display: 'flex'}}>
                           <Field
                             label={'Название тега'}
-                            width={"39.5%"}
+                            width={"47.5%"}
                             margin={"0 5% 0 0"}
                           >
                             <InputBase
@@ -641,7 +650,7 @@ const TagDetails: FC = () => {
                           </Field>
                           <Field
                             label={'Значение тега'}
-                            width={"39.5%"}
+                            width={"47.5%"}
                           >
                             <InputBase
                               onChange={(event: any) => {
@@ -735,8 +744,10 @@ const TagDetails: FC = () => {
                         const dictsData = await dispatch(getTags({group: currentGroup.group}));
                         // @ts-ignore
                         const tags: DictType[] = dictsData.payload;
-                        // if ()
                         await dispatch(getTag(currentTag.id))
+                        dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${currentTag.id}`))
+                        history.location.pathname = '/';
+                        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${currentTag.id}`)
                       }
 
                       setSnackbar({
@@ -795,7 +806,7 @@ const TagDetails: FC = () => {
                         dispatch(tagsSlice.actions.setSearchParams(`?group=${groups[0].group}&id=${tags[0].id}`));
 
                         history.location.pathname = `/`;
-                        history.replace(`markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`);
+                        history.replace(`${language}/${userId}/markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`);
                       } else {
                         const tagsData = await dispatch(getTags({group: currentGroup.group}))
                         // @ts-ignore
@@ -805,7 +816,7 @@ const TagDetails: FC = () => {
                         dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tags[0].id}`));
 
                         history.location.pathname = `/`;
-                        history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
+                        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
                       }
 
                       setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
@@ -863,7 +874,7 @@ const TagDetails: FC = () => {
 
                     dispatch(tagsSlice.actions.setSearchParams(`?group=${groups[0].group}&id=${tags[0].id}`))
                     history.location.pathname = '/';
-                    history.replace(`markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`)
+                    history.replace(`${language}/${userId}/markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`)
                   } else {
                     const tagsDicts = await dispatch(getTags({group: currentGroup.group}));
                     // @ts-ignore
@@ -872,7 +883,7 @@ const TagDetails: FC = () => {
 
                     dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tags[0].id}`))
                     history.location.pathname = '/';
-                    history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
+                    history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
                   }
                   handleDeleteMWClose();
                   // setDeleteDictMWIsOpen(false);

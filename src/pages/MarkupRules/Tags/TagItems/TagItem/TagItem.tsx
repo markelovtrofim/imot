@@ -8,6 +8,7 @@ import {InfoCircle, InfoCircleActive} from "../../../MarkupRules";
 import {getTag, tagsSlice} from "../../../../../store/tags/tags.slice";
 import {useAppSelector} from "../../../../../hooks/redux";
 import {searchStringParserInObj} from "../../TagPage";
+import {RootState} from "../../../../../store/store";
 
 type TagItemPropsType = {
   tag: TagType | null,
@@ -25,6 +26,12 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
   const search = useAppSelector(state => state.tags.searchParams);
   const searchParamsObject = searchStringParserInObj(search);
 
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
+
 
   async function onTagItemClick() {
     if (!isActive && tag && currentGroup) {
@@ -37,11 +44,11 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
       if (searchParamsObject.search) {
         dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tag.id}&search=${searchParamsObject.search}`));
         history.location.pathname = `/`;
-        history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tag.id}&search=${searchParamsObject.search}`);
+        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tag.id}&search=${searchParamsObject.search}`);
       } else {
         dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tag.id}`));
         history.location.pathname = `/`;
-        history.replace(`markuprules/tags?group=${currentGroup.group}&id=${tag.id}`);
+        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tag.id}`);
       }
     }
   }

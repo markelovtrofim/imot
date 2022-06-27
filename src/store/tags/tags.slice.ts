@@ -205,7 +205,7 @@ type initialStateType = {
   currentTagGroup: TagGroupType | null,
 
   tags: TagType[] | null[] | null,
-  currentTag: TagDetailedType | null | false,
+  currentTag: TagDetailedType | null | false | undefined,
 
   allGlobalFilterCriterias: GlobalFilterItemDetailed[],
   defaultGlobalFilterCriterias: GlobalFilterItem[],
@@ -293,7 +293,7 @@ export const tagsSlice = createSlice({
     setTags(state, action: PayloadAction<TagType[] | null[]>) {
       state.tags = action.payload;
     },
-    setCurrentTag(state, action: PayloadAction<TagDetailedType | null | false>) {
+    setCurrentTag(state, action: PayloadAction<TagDetailedType | null | false | undefined>) {
       state.currentTag = action.payload;
     },
 

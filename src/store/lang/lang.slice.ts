@@ -22,11 +22,13 @@ export const getLang = createAsyncThunk(
 
 
 type InitialStateType = {
-  language: string
+  language: string,
+  loading: boolean
 }
 
 const initialState: InitialStateType = {
-  language: 'ru'
+  language: 'ru',
+  loading: false
 };
 
 export const langSlice = createSlice({
@@ -37,6 +39,13 @@ export const langSlice = createSlice({
       state.language = action.payload;
     },
 
+    setDefaultLang(state, action: PayloadAction<null>) {
+      state.language = "ru";
+    },
+
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
     langReset: () => initialState
   }
 })

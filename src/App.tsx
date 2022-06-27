@@ -18,6 +18,7 @@ import LinearDeterminate from "./components/common/LinearDeterminate";
 import {dictsSlice} from "./store/dicts/dicts.slice";
 import {searchStringParserInObj} from "./pages/MarkupRules/Tags/TagPage";
 import {tagsSlice} from "./store/tags/tags.slice";
+import {getLang, langSlice} from "./store/lang/lang.slice";
 
 
 export const useStyles = makeStyles(({
@@ -43,9 +44,40 @@ const App = () => {
   }
   const isDtOrTg = pathArray[2];
 
+
+  const currentUser = useAppSelector(state => state.users.currentUser);
+  const languageParam = pathArray[1];
   const searchDictsParams = useAppSelector(state => state.dicts.search);
+  const {language} = useAppSelector(state => state.lang);
 
   const history = useHistory();
+
+
+  // lang changer
+  useEffect(() => {
+    history.listen(async (location) => {
+      let pathArray: any = [];
+      if (location.pathname) {
+        pathArray = location.pathname.split("/");
+      }
+      const languageParam = pathArray[1];
+      pathArray = location.pathname.split("/");
+      pathArray.splice(0, 2);
+
+      if (languageParam === "ru" || languageParam === "en") {
+        dispatch(langSlice.actions.setLoading(true));
+        await dispatch(getLang(languageParam));
+        dispatch(langSlice.actions.setLoading(false));
+      } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
+        dispatch(langSlice.actions.setDefaultLang(null));
+        if (pathArray.length === 1) {
+          history.location.pathname = `/ru/${pathArray.join("/")}`
+        } else {
+          history.location.pathname = `/ru/${currentUser ? currentUser.id : "123"}/calls`
+        }
+      }
+    });
+  }, [languageParam, currentUser]);
 
   // dicts (прототип 2)
   if (!searchDictsParams) {
@@ -84,7 +116,6 @@ const App = () => {
   }, []);
 
 
-
   useEffect(() => {
     history.listen((location) => {
       localStorage.setItem('path', JSON.stringify({
@@ -100,7 +131,7 @@ const App = () => {
     }
   }, [])
 
-  const [loading, setLoading] = useState(false);
+  const loading = useAppSelector(state => state.lang.language);
 
   return (
     <div className={classes.wrapper}>
@@ -108,39 +139,36 @@ const App = () => {
         {loading && <LinearDeterminate progressIsOver={false}/>}
       </div>
 
+      {/* Авторизация */}
+      <Route exact path="/:lang/:userId/auth">
+        <Auth/>
+      </Route>
+      {!isAuth && <Redirect to="/auth"/>}
+      <Header/>
       <Switch>
-
-        {/* Авторизация */}
-        <Route exact path="/auth">
-          <Auth/>
-        </Route>
-        {!isAuth && <Redirect to="/auth"/>}
-
         {/* Звонки */}
-        <Route path="/calls">
-          <Header/>
+        <Route path="/:lang/:userId/calls">
           <div className={classes.container}>
             <Calls/>
           </div>
         </Route>
 
         {/* Отсчеты */}
-        <Route path="/reports">
-          <Header/>
+        <Route path="/:lang/:userId/reports">
           <div className={classes.container}>
             <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">Reports</Typography>
-            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">in developing</Typography>
+            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">in
+              developing</Typography>
           </div>
         </Route>
 
         {/* Загрузить звонок */}
-        <Route path="/markuprules">
+        <Route path="/:lang/:userId/markuprules">
           <MarkupRules/>
         </Route>
 
         {/* Загрузить звонок */}
-        <Route path="/upload">
-          <Header/>
+        <Route path="/:lang/:userId/upload">
           <div className={classes.container}>
             <LoadCall/>
           </div>
@@ -148,31 +176,34 @@ const App = () => {
 
 
         {/* Оповещение */}
-        <Route path="/alert">
-          <Header/>
+        <Route path="/:lang/:userId/alert">
           <div className={classes.container}>
             <div className={classes.container}>
               <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">Alert</Typography>
-              <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">in developing</Typography>
+              <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">in
+                developing</Typography>
             </div>
           </div>
         </Route>
 
         {/* Настройки */}
-        <Route path="/settings">
-          <Header/>
+        <Route path="/:lang/:userId/settings">
           <div className={classes.container}>
             <Settings/>
           </div>
         </Route>
 
-        <Route exact path="/">
-          <Redirect to="calls"/>
-        </Route>
+        {/*<Route exact path="/">*/}
+        {/*  <Redirect to="/:lang/:userId/calls"/>*/}
+        {/*</Route>*/}
 
         <Route exact path="*">
-          <Button variant="outlined"><Link to="/">На главную страницу.</Link></Button>
-          <h1>404</h1>
+          <div style={{textAlign: "center", marginTop: "250px"}}>
+            <h1 style={{fontSize: '80px', marginBottom: '30px'}}>404</h1>
+            <Link style={{fontSize: '18px'}} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
+              На главную страницу →
+            </Link>
+          </div>
         </Route>
 
       </Switch>

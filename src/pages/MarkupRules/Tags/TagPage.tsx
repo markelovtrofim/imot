@@ -13,6 +13,7 @@ import Snackbar, {SnackbarType} from "../../../components/common/Snackbar";
 import {useHistory} from "react-router-dom";
 import queryString from "query-string";
 import {createQueryString} from "../Dicts/Dicts";
+import {langSlice} from "../../../store/lang/lang.slice";
 
 export function searchStringParserInObj(initialString: string) {
   const searchString = initialString.slice(1);
@@ -70,7 +71,7 @@ const TagPage = () => {
       }
       dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tags[0].id}`));
       history.location.pathname = '/';
-      history.replace(`markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`)
+      history.replace(`${language}/${userId}/markuprules/tags?group=${groups[0].group}&id=${tags[0].id}`)
     } else {
       queryByParameters(search);
       history.location.pathname = '/';
@@ -78,7 +79,7 @@ const TagPage = () => {
       if (search[0] !== '?') {
         newSearch = `?${search}`;
       }
-      history.replace(`markuprules/tags${newSearch}`);
+      history.replace(`${language}/${userId}/markuprules/tags${newSearch}`);
     }
   }
 
@@ -92,6 +93,15 @@ const TagPage = () => {
 
   const history = useHistory();
 
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  let pathArray = [];
+  if (path) {
+    pathArray = path.split("/");
+  }
+  const language = pathArray[1];
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
 
   async function queryByParameters(search: string) {
 
@@ -113,15 +123,20 @@ const TagPage = () => {
 
     let tags = null;
 
-    if (currentGroupLocal) {
+    if (currentGroupLocal && searchParamsObject.search) {
       dispatch(tagsSlice.actions.setCurrentTagGroup(currentGroupLocal));
       const tagsData = await dispatch(getTags({group: currentGroupLocal.group, filter: searchParamsObject.search}));
       // @ts-ignore
       tags = tagsData.payload;
     }
+    if (currentGroupLocal && !searchParamsObject.search) {
+      dispatch(tagsSlice.actions.setCurrentTagGroup(currentGroupLocal));
+      dispatch(tagsSlice.actions.setSearchInput(""));
+      const tagsData = await dispatch(getTags({group: currentGroupLocal.group}));
+      // @ts-ignore
+      tags = tagsData.payload;
+    }
     if (tags) {
-
-
       if (tags.find((item: any) => item.id === searchParamsObject.id)) {
         await dispatch(getTag(searchParamsObject.id));
       } else {
@@ -137,6 +152,7 @@ const TagPage = () => {
       if (oldSearchConverted[0] !== '?') {
         oldSearchConverted = `?${search}`
       }
+      debugger
       if (currentSearch !== oldSearchConverted) {
         queryByParameters(location.search);
       }
@@ -145,6 +161,7 @@ const TagPage = () => {
 
   useEffect(() => {
     getStartTagsData().then();
+    dispatch(langSlice.actions.setLoading(false));
   }, []);
 
 
@@ -165,7 +182,6 @@ const TagPage = () => {
         <div className={classes.dpLeftBlockDicts}>
           <SearchInput
             onSubmit={async (values) => {
-              debugger
               const searchObj = searchStringParserInObj(history.location.search);
               dispatch(tagsSlice.actions.setTags(createNullArray(20)));
               dispatch(tagsSlice.actions.setCurrentTag(null));

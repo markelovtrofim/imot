@@ -11,6 +11,7 @@ import CallStubMiddleware from "./Call";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
+import {langSlice} from "../../store/lang/lang.slice";
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -77,7 +78,8 @@ const Calls = React.memo(() => {
   };
 
   useEffect(() => {
-    pushNewCalls();
+    dispatch(langSlice.actions.setLoading(false));
+    pushNewCalls().then();
     return () => setFetching(false);
   }, []);
 
@@ -90,7 +92,7 @@ const Calls = React.memo(() => {
   const scrollHandler = (e: any) => {
     // @ts-ignore
     if (found > 10 && calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 500)) {
-      pushNewCalls();
+      pushNewCalls().then();
     }
   };
 
