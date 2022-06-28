@@ -15,6 +15,7 @@ import useOnClickOutside from "use-onclickoutside";
 import {useAppSelector} from "../../../hooks/redux";
 import {translate} from '../../../localizations';
 import {RootState} from "../../../store/store";
+import { reportsSlice } from '../../../store/reports/reports.slice';
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -69,7 +70,8 @@ type SelectPropsType = {
   criteriaFull: CriteriasType,
   criteriaCurrent: CriteriasType | RequestDataType,
   isDefaultCriteria: boolean,
-
+  block?: string,
+  index?: {arrayIndex: number, fieldIndex: number},
 };
 
 
@@ -77,6 +79,8 @@ const SearchSelect: FC<SelectPropsType> = ({
                                              criteriaFull,
                                              criteriaCurrent,
                                              isDefaultCriteria,
+                                             block,
+                                             index,
                                            }) => {
   // STYLES BLOCK
   const useStyles = makeStyles(({
@@ -304,7 +308,6 @@ const SearchSelect: FC<SelectPropsType> = ({
   const CustomMenuList = memo(({selectProps, ...props}: any) => {
     const selectSearch = useRef<HTMLInputElement | null>(null);
 
-
     useEffect(() => {
       if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
         selectSearch.current.focus();
@@ -376,12 +379,22 @@ const SearchSelect: FC<SelectPropsType> = ({
     };
 
     const eventConverterResult = eventConverter();
-
-    if (isDefaultCriteria) {
-      dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}))
-    } else {
-      dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+    if (block === 'reports') {
+      dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+    }  else if (block === 'reports-column') {
+      dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+    }  else if (index) {
+      dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex, fieldIndex: index.fieldIndex, criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
+      console.log(index);
+    }  else {
+      if (isDefaultCriteria) {
+        dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      } else {
+        dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      }
     }
+
+
   };
 
   const converter = (state: any) => {
@@ -465,10 +478,6 @@ const SearchSelect: FC<SelectPropsType> = ({
           }
         </div>
       }
-      {/* {isDefaultCriteria
-        ? null
-        : <CrossSvg onClick={removeCriteria} style={{cursor: 'pointer', marginLeft: '8px'}}/>
-      } */}
     </div>
   );
 };
