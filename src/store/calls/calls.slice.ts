@@ -137,6 +137,33 @@ export const getCallsInfo = createAsyncThunk(
   }
 );
 
+export const getCallsInfoById = createAsyncThunk(
+  'calls/getCallsInfoById',
+  async (payload:any [], thunkAPI) => {
+    try {
+      let localCalls = [];
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      for (let i = 0; i < payload.length; i++) {
+        const response = await instance.get(`call/${payload[i]}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        localCalls.push({
+          id: payload[i],
+          info: response.data,
+          stt: null,
+          audio: null
+        })
+      }
+      thunkAPI.dispatch(callsSlice.actions.setCallsInfo(localCalls));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+
 type InitialStateType = {
   bundleLength: number,
   total: number | null,
