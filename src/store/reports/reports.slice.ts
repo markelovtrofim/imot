@@ -17,7 +17,6 @@ import {instance} from "../api";
 import {RootState} from "../store";
 import cloneDeep from "lodash.clonedeep";
 
-
 export const getAllReports = createAsyncThunk(
     'reports/getAllReports',
     async (payload, thunkAPI) => {
@@ -32,48 +31,6 @@ export const getAllReports = createAsyncThunk(
       thunkAPI.dispatch(reportsSlice.actions.setReports(response.data));
     }
 );
-
-export const setReports = createAsyncThunk(
-    'reports/setReports',
-    async (payload: { report_name: string, report_type: string, rows_group_by: {}, cols_group_by: {} }, thunkAPI) => {
-    try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await instance.post(`reports`, payload, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      console.log(payload)
-      return data;
-    } catch(error) {
-      console.log(error)
-      console.log(payload)
-    }
-  }
-);
-
-
-export const getReport = createAsyncThunk(
-  'reports/getReport',
-  async (payload: string, thunkAPI) => {
-    try{
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const response = await instance.get(`reports/${payload}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      console.log(payload)
-      console.log(response.data)
-      thunkAPI.dispatch(reportsSlice.actions.setCurrentReportItem(response.data))
-      // thunkAPI.dispatch(getCallReport(response.data))
-      return
-    } catch(error) {
-      console.log(error)
-      console.log(payload)
-    }
-  }
-)
 
 const convertDate = (date: Date | null) => {
   if (date) {
@@ -90,7 +47,6 @@ const convertDate = (date: Date | null) => {
   }
   return date;
 };
-
 const convertCriterias = (activeCriterias: any) => {
   let requestArray = [];
   // if (activeCriterias.length === 0) return []
@@ -101,7 +57,6 @@ const convertCriterias = (activeCriterias: any) => {
   }
   return requestArray;
 };
-
 // here
 const convertColumn = (obj: any, parameters: any) => {
   // if (parameters.length === 0) return []
@@ -114,8 +69,7 @@ const convertColumn = (obj: any, parameters: any) => {
     return activeReport; 
   }  
 }
-
-const convertColsGroupBy = (obj:any, parameters: any) => {
+const convertColsGroupBy = (obj: any, parameters: any) => {
   let activeReport = {...obj};
   let local: any = [];
   // if (parameters.length === 0) {
@@ -158,12 +112,65 @@ const convertColsGroupBy = (obj:any, parameters: any) => {
   activeReport.cols_group_by = local2;
   return activeReport; 
 }
-
 const convertCallSearch = (callSearchArr: any, arr: any) => {
   const local = {...arr};
   local.call_search_items = callSearchArr;
   return local
 }
+
+export const setReports = createAsyncThunk(
+  'reports/setReports',
+  async (payload, thunkAPI) => {
+  try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      // @ts-ignore;
+      const state: RootState = thunkAPI.getState();
+
+      const requestCriterias = convertCriterias(state.search.activeCriteriasReports);
+      const requestSearchItemsColumn = convertCriterias(state.search.activeCriteriasColumn);
+      const requestFilters = convertColumn(state.reports.activeReport, requestSearchItemsColumn);
+      const requestRowsGroupBy = convertColsGroupBy(requestFilters, state.reports.activeParameters);
+      const requestData = convertCallSearch(requestCriterias, requestRowsGroupBy);
+      console.log(requestData);
+
+      const response = await instance.post(`reports`, requestData, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch(error) {
+      console.log(error);
+      console.log(payload);
+    }
+  }
+);
+
+
+export const getReport = createAsyncThunk(
+  'reports/getReport',
+  async (payload: string, thunkAPI) => {
+    try{
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.get(`reports/${payload}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log(payload)
+      console.log(response.data)
+      thunkAPI.dispatch(reportsSlice.actions.setActiveReport(response.data));
+      // thunkAPI.dispatch(reportsSlice.actions.setCurrentReportItem(response.data))
+      // thunkAPI.dispatch(getCallReport(response.data))
+      return
+    } catch(error) {
+      console.log(error)
+      console.log(payload)
+    }
+  }
+)
+
+
 
 export const getCallReport = createAsyncThunk(
   'make_report/calls/getCallReport',
@@ -201,6 +208,9 @@ export const getCallReport = createAsyncThunk(
       });
 
       console.log(response.data)
+      // поробовать это
+      // thunkAPI.dispatch(reportsSlice.actions.setActiveReport(response.data))
+
       thunkAPI.dispatch(reportsSlice.actions.setCallReport(response.data))
       return response.data
     } catch(error) {
@@ -272,8 +282,7 @@ export const getTagNames = createAsyncThunk(
 
 type InitialStateType = {
   allReports: ReportsType[],
-  currentReport: ReportsType[],
-  currentReportItem: ReportItemType,
+  currentSavedReport: {},
   callReport: CallReportType,
   date: Date[] | null[],
   activeReport: ReportParametersType,
@@ -284,18 +293,11 @@ type InitialStateType = {
   tableColumns: [],
 }
 
-
 const initialState: InitialStateType = {
   allReports: [],
-  currentReport: [],
+  currentSavedReport: {}, 
 
-  currentReportItem: {
-    report_name: '',
-    report_type: '',
-    rows_group_by: {},
-    cols_group_by: {},
-    call_search_items: [],
-  },
+  //разобраться и по возможности убрать его
   callReport: {
     report: {
       cols: [],
@@ -314,6 +316,8 @@ const initialState: InitialStateType = {
     diff_report: {},
     report_parameters_hash: '',
   },
+
+  
   date: [new Date(Date.now() -  24 * 7 * 60 * 60 * 1000), new Date(Date.now())],
   activeReport: {
     report_name: '',
@@ -342,12 +346,14 @@ export const reportsSlice = createSlice({
     setReports(state, action: PayloadAction<[]>) {
       state.allReports = action.payload;
     },
-    setCurrentReport(state, action: any) {
-      state.currentReport = action.payload;
+
+    setActiveReport(state, action: any) {
+      state.activeReport = action.payload;
     },
-    setCurrentReportItem(state, action: any) {
-      state.currentReportItem = action.payload;
+    setCurrentSavedReport(state, action: any) {
+      state.currentSavedReport = action.payload;
     },
+
     setCallReport(state, action: any) {
       state.callReport = action.payload;
       state.callReport.report = action.payload.report;
@@ -368,7 +374,8 @@ export const reportsSlice = createSlice({
       state.activeReport.rows_group_by = action.payload.rows_groupings[0];
       if (action.payload.cols_groupings[0] === 'tag') {
         // ?? как тут получить значения тегов??
-        state.activeReport.cols_group_by = [{group_by: action.payload.cols_groupings[0], value: '' }]
+        //@ts-ignore
+        state.activeReport.cols_group_by = [{group_by: action.payload.cols_groupings[0], value: state.tagNames[0]}]
       }
       if (action.payload.rows_groupings[0] === 'time') {
         state.activeReport.rows_group_by = {group_by: action.payload.rows_groupings[0], value: action.payload.groupings_by_time[0]}

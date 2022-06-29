@@ -154,6 +154,23 @@ const useStyles = makeStyles(({
   checkboxDiffLabel: {
     marginRight: '15px !important',
   },
+  reportName: {
+    '& span': {
+      display: 'none'
+    }
+  },
+  errorInput: {
+    position: 'relative',
+    '& .MuiFormControl-root' : {
+    borderColor: '#F5222D !important'
+    },
+    '& span': {
+      display: 'block',
+      position: 'absolute',
+      top: '-20px',
+      left: '0px'
+    }
+  },
   notFoundCalls: {
     color: '#A3AEBE !important',
     fontWeight: '700 !important',
@@ -205,14 +222,12 @@ const Reports = React.memo(() => {
   const classes = useStyles();
   const allReports = useAppSelector(state => state.reports.allReports);
   const {language} = useAppSelector((state: RootState) => state.lang);
-  const currentReport = useAppSelector(state => state.reports.currentReport);
-  const currentReportItem = useAppSelector(state => state.reports.currentReportItem);
   const callReport = useAppSelector(state => state.reports.callReport);
-  const total = useAppSelector(state => state.reports.callReport.report.total_calls);
+  const totalCalls = useAppSelector(state => state.reports.callReport.report.total_calls);
 
   //calls
   const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
-  const [callsTest, setCalls] = useState(calls)
+  
   const [expanded, setExpanded] = React.useState<string | false>(false);
   const handleExpandedChange = (panel: string | false) => {
     setExpanded(panel);
@@ -220,10 +235,11 @@ const Reports = React.memo(() => {
   const [foundCalls, setFoundCalls] = React.useState<string | number>(0);
     
   const savedReportsOptions = optionsCreatorWithName(allReports);
-  const [savedReportsValue, setAllOptionsReports] = useState(savedReportsOptions[0]);
+  const currentSavedReport = useAppSelector(state => state.reports.currentSavedReport);
+
   const [callsSwitch, setCallSwitch] = useState(false);
   
-  const activeReport = useAppSelector(state => state.reports.activeReport);
+  // const activeReport = useAppSelector(state => state.reports.activeReport);
 
   // for reports 
   const activeCriteriasReports = useAppSelector(state => state.search.activeCriteriasReports);
@@ -324,6 +340,7 @@ const Reports = React.memo(() => {
   const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
   let groupByColumnsValue: any = {};
   if (groupByColumns.length != 0) {
+    //первый дефолтный
     groupByColumnsValue = handleOtionsReportsSelectObj(groupByColumns[0]);
   }
 
@@ -334,10 +351,23 @@ const Reports = React.memo(() => {
   // tagnames
   const tagNames = useAppSelector(state => state.reports.tagNames);
   const tagNamesOptions = optionsCreatorVEL(tagNames);
+
+  // брать его валью из rows group by
+
+  // let tagNamesValue: any = {};
+  // if (tagNames) {
+  //   tagNamesValue = optionsCreatorVEL(tagNames);
+  // }
+
+
   const [tagNamesValues, setTagNamesValues] = useState(tagNamesOptions[0]);
 
   const tagNamesSecOptions = optionsCreatorVEL(tagNames);
   const [tagNamesSecValue, setTagNamesSecValue] = useState(tagNamesSecOptions[0]);
+
+  //call search items
+  const callSearchItems = useAppSelector(state => state.reports.activeReport.call_search_items);
+
 
   useEffect(() => {
     if (timeColumnsReportOptions.length != 0) setTimeColumnsReportValue(timeColumnsReportOptions[0]);
@@ -348,9 +378,9 @@ const Reports = React.memo(() => {
     if (tagNamesSecOptions.length != 0) setTagNamesSecValue(tagNamesSecOptions[0]);
   }, [tagNames])
 
-  useEffect(() => {
-    if (savedReportsOptions.length != 0) setAllOptionsReports(savedReportsOptions[0]);
-  }, [allReports])
+  // useEffect(() => {
+  //   if (savedReportsOptions.length != 0) setAllOptionsReports(savedReportsOptions[0]);
+  // }, [allReports])
 
   useEffect(() => {
     if (allCriteriasOptions.length != 0) setAllCriteriasValue(allCriteriasOptions[0]);
@@ -375,6 +405,8 @@ const Reports = React.memo(() => {
   const handleChangeCheckPercent = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxPercent(event.target.checked);
   }
+
+
 
 
   const tableRows = useAppSelector(state => state.reports.tableRows);
@@ -519,24 +551,25 @@ const Reports = React.memo(() => {
         )
       })
     }
-
-    columnsArray.push({
-      field: 'row_total_processed_calls_count', 
-      headerName: 'Кол-во всего звонков', 
-      minWidth: 130,
-      height: 75,
-      flex: 1, 
-      headerAlign: 'center',  
-      align: 'center',
-      headerClassName: 'light-header--theme',
-      content: 'percent',
-      renderHeader: () => (
-        <div className={classes.tableHeaderTitle}>
-          <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
-          <div className={classes.tableHeaderSubSubTitle}>{'Кол-во всего звонков'}</div>
-        </div>
-      )
-    })
+    if (checkboxCalls) {
+      columnsArray.push({
+        field: 'row_total_processed_calls_count', 
+        headerName: 'Кол-во всего звонков', 
+        minWidth: 130,
+        height: 75,
+        flex: 1, 
+        headerAlign: 'center',  
+        align: 'center',
+        headerClassName: 'light-header--theme',
+        content: 'percent',
+        renderHeader: () => (
+          <div className={classes.tableHeaderTitle}>
+            <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
+            <div className={classes.tableHeaderSubSubTitle}>{'Кол-во всего звонков'}</div>
+          </div>
+        )
+      })
+    }
 
     return columnsArray
   }
@@ -680,8 +713,8 @@ const Reports = React.memo(() => {
 
   const getCallParametres = async (event: any) => {
     await dispatch(getReport(event.value));
-    await dispatch(reportsSlice.actions.setCurrentReport(event.value));
-    await dispatch(reportsSlice.actions.setCallReport);
+    // await dispatch(reportsSlice.actions.setCurrentReport(event.value));
+    // await dispatch(reportsSlice.actions.setCallReport);
   }
 
   const deleteReportItem = async(event: any) => {
@@ -689,7 +722,6 @@ const Reports = React.memo(() => {
   }
 
   const [reportNameColumnDefault, setReportNameColumnDefault] = useState('');
-  const [reportSearchItemTagName, setReportSearchItemTagName] = useState('');
 
   const formReport = async () => {
     setLoading(true);
@@ -698,15 +730,21 @@ const Reports = React.memo(() => {
     switchVisibleParametres();
   }
 
+  const [validateInputItem, setValidateInputItem] = useState(false);
   // сохранение отчета
   const saveReportAsync = async () => {
-    // await dispatch(setReports())
+    if(reportName === '') setValidateInputItem(true);
+    else {
+      setValidateInputItem(false);
+      await dispatch(setReports());
+      //мини прелоадер?
+      await dispatch(getAllReports());
+    }
   }
 
   const getCalls = async (callIds: any[]) => {
     if (callIds.length != 0) {
       dispatch(callsSlice.actions.callsReset());
-      setCalls([]);
       await dispatch(getCallsInfoById(callIds));
       setCallSwitch(true);
       setFoundCalls(callIds.length);
@@ -851,15 +889,17 @@ const Reports = React.memo(() => {
                 width={'265px'}
                 marginRight={'0px'}
                 justify={'center'}
-                onSelectChange={(event) => getCallParametres(event)}
+                onSelectChange={(event) =>  {
+                  getCallParametres(event);
+                  dispatch(reportsSlice.actions.setCurrentSavedReport(event));
+                }}
                 options={savedReportsOptions}
-                value={savedReportsValue}
+                value={currentSavedReport}
               />
             </div>
           </div>
         </div>
       </div>
-
       {visibleParametres ?
         <BlockBox padding="24px">
           {/* фильтры звонков */}
@@ -869,8 +909,7 @@ const Reports = React.memo(() => {
                 <div className={classes.searchTitleLeft}>
                   <Typography className={classes.searchTitleLeftText} variant="h6">
                     Фильтры звонков
-                  </Typography>                 
-                  {/* кнопки справа  */}
+                  </Typography>
                   <div style={{display: 'flex', alignItems: 'center'}}>
                     <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
                       <TextSelect
@@ -919,7 +958,10 @@ const Reports = React.memo(() => {
                 <div style={{display: 'flex', alignItems: 'center', marginRight: '30px',  marginBottom: '16px', width: '100%'}}>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', minWidth: '167px', color: '#2F3747'}}>Название отчета</Typography>
-                    <div style={{width: '265px'}}>
+                    <div style={{width: '265px'}} className={validateInputItem ? classes.errorInput : classes.reportName}>
+                      <span>
+                        <Typography style={{color: '#F5222D', fontSize: '13px'}}>Укажите название отчета</Typography>
+                      </span>
                       <Input
                         name={"report_name"}
                         type={"text"}
@@ -1291,7 +1333,7 @@ const Reports = React.memo(() => {
 
       {callReport.report_parameters_hash  ?
         <>
-          {total === 0 ?
+          {totalCalls === 0 ?
             <div className={classes.notFoundCalls}>Не найдено звонков в выбранном периоде</div>
           : 
             <div style={{marginBottom: '60px'}}>
@@ -1315,7 +1357,7 @@ const Reports = React.memo(() => {
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                   <div className={classes.reportFindNumber}>
                     Под условия фильтра попало звонков: &nbsp; 
-                    {total}
+                    {totalCalls}
                   </div>
                   <div style={{display: 'flex', alignItems: 'center'}}> 
                     {/* <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', color: '#2F3747'}}>Параметры отображения</Typography> */}
