@@ -67,9 +67,17 @@ const Calls = React.memo(() => {
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
-  const handleExpandedChange = (panel: string | false) => {
-    setExpanded(panel);
+  const handleExpandedChange = (callId: string | false) => {
+    setExpanded(callId);
+    // if (callId) {
+    //   history.location.search = "/";
+    //   history.push(`?openCall=${callId}`)
+    // } else {
+    //   history.location.search = "/";
+    //   history.push(``)
+    // }
   };
+
 
   const pushNewCalls = async () => {
     setFetching(true);

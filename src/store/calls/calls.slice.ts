@@ -43,6 +43,19 @@ const convertDate = (date: Date | null) => {
   return date;
 };
 
+export const getCallPublicToken = createAsyncThunk(
+  'calls/getCallPublicToken',
+  async (id: string, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    const {data} = await instance.get(`call/${id}/public_token`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return data;
+  }
+);
+
 export const getCallStt = createAsyncThunk(
   'calls/getCallAudio',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
@@ -144,7 +157,8 @@ type InitialStateType = {
   skip: number,
   limit: number,
   callIds: null,
-  calls: CallType[][] | []
+  calls: CallType[][] | [],
+  callPageSearchParams: string
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -167,13 +181,19 @@ const initialState: InitialStateType = {
   skip: 0,
   limit: 10,
   callIds: null,
-  calls: createInitialCalls()
+  calls: createInitialCalls(),
+
+  callPageSearchParams: ""
 };
 
 export const callsSlice = createSlice({
   name: 'calls',
   initialState,
   reducers: {
+    setCallPageSearchParams(state, action: PayloadAction<string>) {
+      state.callPageSearchParams = action.payload;
+    },
+
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       let calls = [];
       for (let i = 0; i < action.payload.call_ids.length; i++) {

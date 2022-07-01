@@ -10,16 +10,17 @@ const BackSvg = () => {
   );
 };
 
+type BackPropsType = {
+  onClick: (event: any) => void
+}
 
-const Back: FC = () => {
+const Back: FC<BackPropsType> = ({onClick}) => {
   return (
     <IconButton
       margin={'0 15px 0 0'}
       backgroundColor="#E3E8EF"
       icon={<BackSvg/>}
-      onClick={(event: any) => {
-        // эмпти.
-      }}
+      onClick={(event: any) => {onClick(event)}}
     />
   );
 };

@@ -181,10 +181,14 @@ const Auth = () => {
     }
   }, [dispatch])
 
+  const currentUserData = useAppSelector(state => state.users.currentUser?.id);
+  const currentUser = currentUserData ? currentUserData : "_";
+
   if (isAuth) {
-    return <Redirect to="/calls"/>;
+    return <Redirect to={`/${currentUser}/calls`}/>;
   }
 
+  
   return (
     <div className={classes.authWrapper}>
       <div className={cn(classes.authGreetSide, classes.authBothSides)}>

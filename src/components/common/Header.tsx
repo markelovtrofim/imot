@@ -134,7 +134,7 @@ const Header: React.FC = () => {
     await dispatch(getLang(currentLang));
 
     history.location.pathname = '/'
-    history.push(`${currentLang}/123/calls`)
+    history.push(`${currentLang}/_/calls`)
   }
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
@@ -177,6 +177,9 @@ const Header: React.FC = () => {
     dispatch(removeAuthToken())
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
+    history.location.pathname = "/";
+    history.push("/ru/_/calls")
+    debugger
   };
 
   // users changer
