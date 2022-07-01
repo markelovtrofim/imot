@@ -10,13 +10,15 @@ import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
 import {useFormik} from "formik";
 import {useHistory} from "react-router-dom";
-import {DictType, MarkupRulesPagesType} from "../../store/dicts/dicts.types";
+import {MarkupRulesPagesType} from "../../store/dicts/dicts.types";
 import {useStyles} from "../../App";
 import DictsPage from "./Dicts/Dicts";
-import TagPage from "./Tags/TagPage";
+import TagPage, {searchStringParserInObj} from "./Tags/TagPage";
 import ChecklistsPage from "./Checklists/Checklists";
 import {RootState} from "../../store/store";
 import {translate} from '../../localizations';
+import {tagsSlice} from "../../store/tags/tags.slice";
+import {langSlice} from "../../store/lang/lang.slice";
 
 // CUSTOM COMMON COMPONENTS
 type SearchInputType = {
@@ -25,19 +27,110 @@ type SearchInputType = {
 };
 
 export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
-  const currentGroup = useAppSelector(state => state.dicts.currentGroup);
-  const currentDict = useAppSelector(state => state.dicts.currentDict);
+  // привет, предупреждаю после просмотра этого куска кода может пойти кровь из глаз.
+  // как-нибудь порефакторю.
+
+  const searchTagsParams = useAppSelector(state => state.tags.searchParams);
+  const searchDictsParams = useAppSelector(state => state.dicts.search);
+  const search = useAppSelector(state => state.tags.searchInput);
+
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  const pathArray = path.split("/");
+  const isDtOrTg = pathArray[4];
+
+
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const searchInHistory = searchStringParserInObj(history.location.search).search;
+
 
   useEffect(() => {
-    formik.values.search = ''
-  }, [currentGroup])
+    if (searchInHistory) {
+      if (isDtOrTg === "dictionaries") {
+        const searchObj = searchStringParserInObj(history.location.search);
+        if (searchObj.search) {
+          dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
+          dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
+          debugger
+        } else if (searchStringParserInObj(searchDictsParams).search) {
+          debugger
+          dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}`));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          onSubmit({search: ""});
+        }
+      } else if (isDtOrTg === "tags") {
+        const searchObj = searchStringParserInObj(history.location.search);
+        if (searchObj.search) {
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${searchObj.search}`));
+          dispatch(tagsSlice.actions.setSearchInput(searchObj.search));
+          // onSubmit({search: searchObj.search});
+        } else {
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          onSubmit({search: ""});
+        }
+      }
+    }
+
+  }, [searchInHistory]);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
 
   const formik = useFormik({
     initialValues: {
       search: ''
     },
     onSubmit: async (values) => {
-      onSubmit(values);
+      onSubmit({search: search})
+      if (search) {
+        if (isDtOrTg === "dictionaries") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          if (searchObj.search) {
+            dispatch(dictsSlice.actions.setSearch(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`${language}/${userId}/markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+          } else {
+            let newSearchDictsParams = searchDictsParams;
+            if (newSearchDictsParams[0] != "?") {
+              newSearchDictsParams = `?${newSearchDictsParams}`
+            }
+            dispatch(dictsSlice.actions.setSearch(`${newSearchDictsParams}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`${language}/${userId}/markuprules/dictionaries${newSearchDictsParams}&search=${search}`);
+          }
+        } else if (isDtOrTg === "tags") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          if (searchObj.search) {
+            dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`${language}/${userId}/markuprules/tags?group=${searchObj.group}&id=${searchObj.id}&search=${search}`)
+          } else {
+            let newSearchTagsParams = searchTagsParams;
+            if (newSearchTagsParams[0] != "?") {
+              newSearchTagsParams = `?${newSearchTagsParams}`
+            }
+            dispatch(tagsSlice.actions.setSearchParams(`${newSearchTagsParams}&search=${search}`));
+            history.location.pathname = '/';
+            history.replace(`${language}/${userId}/markuprules/tags${newSearchTagsParams}&search=${search}`)
+          }
+        }
+
+      } else {
+
+        if (isDtOrTg === "dictionaries") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          history.location.pathname = '/';
+          history.replace(`${language}/${userId}/markuprules/dictionaries?group=${searchObj.group}&id=${searchObj.id}`)
+        } else if (isDtOrTg === "tags") {
+          const searchObj = searchStringParserInObj(history.location.search);
+          dispatch(tagsSlice.actions.setSearchParams(`?group=${searchObj.group}&id=${searchObj.id}`));
+          history.location.pathname = '/';
+          history.replace(`${language}/${userId}/markuprules/tags?group=${searchObj.group}&id=${searchObj.id}`);
+        }
+      }
     },
   });
   const useStyles = makeStyles(({
@@ -67,16 +160,18 @@ export const SearchInput: FC<SearchInputType> = ({onSubmit, handleMWOpen}) => {
     <div className={classes.searchInputBox}>
       <form onSubmit={formik.handleSubmit} style={{width: '100%'}}>
         <div className={classes.searchInputInputBox}>
-            <Input
-              handleChange={formik.handleChange}
-              value={formik.values.search}
-              name={'search'}
-              type={'text'}
-              height={'35px'}
-              bcColor={'#F8FAFC'}
-              border={'1px solid #E3E8EF'}
-              label={translate('searchInputText_dicts', language)}
-            />
+          <Input
+            handleChange={(e) => {
+              dispatch(tagsSlice.actions.setSearchInput(e.target.value));
+            }}
+            value={search}
+            name={'search'}
+            type={'text'}
+            height={'35px'}
+            bcColor={'#F8FAFC'}
+            border={'1px solid #E3E8EF'}
+            label={translate('searchInputText_dicts', language)}
+          />
           <div className={classes.searchInputSvgBox}>
             <IconButton type={"submit"}>
               <SearchSvg/>
@@ -131,6 +226,13 @@ export const MarkupRulesButtons = () => {
     dispatch(dictsSlice.actions.setActivePage(page));
   };
 
+  useEffect(() => {
+    dispatch(langSlice.actions.setLoading(false));
+  }, []);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
   return (
     <ToggleButtonGroup
       className={classes.buttonsBox}
@@ -142,20 +244,25 @@ export const MarkupRulesButtons = () => {
         disabled={"dictionaries" === activePage}
         className={classes.button} value="dictionaries"
         onClick={() => {
+          dispatch(langSlice.actions.setLoading(true));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          history.location.search = "";
           history.location.pathname = '/'
-
-          history.replace('markuprules/dictionaries')
+          history.replace(`${language}/${userId}/markuprules/dictionaries`)
         }}
       >
         {translate('buttonDictsName_dicts', language)}
       </ToggleButton>
 
-      <ToggleButton disabled={"tags" === activePage}
-                    className={classes.button} value="tags"
-                    onClick={() => {
-                      history.location.pathname = '/'
-                      history.replace('markuprules/tags')
-                    }}
+      <ToggleButton
+        className={classes.button} value="tags"
+        onClick={() => {
+          dispatch(langSlice.actions.setLoading(true));
+          dispatch(tagsSlice.actions.setSearchInput(""));
+          history.location.search = "";
+          history.location.pathname = '/'
+          history.replace(`${language}/${userId}/markuprules/tags`)
+        }}
       >
         {translate('buttonTagsName_dicts', language)}
       </ToggleButton>
@@ -205,23 +312,15 @@ export const InfoCircle = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-export const Preloader = () => {
-  return (
-    <div style={{marginTop: '250px', textAlign: 'center'}}>
-      <CircularProgress size={58}/>
-    </div>
-  );
-}
-
 const MarkupRules = memo(() => {
   const history = useHistory();
-  const path = history.location.pathname.split('/')[2];
+  const path = history.location.pathname.split('/');
+  const pathActivePage = path[4];
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (path) {
-      // @ts-ignore
-      dispatch(dictsSlice.actions.setActivePage(path));
+    if (pathActivePage) {
+      dispatch(dictsSlice.actions.setActivePage(pathActivePage));
     } else {
       dispatch(dictsSlice.actions.setActivePage('dictionaries'));
     }
@@ -235,7 +334,6 @@ const MarkupRules = memo(() => {
       {(activePage === 'dictionaries' || activePage === 'tags' || activePage === 'checklists')
         ?
         <div>
-          <Header/>
           <div className={appClasses.container}>
             {activePage === 'dictionaries' && <DictsPage/>}
             {activePage === 'tags' && <TagPage/>}
@@ -244,7 +342,6 @@ const MarkupRules = memo(() => {
         </div>
         :
         <div>
-          <Header/>
           <div style={{
             fontWeight: '700',
             marginTop: '400px',

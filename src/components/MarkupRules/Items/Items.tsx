@@ -6,18 +6,16 @@ import {dictsSlice, getDict} from "../../../store/dicts/dicts.slice";
 import {DictType, DictTypeDetailed} from "../../../store/dicts/dicts.types";
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
-import {TagDetailedType, TagType} from "../../../store/tags/tags.types";
 
 type ItemsPropsType = {
-  items: DictType[] | TagType[] | null[] | null,
-  currentItem: DictTypeDetailed | TagDetailedType | null | false
+  items: DictType[] | null[] | null,
+  currentItem: DictTypeDetailed | null | false | undefined
 }
 
 const Items: FC<ItemsPropsType> = ({items, currentItem}) => {
   const dispatch = useDispatch();
   const {language} = useAppSelector((state: RootState) => state.lang);
 
-  console.log(items);
   return (
     <div style={{padding: '5px 0'}}>
       {items && items.length > 0

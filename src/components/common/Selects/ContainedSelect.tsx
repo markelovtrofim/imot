@@ -111,7 +111,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = ({
   const customStyles = {
     container: (provided: any) => ({
       ...provided,
-      width: width
+      width: width,
     }),
     menu: (provided: any) => ({
       ...provided,

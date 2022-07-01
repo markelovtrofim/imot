@@ -94,7 +94,7 @@ const CustomSelect: FC<CustomSelect> = (
             closeMenuOnSelect={false}
             isMulti
             createOptionPosition={'first'}
-            styles={selectCustomStylesCreator({menuIsOpen: menuIsOpen})}
+            styles={selectCustomStylesCreator({menuIsOpen: menuIsOpen, height: height})}
             formatCreateLabel={(str) => str}
             value={value}
             onChange={valueHandler}

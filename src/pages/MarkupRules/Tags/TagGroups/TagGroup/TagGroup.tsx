@@ -6,6 +6,8 @@ import {useTagGroupStyles} from "./TagGroup.jss";
 import {TagDetailedType, TagGroupType, TagType} from "../../../../../store/tags/tags.types";
 import {PurpleCircleSvg} from "./TagGroup.svg";
 import {createNullArray, getTag, getTags, tagsSlice} from "../../../../../store/tags/tags.slice";
+import {useAppSelector} from "../../../../../hooks/redux";
+import {RootState} from "../../../../../store/store";
 
 type TagGroupPropsType = {
   group: TagGroupType | null,
@@ -17,15 +19,20 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
+
   const onTagGroupClick = async () => {
     if (group) {
+      dispatch(tagsSlice.actions.setSearchInput(""));
       dispatch(tagsSlice.actions.setTags(createNullArray(20)));
       dispatch(tagsSlice.actions.setCurrentTag(null));
       dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
       dispatch(tagsSlice.actions.removeFragments(null));
       await dispatch(tagsSlice.actions.removeSetTags(null));
-
-
       dispatch(tagsSlice.actions.setCurrentTagGroup(group));
 
       const tagsData = await dispatch(getTags({group: group.group}));
@@ -35,9 +42,9 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
         const dataTag = await dispatch(getTag(tags[0].id));
         // @ts-ignore
         const tag: TagDetailedType = dataTag.payload;
-
+        dispatch(tagsSlice.actions.setSearchParams(`?group=${group.group}&id=${tag.id}`));
         history.location.pathname = `/`;
-        history.replace(`markuprules/tags/${tag.id}`);
+        history.replace(`${language}/${userId}/markuprules/tags?group=${group.group}&id=${tag.id}`);
       }
     }
   };

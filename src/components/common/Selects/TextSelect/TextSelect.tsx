@@ -64,7 +64,7 @@ const TextSelect: FC<TextSelectPropsType> = (
     return <OnBottomArrow className={classes.selectArrow}/>
   });
   const Control: FC<any> = ({children, ...props}) => (
-    <div style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
+    <div style={{display: 'flex', alignItems: 'center', cursor: 'pointer', margin: '2px'}}>
       <div style={{display: 'flex', alignItems: 'center'}} onClick={handleSelectClick}>
         {iconPosition === 'left' ? icon ? icon : <Arrow/> : null}
         {customControl}
@@ -90,7 +90,6 @@ const TextSelect: FC<TextSelectPropsType> = (
     );
   });
   const CustomOption: FC<any> = ({children, ...props}) => {
-
     return (
       <components.Option {...props}>
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>

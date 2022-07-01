@@ -3,23 +3,7 @@ import {makeStyles} from "@mui/styles";
 export const useTagDetailsStyles = makeStyles(({
   tdWrapper: {
     height: '100%',
-    padding: '24px',
-
-    overflow: 'hidden',
-    overflowY: 'auto',
-
-    '&::-webkit-scrollbar': {
-      width: '4px',
-      outline: 'none',
-      background: '#CDD5DF'
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: '#A3AEBE',
-      height: '50px',
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-      background: '#9298A1'
-    }
+    padding: '24px'
   },
   tdNameAdnPriority: {
     display: 'flex',
@@ -27,11 +11,15 @@ export const useTagDetailsStyles = makeStyles(({
     width: '100%'
   },
   tdTagNameInput: {
-    width: '100%'
+    width: '100%',
+    border: ''
   },
   tdPriorityInput: {
     '& input': {
       textAlign: 'center'
+    },
+    "& input[type=number]::-webkit-inner-spin-button": {
+      "-webkit-appearance": "none"
     }
   },
   typographyTitle: {
@@ -43,6 +31,17 @@ export const useTagDetailsStyles = makeStyles(({
   typographyTitleMini: {
     color: '#738094 !important',
     fontWeight: '700 !important',
-    fontSize: '13px !important',
+    fontSize: '11px !important'
+  },
+  typographyTitleMiniTwo: {
+    marginBottom: '10px !important',
+    color: '#738094 !important',
+    fontWeight: '700 !important',
+    fontSize: '13px !important'
+  },
+  typographyTitleMiniThree: {
+    color: '#738094 !important',
+    fontWeight: '700 !important',
+    fontSize: '13px !important'
   }
 }));

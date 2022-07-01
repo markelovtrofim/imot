@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {Button, SelectChangeEvent} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Button, LinearProgress, SelectChangeEvent, Typography} from '@mui/material';
 import {makeStyles} from '@mui/styles';
 import {useHistory} from 'react-router-dom';
 import LogoImg from '../../assets/images/logo.svg';
@@ -17,7 +17,8 @@ import {searchSlice} from "../../store/search/search.slice";
 import {getGroups} from "../../store/dicts/dicts.slice";
 import {getChildUser, getChildUsers, getMe, getUserToken} from "../../store/users/users.slice";
 import ContainedSelect from "./Selects/ContainedSelect";
-import {getLang} from "../../store/lang/lang.slice";
+import {getLang, langSlice} from "../../store/lang/lang.slice";
+import queryString from "query-string";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -118,19 +119,31 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const Header: React.FC = () => {
   const {language} = useAppSelector((state: RootState) => state.lang);
+  const {loading} = useAppSelector(state => state.lang);
 
   const classes = useStyles();
   const dispatch = useDispatch();
+
   async function handleLangChange(event: SelectChangeEvent) {
+    // let pathArray = [];
+    // pathArray = location.pathname.split("/");
+    // const languageParam = pathArray[1];
+
+    debugger
     const currentLang = event.target.value;
     await dispatch(getLang(currentLang));
-    window.location.reload();
+
+    history.location.pathname = '/'
+    history.push(`${currentLang}/_/calls`)
   }
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
 
   const history = useHistory();
-  const historyPathArray = path.split('/');
+  let historyPathArray;
+  if (path) {
+    historyPathArray = path.split('/');
+  }
   const pagePath = history.location.pathname.split('/')[1];
   const activeMarkupRulesPage = useAppSelector(state => state.dicts.activePage);
 
@@ -138,8 +151,14 @@ const Header: React.FC = () => {
   const childUsers = useAppSelector(state => state.users.childUsers);
   const currentChildUser = useAppSelector(state => state.users.currentChildUser);
 
+  const [alignment, setAlignment] = React.useState("");
 
-  const [alignment, setAlignment] = React.useState(path ? `${historyPathArray[1]}` : 'calls');
+  useEffect(() => {
+    history.listen((location) => {
+      const pathArray = location.pathname.split('/');
+      setAlignment(pathArray[3]);
+    })
+  }, [history.location.pathname]);
 
   const handleRouteChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -158,6 +177,9 @@ const Header: React.FC = () => {
     dispatch(removeAuthToken())
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
+    history.location.pathname = "/";
+    history.push("/ru/_/calls")
+    debugger
   };
 
   // users changer
@@ -189,8 +211,16 @@ const Header: React.FC = () => {
     }
   })[0] || {value: '', label: 'Все пользователи'};
 
+
+  useEffect(() => {
+    if (currentUser && currentUser.language) {
+      dispatch(langSlice.actions.setLang(currentUser.language));
+    }
+  }, [currentUser]);
+
   return (
     <div className={classes.headerWrapper}>
+      {/*{loading && <LinearProgress color="primary"/>}*/}
       <div className={classes.headerInner}>
         <div className={classes.headerLeftBlock}>
           {/* Логотип */}
@@ -210,8 +240,9 @@ const Header: React.FC = () => {
               disabled={'calls' === alignment}
               value={'calls'}
               onClick={() => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace('calls');
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/calls`);
               }}
               className={classes.headerItemText}
             >
@@ -224,8 +255,9 @@ const Header: React.FC = () => {
               disabled={'reports' === alignment}
               value={'reports'}
               onClick={() => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace('reports');
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/reports`);
               }}
               className={classes.headerItemText}
             >
@@ -238,8 +270,9 @@ const Header: React.FC = () => {
               disabled={pagePath === 'markuprules' && pagePath === alignment}
               value={'markuprules'}
               onClick={async () => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace(`markuprules/${activeMarkupRulesPage}`);
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/markuprules/${activeMarkupRulesPage}`);
                 await dispatch(getGroups());
               }}
               className={classes.headerItemText}
@@ -253,8 +286,9 @@ const Header: React.FC = () => {
               disabled={'upload' === alignment}
               value={'upload'}
               onClick={() => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace('upload');
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/upload`);
               }}
               className={classes.headerItemText}
             >
@@ -264,12 +298,13 @@ const Header: React.FC = () => {
             {/* Alert */}
             <ToggleButton
               key={4}
-              disabled={true}
+              disabled={'alert' === alignment}
               value={'alert'}
               style={{cursor: 'default !important'}}
               onClick={() => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace('alert');
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/alert`);
               }}
               className={classes.headerItemText}
             >
@@ -282,8 +317,9 @@ const Header: React.FC = () => {
               disabled={'settings' === alignment}
               value={'settings'}
               onClick={() => {
+                dispatch(langSlice.actions.setLoading(true));
                 history.location.pathname = '/'
-                history.replace('settings');
+                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/settings`);
               }}
               className={classes.headerItemText}
             >
@@ -306,9 +342,15 @@ const Header: React.FC = () => {
             />
             }
             {/* Смена языка */}
-            <Select MenuProps={{
-              disableScrollLock: true
-            }} className={classes.langHandler} variant='standard' value={language} onChange={handleLangChange}>
+            <Select
+              MenuProps={{
+                disableScrollLock: true
+              }}
+              className={classes.langHandler}
+              variant='standard'
+              value={language}
+              onChange={handleLangChange}
+            >
               <MenuItem className={classes.langHandlerItem} value={'ru'}>RU</MenuItem>
               <MenuItem className={classes.langHandlerItem} value={'en'}>EN</MenuItem>
             </Select>

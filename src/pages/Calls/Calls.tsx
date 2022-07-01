@@ -11,6 +11,24 @@ import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
 import CallsHeader from './CallsHeader';
 
+import {langSlice} from "../../store/lang/lang.slice";
+
+const useStyles = makeStyles(({
+  callsHeader: {},
+  callsTitle: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '24px'
+  },
+  callsCols: {
+    borderTop: '2px solid #F8FAFC',
+    padding: '16px 24px',
+  },
+  callsTitleText: {
+    fontWeight: '700 !important'
+  }
+}))
 
 const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
   <svg width="20" height="19" viewBox="0 0 20 19" fill={props.fill ? props.fill : '#738094'}
@@ -39,9 +57,17 @@ const Calls = React.memo(() => {
 
   const {language} = useAppSelector((state: RootState) => state.lang);
   const [expanded, setExpanded] = React.useState<string | false>(false);
-  const handleExpandedChange = (panel: string | false) => {
-    setExpanded(panel);
+  const handleExpandedChange = (callId: string | false) => {
+    setExpanded(callId);
+    // if (callId) {
+    //   history.location.search = "/";
+    //   history.push(`?openCall=${callId}`)
+    // } else {
+    //   history.location.search = "/";
+    //   history.push(``)
+    // }
   };
+
 
   const pushNewCalls = async () => {
     setFetching(true);
@@ -50,7 +76,8 @@ const Calls = React.memo(() => {
   };
 
   useEffect(() => {
-    pushNewCalls();
+    dispatch(langSlice.actions.setLoading(false));
+    pushNewCalls().then();
     return () => setFetching(false);
   }, []);
 
@@ -63,7 +90,7 @@ const Calls = React.memo(() => {
   const scrollHandler = (e: any) => {
     // @ts-ignore
     if (found > 10 && calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 500)) {
-      pushNewCalls();
+      pushNewCalls().then();
     }
   };
 
@@ -83,13 +110,39 @@ const Calls = React.memo(() => {
       <СontrolBlock/>
       <Search pageName="Звонок"/>
       <BlockBox>
-
         <CallsHeader
           found={found}
           total={total}
           switchTitleFound={false}
         />
+        <div className={classes.callsHeader}>
+          <div className={classes.callsTitle}>
+            <Typography className={classes.callsTitleText}>
+              {translate('callsFindCalls', language)} {found}
+              {translate('callsOf', language)} {total}
+            </Typography>
+          </div>
+          <Grid container className={classes.callsCols}>
 
+            <Grid item xs={0.5} style={{minWidth: '50px', display: 'flex', alignItems: 'center'}}>
+              <span style={{marginRight: '15px'}}><ClockSvg/></span>
+              <ArrowsSvg/>
+            </Grid>
+
+            <Grid item xs={1.23} style={{minWidth: '100px', display: 'flex', alignItems: 'center'}}>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsEmployee', language)}</Typography>
+            </Grid>
+
+            <Grid item xs={3.5} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsCustomer', language)}</Typography>
+            </Grid>
+
+            <Grid item xs={1} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
+              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsTag', language)}</Typography>
+            </Grid>
+
+          </Grid>
+        </div>
         <div>
           {/*<InfiniteScroll*/}
           {/*  // @ts-ignore*/}

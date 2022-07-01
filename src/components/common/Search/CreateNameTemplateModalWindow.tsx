@@ -12,6 +12,7 @@ import {useAppSelector} from "../../../hooks/redux";
 import {createTemplate, updateTemplate} from "../../../store/search/template.slice";
 import {TemplateType} from "../../../store/search/template.types";
 import Snackbar from "../Snackbar";
+import {translate} from "../../../localizations";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -103,6 +104,7 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
   });
   const classes = useStyles();
 
+  const {language} = useAppSelector(state => state.lang);
   const [loading, setLoading] = useState<boolean>(false);
   const [snackbar, setSnackbar] = useState<boolean>(false);
 
@@ -118,13 +120,12 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
         time={2000}
       />
 
-      <ModalWindowBox isOpen={isOpen} handleClose={handleClose}>
-        <div className={classes.mwTitle}>
-          <Typography className={cn(classes.mwTitleText, classes.mwText)}>Введите имя шаблона</Typography>
-          <IconButton className={classes.mwIconButton} onClick={handleClose} style={{padding: '4px'}}>
-            <CloseIcon style={{color: '#000000', width: '20px', height: '20px'}}/>
-          </IconButton>
-        </div>
+      <ModalWindowBox
+        isMWOpen={isOpen}
+        handleMWClose={handleClose}
+
+        text={"Введите имя шаблона"}
+      >
         <form onSubmit={formik.handleSubmit}>
           <Input
             name={"name"}
@@ -135,11 +136,18 @@ const CreateNameTemplateModalWindow: FC<CreateNameTemplateMWPropsType> = ({
             label={"Название"}
             autoComplete="off"
           />
-          <div className={classes.mwButtonBox}>
-            <LoadingButton loading={loading} disabled={disabled} type="submit" variant="contained" color="primary">
-              Сохранить
-            </LoadingButton>
-          </div>
+
+          {/* Кнопоньки */}
+          <LoadingButton
+            loading={loading}
+            style={{marginRight: '15px'}}
+            variant="contained"
+            type="submit"
+            color={"primary"}
+          >
+            {translate("sendButton", language)}
+          </LoadingButton>
+
         </form>
       </ModalWindowBox>
     </div>

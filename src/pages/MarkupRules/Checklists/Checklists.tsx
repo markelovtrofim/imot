@@ -51,11 +51,6 @@ const ChecklistsPage = () => {
         <ChecklistsDetail/>
       </div>
 
-      {/* modal window */}
-      <ModalWindow isOpen={addDictMWIsOpen} handleClose={() => handleMWClose()}>
-        <Input name={'dict'} type={'text'} bcColor={'#F8FAFC'} label={'Добавить словарь'}/>
-      </ModalWindow>
-
     </div>
   );
 };

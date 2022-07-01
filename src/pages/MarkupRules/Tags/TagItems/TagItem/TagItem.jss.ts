@@ -19,7 +19,7 @@ export const useTagItemStyles = makeStyles<Theme, TagItemStylesType>((theme: The
     justifyContent: 'space-between',
     alignItems: 'center',
     borderRight: '4px solid #FFFFFF',
-    borderColor: props => props.isActive ? '#9254DE' : '#FFFFFF',
+    borderColor: props => props.isActive ? '#9254DE' : '#F8FAFC',
     '&:hover': {
       borderColor: props => props.isActive ? '#722ED1' : '#F9F0FF',
       backgroundColor: '#F9F0FF'

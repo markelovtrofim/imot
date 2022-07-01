@@ -9,8 +9,6 @@ import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../../hooks/redux";
 import {dictsSlice, getDict, getDicts, getGroups, postDict} from "../../../store/dicts/dicts.slice";
 import {DictType, GroupType} from "../../../store/dicts/dicts.types";
-import {IconButton, Typography} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import {LoadingButton} from "@mui/lab";
 import Snackbar from "../../../components/common/Snackbar";
 import {useFormik} from "formik";
@@ -18,6 +16,21 @@ import {useHistory} from "react-router-dom";
 import {Input} from "../../../components/common";
 import {RootState} from "../../../store/store";
 import {translate} from "../../../localizations";
+import queryString from 'query-string';
+import {tagsSlice} from "../../../store/tags/tags.slice";
+import {langSlice} from "../../../store/lang/lang.slice";
+
+export function createQueryString(queryObj: any) {
+  let str = '';
+  for (let key in queryObj) {
+    str += `&${key}=${queryObj[key]}`;
+  }
+  if (str.length > 1) {
+    const output = str.slice(1);
+    return `?${output}`
+  }
+  return "";
+}
 
 const DictsPage = () => {
   // STYLES BLOCK
@@ -100,51 +113,123 @@ const DictsPage = () => {
       }
     }
   }));
-  const classes = useDictsStyles();
 
   // LOGIC BLOCK
-  const history = useHistory();
-  const urlArray = history.location.pathname.split('/');
-  const urlId = urlArray[3];
+  const classes = useDictsStyles();
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const dicts = useAppSelector(state => state.dicts.dicts);
-  const groups = useAppSelector(state => state.dicts.groups);
   const currentGroup = useAppSelector(state => state.dicts.currentGroup);
   const currentDict = useAppSelector(state => state.dicts.currentDict);
+  const search = useAppSelector(state => state.dicts.search);
 
-  // первый рендиринг
-  const getStartDictsData = async () => {
-    const activeGroupIndex = 0;
-    const activeDictsIndex = 0;
 
+  function searchStringParserInObj(initialString: string) {
+    const searchString = initialString.slice(1);
+    const searchStringArray = searchString.split("&");
+
+    let output: any = {};
+    for (let i = 0; i < searchStringArray.length; i++) {
+      const query = queryString.parse(searchStringArray[i]);
+      output = {...output, ...query}
+    }
+    return output;
+  }
+
+  async function queryByParameters(search: string) {
+    const searchParamsObject = searchStringParserInObj(search);
     const groupsData = await dispatch(getGroups());
     // @ts-ignore
     const groups: GroupType[] = groupsData.payload;
-    dispatch(dictsSlice.actions.setCurrentGroup(groups[activeGroupIndex]));
-    const dictsData = await dispatch(getDicts({group: groups[activeGroupIndex].group}));
-    if (!urlId) {
 
+    const searchParams = searchStringParserInObj(search);
+
+    // @ts-ignore
+    const currentGroupLocal = groups.find(item => {
+      if (item) {
+        return item.group === searchParams.group
+      }
+    });
+    if (currentGroupLocal && currentGroup && currentGroupLocal.group !== currentGroup.group) {
+      dispatch(dictsSlice.actions.setEmptyDicts(null));
+    }
+    dispatch(dictsSlice.actions.setCurrentDict(null));
+
+    let dicts = null
+    if (currentGroupLocal && searchParamsObject.search) {
+      dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
+      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group, filter: searchParamsObject.search}));
+      // @ts-ignore
+      dicts = dictsData.payload;
+    }
+    if (currentGroupLocal && !searchParamsObject.search) {
+      dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
+      dispatch(tagsSlice.actions.setSearchInput(""));
+      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group}));
+      // @ts-ignore
+      dicts = dictsData.payload;
+    }
+    if (dicts) {
+      if (dicts.find((item: any) => item.id === searchParamsObject.id)) {
+        await dispatch(getDict(searchParams.id));
+      } else {
+        dispatch(dictsSlice.actions.setCurrentDict(false));
+      }
+    }
+  }
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+
+
+  // первый рендиринг
+  const getStartDictsData = async () => {
+    const searchParams = createQueryString(queryString.parse(search));
+    const groupsData = await dispatch(getGroups());
+    // @ts-ignore
+    const groups: GroupType[] = groupsData.payload;
+
+    if (searchParams.length < 2) {
+      dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
+      const dictsData = await dispatch(getDicts({group: groups[0].group}));
       // @ts-ignore
       const dicts: DictType[] = dictsData.payload;
-      history.push(`dictionaries/${dicts[activeDictsIndex].id}`)
-      await dispatch(getDict(dicts[activeDictsIndex].id));
+      dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`));
+      history.location.pathname = '/';
+      history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
+      if (!currentDict) {
+        await dispatch(getDict(dicts[0].id));
+      }
     } else {
-      await dispatch(getDict(urlId));
-      // // @ts-ignore
-      // const currentDict: DictTypeDetailed = dictData.payload;
-      // const groupsData = await dispatch(getGroups());
-      // // @ts-ignore
-      // const currentGroup = groupsData.payload.filter((item: GroupType) => item.group === currentDict.group)[0];
-      // dispatch(dictsSlice.actions.setCurrentGroup(currentGroup));
-      // await dispatch(getDicts({group: currentGroup.group}));
+      queryByParameters(search);
+      history.location.pathname = '/';
+      let newSearch = search;
+      if (search[0] !== '?') {
+        newSearch = `?${search}`;
+      }
+      history.replace(`${language}/${userId}/markuprules/dictionaries${newSearch}`);
     }
   };
+
   useEffect(() => {
-    if (!currentDict) {
-      getStartDictsData().then();
-    } else {
-      history.push(`dictionaries/${currentDict.id}`)
-    }
+    return history.listen((location) => {
+      const currentSearch = createQueryString(queryString.parse(location.search));
+      let oldSearchConverted = createQueryString(queryString.parse(search));
+      if (oldSearchConverted[0] !== '?') {
+        oldSearchConverted = `?${search}`
+      }
+      debugger
+      if (currentSearch !== oldSearchConverted) {
+        queryByParameters(location.search);
+      }
+    });
+  }, [search]);
+
+
+  useEffect(() => {
+    getStartDictsData().then();
+    dispatch(langSlice.actions.setLoading(false));
   }, []);
 
 
@@ -188,7 +273,6 @@ const DictsPage = () => {
   });
 
 
-
   // modal window(MW) открытие/закрытие.
   const [addDictMWIsOpen, setAddDictMWIsOpen] = useState<boolean>(false);
   const handleMWOpen = () => {
@@ -203,6 +287,7 @@ const DictsPage = () => {
   const [isSuccessSnackbarOpen, setSuccessSnackbarOpen] = useState<boolean>(false);
 
   const {language} = useAppSelector((state: RootState) => state.lang);
+
 
   return (
     <div className={classes.dpContainer}>
@@ -224,7 +309,7 @@ const DictsPage = () => {
 
           {/* groups */}
           <div className={classes.dpBothBox}>
-            <Groups groups={groups} currentGroup={currentGroup}/>
+            <Groups/>
           </div>
         </div>
 
@@ -232,17 +317,17 @@ const DictsPage = () => {
         <div className={classes.dpLeftBlockDicts}>
           <SearchInput
             onSubmit={async (values: any) => {
-              if (currentGroup) {
-                dispatch(dictsSlice.actions.setEmptyDicts(null));
-                dispatch(dictsSlice.actions.setCurrentDict(null));
-                const dictsData = await dispatch(getDicts({group: currentGroup.group, filter: values.search}));
-                // @ts-ignore
-                const dicts: DictType[] = dictsData.payload;
-                if (dicts.length < 1) {
-                  await dispatch(dictsSlice.actions.setCurrentDict(false));
-                } else {
-                  await dispatch(getDict(dicts[0].id));
-                }
+              const searchObj = searchStringParserInObj(history.location.search);
+              debugger
+              dispatch(dictsSlice.actions.setEmptyDicts(null));
+              dispatch(dictsSlice.actions.setCurrentDict(null));
+              const dictsData = await dispatch(getDicts({group: searchObj.group, filter: values.search}));
+              // @ts-ignore
+              const dicts: DictType[] = dictsData.payload;
+              if (dicts.length < 1) {
+                await dispatch(dictsSlice.actions.setCurrentDict(false));
+              } else {
+                await dispatch(getDict(dicts[0].id));
               }
             }}
             handleMWOpen={handleMWOpen}/>
@@ -271,13 +356,12 @@ const DictsPage = () => {
       </div>
 
       {/* modal window */}
-      <ModalWindow isOpen={addDictMWIsOpen} handleClose={handleMWClose}>
-        <div className={classes.MWTitle}>
-          <Typography className={classes.MWTitleText}>Введите имя словаря и группы</Typography>
-          <IconButton onClick={handleMWClose}>
-            <CloseIcon style={{color: '#000000', width: '15px', height: '15px'}}/>
-          </IconButton>
-        </div>
+      <ModalWindow
+        isMWOpen={addDictMWIsOpen}
+        handleMWClose={handleMWClose}
+        width={'400px'}
+        text={"Введите имя словаря и группы"}
+      >
 
         <form onSubmit={formik.handleSubmit}>
           <Input

@@ -12,7 +12,7 @@ type FieldPropsType = {
   padding?: string
 }
 
-const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height, margin, padding}) => {
+const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height, margin, padding, labelBrother}) => {
   const useStyles = makeStyles(({
     fieldBox: {
       margin: margin ? margin : '0',
@@ -20,14 +20,14 @@ const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height
       width: width ? width : 'auto'
     },
     fieldText: {
-      cursor: 'default',
       backgroundColor: bgColor ? bgColor : '#F8FAFC',
-      border: '1px solid #EEF2F6',
+      border: '1px solid #E3E8EF',
       padding: padding ? padding : '3px 10px',
       borderRadius: '5px',
       marginTop: '10px'
     },
     fieldLabel: {
+      cursor: 'default !important',
       color: '#738094 !important',
       fontWeight: '700 !important',
       fontSize: '13px !important'
@@ -40,6 +40,7 @@ const Field: FC<FieldPropsType> = memo(({children, label, bgColor, width, height
         <Typography className={classes.fieldLabel}>
           {label}
         </Typography>
+        {labelBrother}
       </div>
       <div className={classes.fieldText}>
         {children}

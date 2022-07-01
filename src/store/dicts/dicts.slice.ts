@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import  {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {DictActionType, DictType, DictTypeDetailed, GroupType, MarkupRulesPagesType} from "./dicts.types";
 import {instance} from "../api";
 
@@ -137,14 +137,16 @@ export const dictActions = createAsyncThunk(
 
 
 type InitialStateType = {
-  activePage: MarkupRulesPagesType | '',
+  activePage: string,
+  search: string,
+
   activeId: string | null,
 
   groups: GroupType[] | null[],
   currentGroup: GroupType | null,
 
   dicts: DictType[] | null[] | null,
-  currentDict: DictTypeDetailed | null | false,
+  currentDict: DictTypeDetailed | null | false | undefined,
 
   error: string | null
 };
@@ -159,6 +161,11 @@ const createNullArray = (count: number) => {
 
 const initialState: InitialStateType = {
   activePage: '',
+  search: '',
+
+
+
+
   activeId: null,
 
   groups: createNullArray(4),
@@ -180,8 +187,13 @@ export const dictsSlice = createSlice({
     },
 
     // Active page
-    setActivePage(state, action: PayloadAction<MarkupRulesPagesType>) {
+    setActivePage(state, action: PayloadAction<string>) {
       state.activePage = action.payload;
+    },
+
+    // Search params
+    setSearch(state, action: PayloadAction<string>) {
+      state.search = action.payload;
     },
 
     // Groups
@@ -199,7 +211,7 @@ export const dictsSlice = createSlice({
     setEmptyDicts(state, action) {
       state.dicts = createNullArray(15);
     },
-    setCurrentDict(state, action: PayloadAction<DictTypeDetailed | null | false>) {
+    setCurrentDict(state, action: PayloadAction<DictTypeDetailed | null | false | undefined>) {
       state.currentDict = action.payload;
     },
 

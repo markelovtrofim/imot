@@ -45,10 +45,11 @@ type SnackbarPropsType = {
   open: boolean,
   onClose: (event: any) => void,
   text: string,
-  time: number | null
+  time: number | null,
+  bg?: string
 };
 
-const CustomSnackbar: FC<SnackbarPropsType> = memo(({type, open, onClose, text, time}) => {
+const CustomSnackbar: FC<SnackbarPropsType> = memo(({type, open, onClose, text, time, bg}) => {
   const useStyles = makeStyles(({
     snackbar: {
       testAlign: 'center !important'
@@ -83,7 +84,7 @@ const CustomSnackbar: FC<SnackbarPropsType> = memo(({type, open, onClose, text, 
           sx={{
             padding: '15px 40px',
             fontSize: '15px',
-            backgroundColor: '#fff',
+            backgroundColor: bg ? bg : '#fff',
             boxShadow: '0px 9px 28px 8px rgba(0, 0, 0, 0.15), 0px 6px 16px rgba(0, 0, 0, 0.18), 0px 3px 6px -4px rgba(0, 0, 0, 0.22)',
             '& .MuiAlert-icon': {
               paddingTop: '10px !important'

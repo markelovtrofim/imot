@@ -1,12 +1,14 @@
 import React, {FC, memo} from "react";
 import {useDispatch} from "react-redux";
-import {Skeleton} from "@mui/material";
+import {Skeleton, Typography} from "@mui/material";
 import {useHistory} from "react-router-dom";
 import {useTagItemStyles} from "./TagItem.jss";
 import {TagType} from "../../../../../store/tags/tags.types";
 import {InfoCircle, InfoCircleActive} from "../../../MarkupRules";
 import {getTag, tagsSlice} from "../../../../../store/tags/tags.slice";
 import {useAppSelector} from "../../../../../hooks/redux";
+import {searchStringParserInObj} from "../../TagPage";
+import {RootState} from "../../../../../store/store";
 
 type TagItemPropsType = {
   tag: TagType | null,
@@ -18,16 +20,36 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = useTagItemStyles({tag, isActive});
+  const currentGroup = useAppSelector(state => state.tags.currentTagGroup);
+
+
+  const search = useAppSelector(state => state.tags.searchParams);
+  const searchParamsObject = searchStringParserInObj(search);
+
+  const {language} = useAppSelector((state: RootState) => state.lang);
+
+  const userIdData = useAppSelector(state => state.users.currentUser?.id);
+  const userId = userIdData ? userIdData : "_";
+  // ${language}/${userId}/
+
 
   async function onTagItemClick() {
-    if (!isActive && tag) {
+    if (!isActive && tag && currentGroup) {
       dispatch(tagsSlice.actions.setCurrentTag(null));
       dispatch(tagsSlice.actions.setActiveGlobalFilterCriterias([]));
       dispatch(tagsSlice.actions.removeFragments(null));
       dispatch(tagsSlice.actions.removeSetTags(null));
       await dispatch(getTag(tag.id));
-      history.location.pathname = '/';
-      history.replace(`markuprules/tags/${tag.id}`);
+
+      if (searchParamsObject.search) {
+        dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tag.id}&search=${searchParamsObject.search}`));
+        history.location.pathname = `/`;
+        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tag.id}&search=${searchParamsObject.search}`);
+      } else {
+        dispatch(tagsSlice.actions.setSearchParams(`?group=${currentGroup.group}&id=${tag.id}`));
+        history.location.pathname = `/`;
+        history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tag.id}`);
+      }
     }
   }
 
@@ -41,7 +63,9 @@ const TagItem: FC<TagItemPropsType> = memo(({tag, isActive}) => {
           }
         </div>
       </div>
-      {isActive ? <InfoCircleActive/> : <InfoCircle/>}
+      <div style={{display: 'flex', alignItems: 'center'}}>
+        {isActive ? <InfoCircleActive style={{marginLeft: '30px'}}/> : <InfoCircle style={{marginLeft: '30px'}}/>}
+      </div>
     </div>
   )
 });
