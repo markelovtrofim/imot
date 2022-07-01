@@ -1,18 +1,13 @@
 import React, {useState} from 'react';
 import {makeStyles} from '@mui/styles';
-import {Button} from '@mui/material';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../store/store";
-import {translate} from '../../localizations';
-import cn from 'classnames';
-import {DateRangePicker,CustomProvider} from 'rsuite';
 import ButtonGroup from "./ButtonGroup";
 import {useAppSelector} from "../../hooks/redux";
 import {searchSlice} from "../../store/search/search.slice";
 import Snackbar from "./Snackbar";
-import Input from "./Input";
-import {startOfDay, endOfDay, addDays, subDays, addYears, subMonths} from 'date-fns';
-
+import DateRangePickerWrapper from './DateRangePickerWrapper';
+import {reportsSlice} from './../../store/reports/reports.slice';
 
 // Svg
 const DownloadSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -88,86 +83,6 @@ const useStyles = makeStyles(({
       fill: '#738094',
     }
   },
-  dateRangePickerInputs: {
-    position: 'relative',
-    border: 'none !important',
-    outlined: 'none !important',
-    minWidth: '222px',
-    height: '40px',
-    '& .rs-picker-toggle.rs-btn': {
-      height: '100%',
-      paddingTop: '8px',
-      '&:hover, &.rs-picker-toggle-active': {
-        borderColor: '#722ED1'
-      },
-      '&.rs-picker-toggle-active': {
-        boxShadow: '0 0 0 3px rgba(114,46,209,0.25)'
-      }
-    },
-    '& .rs-picker-toggle-value': {
-      color: '#575757 !important',
-      paddingTop: '1px'
-    },
-    '& .rs-picker-toggle-clean.rs-btn-close': {
-      top: '9px !important',
-    }
-  },
-  dateRangePanel: {
-    '& .rs-picker-daterange-panel': {
-      display: 'flex',
-      '& .rs-picker-daterange-content': {
-        backgroundColor: '#fff'
-      },
-      '& .rs-calendar-header-title': {
-        fontSize: '14px',
-        lineHeight: '22px',
-      },
-      '& .rs-picker-toolbar': {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        borderLeft: '1px solid #e5e5ea',
-        borderTop: 'none',
-        '&::before, &::after': {
-          content: 'none',
-        }
-      },
-      '& .rs-picker-toolbar-ranges': {
-        display: 'flex',
-        flexDirection: 'column',
-        '& .rs-btn': {
-          textAlign: 'left',
-          paddingLeft: '0',
-          color: '#575757 !important'
-        }
-      },
-      '& .rs-picker-daterange-header': {
-        display: 'none',
-      },
-      '& .rs-btn-icon.rs-btn-xs>.rs-icon': {
-        fontSize: '20px',
-      },
-      '& .rs-calendar-table-cell-selected .rs-calendar-table-cell-content': {
-        backgroundColor: '#722ED1 !important'
-      },
-      '& .rs-btn-primary, & .rs-btn-primary:focus, & .rs-btn-primary:hover': {
-        backgroundColor: '#722ED1 !important'
-      },
-      '& .rs-calendar-table-cell:hover .rs-calendar-table-cell-content': {
-        color: '#722ED1 !important',
-        backgroundColor: 'rgba(114, 46, 209, 0.15)'
-      },
-      '& .rs-calendar-table-cell-selected:hover .rs-calendar-table-cell-content': {
-        color: '#fff !important'
-      },
-      '& .rs-calendar-table-cell-in-range:before': {
-        backgroundColor: 'rgba(114, 46, 209, 0.15)'
-      }
-    },
-    '.rs-calendar-table-cell-is-today .rs-calendar-table-cell-content': {
-      boxShadow: 'inset 0 0 0 1px #722ED1 !important'
-    },
-  }
 }))
 
 export const unitsOfTime = {
@@ -178,7 +93,7 @@ export const unitsOfTime = {
   year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())]
 }
 
-const ControlBlock = () => {
+const ControlBlock = (props: any) => {
 
   const element = document.getElementById("dateRangePicker");
   if (element) {
@@ -188,6 +103,7 @@ const ControlBlock = () => {
   const {language} = useSelector((state: RootState) => state.lang);
   const classes = useStyles();
   const date = useAppSelector(state => state.search.date);
+  const dateReports = useAppSelector(state => state.reports.date);
   const dispatch = useDispatch();
 
   const [errorSnackbar, setErrorSnackbar] = useState<boolean>(false);
@@ -198,77 +114,75 @@ const ControlBlock = () => {
       <div className={classes.controlBlockDate}>
         {/* Ввод точной даты */}
         <div style={{height: '40px', display: 'flex'}}>
-          <DateRangePicker
-            id={'dateRangePicker'}
-            menuClassName={classes.dateRangePanel}
-            ranges={[
-              {
-                label: translate('today', language),
-                value: [startOfDay(new Date()), endOfDay(new Date())],
-                closeOverlay: true
-              },
-              {
-                label: translate('lastWeek', language),
-                value: [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
-                closeOverlay: true
-              },
-              {
-                label: translate('lastMonth', language),
-                value: [startOfDay(subMonths(new Date(), 1)), endOfDay(new Date())],
-                closeOverlay: true
-              },
-              {
-                label: translate('lastYear', language),
-                value: [startOfDay(addYears(new Date(), -1)), endOfDay(new Date())],
-                closeOverlay: true
-              },
-            ]}
-            caretAs={CalendarSvg}
-            isoWeek
-            appearance="default"
-            placeholder={translate('placeholderCalendar', language)}
-            format={'dd.MM.yyyy'}
-            className={classes.dateRangePickerInputs}
-            // @ts-ignore
-            value={date}
-            onChange={(value,) => {
+          {props.switchEntity === 'reports' ?
+            <DateRangePickerWrapper
+              id={'dateRangePicker'}
               // @ts-ignore
-              dispatch(searchSlice.actions.setDate(value));
-            }}
-            onClean={() => {
-              dispatch(searchSlice.actions.setDate([null, null]));
-            }}
-          />
-          {
-            <div style={{}}>
-
-            </div>
+              value={dateReports}
+              // @ts-ignore
+              onChange={(value,) => {
+                // @ts-ignore
+                dispatch(reportsSlice.actions.setDate(value))
+              }}
+              onClean={() => {
+                dispatch(reportsSlice.actions.setDate([null, null]));
+              }}
+            />
+            :
+            <DateRangePickerWrapper
+              id={'dateRangePicker'}
+              // @ts-ignore
+              value={date}
+              // @ts-ignore
+              onChange={(value,) => {
+                // @ts-ignore
+                dispatch(searchSlice.actions.setDate(value));
+              }}
+              onClean={() => {
+                dispatch(searchSlice.actions.setDate([null, null]));
+              }}
+            />
           }
           <ButtonGroup
             items={[
               {
                 value: 'today', onClick: () => {
-                  dispatch(searchSlice.actions.setDate(unitsOfTime.today))
+                  {props.switchEntity === 'reports' ? 
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.today))
+                  : dispatch(searchSlice.actions.setDate(unitsOfTime.today))
+                  }
                 }, unitOfTime: unitsOfTime.today
               },
               {
                 value: 'yesterday', onClick: () => {
-                  dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday))
+                  {props.switchEntity === 'reports' ? 
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.yesterday))
+                  : dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday))
+                  }                  
                 }, unitOfTime: unitsOfTime.yesterday
               },
               {
                 value: 'week', onClick: () => {
-                  dispatch(searchSlice.actions.setDate(unitsOfTime.week))
+                  {props.switchEntity === 'reports' ? 
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.week))
+                  : dispatch(searchSlice.actions.setDate(unitsOfTime.week))
+                  }
                 }, unitOfTime: unitsOfTime.week
               },
               {
                 value: 'month', onClick: () => {
-                  dispatch(searchSlice.actions.setDate(unitsOfTime.month))
+                  {props.switchEntity === 'reports' ? 
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.month))
+                  : dispatch(searchSlice.actions.setDate(unitsOfTime.month))
+                  }
                 }, unitOfTime: unitsOfTime.month
               },
               {
                 value: 'year', onClick: () => {
-                  dispatch(searchSlice.actions.setDate(unitsOfTime.year))
+                  {props.switchEntity === 'reports' ? 
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.year))
+                  : dispatch(searchSlice.actions.setDate(unitsOfTime.year))
+                  }
                 }, unitOfTime: unitsOfTime.year
               }
             ]}

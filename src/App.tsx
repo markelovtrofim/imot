@@ -6,6 +6,7 @@ import {Header} from './components/common';
 import {
   Auth,
   Calls,
+  Reports,
   MarkupRules,
   LoadCall,
   Settings
@@ -162,7 +163,7 @@ const App = () => {
             <Calls/>
           </div>
         </Route>
-
+ 
         {/* Звонок */}
         <Route path="/:lang/:userId/call">
           <Header/>
@@ -175,9 +176,7 @@ const App = () => {
         <Route path="/:lang/:userId/reports">
           <Header/>
           <div className={classes.container}>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">Reports</Typography>
-            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
-              in developing</Typography>
+            <Reports/>
           </div>
         </Route>
 

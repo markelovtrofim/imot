@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {BlockBox, Search, СontrolBlock} from "../../components/common";
 import {CircularProgress, Typography} from "@mui/material";
-import {makeStyles} from "@mui/styles";
-import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
@@ -11,6 +9,8 @@ import CallStubMiddleware from "./Call";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
+import CallsHeader from './CallsHeader';
+
 import {langSlice} from "../../store/lang/lang.slice";
 
 const useStyles = makeStyles(({
@@ -28,7 +28,7 @@ const useStyles = makeStyles(({
   callsTitleText: {
     fontWeight: '700 !important'
   }
-}));
+}))
 
 const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
   <svg width="20" height="19" viewBox="0 0 20 19" fill={props.fill ? props.fill : '#738094'}
@@ -45,18 +45,8 @@ const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="6" height="12" viewBox="0 0 6 12" fill={props.fill ? props.fill : '#738094'}
-       xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path
-      d="M2.56736 0.75C2.75981 0.416667 3.24094 0.416667 3.43339 0.75L5.16544 3.75C5.35789 4.08333 5.11733 4.5 4.73243 4.5H1.26832C0.883424 4.5 0.642861 4.08333 0.835311 3.75L2.56736 0.75Z"/>
-    <path
-      d="M3.43264 11.25C3.24019 11.5833 2.75906 11.5833 2.56661 11.25L0.834562 8.25C0.642112 7.91667 0.882675 7.5 1.26757 7.5H4.73168C5.11658 7.5 5.35714 7.91667 5.16469 8.25L3.43264 11.25Z"/>
-  </svg>
-);
 
 const Calls = React.memo(() => {
-  const classes = useStyles();
   const dispatch = useDispatch();
   const [fetching, setFetching] = useState<boolean>(false);
 
@@ -120,6 +110,11 @@ const Calls = React.memo(() => {
       <СontrolBlock/>
       <Search pageName="Звонок"/>
       <BlockBox>
+        <CallsHeader
+          found={found}
+          total={total}
+          switchTitleFound={false}
+        />
         <div className={classes.callsHeader}>
           <div className={classes.callsTitle}>
             <Typography className={classes.callsTitleText}>
@@ -148,7 +143,6 @@ const Calls = React.memo(() => {
 
           </Grid>
         </div>
-
         <div>
           {/*<InfiniteScroll*/}
           {/*  // @ts-ignore*/}

@@ -8,5 +8,7 @@ export type CriteriasType = {
   key: string,
   selectType: string,
   addMulti: boolean,
-  values: string[]
+  values: string[],
+  block: string,
+  wide: boolean,
 };
