@@ -10,6 +10,7 @@ import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import {useHistory} from "react-router-dom";
 import CallsHeader from './CallsHeader';
+import {makeStyles} from '@mui/styles';
 
 import {langSlice} from "../../store/lang/lang.slice";
 
@@ -48,6 +49,7 @@ const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
 
 const Calls = React.memo(() => {
   const dispatch = useDispatch();
+  const classes = useStyles();
   const [fetching, setFetching] = useState<boolean>(false);
 
   const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
@@ -110,39 +112,12 @@ const Calls = React.memo(() => {
       <СontrolBlock/>
       <Search pageName="Звонок"/>
       <BlockBox>
+
         <CallsHeader
           found={found}
           total={total}
           switchTitleFound={false}
         />
-        <div className={classes.callsHeader}>
-          <div className={classes.callsTitle}>
-            <Typography className={classes.callsTitleText}>
-              {translate('callsFindCalls', language)} {found}
-              {translate('callsOf', language)} {total}
-            </Typography>
-          </div>
-          <Grid container className={classes.callsCols}>
-
-            <Grid item xs={0.5} style={{minWidth: '50px', display: 'flex', alignItems: 'center'}}>
-              <span style={{marginRight: '15px'}}><ClockSvg/></span>
-              <ArrowsSvg/>
-            </Grid>
-
-            <Grid item xs={1.23} style={{minWidth: '100px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsEmployee', language)}</Typography>
-            </Grid>
-
-            <Grid item xs={3.5} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsCustomer', language)}</Typography>
-            </Grid>
-
-            <Grid item xs={1} style={{minWidth: '130px', display: 'flex', alignItems: 'center'}}>
-              <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsTag', language)}</Typography>
-            </Grid>
-
-          </Grid>
-        </div>
         <div>
           {/*<InfiniteScroll*/}
           {/*  // @ts-ignore*/}

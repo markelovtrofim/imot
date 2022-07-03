@@ -71,7 +71,7 @@ type SelectPropsType = {
   criteriaCurrent: CriteriasType | RequestDataType,
   isDefaultCriteria: boolean,
   block?: string,
-  index?: {arrayIndex: number, fieldIndex: number},
+  index?: {arrayIndex: number},
 };
 
 
@@ -384,7 +384,7 @@ const SearchSelect: FC<SelectPropsType> = memo(({
     }  else if (block === 'reports-column') {
       dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
     }  else if (index) {
-      dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex, fieldIndex: index.fieldIndex, criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
+      dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex,  criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
       console.log(index);
     }  else {
       if (isDefaultCriteria) {

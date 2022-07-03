@@ -107,7 +107,6 @@ export const searchSlice = createSlice({
       state.allCriterias = null;
       state.defaultCriterias = [];
       state.activeCriterias = [];
-      // state.activeCriteriasReports = [];
     },
 
 
@@ -115,12 +114,13 @@ export const searchSlice = createSlice({
     setActiveCriteriasReports(state, action: PayloadAction<CriteriasType[]>) {
       state.activeCriteriasReports = action.payload;
     },
-    setActiveCriteriaReportsValues(state, action: PayloadAction<RequestDataType>) {
+    setActiveCriteriaReportsValues(state, action: any) {
       const obj = current(state.activeCriteriasReports).find(item => {
         return item.key === action.payload.key
       });
       // @ts-ignore
       const index = current(state.activeCriteriasReports).indexOf(obj);
+      debugger
       state.activeCriteriasReports[index].values = action.payload.values;
     },
     removeActiveCriteriaReports(state, action: PayloadAction<CriteriasType>) {
@@ -140,7 +140,7 @@ export const searchSlice = createSlice({
     //for column in report
     setActiveCriteriaReportsColumn(state, action: PayloadAction<CriteriasType[]>) {
       state.activeCriteriasColumn = action.payload;
-    }, 
+    },
     setActiveCriteriaReportsColumnValues(state, action: PayloadAction<RequestDataType>) {
       const obj = current(state.activeCriteriasColumn).find(item => {
         return item.key === action.payload.key
@@ -150,7 +150,7 @@ export const searchSlice = createSlice({
       state.activeCriteriasColumn[index].values = action.payload.values;
     },
 
-    
+
     removeActiveCriteriaColumnReports(state, action: PayloadAction<CriteriasType>) {
       let activeCriteriasColumn = cloneDeep(current(state.activeCriteriasColumn));
       const obj = current(state.activeCriteriasColumn).find(item => {
@@ -164,7 +164,7 @@ export const searchSlice = createSlice({
     removeAllActiveCriteriasColumnReports(state, action: PayloadAction<null>) {
       state.activeCriteriasColumn = [];
     },
-    
+
     searchReset: () => initialState
 
   }
