@@ -22,7 +22,8 @@ const rootReducer = combineReducers({
   dicts: dictsSlice.reducer,
   tags: tagsSlice.reducer,
   reports: reportsSlice.reducer,
-  error: errorSlice.reducer
+  error: errorSlice.reducer,
+});
 
 export const setupStore = () => {
   return configureStore({

@@ -59,7 +59,7 @@ type FindCriteriasPropsType = {
   allCriterias: CriteriasType[] | null,
   activeCriterias: CriteriasType[],
   block?: string,
-  index?: {arrayIndex: number, fieldIndex: number},
+  index?: {arrayIndex: number},
 }
 
 const CriteriasList: FC<FindCriteriasPropsType> = React.memo(({

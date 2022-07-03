@@ -1,5 +1,4 @@
-import React, {FC, memo, useEffect, useState} from 'react';
-import {makeStyles} from "@mui/styles";
+import React, {FC, memo, useEffect, useState, useRef} from 'react';
 import {getAllReports, getReport, setReports, getCallReport, deleteReport, getSelectors, getTagNames} from "../../store/reports/reports.slice";
 import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
@@ -29,6 +28,9 @@ import Plus from '../../components/common/Buttons/Plus';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
+import cloneDeep from "lodash.clonedeep";
+import {reportsStyles} from './Reports.jss';
+import Dialog from "@mui/material/Dialog";
 
 export function SortedDescendingIcon() {
   return <ExpandMoreIcon className="icon" />;
@@ -36,179 +38,7 @@ export function SortedDescendingIcon() {
 export function SortedAscendingIcon() {
   return <ExpandLessIcon className="icon" />;
 }
-
-const useStyles = makeStyles(({
-  reportItemInfo: {
-    marginTop: '40px',
-  },
-  reportTitle: {
-    marginRight: '16px !important',
-    color: '#2F3747 !important',
-    fontWeight: '500 !important',
-  },
-  reportFindNumber: {
-    color: '#A3AEBE !important',
-    fontWeight: '700 !important'
-  },
-  reportButtonsGroup: {
-    margin: '24px 0 24px 0',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }, 
-  reportButtonsGroupLeft: {
-
-  },
-  reportOptionsButton: {
-    // @ts-ignore
-    textTransform: 'none !important',
-    borderRadius: '5px !important',
-    background: '#fff !important',
-    color: '#1B202B !important',
-  },
-  reportOptionsButtonActive: {
-    // @ts-ignore
-    textTransform: 'none !important',
-    borderRadius: '5px !important',
-    background: '#fff !important',
-    color: '#1B202B !important',
-    border: '1px solid #722ED1 !important',
-  },
-  getReportsButton: {
-    // @ts-ignore
-    textTransform: 'none !important',
-    borderRadius: '5px !important',
-    marginLeft: '20px !important'
-  },
-
-  searchTitle: {
-    height: '40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '15px'
-  },
-
-  searchTitleLeft: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%'
-  },
-  searchTitleLeftText: {
-    marginRight: '16px !important',
-    color: '#2F3747 !important',
-    fontWeight: '500 !important',
-  },
-  searchTitleLeftStick: {
-    marginLeft: '16px !important',
-    color: '#CDD5DF !important',
-    fontSize: '17px !important'
-  },
-
-  searchText: {
-    marginRight: '8px !important',
-    color: '#2F3747 !important',
-    whiteSpace: 'nowrap'
-  },
-  tagsBox: {
-    minWidth: '70px',
-    height: '32px',
-    backgroundColor: '#F8FAFC',
-    border: 'none !important',
-    outline: 'none'
-  },
-  searchSearchButton: {
-    // @ts-ignore
-    textTransform: 'none !important',
-    borderRadius: '5px !important'
-  },
-  selectArrow: {
-    marginRight: '10px'
-  },
-  selectArrowOnArrow: {
-    marginBottom: '5px'
-  },
-  reportInput: {
-    border: '1px solid #ccc',
-    borderRaduis: '2px',
-    minWidth: '200px',
-    maxWidth: '300px',
-    width: '100%'
-  },
-  checkboxDiff: {
-    '& label': {
-      marginRight: '0px',
-    }
-  },
-  checkboxDiffValues: {
-    display: 'flex',
-    //@ts-ignore
-    flexDirection: 'row !important',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    '& label': {
-      marginRight: '0px',
-    }
-  },
-  checkboxDiffLabel: {
-    marginRight: '15px !important',
-  },
-  reportName: {
-    '& span': {
-      display: 'none'
-    }
-  },
-  errorInput: {
-    position: 'relative',
-    '& .MuiFormControl-root' : {
-    borderColor: '#F5222D !important'
-    },
-    '& span': {
-      display: 'block',
-      position: 'absolute',
-      top: '-20px',
-      left: '0px'
-    }
-  },
-  notFoundCalls: {
-    color: '#A3AEBE !important',
-    fontWeight: '700 !important',
-    textAlign: 'center',
-    margin: '20px 0 20px'
-  },
-  tableHeaderTitle: {
-    fontWeight: '600', 
-    lineHeight: '1.3', 
-    color: '#738094', 
-    display: 'flex', 
-    flexDirection: 'column', 
-    alignItems: 'center'
-  },
-  tableHeaderSubTitle: {
-    paddingBottom: '12px',
-    textAlign: 'center',
-    position: 'relative',
-    fontSize: '13px',
-    '&:after': {
-      position: 'absolute',
-      bottom: '7px',
-      width: '36px',
-      height: '1px',
-      display: 'block',
-      content: '""',
-      left: 'calc(50% - 18px)',
-      background: 'rgba(224, 224, 224, 1)',
-    },
-  },
-  tableHeaderSubSubTitle: {
-    fontSize: '0.8em', 
-    textAlign: 'center',
-    fontWeight: '400'
-  }
-}))
-
-const ExportIcon = (props: React.SVGProps<SVGSVGElement>) => {
+const ExportIcon = () => {
   return(
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M13.35 9.39611C13.2952 9.44451 13.2621 9.51298 13.2585 9.58605C13.2261 10.2611 13.1707 10.9354 13.0921 11.6076C12.9893 12.486 12.279 13.1858 11.3922 13.2848C9.15505 13.5349 6.84064 13.5349 4.60343 13.2848C3.71669 13.1858 3.00636 12.486 2.90361 11.6076C2.63629 9.32185 2.63629 7.01285 2.90361 4.72713C3.00636 3.84869 3.71669 3.14894 4.60343 3.04983C6.07844 2.88498 7.58877 2.82889 9.08683 2.88142C9.19497 2.88521 9.28703 2.80291 9.29463 2.69493L9.32738 2.22625C9.32938 2.19865 9.3321 2.17135 9.3355 2.14436C9.35177 2.01477 9.26191 1.88698 9.13138 1.88236C7.58098 1.82743 6.01967 1.88533 4.49235 2.05603C3.15097 2.20594 2.06809 3.26261 1.91039 4.61097C1.63403 6.97385 1.63403 9.36085 1.91039 11.7237C2.06809 13.072 3.15097 14.1288 4.49235 14.2786C6.80337 14.537 9.1923 14.537 11.5033 14.2786C12.8447 14.1288 13.9275 13.072 14.0853 11.7237C14.1979 10.7605 14.2647 9.79331 14.2855 8.82531C14.2881 8.70385 14.1391 8.64331 14.0537 8.72985C13.827 8.96005 13.5923 9.18225 13.35 9.39611Z" fill="#A3AEBE"/>
@@ -218,81 +48,37 @@ const ExportIcon = (props: React.SVGProps<SVGSVGElement>) => {
 }
 
 const Reports = React.memo(() => {
+  const classes = reportsStyles();
   const dispatch = useDispatch();
-  const classes = useStyles();
-  const allReports = useAppSelector(state => state.reports.allReports);
   const {language} = useAppSelector((state: RootState) => state.lang);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+  //reports
+  const allReports = useAppSelector(state => state.reports.allReports);
+  const savedReportsOptions = optionsCreatorWithName(allReports);
+  const currentSavedReport = useAppSelector(state => state.reports.currentSavedReport);
   const callReport = useAppSelector(state => state.reports.callReport);
   const totalCalls = useAppSelector(state => state.reports.callReport.report.total_calls);
 
   //calls
   const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
-  
+  const [foundCalls, setFoundCalls] = React.useState<string | number>(0);
+  const [callsSwitch, setCallSwitch] = useState(false);
+
   const [expanded, setExpanded] = React.useState<string | false>(false);
   const handleExpandedChange = (panel: string | false) => {
     setExpanded(panel);
   };
-  const [foundCalls, setFoundCalls] = React.useState<string | number>(0);
-    
-  const savedReportsOptions = optionsCreatorWithName(allReports);
-  const currentSavedReport = useAppSelector(state => state.reports.currentSavedReport);
 
-  const [callsSwitch, setCallSwitch] = useState(false);
-  
-  // const activeReport = useAppSelector(state => state.reports.activeReport);
-
-  // for reports 
+  //criterias
   const activeCriteriasReports = useAppSelector(state => state.search.activeCriteriasReports);
   const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
-
   const allCriterias = useAppSelector(state => state.search.allCriterias);
-
-  //
-  const allCriteriasOptions = optionsCreatorWithKey(allCriterias);
-  const [allCriteriasValue, setAllCriteriasValue] = useState(allCriteriasOptions[0]);
-
-  const copyAllCriteriasOptions =  optionsCreatorWithKey(allCriterias);
-  const [copyAllCriteriasValue, setCopyAllCriteriasValue] = useState(copyAllCriteriasOptions[0]);
- //
-
   const allCriteriasColumn = useAppSelector(state => state.search.allCriterias);
   const activeCriteriasColumn = useAppSelector(state => state.search.activeCriteriasColumn);
-
-
-  const [visibleParametres, setVisibleParametres] = React.useState(false);
-
   const activeParameters = useAppSelector(state => state.reports.activeParameters);
 
-
-  const handleOptionsReportsSelect = (options: any) => {
-    let local: { value: any, label: string, type: string }[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i] === 'time') {
-        local.push({value: options[i], label: options[i], type: 'select'});
-      } else if (options[i] === 'search_items') {
-        local.push({value: options[i], label: options[i], type: 'title'});
-      } else if (options[i] === 'tag') {
-        local.push({value: options[i], label: options[i], type: 'select-tag'});
-      } else {
-        local.push({value: options[i], label: options[i], type: 'boolean'});
-      }
-    }
-    return local;
-  }
-
-  const handleOtionsReportsSelectObj = (options: any) => {
-    let local = {};
-      if (options.group_by === 'time') {
-        local = {value: options.group_by, label: options.group_by, type: 'select'};
-      } else if (options.group_by === 'search_items') {
-        local = {value: options.group_by, label: options.group_by, type: 'title'};
-      } else if (options.group_by === 'tag') {
-        local = {value: options.group_by, label: options.group_by, type: 'select-tag'};
-      } else {
-        local = {value: options.group_by, label: options.group_by, type: 'boolean'};
-      }
-    return local;
-  }
+  const [visibleParameters, setVisibleParameters] = React.useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -316,7 +102,110 @@ const Reports = React.memo(() => {
     await dispatch(getAllSearchCriterias());
   }
 
-  // selectors values 
+  const handleOptionsReportsSelect = (options: any) => {
+    let local: { value: any, label: string, type: string }[] = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i] === 'time') {
+        local.push({value: options[i], label: options[i], type: 'select'});
+      } else if (options[i] === 'search_items') {
+        local.push({value: options[i], label: options[i], type: 'title'});
+      } else if (options[i] === 'tag') {
+        local.push({value: options[i], label: options[i], type: 'select-tag'});
+      } else {
+        local.push({value: options[i], label: options[i], type: 'boolean'});
+      }
+    }
+    return local;
+  }
+  const handleOptionsReportsSelectObj = (options: any) => {
+    let local = {};
+    if (options.group_by === 'time') {
+      local = {value: options.group_by, label: options.group_by, type: 'select'};
+    } else if (options.group_by === 'search_items') {
+      local = {value: options.group_by, label: options.group_by, type: 'title'};
+    } else if (options.group_by === 'tag') {
+      local = {value: options.group_by, label: options.group_by, type: 'select-tag'};
+    } else {
+      local = {value: options.group_by, label: options.group_by, type: 'boolean'};
+    }
+    return local;
+  }
+
+  const handleMoreSelectClick = (allCriteriasArr:  CriteriasType[] | null , activeCriterias:  CriteriasType[] | null) => {
+    if (allCriteriasArr) {
+      let local: {value: {}, label: string, icon?: string}[] = [];
+      allCriteriasArr.forEach((item, i)=> {
+        local.push({value: allCriteriasArr[i], label: allCriteriasArr[i].title});
+      })
+      for (let i = 0; i < local.length; i++) {
+        //@ts-ignore
+        if (activeCriterias.find((item) => item.key === local[i].value.key)) {
+          local[i].icon = 'minus';
+        } else {
+          local[i].icon = 'plus';
+        }
+      }
+      return local
+    }
+  }
+
+  function onAllCriteriasSelectValueChange(event: any) {
+    let index = -1;
+    for (let i in activeCriteriasReports) {
+      if (event.value.key === activeCriteriasReports[i].key) {
+        index = parseInt(i, 10);
+        dispatch(searchSlice.actions.removeActiveCriteriaReports(activeCriteriasReports[index]));
+        break
+      }
+    }
+    if (index < 0) {
+      dispatch(searchSlice.actions.setActiveCriteriasReports([...activeCriteriasReports, {...event.value, values: []}]));
+    }
+  }
+
+  function onAllCriteriasColumnSelectValueChange(event: any) {
+    let index = -1;
+    for (let i in activeCriteriasColumn) {
+      if (event.value.key === activeCriteriasColumn[i].key) {
+        index = parseInt(i, 10);
+        dispatch(searchSlice.actions.removeActiveCriteriaColumnReports(activeCriteriasColumn[index]));
+        break
+      }
+    }
+    if (index < 0) {
+      dispatch(searchSlice.actions.setActiveCriteriaReportsColumn([...activeCriteriasColumn, {...event.value, values: []}]));
+    }
+  }
+
+  function onAllCriteriasColumnSelectValueChangeTEST(event: any, arrayIndex: number, activeCriterias: CriteriasType[], allCriteriasArr: CriteriasType[], allOptions: any) {
+    let index = -1;
+    for (let i in activeCriterias) {
+      if (event.value.key === activeCriterias[i].key) {
+        index = parseInt(i, 10);
+        dispatch(reportsSlice.actions.removeActiveCriteriaColumn({criteria: activeCriterias[index], arrayIndex: arrayIndex}));
+
+        const activeCriteriasArr = cloneDeep(activeCriterias);
+        activeCriteriasArr.splice(index, 1);
+
+        const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriteriasArr]);
+        const allOptions = local2;
+        dispatch(reportsSlice.actions.setOptionsCriterias({arrayIndex: arrayIndex, criteria: allOptions}));
+        break
+      }
+    }
+    if (index < 0) {
+      dispatch(reportsSlice.actions.setActiveCriteriaColumn({criteria: [...activeCriterias, {...event.value, values: []}], arrayIndex: arrayIndex }));
+      const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriterias, {...event.value, values: []}]);
+      const allOptions = local2;
+      dispatch(reportsSlice.actions.setOptionsCriterias({arrayIndex: arrayIndex, criteria: allOptions}));
+    }
+
+  }
+
+  const activeReport = useAppSelector(state => state.reports.activeReport);
+  const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
+
+  // selectors values
   const selectorsValues = useAppSelector(state => state.reports.selectors);
 
   //название отчета
@@ -332,111 +221,143 @@ const Reports = React.memo(() => {
   const groupByRows = useAppSelector(state => state.reports.activeReport.rows_group_by);
   let groupByRowsValue: any = {};
   if (groupByRows) {
-    groupByRowsValue = handleOtionsReportsSelectObj(groupByRows);
-  }
-
-  // по столбцам
-  const groupByColumnsReportOptions = handleOptionsReportsSelect(selectorsValues.cols_groupings);
-  const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
-  let groupByColumnsValue: any = {};
-  if (groupByColumns.length != 0) {
-    //первый дефолтный
-    groupByColumnsValue = handleOtionsReportsSelectObj(groupByColumns[0]);
+    groupByRowsValue = handleOptionsReportsSelectObj(groupByRows);
   }
 
   // по времени
   const timeColumnsReportOptions = optionsCreatorVEL(selectorsValues.groupings_by_time);
   const [timeColumnsReportValue, setTimeColumnsReportValue] = useState(timeColumnsReportOptions[0]);
-  
-  // tagnames
+
+  // tag names
   const tagNames = useAppSelector(state => state.reports.tagNames);
   const tagNamesOptions = optionsCreatorVEL(tagNames);
+  let tagNamesValue = {value: '', label: ''};
+  //@ts-ignore
+  if (groupByRows.group_by === 'tag') {
+    //@ts-ignore
+    tagNamesValue = {label: groupByRows.value, value: groupByRows.value};
+  }  else {
+    tagNamesValue = tagNamesOptions[0];
+  }
 
-  // брать его валью из rows group by
+  const tagNamesColOptions = optionsCreatorVEL(tagNames);
+  //@ts-ignore
+  let tagNameColFrom = useAppSelector(state => state.reports.activeReport.cols_group_by[0]);
+  let tagNamesColValue: any = {};
+  if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
+    tagNamesColValue = {label: tagNameColFrom.value, value: tagNameColFrom.value};
+  } else {
+    tagNamesColValue = tagNamesOptions[0];
+  }
 
-  // let tagNamesValue: any = {};
-  // if (tagNames) {
-  //   tagNamesValue = optionsCreatorVEL(tagNames);
-  // }
+  const [op, setOp] = useState<any>([]);
+  useEffect(() => {
+    setOp(handleMoreSelectClick(allCriterias, activeCriteriasReports));
+  }, [allCriterias, activeCriteriasReports, defaultCriterias]);
 
+  const [opCriteriasColumn, setOpCriteriasColumn] = useState<any>([]);
+  useEffect(() => {
+    setOpCriteriasColumn(handleMoreSelectClick(allCriteriasColumn, activeCriteriasColumn));
+  }, [allCriteriasColumn, activeCriteriasColumn]);
 
-  const [tagNamesValues, setTagNamesValues] = useState(tagNamesOptions[0]);
+  const [opAddCriterias, setOpAddCriterias] = useState(op);
+  useEffect(() => {
+    if(allCriterias) {
+      setOpAddCriterias(handleMoreSelectClick(allCriterias, []));
+    }
+  }, [allCriterias])
 
-  const tagNamesSecOptions = optionsCreatorVEL(tagNames);
-  const [tagNamesSecValue, setTagNamesSecValue] = useState(tagNamesSecOptions[0]);
+  // по столбцам
+  const groupByColumnsReportOptions = handleOptionsReportsSelect(selectorsValues.cols_groupings);
+  let groupByColumnsValue: any = {};
+  if (groupByColumns.length != 0) {
+    groupByColumnsValue = handleOptionsReportsSelectObj(groupByColumns[0]);
+  }
 
   //call search items
   const callSearchItems = useAppSelector(state => state.reports.activeReport.call_search_items);
-
+  useEffect(() => {
+    if (callSearchItems.length != 0) {
+      let handleArray: any = [];
+      for (let i = 0; i < callSearchItems.length; i++) {
+        //@ts-ignore
+        let handleArrayItem = allCriterias.find((item) => callSearchItems[i].key === item.key);
+        handleArray.push(handleArrayItem);
+      }
+      let activeSearchItems = cloneDeep(handleArray);
+      for (let i = 0; i < activeSearchItems.length; i++) {
+        //@ts-ignore
+        activeSearchItems[i].values = callSearchItems[i].values;
+      }
+      dispatch(searchSlice.actions.setActiveCriteriasReports(activeSearchItems));
+    }
+  }, [callSearchItems])
 
   useEffect(() => {
     if (timeColumnsReportOptions.length != 0) setTimeColumnsReportValue(timeColumnsReportOptions[0]);
   }, [selectorsValues])
 
-  useEffect(() => {
-    if (tagNamesOptions.length != 0) setTagNamesValues(tagNamesOptions[0]);
-    if (tagNamesSecOptions.length != 0) setTagNamesSecValue(tagNamesSecOptions[0]);
-  }, [tagNames])
-
-  // useEffect(() => {
-  //   if (savedReportsOptions.length != 0) setAllOptionsReports(savedReportsOptions[0]);
-  // }, [allReports])
-
-  useEffect(() => {
-    if (allCriteriasOptions.length != 0) setAllCriteriasValue(allCriteriasOptions[0]);
-  }, [allCriterias])
+  //название деф столбца
+  //@ts-ignore
+  const colsGroupDefault = useAppSelector(state => state.reports.activeReport.cols_group_by[0]);
+  let reportNameColumnDefault = '';
+  if (colsGroupDefault) {
+    if (colsGroupDefault.value) {
+      //@ts-ignore
+      reportNameColumnDefault = colsGroupDefault.value.col_name;
+    }
+    if (!reportNameColumnDefault) reportNameColumnDefault = '';
+  }
 
   //checkbox diff values in table
   const [checkboxValue, setCheckBoxValue] = useState(false);
   const handleChangeCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckBoxValue(event.target.checked);
   }
-
   //checkbox show values in table
   const [checkboxCalls, setCheckboxCalls] = useState(true);
   const handleChangeCheckCalls = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxCalls(event.target.checked);
   }
-  const [checkboxMinuts, setCheckboxMinuts] = useState(true);
-  const handleChangeCheckMinuts = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCheckboxMinuts(event.target.checked);
+  const [checkboxMinutes, setCheckboxMinutes] = useState(true);
+  const handleChangeCheckMinutes = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckboxMinutes(event.target.checked);
   }
   const [checkboxPercent, setCheckboxPercent] = useState(true);
   const handleChangeCheckPercent = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxPercent(event.target.checked);
   }
-
-
-
-
   const tableRows = useAppSelector(state => state.reports.tableRows);
   const tableColumns = useAppSelector(state => state.reports.tableColumns);
   const rowGroupHeaderTitle = useAppSelector(state => state.reports.callReport.report.row_group_header);
- 
+
+  //to do: oптимизировать функции ниже
   //for table
+
   const columnsTable = function () {
     const columnsArray:any[] = [{
-      field: 'idName', 
-      headerName: `${rowGroupHeaderTitle}`, 
+      field: 'idName',
+      headerName: `${rowGroupHeaderTitle}`,
       minWidth: 160,
       height: 75,
+      minHeight: 100,
       flex: 1.5,
-      editable: false, 
-      headerAlign: 'center', 
+      editable: false,
+      headerAlign: 'center',
       align: 'center',
       headerClassName: 'light-header--theme',
     }];
-
     callReport.report.cols.forEach((item, index) => {
       if (checkboxCalls) {
         columnsArray.push({
-          field: `calls_count_${index}`, 
+          field: `calls_count_${index}`,
           headerName: `Звонки`,
-          minWidth: 130,
+          minWidth: 150,
           height: 75,
+          minHeight: 100,
           flex: 1,
-          editable: false, 
-          headerAlign: 'center',  
+          editable: false,
+          headerAlign: 'center',
           align: 'center',
           headerClassName: 'light-header--theme',
           cellClassName: 'cell-active',
@@ -449,15 +370,16 @@ const Reports = React.memo(() => {
         })
       }
 
-      if (checkboxMinuts) {
+      if (checkboxMinutes) {
         columnsArray.push({
-          field: `calls_minutes_${index}`, 
-          headerName: `Минуты`, 
-          minWidth: 130,
+          field: `calls_minutes_${index}`,
+          headerName: `Минуты`,
+          minWidth: 150,
           height: 75,
+          minHeight: 100,
           flex: 1,
-          editable: false, 
-          headerAlign: 'center',  
+          editable: false,
+          headerAlign: 'center',
           align: 'center',
           headerClassName: 'light-header--theme',
           content: 'minuts',
@@ -472,13 +394,14 @@ const Reports = React.memo(() => {
 
       if (checkboxPercent) {
         columnsArray.push({
-          field: `percent_calls_count_from_total_${index}`, 
-          headerName: `%`, 
-          minWidth: 130,
+          field: `percent_calls_count_from_total_${index}`,
+          headerName: `%`,
+          minWidth: 150,
           height: 75,
+          minHeight: 100,
           flex: 1,
-          editable: false, 
-          headerAlign: 'center',  
+          editable: false,
+          headerAlign: 'center',
           align: 'center',
           headerClassName: 'light-header--theme',
           content: 'percent',
@@ -494,12 +417,13 @@ const Reports = React.memo(() => {
     })
     if (checkboxCalls) {
       columnsArray.push({
-        field: 'row_sum_calls_count', 
-        headerName: 'Сумма звонков', 
-        minWidth: 130,
+        field: 'row_sum_calls_count',
+        headerName: 'Сумма звонков',
+        minWidth: 150,
         height: 75,
+        minHeight: 100,
         flex: 1,
-        headerAlign: 'center',  
+        headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
         cellClassName: 'cell-active',
@@ -511,14 +435,15 @@ const Reports = React.memo(() => {
         )
       })
     }
-    if (checkboxMinuts) {
+    if (checkboxMinutes) {
       columnsArray.push({
-        field: 'row_sum_calls_minutes', 
-        headerName: 'Кол-во минут', 
-        minWidth: 130,
+        field: 'row_sum_calls_minutes',
+        headerName: 'Кол-во минут',
+        minWidth: 150,
         height: 75,
+        minHeight: 100,
         flex: 1,
-        headerAlign: 'center',  
+        headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
         cellClassName: 'dataCell-hover',
@@ -534,12 +459,13 @@ const Reports = React.memo(() => {
 
     if (checkboxPercent) {
       columnsArray.push({
-        field: 'row_percent_count_from_total', 
-        headerName: '%', 
-        minWidth: 130,
+        field: 'row_percent_count_from_total',
+        headerName: '%',
+        minWidth: 150,
         height: 75,
-        flex: 1, 
-        headerAlign: 'center',  
+        minHeight: 100,
+        flex: 1,
+        headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
         content: 'percent',
@@ -553,12 +479,13 @@ const Reports = React.memo(() => {
     }
     if (checkboxCalls) {
       columnsArray.push({
-        field: 'row_total_processed_calls_count', 
-        headerName: 'Кол-во всего звонков', 
-        minWidth: 130,
+        field: 'row_total_processed_calls_count',
+        headerName: 'Кол-во всего звонков',
+        minWidth: 150,
         height: 75,
-        flex: 1, 
-        headerAlign: 'center',  
+        minHeight: 100,
+        flex: 1,
+        headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
         content: 'percent',
@@ -596,7 +523,7 @@ const Reports = React.memo(() => {
         result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_minutes;
         // @ts-ignorer
         result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total}%`;
-        
+
         if (checkboxValue) {
           // @ts-ignore
           const diffValue = callReport.diff_report[itemRow].cols[itemCol].calls_count;
@@ -610,15 +537,15 @@ const Reports = React.memo(() => {
           result[indexRow][`calls_count_${indexCol}`] += diffAdd;
 
           // @ts-ignore
-          const diffValueMinuts = callReport.diff_report[itemRow].cols[itemCol].calls_minutes;
-          let diffAddMinuts = '';
-          if (diffValueMinuts > 0)  {
-            diffAddMinuts = ` (+${diffValueMinuts})`;
+          const diffValueMinutes = callReport.diff_report[itemRow].cols[itemCol].calls_minutes;
+          let diffAddMinutes = '';
+          if (diffValueMinutes > 0)  {
+            diffAddMinutes = ` (+${diffValueMinutes})`;
           } else {
-            diffAddMinuts = ` (${diffValueMinuts})`;
+            diffAddMinutes = ` (${diffValueMinutes})`;
           }
           // @ts-ignore
-          result[indexRow][`calls_minutes_${indexCol}`] += diffAddMinuts;
+          result[indexRow][`calls_minutes_${indexCol}`] += diffAddMinutes;
 
           // @ts-ignore
           const diffValuePercent = callReport.diff_report[itemRow].cols[itemCol].percent_calls_count_from_total;
@@ -631,7 +558,7 @@ const Reports = React.memo(() => {
           // @ts-ignore
           result[indexRow][`percent_calls_count_from_total_${indexCol}`] += diffAddPercent;
         }
-        
+
         // @ts-ignore
         result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].call_ids;
         //массив ids
@@ -647,7 +574,7 @@ const Reports = React.memo(() => {
       result[indexRow]['row_percent_count_from_total'] = `${callReport.report.values[itemRow].row_info.row_percent_count_from_total}%`;
       // @ts-ignore
       result[indexRow]['row_total_processed_calls_count'] = callReport.report.values[itemRow].row_info.row_total_processed_calls_count;
-       
+
       if (checkboxValue) {
         // @ts-ignore
         const diffValue = callReport.diff_report[itemRow].row_info.row_sum_calls_count;
@@ -661,15 +588,15 @@ const Reports = React.memo(() => {
         result[indexRow][`row_sum_calls_count`] += diffAdd;
 
         // @ts-ignore
-        const diffValueMinuts = callReport.diff_report[itemRow].row_info.row_sum_calls_minutes;
-        let diffAddMinuts = '';
-        if (diffValueMinuts > 0)  {
-          diffAddMinuts = ` (+${diffValueMinuts})`;
+        const diffValueMinutes = callReport.diff_report[itemRow].row_info.row_sum_calls_minutes;
+        let diffAddMinutes = '';
+        if (diffValueMinutes > 0)  {
+          diffAddMinutes = ` (+${diffValueMinutes})`;
         } else {
-          diffAddMinuts = ` (${diffValueMinuts})`;
+          diffAddMinutes = ` (${diffValueMinutes})`;
         }
         // @ts-ignore
-        result[indexRow][`row_sum_calls_minutes`] += diffAddMinuts;
+        result[indexRow][`row_sum_calls_minutes`] += diffAddMinutes;
 
         // @ts-ignore
         const diffValuePercent = callReport.diff_report[itemRow].row_info.row_percent_count_from_total;
@@ -693,7 +620,6 @@ const Reports = React.memo(() => {
         // @ts-ignore
         result[indexRow][`row_total_processed_calls_count`] += diffAddCount;
       }
-
       //массив ids
       // @ts-ignore
       result[indexRow]['callIds']['row_sum_calls_count'] = resultIds;
@@ -702,44 +628,121 @@ const Reports = React.memo(() => {
     return result;
   }
   const rows: GridRowsProp = rowsTable();
-  // console.log(rowsTable())
-  
 
   useEffect(() => {
     dispatch(reportsSlice.actions.setTableRows(rows));
     dispatch(reportsSlice.actions.setTableColumns(columns));
-  },[callReport, checkboxValue, checkboxCalls, checkboxMinuts, checkboxPercent])
 
+  },[callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
 
-  const getCallParametres = async (event: any) => {
+  const getCallParameters = async (event: any) => {
+    setLoading(true);
+    //обнуление параметров
+    dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
+    dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
+    dispatch(reportsSlice.actions.removeAllActiveParameters(null));
+    await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
-    // await dispatch(reportsSlice.actions.setCurrentReport(event.value));
-    // await dispatch(reportsSlice.actions.setCallReport);
+
+    await dispatch(getCallReport());
+    setLoading(false);
+    switchVisibleParameters();
+    //to do: preloader
   }
 
-  const deleteReportItem = async(event: any) => {
-    await dispatch(deleteReport(event.target.value));
-  }
+  //отображение доп группировки по столбцам из сохраненных отчетов - переделать это
+  useEffect(() => {
+    if (groupByColumns.length > 0) {
+      if (groupByColumns[0].group_by === 'search_items') {
+        const test = [];
+        //@ts-ignore
+        for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
+          //@ts-ignore
+          const groupColumnsItem = groupByColumns[0].value.search_items[i]
+          //@ts-ignore
+          test.push(allCriterias.filter((item) => item.key === groupColumnsItem.key))
+          //@ts-ignore
+          dispatch(searchSlice.actions.setActiveCriteriaReportsColumn(allCriterias.filter((item) => item.key === groupColumnsItem.key)))
+          dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: groupColumnsItem.key, values: [...groupColumnsItem.values]}));
+        }
+      }
+    }
 
-  const [reportNameColumnDefault, setReportNameColumnDefault] = useState('');
+    if (groupByColumns.length > 1) {
+      //доп группировки
+      for (let i = 1; i < groupByColumns.length; i++) {
+        dispatch(reportsSlice.actions.setActiveParameters([{
+          select: {options: groupByColumnsReportOptions, value: handleOptionsReportsSelectObj(groupByColumns[i])},
+          tagsVal: {options: tagNamesColOptions, value: tagNamesColValue},
+          op: {options: opAddCriterias, value: ''},
+          callFilters: {options: opAddCriterias, values: allCriterias, activeValues: []}
+        }]))
+        if (groupByColumns[i].group_by === 'tag') {
+          dispatch(reportsSlice.actions.setParameterTagstFieldValue({
+            arrayIndex: i - 1,
+            //@ts-ignore
+            value: {value: groupByColumns[i].value, label: groupByColumns[i].value}
+          }))
+        } else if (groupByColumns[i].group_by === 'search_items') {
+          dispatch(reportsSlice.actions.setNameColumnFieldValue({
+            arrayIndex: i - 1,
+            //@ts-ignore
+            value: groupByColumns[i].value.col_name
+          }))
+          let activeColsCriterias = [];
+          //@ts-ignore
+          for (let j = 0; j < groupByColumns[i].value.search_items.length; j++) {
+            //@ts-ignore
+            const searchItem = groupByColumns[i].value.search_items[j];
+            //@ts-ignore
+            activeColsCriterias.push(allCriterias.filter((item) => item.key === searchItem.key));
 
+            let activeSearchItems = cloneDeep(activeColsCriterias);
+            for (let y = 0; y < activeSearchItems.length; y++) {
+              activeSearchItems[j][y].values = searchItem.values
+            }
+            dispatch(reportsSlice.actions.setActiveCriteriaColumn({
+              arrayIndex: i - 1,
+              criteria: activeSearchItems[j]
+            }))
+            dispatch(reportsSlice.actions.setOptionsCriterias({
+              arrayIndex: i - 1,
+              criteria: handleMoreSelectClick(allCriterias, activeSearchItems[j])
+            }))
+          }
+        }
+      }
+    }
+  }, [groupByColumns, activeReport])
+
+  //построение отчета
   const formReport = async () => {
     setLoading(true);
     await dispatch(getCallReport());
     setLoading(false);
-    switchVisibleParametres();
+    switchVisibleParameters();
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
   // сохранение отчета
   const saveReportAsync = async () => {
-    if(reportName === '') setValidateInputItem(true);
+    if(reportName === '') {
+      setValidateInputItem(true);
+    }
     else {
       setValidateInputItem(false);
       await dispatch(setReports());
-      //мини прелоадер?
+      //to do: мини прелоадер?
       await dispatch(getAllReports());
+      await dispatch(reportsSlice.actions.setCurrentSavedReport({value: reportName, label: reportName}));
     }
+  }
+  // удаление отчета
+  const deleteReportAsync = async() => {
+    await dispatch(deleteReport(currentSavedReport.value));
+    await dispatch(getAllReports());
+    await dispatch(reportsSlice.actions.setInitialSavedReport(''));
+    await handleClose();
   }
 
   const getCalls = async (callIds: any[]) => {
@@ -751,95 +754,16 @@ const Reports = React.memo(() => {
     } else setCallSwitch(false);
   }
 
-  const isAuth = useAppSelector(state => state.auth.isAuth);
-  const [isLoading, setLoading] = useState(false);
-
-  const [op, setOp] = useState<any>([]);
-  useEffect(() => {
-    setOp(handleMoreSelectClick(allCriterias, activeCriteriasReports));
-  }, [allCriterias, activeCriteriasReports, defaultCriterias]);
-
-
-  const [opCriteriasColumn, setOpCriteriasColumn] = useState<any>([]);
-  useEffect(() => {
-    setOpCriteriasColumn(handleMoreSelectClick(allCriteriasColumn, activeCriteriasColumn));
-  }, [allCriteriasColumn, activeCriteriasColumn]);
-
-
-  const handleMoreSelectClick = (allCriteriasArr:  CriteriasType[] | null, activeCriterias:  CriteriasType[] | null) => {
-    if (allCriteriasArr) {
-      interface keyable {
-        [key: string]: any
-      } 
-      let local: Array<keyable> = [];
-
-      allCriteriasArr.forEach((item, i)=> {
-        local.push({value: allCriteriasArr[i], label: allCriteriasArr[i].title});
-      })
-
-      for (let i = 0; i < local.length; i++) {
-        //@ts-ignore
-        if (activeCriterias.find((item) => item.key === local[i].value.key)) {
-          local[i].icon = 'minus';         
-        } else {
-          local[i].icon = 'plus';  
-        }
-      }
-      return local
-    }
+  function switchVisibleParameters() {
+    setVisibleParameters(!visibleParameters);
   }
 
-  function onAllCriteriasSelectValueChange(event: any) {
-    let index = -1;
-    for (let i in activeCriteriasReports) {
-      if (event.value.key === activeCriteriasReports[i].key) {
-        index = parseInt(i, 10);
-        dispatch(searchSlice.actions.removeActiveCriteriaReports(activeCriteriasReports[index]));
-        break
-      }
-    }
-    if (index < 0) {
-      dispatch(searchSlice.actions.setActiveCriteriasReports([...activeCriteriasReports, {...event.value, values: []}]));
-    }    
+  const [isOpen, setIsOpen] = useState(false);
+  const handleClose = () => {
+    setIsOpen(false);
   }
-
-  function onAllCriteriasColumnSelectValueChange(event: any) {
-    let index = -1;
-    for (let i in activeCriteriasColumn) {
-      if (event.value.key === activeCriteriasColumn[i].key) {
-        index = parseInt(i, 10);
-        dispatch(searchSlice.actions.removeActiveCriteriaColumnReports(activeCriteriasColumn[index]));
-        break
-      }
-    }
-    if (index < 0) {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsColumn([...activeCriteriasColumn, {...event.value, values: []}]));
-    }    
-  }
-
-  function onAllCriteriasColumnSelectValueChangeTEST(event: any, arrayIndex: number, fieldIndex: number, activeCriterias: CriteriasType[], allCriteriasArr: CriteriasType[], allOptions: any) {
-    let index = -1;
-    console.log(activeCriterias);
-    for (let i in activeCriterias) {
-      if (event.value.key === activeCriterias[i].key) {
-        index = parseInt(i, 10);
-        dispatch(reportsSlice.actions.removeActiveCriteriaColumn({criteria: activeCriterias[index], arrayIndex: arrayIndex, fieldIndex: fieldIndex}));
-        debugger
-        break
-      }
-    }
-    if (index < 0) {
-      dispatch(reportsSlice.actions.setActiveCriteriaColumn({criteria: [...activeCriterias, {...event.value, values: []}], arrayIndex: arrayIndex, fieldIndex: fieldIndex }));
-    }    
-
-    const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriterias, {...event.value, values: []}]);
-    allOptions = local2;
-    dispatch(reportsSlice.actions.setOptionsCriterias({arrayIndex: arrayIndex, fieldIndex: fieldIndex, criteria: allOptions}));
-    debugger;
-  }
-
-  function switchVisibleParametres() {
-    setVisibleParametres(!visibleParametres);
+  const handleOpen = () => {
+    setIsOpen(true);
   }
 
   //высота таблицы
@@ -851,32 +775,41 @@ const Reports = React.memo(() => {
     if (gridDiv != undefined || gridDiv != null && columns.length > 0 || rows.length > 0){
       if (gridDiv) {
         const gridEl: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-root')!;
+        const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
+        const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
           setHeightTable(`${gridEl.clientHeight}px`);
+        }
+        if (gridElHeader && gridElHeaderInner) {
+          const height = gridElHeaderInner.clientHeight
+          gridElHeader.style.minHeight = `${gridElHeaderInner.clientHeight}px`;
+          gridElHeader.style.maxHeight = `${gridElHeaderInner.clientHeight}px`;
+          gridElHeader.style.lineHeight = `${gridElHeaderInner.clientHeight}px`;
         }
       }
     }
   }, [columns, rows]);
 
-  return( 
-    <div>              
+
+  return(
+    <div>
       <СontrolBlock switchEntity={'reports'}/>
       <div>
         <div className={classes.reportButtonsGroup}>
           <div className={classes.reportButtonsGroupLeft}>
             <LoadingButton
-              className={visibleParametres ? classes.reportOptionsButtonActive : classes.reportOptionsButton}
+              className={visibleParameters ? classes.reportOptionsButtonActive : classes.reportOptionsButton}
               color="primary"
               variant="text"
-              onClick={switchVisibleParametres}
+              onClick={switchVisibleParameters}
             >
               Параметры отчета
             </LoadingButton>
             <LoadingButton
-                className={classes.getReportsButton}
-                color="primary"
-                variant="contained"
-                onClick={formReport}
+              className={classes.getReportsButton}
+              color="primary"
+              variant="contained"
+              onClick={formReport}
             >
               Сформировать отчет
             </LoadingButton>
@@ -890,8 +823,7 @@ const Reports = React.memo(() => {
                 marginRight={'0px'}
                 justify={'center'}
                 onSelectChange={(event) =>  {
-                  getCallParametres(event);
-                  dispatch(reportsSlice.actions.setCurrentSavedReport(event));
+                  getCallParameters(event);
                 }}
                 options={savedReportsOptions}
                 value={currentSavedReport}
@@ -900,12 +832,12 @@ const Reports = React.memo(() => {
           </div>
         </div>
       </div>
-      {visibleParametres ?
+      {visibleParameters ?
         <BlockBox padding="24px">
           {/* фильтры звонков */}
           <div>
-            <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: ' 16px', marginBottom: '16px'}}>
-              <div style={{height: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div className={classes.filtersBlock}>
+              <div className={classes.filterBlockWrapper}>
                 <div className={classes.searchTitleLeft}>
                   <Typography className={classes.searchTitleLeftText} variant="h6">
                     Фильтры звонков
@@ -920,7 +852,7 @@ const Reports = React.memo(() => {
                         iconPosition={'left'}
                         customControl={
                           <div style={{display: 'flex', alignItems: 'center'}}>
-                            <Typography style={{color: '#722ED1', fontWeight: '700', marginLeft: '5px'}}>{translate('searchMore', language)}</Typography>
+                            <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
                           </div>
                         }
                         ifArrowColor={'#722ED1'}
@@ -933,7 +865,7 @@ const Reports = React.memo(() => {
                 </div>
               </div>
 
-              <div style={{display: 'flex', alignItems: 'flex-start', marginTop: '16px', width: '100%'}}>
+              <div className={classes.criteriaList}>
                 <CriteriasList
                   allCriterias={allCriterias}
                   activeCriterias={activeCriteriasReports}
@@ -944,7 +876,7 @@ const Reports = React.memo(() => {
           </div>
 
           {/* звонки */}
-          <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: ' 16px', marginBottom: '16px'}}>
+          <div className={classes.filtersBlock}>
             <div className={classes.searchTitle}>
               <div className={classes.searchTitleLeft}>
                 <Typography className={classes.searchTitleLeftText} variant="h6">
@@ -955,12 +887,12 @@ const Reports = React.memo(() => {
             <div style={{display: 'flex', alignItems: 'flex-start', minHeight: '50px'}}>
               <div style={{width: '100%'}}>
                 {/* название */}
-                <div style={{display: 'flex', alignItems: 'center', marginRight: '30px',  marginBottom: '16px', width: '100%'}}>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', minWidth: '167px', color: '#2F3747'}}>Название отчета</Typography>
+                <div className={classes.parameterBlock}>
+                  <div className={classes.flexCenter}>
+                    <Typography className={classes.parameterItemTitle}>Название отчета</Typography>
                     <div style={{width: '265px'}} className={validateInputItem ? classes.errorInput : classes.reportName}>
                       <span>
-                        <Typography style={{color: '#F5222D', fontSize: '13px'}}>Укажите название отчета</Typography>
+                        <Typography className={classes.errorTitle}>Укажите название отчета</Typography>
                       </span>
                       <Input
                         name={"report_name"}
@@ -973,15 +905,15 @@ const Reports = React.memo(() => {
                         handleChange={(event: any) =>  {
                           dispatch(reportsSlice.actions.setNameReport(event.target.value))
                         }}
-                      />  
+                      />
                     </div>
                   </div>
-                </div>  
+                </div>
 
                 {/* тип отчета */}
-                <div style={{display: 'flex', alignItems: 'center', marginRight: '30px',  marginBottom: '16px', width: '100%'}}>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', minWidth: '167px', color: '#2F3747'}}>Тип отчета по</Typography>
+                <div className={classes.parameterBlock}>
+                  <div className={classes.flexCenter}>
+                    <Typography className={classes.parameterItemTitle}>Тип отчета по</Typography>
                     <ContainedSelect
                       height={'38px'}
                       width={'265px'}
@@ -989,26 +921,25 @@ const Reports = React.memo(() => {
                       onSelectChange={
                         (event) => {
                           dispatch(reportsSlice.actions.setTypeReport(event.value));
-                      }}
+                        }}
                       options={typeReportOptions}
-                      // value={typeReportValue}
                       value={typeReportValue}
                     />
-                  </div>  
-                </div> 
+                  </div>
+                </div>
 
                 {/* по строкам */}
-                <div style={{display: 'flex', alignItems: 'center', marginRight: '30px',  marginBottom: '16px', width: '100%'}}>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', minWidth: '167px', color: '#2F3747'}}>Группировка по строкам</Typography>
+                <div className={classes.parameterBlock}>
+                  <div className={classes.flexCenter}>
+                    <Typography className={classes.parameterItemTitle}>Группировка по строкам</Typography>
                     <ContainedSelect
                       height={'38px'}
                       width={'265px'}
                       justify={'flex-end'}
                       onSelectChange={(event) => {
-                        if(event.type === 'select-tag') { 
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: event.value, value: tagNamesValues.value}));
-                        } else if(event.type === 'select') { 
+                        if(event.type === 'select-tag') {
+                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: event.value, value: tagNamesValue.value}));
+                        } else if(event.type === 'select') {
                           dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: event.value, value: timeColumnsReportValue.value}));
                         }
                         else {
@@ -1019,26 +950,25 @@ const Reports = React.memo(() => {
                       value={groupByRowsValue}
                     />
                   </div>
-                    {/* по тегу */}
-                  {groupByRowsValue && groupByRowsValue.type === 'select-tag' ? 
+                  {/* по тегу */}
+                  {groupByRowsValue && groupByRowsValue.type === 'select-tag' ?
                     <div style={{width: '265px'}}>
                       <ContainedSelect
                         height={'38px'}
                         width={'265px'}
                         justify={'flex-end'}
                         onSelectChange={(event) => {
-                          setTagNamesValues(event)
                           dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: groupByRowsValue.value, value: event.value}))
                         }}
                         options={tagNamesOptions}
-                        value={tagNamesValues}
+                        value={tagNamesValue}
                       />
                     </div>
-                  : <></>
+                    : <></>
                   }
 
                   {/* по времени */}
-                  {groupByRowsValue && groupByRowsValue.type === 'select' ? 
+                  {groupByRowsValue && groupByRowsValue.type === 'select' ?
                     <div style={{width: '265px'}}>
                       <ContainedSelect
                         height={'38px'}
@@ -1047,275 +977,294 @@ const Reports = React.memo(() => {
                         onSelectChange={(event) => {
                           setTimeColumnsReportValue(event);
                           dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: groupByRowsValue.value, value: event.value}));
-                          }
+                        }
                         }
                         options={timeColumnsReportOptions}
                         value={timeColumnsReportValue}
                         // value={timeColumnTest}
                       />
                     </div>
-                  : <></>
+                    : <></>
                   }
                 </div>
 
                 {/* по столбцам */}
-                <div style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', marginRight: '30px',  marginBottom: '16px', width: '100%'}}>
-                  <div style={{width: '100%', marginBottom: '16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
+                <div className={classes.parameterBlock}>
+                  <div className={classes.parameterBlock}>
 
                     {/* типо дефолтный */}
                     <div style={{display: 'inline-flex', color: '#2F3747'}}>
-                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                        <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', minWidth: '167px', color: '#2F3747'}}>Группировка по столбцам</Typography>
+                      <div className={classes.flexCenter}>
+                        <Typography className={classes.parameterItemTitle}>Группировка по столбцам</Typography>
                         <ContainedSelect
                           height={'38px'}
                           width={'265px'}
                           justify={'flex-end'}
                           onSelectChange={(event) => {
                             if(event.type === 'select-tag') {
-                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({group_by: tagNamesSecValue}))
-                            } 
+                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({group_by: tagNamesColValue}))
+                            }
                             else if (event.type === 'title') {
-                            dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: reportNameColumnDefault}))
+                              dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: reportNameColumnDefault}))
                             }
                             else {
                               dispatch(reportsSlice.actions.setDefaultColsGroupBy({group_by: event}))
                             }
                           }}
                           options={groupByColumnsReportOptions}
-                          // value={groupByColumnsReportValue}
                           value={groupByColumnsValue}
                         />
                       </div>
                     </div>
-                    { groupByColumnsValue && groupByColumnsValue.type === 'title' ? 
-                    <>
-                    <div style={{display: 'inline-flex'}}>
-                      <div style={{ marginRight: '20px',minWidth: '265px', width: '265px'}}>
-                        <Input
-                          name={""}
-                          type={"text"}
-                          height={'38px'}
-                          bcColor={"#FFFFFF"}
-                          border={'1px solid #E3E8EF'}
-                          label={"заголовок столбца"}
-                          value={reportNameColumnDefault}
-                          handleChange={(event: any) => {
-                            setReportNameColumnDefault(event.target.value);
-                            dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: event.target.value }));
-                          }}
-                        />
-                      </div>
-                    </div>  
-
-                    <div style={{display: 'inline-flex', marginRight: '20px', whiteSpace: 'nowrap', width: '200px'}}>
-                      <TextSelect
-                        name={'moreSelect'}
-                        value={null}
-                        handleValueChange={onAllCriteriasColumnSelectValueChange}
-                        options={opCriteriasColumn}
-                        iconPosition={'left'}
-                        customControl={
-                          <div style={{display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'flex-end'}}>
-                            <Typography style={{color: '#722ED1', fontWeight: '700', marginLeft: '5px'}}>{translate('searchMore', language)}</Typography>
+                    { groupByColumnsValue && groupByColumnsValue.type === 'title' ?
+                      <>
+                        <div style={{display: 'inline-flex'}}>
+                          <div style={{ marginRight: '20px',minWidth: '265px', width: '265px'}}>
+                            <Input
+                              name={""}
+                              type={"text"}
+                              height={'38px'}
+                              bcColor={"#FFFFFF"}
+                              border={'1px solid #E3E8EF'}
+                              label={"заголовок столбца"}
+                              value={reportNameColumnDefault}
+                              handleChange={(event: any) => {
+                                dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: event.target.value }));
+                              }}
+                            />
                           </div>
-                        }
-                        ifArrowColor={'#722ED1'}
-                        notClose={true}
-                        menuPosition={'right'}
-                        height={"400px"}
-                      />
-                    </div>   
+                        </div>
 
-                      <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '177px', marginTop: '16px'}}>
-                        {activeCriteriasColumn.length > 0 ? 
-                          <div style={{display: 'flex', alignItems: 'center', width: '100%', border: '1px solid #E3E8EF', borderRadius: '13px', padding: ' 16px', marginBottom: '16px'}}>
-                          <CriteriasList
-                            allCriterias={allCriteriasColumn}
-                            activeCriterias={activeCriteriasColumn}
-                            block={"reports-column"}
+                        <div className={classes.parameterSelect}>
+                          <TextSelect
+                            name={'moreSelect'}
+                            value={null}
+                            handleValueChange={onAllCriteriasColumnSelectValueChange}
+                            options={opCriteriasColumn}
+                            iconPosition={'left'}
+                            customControl={
+                              <div className={classes.filterBlockControl}>
+                                <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                              </div>
+                            }
+                            ifArrowColor={'#722ED1'}
+                            notClose={true}
+                            menuPosition={'right'}
+                            height={"400px"}
                           />
                         </div>
-                        :<></>
-                        }
+
+                        <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '177px', marginTop: '16px'}}>
+                          {activeCriteriasColumn.length > 0 ?
+                            <div className={classes.filterBlockFlex}>
+                              <CriteriasList
+                                allCriterias={allCriteriasColumn}
+                                activeCriterias={activeCriteriasColumn}
+                                block={"reports-column"}
+                              />
+                            </div>
+                            :<></>
+                          }
+                        </div>
+                      </>
+                      : <></>
+                    }
+                    {groupByColumnsValue && groupByColumnsValue.type === 'select-tag' ?
+                      <div style={{display: 'inline-flex', width: '265px'}}>
+                        <ContainedSelect
+                          height={'38px'}
+                          width={'265px'}
+                          justify={'flex-end'}
+                          onSelectChange={(event) => {
+                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({group_by: event}))
+                          }}
+                          options={tagNamesColOptions}
+                          value={tagNamesColValue}
+                        />
                       </div>
-                    </>
-                    : <></>
-                    } 
-                    {groupByColumnsValue && groupByColumnsValue.type === 'select-tag' ? 
-                    <div style={{display: 'inline-flex', width: '265px'}}>
-                      <ContainedSelect
-                        height={'38px'}
-                        width={'265px'}
-                        justify={'flex-end'}
-                        onSelectChange={(event) => {
-                          setTagNamesSecValue(event)
-                          dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({group_by: event}))
-                        }}
-                        options={tagNamesSecOptions}
-                        value={tagNamesSecValue}
-                      />
-                    </div>
-                    :
-                    <></>
+                      :
+                      <></>
                     }
                   </div>
 
-
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <div style={{minWidth: '155px'}}>
-                      <Plus 
+                      <Plus
                         handleClick={() => {
-                          dispatch(reportsSlice.actions.setActiveParameters([ {
-                            // select: {options: groupByColumnsReportOptions, value: groupByColumnsReportValue},
+                          dispatch(reportsSlice.actions.setActiveParameters([{
                             select: {options: groupByColumnsReportOptions, value: groupByColumnsValue},
-                            tagsVal: {options: tagNamesSecOptions, value: tagNamesSecValue},
-                            op: {options:op, value: op[0]},
-                            callFilters: {options: op, values: allCriteriasColumn, activeValues: []}
+                            tagsVal: {options: tagNamesColOptions, value: tagNamesColValue},
+                            op: {options: opAddCriterias, value: opAddCriterias[0]},
+                            callFilters: {options: opAddCriterias, values: allCriterias, activeValues: []}
                           }]))
                         }}
                       />
                     </div>
 
-                  {/* новые фильтры */}
+                    {/* новые фильтры */}
                     <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                      {activeParameters.map((curActiveParameter) => {
-                        const arrayIndex = activeParameters.indexOf(curActiveParameter);
-                          return(
-                            <div  style={{ width: '100%', display: 'flex', justifyContent:' flex-start', marginBottom: '16px', flexWrap: 'wrap'}}>
-                            {curActiveParameter.map((item) => {
-                              const fieldIndex = curActiveParameter.indexOf(item);
-                              return (
-                                <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                  <div style={{height: '16px', minWidth: '18px', marginRight: '5px'}}>
-                                    <TrashSvg
-                                      style={{width: '100%', height: 'auto'}}
-                                      onClick={() => {
-                                        dispatch(reportsSlice.actions.removeParameterField({
-                                          arrayIndex: arrayIndex,
-                                          fieldIndex: fieldIndex,
-                                        }));
-                                      }}
-                                    />
-                                  </div>
+                      {activeParameters.map((item) => {
+                        const arrayIndex = activeParameters.indexOf(item);
+                        return(
+                          <div  style={{ width: '100%', display: 'flex', justifyContent:' flex-start', marginBottom: '16px', flexWrap: 'wrap'}}>
+                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
+                              <div style={{height: '16px', minWidth: '18px', marginRight: '5px'}}>
+                                <TrashSvg
+                                  style={{width: '100%', height: 'auto'}}
+                                  onClick={() => {
+                                    dispatch(reportsSlice.actions.removeParameterField({
+                                      arrayIndex: arrayIndex,
+                                    }));
+                                  }}
+                                />
+                              </div>
 
-                                  <div style={{display: 'flex'}}>
-                                    <ContainedSelect
-                                      height={'38px'}
-                                      width={'265px'}
-                                      justify={'center'}
-                                      onSelectChange={ (event: any) => {
-                                        dispatch(reportsSlice.actions.setParameterSelectFieldValue({
-                                          arrayIndex: arrayIndex,
-                                          fieldIndex: fieldIndex,
-                                          value: event
-                                        }))
-                                      }}
-                                      options={item.select.options}
-                                      value={item.select.value}
-                                    />
-                                  </div>
-                                  { item.select.value &&  item.select.value.type === 'title' ? 
-                                    <>
-                                      <div style={{display: 'inline-flex'}}>
-                                        <div style={{ marginRight: '20px', minWidth: '265px', width: '265px'}}>
-                                          <Input
-                                            name={""}
-                                            type={"text"}
-                                            height={'38px'}
-                                            bcColor={"#FFFFFF"}
-                                            border={'1px solid #E3E8EF'}
-                                            label={"заголовок столбца"}
-                                            value={item.nameColumn.value}
-                                            handleChange={(event: any) => {
-                                              dispatch(reportsSlice.actions.setNameColumnFieldValue({
-                                                arrayIndex: arrayIndex,
-                                                fieldIndex: fieldIndex,
-                                                value: event.target.value
-                                              }))
-                                            }}
-                                          />
-                                        </div>
-                                      </div>  
-
-                                      <div style={{display: 'inline-flex', marginRight: '20px', whiteSpace: 'nowrap', width: '200px'}}>
-                                        <TextSelect
-                                          name={'moreSelect'}
-                                          value={null}
-                                          handleValueChange={(event: any) => {
-                                            onAllCriteriasColumnSelectValueChangeTEST(
-                                            event,
-                                            arrayIndex,
-                                            fieldIndex,
-                                            item.callFilters.activeValues,
-                                            item.callFilters.values,
-                                            item.callFilters.options
-                                          )}}
-                                          options={item.callFilters.options}
-                                          iconPosition={'left'}
-                                          customControl={
-                                            <div style={{display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'flex-end'}}>
-                                              <Typography style={{color: '#722ED1', fontWeight: '700'}}>{translate('searchMore', language)}</Typography>
-                                            </div>
-                                          }
-                                          ifArrowColor={'#722ED1'}
-                                          notClose={true}
-                                          menuPosition={'right'}
-                                          height={"400px"}
-                                        />
-                                      </div>
-
-                                        <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '16px'}}>
-                                          {item.callFilters.activeValues.length > 0 ? 
-                                            <div style={{display: 'flex', alignItems: 'center', width: '100%', border: '1px solid #E3E8EF', borderRadius: '13px', padding: ' 16px', marginBottom: '16px'}}>
-                                            <CriteriasList
-                                              allCriterias={item.callFilters.values}
-                                              activeCriterias={item.callFilters.activeValues}
-                                              block={"reports-column"}
-                                              index={{arrayIndex: arrayIndex, fieldIndex: fieldIndex}}
-                                            />
-                                          </div>
-                                          :<></>
-                                          }
-                                        </div>
-                                    </>
-                                    : <></>
-                                    }  
-
-                                    {item.select.value && item.select.value.type === 'select-tag' ? 
-                                    <div style={{display: 'inline-flex', width: '265px'}}>
-                                      <ContainedSelect
+                              <div style={{display: 'flex'}}>
+                                <ContainedSelect
+                                  height={'38px'}
+                                  width={'265px'}
+                                  justify={'center'}
+                                  onSelectChange={ (event: any) => {
+                                    dispatch(reportsSlice.actions.setParameterSelectFieldValue({
+                                      arrayIndex: arrayIndex,
+                                      value: event
+                                    }))
+                                  }}
+                                  options={item[0].select.options}
+                                  value={item[0].select.value}
+                                />
+                              </div>
+                              { item[0].select.value &&  item[0].select.value.type === 'title' ?
+                                <>
+                                  <div style={{display: 'inline-flex'}}>
+                                    <div style={{ marginRight: '20px', minWidth: '265px', width: '265px'}}>
+                                      <Input
+                                        name={""}
+                                        type={"text"}
                                         height={'38px'}
-                                        width={'265px'}
-                                        justify={'flex-end'}
-                                        onSelectChange={(event) => {
-                                          dispatch(reportsSlice.actions.setParameterTagstFieldValue({
+                                        bcColor={"#FFFFFF"}
+                                        border={'1px solid #E3E8EF'}
+                                        label={"заголовок столбца"}
+                                        value={item[0].nameColumn.value}
+                                        handleChange={(event: any) => {
+                                          dispatch(reportsSlice.actions.setNameColumnFieldValue({
                                             arrayIndex: arrayIndex,
-                                            fieldIndex: fieldIndex,
-                                            value: event
+                                            value: event.target.value
                                           }))
-                                          }
-                                        }
-                                        options={item.tagsVal.options}
-                                        value={item.tagsVal.value}
+                                        }}
                                       />
                                     </div>
-                                    :
-                                    <></>
+                                  </div>
+
+                                  <div className={classes.parameterSelect}>
+                                    <TextSelect
+                                      name={'moreSelect'}
+                                      value={null}
+                                      handleValueChange={(event: any) => {
+                                        onAllCriteriasColumnSelectValueChangeTEST(
+                                          event,
+                                          arrayIndex,
+                                          item[0].callFilters.activeValues,
+                                          item[0].callFilters.values,
+                                          item[0].callFilters.options
+                                        )}}
+                                      options={item[0].callFilters.options}
+                                      iconPosition={'left'}
+                                      customControl={
+                                        <div className={classes.filterBlockControl}>
+                                          <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                                        </div>
+                                      }
+                                      ifArrowColor={'#722ED1'}
+                                      notClose={true}
+                                      menuPosition={'right'}
+                                      height={"400px"}
+                                    />
+                                  </div>
+
+                                  <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '16px'}}>
+                                    {item[0].callFilters.activeValues.length > 0 ?
+                                      <div className={classes.filterBlockFlex}>
+                                        <CriteriasList
+                                          allCriterias={item[0].callFilters.values}
+                                          activeCriterias={item[0].callFilters.activeValues}
+                                          index={{arrayIndex: arrayIndex}}
+                                        />
+                                      </div>
+                                      :<></>
                                     }
+                                  </div>
+                                </>
+                                : <></>
+                              }
+
+                              {item[0].select.value && item[0].select.value.type === 'select-tag' ?
+                                <div style={{display: 'inline-flex', width: '265px'}}>
+                                  <ContainedSelect
+                                    height={'38px'}
+                                    width={'265px'}
+                                    justify={'flex-end'}
+                                    onSelectChange={(event) => {
+                                      dispatch(reportsSlice.actions.setParameterTagstFieldValue({
+                                        arrayIndex: arrayIndex,
+                                        value: event
+                                      }))
+                                    }
+                                    }
+                                    options={item[0].tagsVal.options}
+                                    value={item[0].tagsVal.value}
+                                  />
                                 </div>
-                              )
-                            })}
+                                :
+                                <></>
+                              }
                             </div>
-                          )
+                          </div>
+                        )
                       })}
                     </div>
                   </div>
                 </div>
               </div>
-            </div> 
+            </div>
           </div>
+            <Dialog
+              open={isOpen}
+              onClose={handleClose}
+            >
+            <div>
+              <Typography style={{fontWeight: '600'}}>Вы точно хотите удалить отчет?</Typography>
+              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
+                <LoadingButton
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleClose}
+                >
+                  Назад
+                </LoadingButton>
+                <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  onClick={deleteReportAsync}
+                >
+                  Удалить
+                </LoadingButton>
+              </div>
+            </div>
+            </Dialog>
 
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+            {currentSavedReport.value ?
+              <LoadingButton
+                className={classes.getReportsButton}
+                color="error"
+                variant="outlined"
+                onClick={handleOpen}
+              >
+                Удалить отчет
+              </LoadingButton>
+              : <></>
+            }
             <LoadingButton
               className={classes.getReportsButton}
               color="primary"
@@ -1326,23 +1275,17 @@ const Reports = React.memo(() => {
             </LoadingButton>
           </div>
         </BlockBox>
-        : null      
-      }      
-
-
+        : null
+      }
 
       {callReport.report_parameters_hash  ?
         <>
           {totalCalls === 0 ?
             <div className={classes.notFoundCalls}>Не найдено звонков в выбранном периоде</div>
-          : 
+            :
             <div style={{marginBottom: '60px'}}>
-              <div className={classes.reportItemInfo}>   
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px'}}>
-                  <Typography className={classes.reportTitle} variant="h6">
-                    {reportName}
-                  </Typography>
-
+              <div className={classes.reportItemInfo}>
+                <div className={classes.flexCenterMb}>
                   <LoadingButton
                     className={classes.reportOptionsButton}
                     color="primary"
@@ -1351,150 +1294,159 @@ const Reports = React.memo(() => {
                     startIcon={<ExportIcon/>}
                   >
                     Экспорт в Excel
-                  </LoadingButton>                        
-                </div>           
-
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <div className={classes.reportFindNumber}>
-                    Под условия фильтра попало звонков: &nbsp; 
-                    {totalCalls}
-                  </div>
-                  <div style={{display: 'flex', alignItems: 'center'}}> 
-                    {/* <Typography style={{whiteSpace: 'nowrap', marginRight: '10px', color: '#2F3747'}}>Параметры отображения</Typography> */}
+                  </LoadingButton>
+                </div>
+                <div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <Typography className={classes.reportTitle} variant="h6">
+                      {reportName}
+                    </Typography>
                     <FormGroup className={classes.checkboxDiff}>
-                      <FormControlLabel 
+                      <FormControlLabel
                         control={
-                          <Checkbox 
+                          <Checkbox
                             onChange={handleChangeCheck}
                             checked={checkboxValue}
-                          />}  
-                        label="Показать разницу с прошлым периодом" 
-                        />
-                    </FormGroup>
-                    </div>
-                  </div>
-                  <div>
-
-                    <FormGroup className={classes.checkboxDiffValues}>
-                      <FormControlLabel 
-                        className={classes.checkboxDiffLabel}
-                        control={
-                          <Checkbox 
-                            onChange={handleChangeCheckCalls}
-                            checked={checkboxCalls}
-                          />}  
-                        label="Звонки"
-                      />
-                      <FormControlLabel 
-                        className={classes.checkboxDiffLabel}
-                        control={
-                          <Checkbox 
-                            onChange={handleChangeCheckMinuts}
-                            checked={checkboxMinuts}
-                          />}  
-                        label="Минуты" 
-                      />
-                      <FormControlLabel 
-                        control={
-                          <Checkbox 
-                            onChange={handleChangeCheckPercent}
-                            checked={checkboxPercent}
-                          />}  
-                        label="Проценты" 
+                          />}
+                        label="Показать разницу с прошлым периодом"
                       />
                     </FormGroup>
                   </div>
-
-              </div>
-              <div style={{ width: 'auto', marginTop: '20px', marginBottom: '30px', height: '100%'}}>
-                <div style={{display: 'flex', alignItems: 'center'}}>                  
                 </div>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                  <div className={classes.reportFindNumber}>
+                    Под условия фильтра попало звонков: &nbsp;
+                    {totalCalls}
+                  </div>
+                  <FormGroup className={classes.checkboxDiffValues}>
+                    <FormControlLabel
+                      className={classes.checkboxDiffLabel}
+                      control={
+                        <Checkbox
+                          onChange={handleChangeCheckCalls}
+                          checked={checkboxCalls}
+                        />}
+                      label="Звонки"
+                    />
+                    <FormControlLabel
+                      className={classes.checkboxDiffLabel}
+                      control={
+                        <Checkbox
+                          onChange={handleChangeCheckMinutes}
+                          checked={checkboxMinutes}
+                        />}
+                      label="Минуты"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          onChange={handleChangeCheckPercent}
+                          checked={checkboxPercent}
+                        />}
+                      label="Проценты"
+                    />
+                  </FormGroup>
+                </div>
+              </div>
+              <div className={classes.table}>
                 <div style={{ display: 'flex', height: '100%'}}>
                   <div style={{ flexGrow: 1,  background: '#fff', height: heightTable }}>
-                      <Box
-                        sx={{
-                          height: 60,
-                          border: 'none',
-                          borderRadius: '10px',
+                    <Box
+                      sx={{
+                        height: 60,
+                        border: 'none',
+                        borderRadius: '10px',
+                        backgroundColor: '#fff',
+                        '& .light-header--theme .MuiDataGrid-columnHeaderTitle': {
+                          color: '#738094',
+                          fontWeight: 600,
+                          padding: '0 5px',
+                          lineHeight: 1.3,
+                        },
+                        '& .MuiDataGrid-root': {
                           backgroundColor: '#fff',
-                          '& .light-header--theme .MuiDataGrid-columnHeaderTitle': {                    
-                            color: '#738094',
-                            fontWeight: 600,
-                            padding: '0 5px',
-                            lineHeight: 1.3,
-                          },
-                          '& .MuiDataGrid-columnHeader': {
-                            padding: '0 5px !important'
-                          },
-                          '& .MuiDataGrid-root': {
-                            backgroundColor: '#fff',
-                          },
-                          '& .MuiDataGrid-cell': {
-                            color: '#2F3747',
-                            maHheight: 'none !important',
-                            overflow: 'auto',
-                            whiteSpace: 'initial !important',
-                            lineHeight: '16px !important',
-                            display: 'flex !important',
-                            alignItems: 'center',
-                            paddingTop: '5px !important',
-                            paddingBottom: '5px !important',
-                            textAlign: 'center',
-                            fontSize: '12px !important',
-                          },
-                          '.MuiDataGrid-columnSeparator': {
-                            display: 'none',
-                          },
-                          '&.MuiDataGrid-root': {
-                            border: 'none',
-                          },
-                          '& .cell-active': {
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
-                            color: '#531DAB',
-                            fontWeight: '600',
-                          },
-                          '& .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon':{
-                            opacity: '0.5 !important'
-
-                          },
-                          // костыль для скрытия пагинации
-                          '& .MuiDataGrid-footerContainer': {
-                            display: 'none !important'
-                          },
-
-                          "& .MuiDataGrid-root .MuiDataGrid-columnHeader .MuiDataGrid-iconButtonContainer": {
-                            visibility: "visible",
-                            width: 'auto',
-                            alignSelf: 'flex-end',
-                            marginBottom: '-3px'
-                          },
-                          '& .MuiDataGrid-columnHeader:nth-of-type(3n + 1) .MuiDataGrid-columnSeparator svg' :{
-                            // fontSize: '2rem !important',
-                            color: 'rgba(115, 128, 148, 0.7) !important'
-                          },
-                          "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
-                            opacity: 0.5
-                          },
-                          '& .MuiDataGrid-iconButtonContainer': {
-                            '& button': {
-                              padding: '1px',
-                              '& svg': {
-                                fontSize: '1.1rem',
-                                padding: '1px'
-                              }
+                        },
+                        '& .MuiDataGrid-cell': {
+                          color: '#2F3747',
+                          maxHeight: 'none !important',
+                          overflow: 'auto',
+                          whiteSpace: 'initial !important',
+                          lineHeight: '16px !important',
+                          display: 'flex !important',
+                          alignItems: 'center',
+                          paddingTop: '5px !important',
+                          paddingBottom: '5px !important',
+                          textAlign: 'center',
+                          fontSize: '12px !important',
+                        },
+                        '.MuiDataGrid-columnSeparator': {
+                          display: 'none',
+                        },
+                        '&.MuiDataGrid-root': {
+                          border: 'none',
+                        },
+                        '& .cell-active': {
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          color: '#531DAB',
+                          fontWeight: '600',
+                        },
+                        '& .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon':{
+                          opacity: '0.5 !important'
+                        },
+                        // костыль для скрытия пагинации
+                        '& .MuiDataGrid-footerContainer': {
+                          display: 'none !important'
+                        },
+                        "& .MuiDataGrid-root .MuiDataGrid-columnHeader .MuiDataGrid-iconButtonContainer": {
+                          visibility: "visible",
+                          width: 'auto',
+                          alignSelf: 'flex-end',
+                          marginBottom: '-3px'
+                        },
+                        '& .MuiDataGrid-columnHeader:nth-of-type(3n + 1) .MuiDataGrid-columnSeparator svg' :{
+                          // fontSize: '2rem !important',
+                          color: 'rgba(115, 128, 148, 0.7) !important'
+                        },
+                        "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
+                          opacity: 0.5
+                        },
+                        '& .MuiDataGrid-iconButtonContainer': {
+                          '& button': {
+                            padding: '1px',
+                            '& svg': {
+                              fontSize: '1.1rem',
+                              padding: '1px'
                             }
-                          },
-                          '& .MuiDataGrid-root .MuiDataGrid-columnHeader:focus, &  .MuiDataGrid-root .MuiDataGrid-columnHeader:focus-within, &  .MuiDataGrid-root .MuiDataGrid-cell:focus-within': {
-                            outline: 'none !important',
-                          },
-                          '& .MuiDataGrid-viewport, & .MuiDataGrid-row, & .MuiDataGrid-renderingZone': {
-                            maxHeight: 'none !important',
-                          },
-                        }}
-                      >
-                        <div ref={gridWrapperRef} style={{height: heightTable}}>
-                        <DataGrid 
+                          }
+                        },
+                        '& .MuiDataGrid-columnHeaderTitleContainer': {
+                          overflow: 'hidden !important',
+                          padding: '7px 5px !important'
+                        },
+                        '& .MuiDataGrid-root .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-root .MuiDataGrid-columnHeader:focus-within, ' :{
+                          outline: 'none !important',
+                        },
+                        '& .MuiDataGrid-viewport, & .MuiDataGrid-row, & .MuiDataGrid-renderingZone': {
+                          maxHeight: 'none !important',
+                        },
+                        //sticky header
+                        '& .MuiDataGrid-columnHeaders': {
+                          position: "sticky",
+                          top: '-1px',
+                          backgroundColor: '#fff',
+                          zIndex: 1000
+                        },
+                        '& .MuiDataGrid-virtualScroller': {
+                          marginTop: "0 !important"
+                        },
+                        '& .MuiDataGrid-main': {
+                          overflow: "visible"
+                        }
+                      }}
+                    >
+                      <div ref={gridWrapperRef} style={{height: heightTable}}>
+                        <DataGrid
                           autoHeight
                           pagination
                           rows={tableRows}
@@ -1505,26 +1457,23 @@ const Reports = React.memo(() => {
                           disableColumnMenu={true}
                           // disableSelectionOnClick
                           onCellClick={(params, event: MuiEvent<React.MouseEvent>) => {
-                            if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field])
-                          }}
-                          localeText={{
-                            toolbarColumns: "Показать/скрыть колонки",
+                            if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field]);
                           }}
                         />
-                        </div>
-                      </Box>
+                      </div>
+                    </Box>
                   </div>
                 </div>
               </div>
               <div>
-                {calls.length != 0 && callsSwitch ? 
+                {calls.length != 0 && callsSwitch ?
                   <CallsHeader
                     found={foundCalls}
                     switchTitleFound={true}
                   />
-                  : <></>   
+                  : <></>
                 }
-                {calls.length != 0 && callsSwitch ? 
+                {calls.length != 0 && callsSwitch ?
                   calls.map((callsArrays: CallType[]) => {
                     const callsArrayIndex = calls.indexOf(callsArrays)
                     return (
@@ -1540,17 +1489,19 @@ const Reports = React.memo(() => {
                         })}
                       </div>
                     )
-                  })   
-                  : <></>                         
+                  })
+                  : <></>
                 }
               </div>
             </div>
           }
         </>
-      :
-      <div style={{color: '#738094', opacity: '0.6', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px'}}>
-        <div style={{maxWidth: '300px', textAlign:'center'}}>Для построения отчета <br/> выберите необходимые параметры <br/>и нажмите кнопку <br/> "Сформировать отчет"</div>
-      </div>
+        :
+        <div className={classes.centerMessage}>
+          <div className={classes.centerMessageTitle}>
+            Для построения отчета <br/> выберите необходимые параметры <br/>и нажмите кнопку <br/> "Сформировать отчет"
+          </div>
+        </div>
       }
     </div>
   )

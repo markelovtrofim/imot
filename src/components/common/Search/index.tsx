@@ -42,7 +42,7 @@ const useStyles = makeStyles(({
     marginLeft: '16px !important',
     color: '#CDD5DF !important',
     fontSize: '17px !important'
-  }, 
+  },
   searchTitleRight: {
     display: 'flex',
     alignItems: 'center'
@@ -68,53 +68,6 @@ const useStyles = makeStyles(({
   },
   searchButtonIcon: {
     fill: '#722ED1 !important'
-  },
-
-  searchItems: {
-    display: 'flex',
-    width: '100%',
-    flexWrap: 'wrap',
-    // display: 'grid'
-  },
-  searchItem: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: '0 22px 16px 0',
-    width: '100%',
-  },
-  searchItemBlock_1: {
-    gridRowStart: 1,
-    gridRowEnd: 2,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  searchItemBlock_2: {
-    gridRowStart: 2,
-    gridRowEnd: 3,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  searchItemBlock_3: {
-    gridRowStart: 3,
-    gridRowEnd: 4,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  searchItemBlock_4: {
-    gridRowStart: 4,
-    gridRowEnd: 5,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  searchItemBlock_noWide: {
-    width: '30%',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  searchItemBlock_Wide: {
-    width: '70%',
-    display: 'flex',
-    alignItems: 'center',
   },
   searchText: {
     marginRight: '8px !important',
@@ -167,17 +120,6 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     await dispatch(getBaseCallsData());
     setLoading(false);
   }; 
-  function switchSearchItemCLassName(className: string) {
-    const classSwitcher: { [id: string]: any } = {};
-    classSwitcher['searchItemBlock_1'] = classes.searchItemBlock_1;
-    classSwitcher['searchItemBlock_2'] = classes.searchItemBlock_2;
-    classSwitcher['searchItemBlock_3'] = classes.searchItemBlock_3;
-    classSwitcher['searchItemBlock_4'] = classes.searchItemBlock_4;
-    classSwitcher['searchItemBlock_Wide'] = classes.searchItemBlock_Wide;
-    classSwitcher['searchItemBlock_noWide'] = classes.searchItemBlock_noWide;
-    return classSwitcher[className];
-  }
- 
   // template select
   const convertedTemplate = optionsCreator(allTemplates);
 
@@ -304,6 +246,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     <div style={{margin: '24px 0'}}>
       <BlockBox padding="24px 24px 10px 24px" height="100%" minHeight="200px">
         <div className={classes.searchTitle}>
+
           <div className={classes.searchTitleLeft}>
             <Typography className={classes.searchTitleLeftText} variant="h5">
               {translate('searchTitle', language)}
@@ -313,44 +256,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
               options={convertedTemplate}
               currentTemplate={currentTemplate}
               allTemplates={allTemplates}
-            /> 
-            <div style={{marginTop: '3px', borderLeft: '1px solid #CDD5DF', paddingLeft: '16px'}}>
-              <TextSelect
-                name={'templatesSelect'}
-                value={currentTemplate ? {value: currentTemplate, label: currentTemplate.title} : null}
-                handleValueChange={onTemplateSelectValueChange}
-                options={convertedTemplate}
-                iconPosition={'right'}
-                customControl={
-                  <div style={{
-                    display: 'flex',
-                    fontSize: '16px',
-                    lineHeight: '24px',
-                    color: '#2F3747',
-                    marginRight: '5px'
-                  }}>
-                    {currentTemplate ?
-                      <>
-                        <Typography style={{color: '#722ED1'}}>{currentTemplate.title}</Typography>
-                      </> :
-                      <>
-                        <Typography style={{
-                          fontSize: '16px',
-                          lineHeight: '24px',
-                          marginRight: '3px',
-                          color: '#2F3747'
-                        }}>{translate('searchTemp', language)}</Typography>
-                        <span style={{fontFamily: '"Inter", sans-serif'}}>
-                          ({allTemplates.length})
-                        </span>
-                      </>
-                    }
-                  </div>
-                }
-                ifArrowColor={currentTemplate ? '#722ED1' : '#000'}
-                menuPosition={'left'}
-              />
-            </div>
+            />
           </div>
           {(activeCriterias.length > 0 || defaultCriterias.some(item => item.values.length > 0)) &&
           <SaveCriterias
@@ -404,84 +310,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
                   height={"400px"}
                 />
               </div>
-            </div> 
-          <div className={classes.searchItems}>
-            {defaultCriterias && allCriterias ? defaultCriterias.map(criteria => {
-              const criteriaKey = criteria.key.slice(4);
-              const compResult = allCriterias.filter(v => v.key === criteria.key);
-              return (
-                <div className={classes.searchItem}>
-                  <Typography className={classes.searchText}>{compResult[0].title}</Typography>
-                  <SearchSelect
-                    criteriaFull={compResult[0]}
-                    criteriaCurrent={criteria}
-                    isDefaultCriteria={true}
-                  />
-                </div>
-              )
-            }) : null}
-            {activeCriterias && allCriterias ? activeCriterias.map(criteria => {
-              const compResult = allCriterias.filter(v => v.key === criteria.key);
-              // @ts-ignore
-              const criteriaWide = criteria.wide ? 'searchItemBlock_Wide' : 'searchItemBlock_noWide';
-              // @ts-ignore
-              const criteriaBlock = `searchItemBlock_${criteria.block}`;
-              return (
-                // <div className={switchSearchItemCLassName(criteriaBlock)}>
-                <div className={switchSearchItemCLassName(criteriaWide)}>
-                  <div className={classes.searchItem}>
-                    <Typography className={classes.searchText}>{criteria.title}</Typography>
-                    <SearchSelect
-                      criteriaFull={compResult[0]}
-                      criteriaCurrent={criteria}
-                      isDefaultCriteria={false}
-                    />
-                  </div>
-                  {/* </div> */}
-                </div>
-              )
-            }) : null}
-          </div>
-          <div style={{display: 'flex', alignItems: 'center', minHeight: '54px'}}>
-            <LoadingButton
-              className={classes.searchSearchButton}
-              startIcon={<SearchIcon/>}
-              color="primary"
-              variant="contained"
-              loading={loading}
-              loadingPosition="start"
-              onClick={searchRequest}
-            >
-              {translate('searchButton', language)}
-            </LoadingButton>
-            <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
-              <TextSelect
-                name={'moreSelect'}
-                value={null}
-                handleValueChange={onAllCriteriasSelectValueChange}
-                options={op}
-                iconPosition={'left'}
-                customControl={
-                  <div style={{display: 'flex', alignItems: 'center'}}>
-                    <Typography style={{
-                      color: '#722ED1',
-                      fontWeight: '700',
-                      marginLeft: '5px'
-                    }}>{translate('searchMore', language)}</Typography>
-                    {/* {activeCriterias.length > 0 &&
-                        <span style={{marginLeft: '3px', color: '#722ED1', fontWeight: '700'}}>
-                          ({activeCriterias.length})
-                        </span>
-                        } */}
-                  </div>
-                }
-                ifArrowColor={'#722ED1'}
-                notClose={true}
-                menuPosition={'right'}
-                height={"400px"}
-              />
             </div>
-          </div>
         </div>
       </BlockBox>
 
