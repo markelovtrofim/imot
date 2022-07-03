@@ -1,13 +1,12 @@
-import React, {Dispatch, FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useRef} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Typography} from "@mui/material";
 import 'react-h5-audio-player/lib/styles.css';
-import {callsSlice} from "../../../store/calls/calls.slice";
+import {callsSlice, getCallPublicToken} from "../../../store/calls/calls.slice";
 import {useDispatch} from "react-redux";
 import {
   CallAudioType,
   CallInfoType,
-  CallSttFragmentType,
   CallSttType,
   CallTagType,
 } from "../../../store/calls/calls.types";
@@ -17,7 +16,7 @@ import History from "../../../components/common/Buttons/History";
 import Download from "../../../components/common/Buttons/Download";
 import Back from "../../../components/common/Buttons/Back";
 import {BlockBox} from "../../../components/common";
-import {BaseTag, Fragment} from "../../../components/common/Tag";
+import {Fragment} from "../../../components/common/Tag";
 import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
 
@@ -41,11 +40,14 @@ type CallBodyPropsType = {
   bundleIndex: number,
   expanded: boolean,
   fragments: CallTagType[],
+
+  // сори)
   audioRef: any,
   onFragmentClick: any,
   prevActiveFragment: any,
   audioPlayerRef: any,
-  activeFragmentRef: any
+  activeFragmentRef: any,
+  setIsCallBodyData: any
 };
 
 const CallBody: FC<CallBodyPropsType> = React.memo((
@@ -59,6 +61,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     audioRef,
     onFragmentClick,
     audioPlayerRef,
+    setIsCallBodyData,
+
     prevActiveFragment,
     activeFragmentRef
   }
@@ -184,6 +188,21 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
   } // return [1-4, 2-8]
 
 
+  useEffect(() => {
+    return () => {
+      setIsCallBodyData(false);
+    }
+  }, []);
+
+
+  async function formPublicToken(id: string) {
+    const publicTokenData = await dispatch(getCallPublicToken(id));
+    // @ts-ignore
+    const publicToken: {access_token: string, token_type: string} = publicTokenData.payload;
+    const publicUrl = `${window.location.href.slice(0, -1)}?call=${id}&token=${publicToken.access_token}`;
+    navigator.clipboard.writeText(publicUrl);
+  }
+
   const onListen = (eventCurrentTime: any) => {
     let currentTimeLocal;
     if (!!eventCurrentTime.target) {
@@ -299,7 +318,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
         </div>
         <div style={{backgroundColor: 'fff', width: '370px', marginTop: '20px'}}>
           <div style={{display: 'flex', justifyContent: 'flex-end', paddingRight: '14px'}}>
-            <Back/>
+            <Back onClick={(event) => {formPublicToken(callId)}}/>
             <Download/>
             <History/>
             <Reboot/>

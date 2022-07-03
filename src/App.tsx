@@ -6,6 +6,7 @@ import {Header} from './components/common';
 import {
   Auth,
   Calls,
+  Reports,
   MarkupRules,
   LoadCall,
   Settings
@@ -19,6 +20,9 @@ import {dictsSlice} from "./store/dicts/dicts.slice";
 import {searchStringParserInObj} from "./pages/MarkupRules/Tags/TagPage";
 import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
+import Call from "./pages/Calls/Call";
+import CallPage from "./pages/Calls/CallPage";
+import {callsSlice} from "./store/calls/calls.slice";
 
 
 export const useStyles = makeStyles(({
@@ -42,7 +46,8 @@ const App = () => {
   if (path) {
     pathArray = path.split("/");
   }
-  const isDtOrTg = pathArray[2];
+  const activePage = pathArray[3];
+  const isDtOrTg = pathArray[4];
 
 
   const currentUser = useAppSelector(state => state.users.currentUser);
@@ -71,25 +76,29 @@ const App = () => {
       } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
         dispatch(langSlice.actions.setDefaultLang(null));
         if (pathArray.length === 1) {
-          history.location.pathname = `/ru/${pathArray.join("/")}`
+          history.location.pathname = `/`;
+          history.replace(`ru/${pathArray.join("/")}`);
         } else {
-          history.location.pathname = `/ru/${currentUser ? currentUser.id : "123"}/calls`
+          history.location.pathname = `/`;
+          history.replace(`ru/${currentUser ? currentUser.id : "_"}/calls`);
         }
       }
     });
   }, [languageParam, currentUser]);
 
-  // dicts (прототип 2)
-  if (!searchDictsParams) {
-    let newSearch = history.location.search;
-    if (newSearch[0] !== '?') {
-      newSearch = `?${history.location.search}`
-    }
+  let newSearch = history.location.search;
+  if (newSearch[0] !== '?') {
+    newSearch = `?${history.location.search}`
+  }
+  if (activePage === "markuprules") {
     if (isDtOrTg === "dictionaries") {
       dispatch(dictsSlice.actions.setSearch(newSearch));
     } else if (isDtOrTg === "tags") {
       dispatch(tagsSlice.actions.setSearchParams(newSearch));
     }
+  } else if (activePage === "call") {
+    debugger
+    dispatch(callsSlice.actions.setCallPageSearchParams(newSearch));
   }
 
   useEffect(() => {
@@ -139,36 +148,49 @@ const App = () => {
         {loading && <LinearDeterminate progressIsOver={false}/>}
       </div>
 
-      {/* Авторизация */}
-      <Route exact path="/:lang/:userId/auth">
-        <Auth/>
-      </Route>
-      {!isAuth && <Redirect to="/auth"/>}
-      <Header/>
       <Switch>
+        {/* Авторизация */}
+        <Route exact path="/:lang/auth">
+          <Auth/>
+        </Route>
+        {!isAuth && <Redirect to="/ru/auth"/>}
+
+
         {/* Звонки */}
         <Route path="/:lang/:userId/calls">
+          <Header/>
           <div className={classes.container}>
             <Calls/>
+          </div>
+        </Route>
+ 
+        {/* Звонок */}
+        <Route path="/:lang/:userId/call">
+          <Header/>
+          <div className={classes.container}>
+            <CallPage/>
           </div>
         </Route>
 
         {/* Отсчеты */}
         <Route path="/:lang/:userId/reports">
+          <Header/>
           <div className={classes.container}>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">Reports</Typography>
-            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">in
-              developing</Typography>
+            <Reports/>
           </div>
         </Route>
 
         {/* Загрузить звонок */}
         <Route path="/:lang/:userId/markuprules">
+          <Header/>
+
           <MarkupRules/>
         </Route>
 
         {/* Загрузить звонок */}
         <Route path="/:lang/:userId/upload">
+          <Header/>
+
           <div className={classes.container}>
             <LoadCall/>
           </div>
@@ -177,6 +199,8 @@ const App = () => {
 
         {/* Оповещение */}
         <Route path="/:lang/:userId/alert">
+          <Header/>
+
           <div className={classes.container}>
             <div className={classes.container}>
               <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">Alert</Typography>
@@ -188,14 +212,16 @@ const App = () => {
 
         {/* Настройки */}
         <Route path="/:lang/:userId/settings">
+          <Header/>
+
           <div className={classes.container}>
             <Settings/>
           </div>
         </Route>
 
-        {/*<Route exact path="/">*/}
-        {/*  <Redirect to="/:lang/:userId/calls"/>*/}
-        {/*</Route>*/}
+        <Route exact path="/">
+          <Redirect to="/:lang/:userId/calls"/>
+        </Route>
 
         <Route exact path="*">
           <div style={{textAlign: "center", marginTop: "250px"}}>

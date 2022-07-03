@@ -34,6 +34,7 @@ type ContainedSelectPropsType = {
   width: string,
   height?: string,
   justify?: string,
+  marginRight?: string,
 
   onSelectChange: (event: any) => void,
   options: { value: any, label: string }[],
@@ -45,6 +46,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = ({
                                                          width,
                                                          height,
                                                          justify,
+                                                         marginRight,
 
                                                          onSelectChange,
                                                          options,
@@ -57,6 +59,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = ({
       justifyContent: justify ? justify : 'left',
       alignItems: 'center',
       width: '100% !important',
+      marginRight: marginRight ? marginRight : '25px'
     },
     selectMenuListInput: {
       width: "228px",

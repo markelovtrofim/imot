@@ -532,6 +532,7 @@ const Call = memo((props: CallPropsType) => {
           className={classes.accordionSummary} tabIndex={-1}
           onClick={async (e) => {
             if (index || index === 0) {
+              debugger
               if (!isCallBodyData) {
                 props.handleExpandedChange(props.callInfo.id);
                 dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
@@ -540,9 +541,11 @@ const Call = memo((props: CallPropsType) => {
               } else {
                 dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
                 setIsCallBodyData(false);
-                audioPlayerRef.current.audioEl.current.currentTime = 0;
-                prevActiveFragment.current = null;
-                activeFragmentRef.current = null;
+                if (audioPlayerRef.current) {
+                  audioPlayerRef.current.audioEl.current.currentTime = 0;
+                  prevActiveFragment.current = null;
+                  activeFragmentRef.current = null;
+                }
                 props.handleExpandedChange(false);
               }
               scroll(e.target);
@@ -662,6 +665,8 @@ const Call = memo((props: CallPropsType) => {
           bundleIndex={props.bundleIndex}
           expanded={props.expanded}
           audioPlayerRef={audioPlayerRef}
+
+          setIsCallBodyData={setIsCallBodyData}
 
           prevActiveFragment={prevActiveFragment}
           activeFragmentRef={activeFragmentRef}

@@ -34,14 +34,18 @@ type InitialStateType = {
   date: Date[] | null[],
   allCriterias: CriteriasType[] | null,
   defaultCriterias: RequestDataType[],
-  activeCriterias: CriteriasType[]
+  activeCriterias: CriteriasType[],
+  activeCriteriasReports: CriteriasType[],
+  activeCriteriasColumn: CriteriasType[],
 }
 
 const initialState: InitialStateType = {
   date: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())],
   allCriterias: null,
   defaultCriterias: [],
-  activeCriterias: []
+  activeCriterias: [],
+  activeCriteriasReports: [],
+  activeCriteriasColumn: [],
 };
 
 export const searchSlice = createSlice({
@@ -103,8 +107,64 @@ export const searchSlice = createSlice({
       state.allCriterias = null;
       state.defaultCriterias = [];
       state.activeCriterias = [];
+      // state.activeCriteriasReports = [];
     },
 
+
+    // for reports
+    setActiveCriteriasReports(state, action: PayloadAction<CriteriasType[]>) {
+      state.activeCriteriasReports = action.payload;
+    },
+    setActiveCriteriaReportsValues(state, action: PayloadAction<RequestDataType>) {
+      const obj = current(state.activeCriteriasReports).find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const index = current(state.activeCriteriasReports).indexOf(obj);
+      state.activeCriteriasReports[index].values = action.payload.values;
+    },
+    removeActiveCriteriaReports(state, action: PayloadAction<CriteriasType>) {
+      let activeCriteriasReports = cloneDeep(current(state.activeCriteriasReports));
+      const obj = current(state.activeCriteriasReports).find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const index = current(state.activeCriteriasReports).indexOf(obj);
+      activeCriteriasReports.splice(index, 1);
+      state.activeCriteriasReports = activeCriteriasReports;
+    },
+    removeAllActiveCriteriasReports(state, action: PayloadAction<null>) {
+      state.activeCriteriasReports = [];
+    },
+
+    //for column in report
+    setActiveCriteriaReportsColumn(state, action: PayloadAction<CriteriasType[]>) {
+      state.activeCriteriasColumn = action.payload;
+    }, 
+    setActiveCriteriaReportsColumnValues(state, action: PayloadAction<RequestDataType>) {
+      const obj = current(state.activeCriteriasColumn).find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const index = current(state.activeCriteriasColumn).indexOf(obj);
+      state.activeCriteriasColumn[index].values = action.payload.values;
+    },
+
+    
+    removeActiveCriteriaColumnReports(state, action: PayloadAction<CriteriasType>) {
+      let activeCriteriasColumn = cloneDeep(current(state.activeCriteriasColumn));
+      const obj = current(state.activeCriteriasColumn).find(item => {
+        return item.key === action.payload.key
+      });
+      // @ts-ignore
+      const index = current(state.activeCriteriasColumn).indexOf(obj);
+      activeCriteriasColumn.splice(index, 1);
+      state.activeCriteriasColumn = activeCriteriasColumn;
+    },
+    removeAllActiveCriteriasColumnReports(state, action: PayloadAction<null>) {
+      state.activeCriteriasColumn = [];
+    },
+    
     searchReset: () => initialState
 
   }
