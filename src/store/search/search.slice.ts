@@ -56,9 +56,13 @@ export const searchSlice = createSlice({
       state.date = action.payload;
     },
 
-    setDefaultCriterias(state, action: PayloadAction<string[]>) {
-      for (let i = 0; i < action.payload.length; i++) {
-        state.defaultCriterias.push({key: action.payload[i], values: []});
+    setDefaultCriterias(state, action: PayloadAction<string[] | null>) {
+      if (!action.payload) {
+        state.defaultCriterias.length = 0;
+      } else {
+        for (let i = 0; i < action.payload.length; i++) {
+          state.defaultCriterias.push({key: action.payload[i], values: []});
+        }
       }
     },
     setDefaultCriteriaValues(state, action: PayloadAction<RequestDataType>) {

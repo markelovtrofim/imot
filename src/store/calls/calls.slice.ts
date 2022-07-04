@@ -43,6 +43,7 @@ const convertDate = (date: Date | null) => {
   return date;
 };
 
+// публичный токен - токен, который создается для доступа к конкретному звонку даже для не авторизованных пользователей.
 export const getCallPublicToken = createAsyncThunk(
   'calls/getCallPublicToken',
   async (id: string, thunkAPI) => {
@@ -56,37 +57,58 @@ export const getCallPublicToken = createAsyncThunk(
   }
 );
 
-export const getCallStt = createAsyncThunk(
-  'calls/getCallAudio',
+export const getAndSetCallStt = createAsyncThunk(
+  'calls/getCallStt',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
+    const callSttData = await thunkAPI.dispatch(getCallStt({id: payload.id}));
+    // @ts-ignore
+    const callStt = callSttData.payload;
+    thunkAPI.dispatch(callsSlice.actions.setStt({stt: callStt, id: payload.id, index: payload.bundleIndex}));
+  }
+);
+
+export const getCallStt = createAsyncThunk(
+  'calls/getCallStt',
+  async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const {data} = await instance.get(`call/${payload.id}/stt`, {
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${payload.token ? payload.token : token}`
       }
     });
-    thunkAPI.dispatch(callsSlice.actions.setStt({stt: data, id: payload.id, index: payload.bundleIndex}));
+    return data;
   }
 );
 
 
+export const getAndSetCallAudio = createAsyncThunk(
+  'calls/getAndSetCallAudio',
+  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
+    const audioLinkData = await thunkAPI.dispatch(getCallAudio({id: payload.id}));
+    // @ts-ignore
+    const audioLink = audioLinkData.payload;
+    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: audioLink, id: payload.id, index: payload.bundleIndex}))
+  }
+);
+
 export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
-  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
+  async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     const {data} = await instance.get(`call/${payload.id}/audio`, {
       responseType: 'arraybuffer',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${payload.token ? payload.token : token}`,
         'Content-Type': 'audio/wav'
       }
     });
     const blob = new Blob([data], {
       type: 'audio/wav'
     });
+    // ниже штука, которая в теории может помочь загружать аудио постепенно, а не дожедаться его полостью.
     // const source = new MediaSource();
     const blobUrl = URL.createObjectURL(blob);
-    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: blobUrl, id: payload.id, index: payload.bundleIndex}))
+    return blobUrl;
   }
 );
 
@@ -129,19 +151,15 @@ export const getCallsInfo = createAsyncThunk(
   async (payload: CallType[], thunkAPI) => {
     try {
       let localCalls = [];
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       for (let i = 0; i < payload.length; i++) {
-        const response = await instance.get(`call/${payload[i].id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const callInfoData = await thunkAPI.dispatch(getCallInfo({id: payload[i].id}));
+        const callInfo = callInfoData.payload;
         localCalls.push({
           id: payload[i].id,
-          info: response.data,
+          info: callInfo,
           stt: null,
           audio: null
-        })
+        });
       }
       thunkAPI.dispatch(callsSlice.actions.setCallsInfo(localCalls));
     } catch (error) {
@@ -150,9 +168,26 @@ export const getCallsInfo = createAsyncThunk(
   }
 );
 
+export const getCallInfo = createAsyncThunk(
+  'calls/getCallInfo',
+  async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.get(`call/${payload.id}`, {
+        headers: {
+          'Authorization': `Bearer ${payload.token ? payload.token : token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 export const getCallsInfoById = createAsyncThunk(
   'calls/getCallsInfoById',
-  async (payload:any [], thunkAPI) => {
+  async (payload: any [], thunkAPI) => {
     try {
       let localCalls = [];
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
@@ -185,6 +220,7 @@ type InitialStateType = {
   limit: number,
   callIds: null,
   calls: CallType[][] | [],
+  currentCall: CallType | null | false,
   callPageSearchParams: string
 }
 
@@ -210,6 +246,7 @@ const initialState: InitialStateType = {
   callIds: null,
   calls: createInitialCalls(),
 
+  currentCall: null,
   callPageSearchParams: ""
 };
 
@@ -295,6 +332,11 @@ export const callsSlice = createSlice({
       state.skip += state.limit;
     },
 
-    callsReset: () => initialState
+    callsReset: () => initialState,
+
+    // current call
+    setCurrentCall(state, action: PayloadAction<CallType | null | false>) {
+      state.currentCall = action.payload;
+    }
   }
 });

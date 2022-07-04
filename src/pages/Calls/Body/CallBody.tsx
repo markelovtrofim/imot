@@ -19,6 +19,7 @@ import {BlockBox} from "../../../components/common";
 import {Fragment} from "../../../components/common/Tag";
 import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
+import {useAppSelector} from "../../../hooks/redux";
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -37,7 +38,7 @@ type CallBodyPropsType = {
   callInfo: CallInfoType,
   callAudio: CallAudioType | null,
   callStt: CallSttType | null,
-  bundleIndex: number,
+  bundleIndex: number | null,
   expanded: boolean,
   fragments: CallTagType[],
 
@@ -102,7 +103,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
       overflow: 'hidden',
       position: 'sticky',
       top: '-200px',
-      zIndex: '100'
+      zIndex: '100',
+      backgroundColor: "#EEF2F6"
     },
 
     controlBlockButtonBox: {
@@ -143,7 +145,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
 
   useEffect(() => {
-    if (!expanded && callAudio) {
+    if (!expanded && callAudio && bundleIndex) {
       dispatch(callsSlice.actions.removeAudio({id: callInfo.id, bundleIndex}));
     }
   }, [expanded]);
@@ -160,6 +162,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
     return indices;
   }
+
 
   // Возвращает строку с индексом фрагмента/фразы и слова.
   function findWordIndexes(phrases: any[] | undefined, currentTime: number) {
@@ -194,12 +197,16 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   }, []);
 
+  const {language} = useAppSelector(state => state.lang);
 
   async function formPublicToken(id: string) {
     const publicTokenData = await dispatch(getCallPublicToken(id));
     // @ts-ignore
     const publicToken: {access_token: string, token_type: string} = publicTokenData.payload;
-    const publicUrl = `${window.location.href.slice(0, -1)}?call=${id}&token=${publicToken.access_token}`;
+    const host = window.location.origin;
+
+    const publicUrl = `${host}/imot/#/${language}/call?id=${id}&token=${publicToken.access_token}`;
+    debugger
     navigator.clipboard.writeText(publicUrl);
   }
 

@@ -129,7 +129,6 @@ const Header: React.FC = () => {
     // pathArray = location.pathname.split("/");
     // const languageParam = pathArray[1];
 
-    debugger
     const currentLang = event.target.value;
     await dispatch(getLang(currentLang));
 
@@ -174,13 +173,19 @@ const Header: React.FC = () => {
   }, []);
 
   const logout = () => {
-    dispatch(removeAuthToken())
+    dispatch(removeAuthToken());
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
     history.location.pathname = "/";
-    history.push("/ru/_/calls")
-    debugger
+    history.push(`/${language}/auth`);
   };
+
+  function login() {
+    history.location.pathname = "/";
+    history.push(`/${language}/auth`)
+  }
+
+  const isAuth = useAppSelector(state => state.auth.isAuth);
 
   // users changer
   const handleUserChange = async (e: any) => {
@@ -228,106 +233,106 @@ const Header: React.FC = () => {
             <img className={classes.headerIcon} height={55} src={LogoImg} alt="Imot.io"/>
           </div>
           {/* Навигация */}
-          <ToggleButtonGroup
-            value={alignment}
-            exclusive
-            onChange={handleRouteChange}
-            style={{cursor: 'pointer'}}
-          >
-            {/* Calls */}
-            <ToggleButton
-              key={0}
-              disabled={'calls' === alignment}
-              value={'calls'}
-              onClick={() => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/calls`);
-              }}
-              className={classes.headerItemText}
+          {isAuth && (
+            <ToggleButtonGroup
+              value={alignment}
+              exclusive
+              onChange={handleRouteChange}
+              style={{cursor: 'pointer'}}
             >
-              {translate('calls', language)}
-            </ToggleButton>
+              {/* Calls */}
+              <ToggleButton
+                key={0}
+                disabled={'calls' === alignment}
+                value={'calls'}
+                onClick={() => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/calls`);
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('calls', language)}
+              </ToggleButton>
 
-            {/* Reports */}
-            <ToggleButton
-              key={1}
-              disabled={'reports' === alignment}
-              value={'reports'}
-              onClick={() => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/reports`);
-              }}
-              className={classes.headerItemText}
-            >
-              {translate('reports', language)}
-            </ToggleButton>
+              {/* Reports */}
+              <ToggleButton
+                key={1}
+                disabled={'reports' === alignment}
+                value={'reports'}
+                onClick={() => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/reports`);
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('reports', language)}
+              </ToggleButton>
 
-            {/* Markuprules */}
-            <ToggleButton
-              key={2}
-              disabled={pagePath === 'markuprules' && pagePath === alignment}
-              value={'markuprules'}
-              onClick={async () => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/markuprules/${activeMarkupRulesPage}`);
-                await dispatch(getGroups());
-              }}
-              className={classes.headerItemText}
-            >
-              {translate('markupRules', language)}
-            </ToggleButton>
+              {/* Markuprules */}
+              <ToggleButton
+                key={2}
+                disabled={pagePath === 'markuprules' && pagePath === alignment}
+                value={'markuprules'}
+                onClick={async () => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/markuprules/${activeMarkupRulesPage}`);
+                  await dispatch(getGroups());
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('markupRules', language)}
+              </ToggleButton>
 
-            {/* Upload */}
-            <ToggleButton
-              key={3}
-              disabled={'upload' === alignment}
-              value={'upload'}
-              onClick={() => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/upload`);
-              }}
-              className={classes.headerItemText}
-            >
-              {translate('loadCall', language)}
-            </ToggleButton>
+              {/* Upload */}
+              <ToggleButton
+                key={3}
+                disabled={'upload' === alignment}
+                value={'upload'}
+                onClick={() => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/upload`);
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('loadCall', language)}
+              </ToggleButton>
 
-            {/* Alert */}
-            <ToggleButton
-              key={4}
-              disabled={'alert' === alignment}
-              value={'alert'}
-              style={{cursor: 'default !important'}}
-              onClick={() => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/alert`);
-              }}
-              className={classes.headerItemText}
-            >
-              {translate('alert', language)}
-            </ToggleButton>
+              {/* Alert */}
+              <ToggleButton
+                key={4}
+                disabled={'alert' === alignment}
+                value={'alert'}
+                style={{cursor: 'default !important'}}
+                onClick={() => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/alert`);
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('alert', language)}
+              </ToggleButton>
 
-            {/* Settings */}
-            <ToggleButton
-              key={5}
-              disabled={'settings' === alignment}
-              value={'settings'}
-              onClick={() => {
-                dispatch(langSlice.actions.setLoading(true));
-                history.location.pathname = '/'
-                history.replace(`${language}/${currentUser ? currentUser.id : "#"}/settings`);
-              }}
-              className={classes.headerItemText}
-            >
-              {translate('settings', language)}
-            </ToggleButton>
-
-
-          </ToggleButtonGroup>
+              {/* Settings */}
+              <ToggleButton
+                key={5}
+                disabled={'settings' === alignment}
+                value={'settings'}
+                onClick={() => {
+                  dispatch(langSlice.actions.setLoading(true));
+                  history.location.pathname = '/'
+                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/settings`);
+                }}
+                className={classes.headerItemText}
+              >
+                {translate('settings', language)}
+              </ToggleButton>
+            </ToggleButtonGroup>
+          )}
         </div>
 
 
@@ -356,10 +361,21 @@ const Header: React.FC = () => {
             </Select>
           </div>
 
-          {/* Выход из аккаунта */}
-          <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={logout}>
-            {translate('logout', language)}
-          </Button>
+          {isAuth ? (
+            <>
+              {/* Выход из аккаунта */}
+              <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={logout}>
+                {translate('logout', language)}
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* Выход из аккаунта */}
+              <Button className={classes.headerLogout} startIcon={<LogoutSvg/>} onClick={login}>
+                Войти
+              </Button>
+            </>
+          )}
 
         </div>
       </div>

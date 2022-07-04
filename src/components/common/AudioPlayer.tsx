@@ -43,7 +43,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({callAudio, onListen, audioPlayer
   }
 
   return (
-    <div tabIndex={1} style={{display: 'flex', backgroundColor: '#fff'}}>
+    <div tabIndex={1} style={{display: 'flex', backgroundColor: '#F8FAFC'}}>
       <ReactAudioPlayer
         ref={audioPlayerRef}
         className={classes.audioPlayer}
@@ -54,7 +54,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({callAudio, onListen, audioPlayer
         onListen={onListen}
         onSeeked={onListen}
       />
-      <Speed audioPlayerRef={audioPlayerRef}/>
+      {/*<Speed audioPlayerRef={audioPlayerRef}/>*/}
     </div>
   );
 };

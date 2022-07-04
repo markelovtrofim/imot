@@ -8,7 +8,7 @@ import {authSlice, fetchAuthToken} from "../../store/auth/auth.slice";
 import {useAppSelector} from "../../hooks/redux";
 import {useFormik} from 'formik';
 import {LoadingButton} from "@mui/lab";
-import {Redirect} from "react-router-dom";
+import {Redirect, useHistory} from "react-router-dom";
 import SendIcon from '@mui/icons-material/Send';
 import Alert from "@mui/material/Alert";
 import Input from "../../components/common/Input";
@@ -159,8 +159,11 @@ const Auth = () => {
   const handleOpenSignUpWindow = () => setOpenSignUpWindow(true);
   const handleCloseSignUpWindow = () => setOpenSignUpWindow(false);
 
-  const isAuth = useAppSelector(state => state.auth.isAuth);
   const error = useAppSelector(state => state.auth.error);
+  const {language} = useAppSelector(state => state.lang);
+  const currentUser = useAppSelector(state => state.users.currentUser);
+
+  const history = useHistory();
 
   const formik = useFormik({
     initialValues: {
@@ -171,6 +174,8 @@ const Auth = () => {
       setButtonClick(true);
       await dispatch(fetchAuthToken(values));
       setButtonClick(false);
+      history.location.pathname = "/";
+      history.push(`/${language}/${currentUser ? currentUser.id : "_"}/calls`)
     },
   });
 
@@ -179,16 +184,9 @@ const Auth = () => {
       setButtonClick(false);
       dispatch(authSlice.actions.setError(null));
     }
-  }, [dispatch])
+  }, [dispatch]);
 
-  const currentUserData = useAppSelector(state => state.users.currentUser?.id);
-  const currentUser = currentUserData ? currentUserData : "_";
 
-  if (isAuth) {
-    return <Redirect to={`/${currentUser}/calls`}/>;
-  }
-
-  
   return (
     <div className={classes.authWrapper}>
       <div className={cn(classes.authGreetSide, classes.authBothSides)}>

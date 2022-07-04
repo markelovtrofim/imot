@@ -3,18 +3,23 @@ import axios from "axios";
 import {ChildUserType, UserType} from "./users.types";
 import {langSlice} from '../lang/lang.slice';
 import {instance} from "../api";
+import {removeAuthToken} from "../auth/auth.slice";
 
 export const getMe = createAsyncThunk(
   'users/getMe',
   async (payload, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const response = await instance.get<UserType>(`user/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    thunkAPI.dispatch(usersSlice.actions.setCurrentUser(response.data));
-    thunkAPI.dispatch(langSlice.actions.setLang(response.data.language));
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.get<UserType>(`user/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      thunkAPI.dispatch(usersSlice.actions.setCurrentUser(response.data));
+      thunkAPI.dispatch(langSlice.actions.setLang(response.data.language));
+    } catch (e) {
+      thunkAPI.dispatch(removeAuthToken());
+    }
   }
 );
 

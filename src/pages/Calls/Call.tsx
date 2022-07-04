@@ -14,7 +14,7 @@ import {TwoTags, Fragment} from "../../components/common/Tag";
 import {CallInfoType, CallSttType, CallTagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
-import {callsSlice, getCallAudio, getCallStt} from "../../store/calls/calls.slice";
+import {callsSlice, getAndSetCallAudio, getAndSetCallStt} from "../../store/calls/calls.slice";
 import {useAppSelector} from "../../hooks/redux";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
@@ -74,10 +74,11 @@ type CallStubMiddlewarePropsType = {
   callInfo: CallInfoType | null,
   callAudio: string | null,
   callStt: CallSttType | null,
-  bundleIndex: number,
+  bundleIndex: number | null,
 
   expanded: boolean,
-  handleExpandedChange: (panel: string | false) => void
+  handleExpandedChange: (panel: string | false) => void,
+  solo?: boolean
 };
 
 
@@ -87,7 +88,8 @@ const CallStubMiddleware = memo(({
                                    callStt = null,
                                    bundleIndex,
                                    expanded,
-                                   handleExpandedChange
+                                   handleExpandedChange,
+                                   solo
                                  }: CallStubMiddlewarePropsType) => {
   const useStyles = makeStyles(({
     accordion: {
@@ -250,6 +252,7 @@ const CallStubMiddleware = memo(({
       bundleIndex={bundleIndex}
       handleExpandedChange={handleExpandedChange}
       expanded={expanded}
+      solo={solo}
     />
   )
 });
@@ -259,10 +262,11 @@ type CallPropsType = {
   callInfo: CallInfoType,
   callAudio: string | null,
   callStt: CallSttType | null,
-  bundleIndex: number,
+  bundleIndex: number | null,
 
   expanded: boolean,
-  handleExpandedChange: (panel: string | false) => void
+  handleExpandedChange: (panel: string | false) => void,
+  solo?: boolean
 };
 
 // конвертирует время для показа
@@ -413,11 +417,6 @@ const Call = memo((props: CallPropsType) => {
 
   // устанавливает пришело ли аудио и stt.
   const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
-  useEffect(() => {
-    return () => {
-      setIsCallBodyData(false);
-    }
-  }, []);
 
   // разделяет теги на теги и фрагменты
   const tagsAndFragmentsSeparator = () => {
@@ -523,7 +522,7 @@ const Call = memo((props: CallPropsType) => {
       id={props.callInfo.id}
       className={classes.accordion}
       tabIndex={-1}
-      expanded={props.expanded && isCallBodyData}
+      expanded={props.solo ? props.solo : props.expanded && isCallBodyData}
     >
       {/* Первичная информация о звонке. */}
       <div style={{position: 'sticky', top: '0', zIndex: '101'}} ref={accordionSummary}>
@@ -532,11 +531,10 @@ const Call = memo((props: CallPropsType) => {
           className={classes.accordionSummary} tabIndex={-1}
           onClick={async (e) => {
             if (index || index === 0) {
-              debugger
               if (!isCallBodyData) {
                 props.handleExpandedChange(props.callInfo.id);
-                dispatch(getCallAudio({id: props.callInfo.id, bundleIndex: index}));
-                dispatch(getCallStt({id: props.callInfo.id, bundleIndex: index}));
+                dispatch(getAndSetCallAudio({id: props.callInfo.id, bundleIndex: index}));
+                dispatch(getAndSetCallStt({id: props.callInfo.id, bundleIndex: index}));
                 await setIsCallBodyData(true);
               } else {
                 dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));

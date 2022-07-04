@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {BlockBox, Search, СontrolBlock} from "../../components/common";
-import {CircularProgress, Typography} from "@mui/material";
+import {CircularProgress, Grid, Typography} from "@mui/material";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../store/calls/calls.slice";
+import {searchSlice} from '../../store/search/search.slice';
 import {CallType} from "../../store/calls/calls.types";
 import CallStubMiddleware from "./Call";
 import {RootState} from "../../store/store";
@@ -31,6 +32,7 @@ const useStyles = makeStyles(({
   }
 }))
 
+
 const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
   <svg width="20" height="19" viewBox="0 0 20 19" fill={props.fill ? props.fill : '#738094'}
        xmlns="http://www.w3.org/2000/svg">
@@ -51,7 +53,6 @@ const Calls = React.memo(() => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const [fetching, setFetching] = useState<boolean>(false);
-
   const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
 
   const found = useAppSelector(state => state.calls.found);
@@ -79,8 +80,13 @@ const Calls = React.memo(() => {
 
   useEffect(() => {
     dispatch(langSlice.actions.setLoading(false));
-    pushNewCalls().then();
-    return () => setFetching(false);
+    if (calls.length < 2) {
+      pushNewCalls().then();
+    }
+    return () => {
+      setFetching(false);
+      dispatch(searchSlice.actions.setDefaultCriterias(null));
+    }
   }, []);
 
   useEffect(() => {
