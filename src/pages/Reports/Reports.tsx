@@ -1232,7 +1232,7 @@ const Reports = React.memo(() => {
               open={isOpen}
               onClose={handleClose}
             >
-            <div>
+            <div className={classes.deleteModal}>
               <Typography style={{fontWeight: '600'}}>Вы точно хотите удалить отчет?</Typography>
               <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                 <LoadingButton
