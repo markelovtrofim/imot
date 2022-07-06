@@ -166,11 +166,11 @@ const Header: React.FC = () => {
     setAlignment(newAlignment);
   };
 
-  useEffect(() => {
-    dispatch(getChildUser());
-    dispatch(getMe());
-    dispatch(getChildUsers());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getChildUser());
+  //   dispatch(getMe());
+  //   dispatch(getChildUsers());
+  // }, []);
 
   const logout = () => {
     dispatch(removeAuthToken());

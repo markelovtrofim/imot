@@ -17,7 +17,9 @@ export const getMe = createAsyncThunk(
       });
       thunkAPI.dispatch(usersSlice.actions.setCurrentUser(response.data));
       thunkAPI.dispatch(langSlice.actions.setLang(response.data.language));
+      return response.data;
     } catch (e) {
+      console.log('error me')
       thunkAPI.dispatch(removeAuthToken());
     }
   }
