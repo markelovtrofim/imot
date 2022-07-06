@@ -19,13 +19,14 @@ export const fetchAuthToken = createAsyncThunk(
           'Content-Security-Policy': 'block-all-mixed-content'
         }
       });
-      localStorage.setItem('token', JSON.stringify({
+      await localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));
-      localStorage.setItem('mainToken', JSON.stringify({
+      await localStorage.setItem('mainToken', JSON.stringify({
         mainToken: response.data.access_token
       }));
-      thunkAPI.dispatch(authSlice.actions.setAuth(true));
+      await thunkAPI.dispatch(authSlice.actions.setAuth(true));
+      return response.data;
     } catch (error) {
       // @ts-ignore
       const status = Number(error.message.substr(-3, 3));

@@ -81,8 +81,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({disabled, handle
   // STYLES BLOCK
   const customDotsStyles = {
     container: (base: any) => ({
-      ...base,
-      flex: 1
+      ...base
     }),
     menu: (provided: any, state: any) => ({
       ...provided,
@@ -118,8 +117,8 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({disabled, handle
     control: (provided: any, state: any) => ({
       ...provided,
       cursor: 'pointer',
-      width: '40px',
-      height: '40px',
+      width: '32px',
+      height: '32px',
       border: 'none',
       boxShadow: 'none',
       backgroundColor: '#E3E8EF',
