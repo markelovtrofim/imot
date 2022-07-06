@@ -117,11 +117,8 @@ const ControlBlock = (props: any) => {
           {props.switchEntity === 'reports' ?
             <DateRangePickerWrapper
               id={'dateRangePicker'}
-              // @ts-ignore
               value={dateReports}
-              // @ts-ignore
-              onChange={(value,) => {
-                // @ts-ignore
+              onChange={(value: [Date, Date],) => {
                 dispatch(reportsSlice.actions.setDate(value))
               }}
               onClean={() => {
@@ -131,11 +128,8 @@ const ControlBlock = (props: any) => {
             :
             <DateRangePickerWrapper
               id={'dateRangePicker'}
-              // @ts-ignore
               value={date}
-              // @ts-ignore
-              onChange={(value,) => {
-                // @ts-ignore
+              onChange={(value: [Date, Date],) => {
                 dispatch(searchSlice.actions.setDate(value));
               }}
               onClean={() => {

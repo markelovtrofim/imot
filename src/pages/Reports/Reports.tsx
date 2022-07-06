@@ -3,8 +3,8 @@ import {getAllReports, getReport, setReports, getCallReport, deleteReport, getSe
 import {useDispatch} from "react-redux";
 import {useAppSelector} from "../../hooks/redux";
 import {RootState} from '../../store/store';
-import {BlockBox, ModalWindowBox, Search, СontrolBlock} from "../../components/common";
-import {DataGrid, GridColDef, GridValueGetterParams,  GridToolbarExport, GridToolbarContainer, GridRowsProp, MuiEvent, GridCellParams, GridToolbar, GridColumnVisibilityModel, GridToolbarColumnsButton } from '@mui/x-data-grid';
+import {BlockBox, СontrolBlock} from "../../components/common";
+import {DataGrid, GridColDef, GridRowsProp, MuiEvent} from '@mui/x-data-grid';
 import {optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey} from '../../utils/optionsCreator';
 import {Typography} from '@mui/material';
 import {reportsSlice} from '../../store/reports/reports.slice';
@@ -14,16 +14,13 @@ import {translate} from "../../localizations";
 import {CallType} from '../../store/calls/calls.types';
 import {CriteriasType} from '../../store/search/search.types';
 import CallStubMiddleware from '../Calls/Call';
-import {getCallsInfo, getCallsInfoById, getBaseCallsData, callsSlice} from '../../store/calls/calls.slice';
+import {getCallsInfoById, callsSlice} from '../../store/calls/calls.slice';
 import CallsHeader from '../Calls/CallsHeader';
 import CriteriasList from '../../components/common/Criterias/CriteriasList';
 import TextSelect from '../../components/common/Selects/TextSelect/TextSelect';
 import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../../store/search/search.slice"
 import Input from "../../components/common/Input";
-import {TrashSvg} from '../MarkupRules/Tags/TagDetails/TagDetails.svg';
 import Box from '@mui/material/Box';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Plus from '../../components/common/Buttons/Plus';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -31,21 +28,8 @@ import FormGroup from '@mui/material/FormGroup';
 import cloneDeep from "lodash.clonedeep";
 import {reportsStyles} from './Reports.jss';
 import Dialog from "@mui/material/Dialog";
-
-export function SortedDescendingIcon() {
-  return <ExpandMoreIcon className="icon" />;
-}
-export function SortedAscendingIcon() {
-  return <ExpandLessIcon className="icon" />;
-}
-const ExportIcon = () => {
-  return(
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M13.35 9.39611C13.2952 9.44451 13.2621 9.51298 13.2585 9.58605C13.2261 10.2611 13.1707 10.9354 13.0921 11.6076C12.9893 12.486 12.279 13.1858 11.3922 13.2848C9.15505 13.5349 6.84064 13.5349 4.60343 13.2848C3.71669 13.1858 3.00636 12.486 2.90361 11.6076C2.63629 9.32185 2.63629 7.01285 2.90361 4.72713C3.00636 3.84869 3.71669 3.14894 4.60343 3.04983C6.07844 2.88498 7.58877 2.82889 9.08683 2.88142C9.19497 2.88521 9.28703 2.80291 9.29463 2.69493L9.32738 2.22625C9.32938 2.19865 9.3321 2.17135 9.3355 2.14436C9.35177 2.01477 9.26191 1.88698 9.13138 1.88236C7.58098 1.82743 6.01967 1.88533 4.49235 2.05603C3.15097 2.20594 2.06809 3.26261 1.91039 4.61097C1.63403 6.97385 1.63403 9.36085 1.91039 11.7237C2.06809 13.072 3.15097 14.1288 4.49235 14.2786C6.80337 14.537 9.1923 14.537 11.5033 14.2786C12.8447 14.1288 13.9275 13.072 14.0853 11.7237C14.1979 10.7605 14.2647 9.79331 14.2855 8.82531C14.2881 8.70385 14.1391 8.64331 14.0537 8.72985C13.827 8.96005 13.5923 9.18225 13.35 9.39611Z" fill="#A3AEBE"/>
-      <path d="M5.2448 10.3666C5.09732 10.326 4.99642 10.1902 5.0001 10.0373L5.03959 8.39467C5.09614 6.04271 7.01899 4.16551 9.37166 4.16551H10.2099C10.2275 3.74969 10.2514 3.33407 10.2817 2.9188L10.3269 2.29837C10.3545 1.91975 10.7767 1.70809 11.0965 1.9125C12.4772 2.79469 13.6775 3.93142 14.6333 5.26209L14.9374 5.68539C15.0209 5.8016 15.0209 5.95812 14.9374 6.07433L14.6333 6.49763C13.6775 7.82827 12.4772 8.96501 11.0965 9.84721C10.8331 10.0155 10.4993 9.90174 10.3747 9.64487C10.3485 9.59027 10.3317 9.52734 10.3269 9.46134L10.2817 8.84094C10.2455 8.34567 10.2185 7.84994 10.2005 7.35394L9.96446 7.31841C8.46032 7.09201 6.97252 7.81787 6.2252 9.14267L5.62366 10.2091C5.59501 10.2598 5.55435 10.3009 5.50712 10.3297C5.43048 10.3765 5.33598 10.3917 5.2448 10.3666Z" fill="#738094"/>
-    </svg>
-  )
-}
+import CircularProgress from '@mui/material/CircularProgress';
+import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg } from "./Reports.svg";
 
 const Reports = React.memo(() => {
   const classes = reportsStyles();
@@ -80,6 +64,7 @@ const Reports = React.memo(() => {
   const [visibleParameters, setVisibleParameters] = React.useState(false);
   const [isLoading, setLoading] = useState(false);
 
+
   useEffect(() => {
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
@@ -102,17 +87,52 @@ const Reports = React.memo(() => {
     await dispatch(getAllSearchCriterias());
   }
 
+  const handleOptionsTypeReports = (options: any) => {
+    let local: { value: any, label: string}[] = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i] === 'calls') {
+        local.push({value: options[i], label: `${translate('reportTypeCalls', language)}`});
+      }
+    }
+    return local;
+  }
+  const handleOptionsTypeReportsObj = (options: any) => {
+    let local = {};
+    if (options === 'calls') {
+      local = {value: options.group_by, label: `${translate('reportTypeCalls', language)}`};
+    }
+    return local;
+  }
+
+  //to do: переделать
   const handleOptionsReportsSelect = (options: any) => {
-    let local: { value: any, label: string, type: string }[] = [];
+    let local: { value: any, label: string, type?: string }[] = [];
     for (let i = 0; i < options.length; i++) {
       if (options[i] === 'time') {
-        local.push({value: options[i], label: options[i], type: 'select'});
+        local.push({value: options[i], label: `${translate('reportGroupByRowTime', language)}`, type: 'select'});
       } else if (options[i] === 'search_items') {
-        local.push({value: options[i], label: options[i], type: 'title'});
+        local.push({value: options[i], label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title'});
       } else if (options[i] === 'tag') {
-        local.push({value: options[i], label: options[i], type: 'select-tag'});
+        local.push({value: options[i], label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag'});
+      } else if (options[i] === 'tag_list') {
+        // new
+        local.push({value: options[i], label: `${translate('reportGroupByRowTagList', language)}`, type: 'input'});
+      } else if (options[i] === 'operator_phone') {
+        local.push({value: options[i], label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean'});
+      } else if (options[i] === 'client_phone') {
+        local.push({value: options[i], label: `${translate('reportGroupByRowClientPhone', language)}`, type: 'boolean'});
+      } else if (options[i] === 'calls_count') {
+        local.push({value: options[i], label: `${translate('reportGroupByRowCallsCount', language)}`, type: 'boolean'});
+      } else if (options[i] === 'stt_engine') {
+        local.push({value: options[i], label: `${translate('reportGroupByRowSttEngine', language)}`, type: 'boolean'});
+      } else if (options[i] === 'hour') {
+        local.push({value: options[i], label: `${translate('reportGroupByTimeHour', language)}`});
+      } else if (options[i] === 'day') {
+        local.push({value: options[i], label: `${translate('reportGroupByTimeDay', language)}`});
+      } else if (options[i] === 'week') {
+        local.push({value: options[i], label: `${translate('reportGroupByTimeWeek', language)}`});
       } else {
-        local.push({value: options[i], label: options[i], type: 'boolean'});
+        local.push({value: options[i], label: `${translate('reportGroupByTimeMonth', language)}`});
       }
     }
     return local;
@@ -120,16 +140,34 @@ const Reports = React.memo(() => {
   const handleOptionsReportsSelectObj = (options: any) => {
     let local = {};
     if (options.group_by === 'time') {
-      local = {value: options.group_by, label: options.group_by, type: 'select'};
+      local = {value: options.group_by, label: `${translate('reportGroupByRowTime', language)}`, type: 'select'};
     } else if (options.group_by === 'search_items') {
-      local = {value: options.group_by, label: options.group_by, type: 'title'};
+      local = {value: options.group_by, label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title'};
     } else if (options.group_by === 'tag') {
-      local = {value: options.group_by, label: options.group_by, type: 'select-tag'};
+      local = {value: options.group_by, label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag'};
+    }  else if (options.group_by === 'tag_list') {
+      // new
+      local = {value: options.group_by, label: `${translate('reportGroupByRowTagList', language)}`, type: 'input'};
+    } else if (options.group_by === 'operator_phone') {
+      local = {value: options.group_by, label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean'};
+    } else if (options.group_by === 'client_phone') {
+      local = {value: options.group_by, label: `${translate('reportGroupByRowClientPhone', language)}`, type: 'boolean'};
+    } else if (options.group_by === 'calls_count') {
+      local = {value: options.group_by, label: `${translate('reportGroupByRowCallsCount', language)}`, type: 'boolean'};
+    } else if (options.group_by === 'stt_engine') {
+      local = {value: options.group_by, label: `${translate('reportGroupByRowSttEngine', language)}`, type: 'boolean'};
+    } else if (options.group_by === 'hour') {
+      local = {value: options.group_by, label: `${translate('reportGroupByTimeHour', language)}`};
+    } else if (options.group_by === 'day') {
+      local = {value: options.group_by, label: `${translate('reportGroupByTimeDay', language)}`};
+    } else if (options.group_by === 'week') {
+      local = {value: options.group_by, label: `${translate('reportGroupByTimeWeek', language)}`};
     } else {
-      local = {value: options.group_by, label: options.group_by, type: 'boolean'};
+      local = {value: options.group_by, label: `${translate('reportGroupByTimeMonth', language)}`};
     }
     return local;
   }
+
 
   const handleMoreSelectClick = (allCriteriasArr:  CriteriasType[] | null , activeCriterias:  CriteriasType[] | null) => {
     if (allCriteriasArr) {
@@ -212,9 +250,9 @@ const Reports = React.memo(() => {
   const reportName = useAppSelector(state => state.reports.activeReport.report_name);
 
   // тип отчета
-  const typeReportOptions = optionsCreatorVEL(selectorsValues.report_types);
+  const typeReportOptions = handleOptionsTypeReports(selectorsValues.report_types);
   const typeReport = useAppSelector(state => state.reports.activeReport.report_type);
-  const typeReportValue = {value: typeReport, label: typeReport};
+  const typeReportValue = handleOptionsTypeReportsObj(typeReport);
 
   // по строкам
   const groupByRowsReportOptions = handleOptionsReportsSelect(selectorsValues.rows_groupings);
@@ -225,7 +263,7 @@ const Reports = React.memo(() => {
   }
 
   // по времени
-  const timeColumnsReportOptions = optionsCreatorVEL(selectorsValues.groupings_by_time);
+  const timeColumnsReportOptions = handleOptionsReportsSelect(selectorsValues.groupings_by_time);
   const [timeColumnsReportValue, setTimeColumnsReportValue] = useState(timeColumnsReportOptions[0]);
 
   // tag names
@@ -643,27 +681,28 @@ const Reports = React.memo(() => {
     dispatch(reportsSlice.actions.removeAllActiveParameters(null));
     await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
-
     await dispatch(getCallReport());
+    hideVisibleParameters();
     setLoading(false);
-    switchVisibleParameters();
-    //to do: preloader
   }
 
-  //отображение доп группировки по столбцам из сохраненных отчетов - переделать это
+  //отображение доп группировки по столбцам из сохраненных отчетов - to do:  переделать это
   useEffect(() => {
     if (groupByColumns.length > 0) {
       if (groupByColumns[0].group_by === 'search_items') {
         const test = [];
         //@ts-ignore
-        for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
+        if (groupByColumns[0].value.search_items) {
           //@ts-ignore
-          const groupColumnsItem = groupByColumns[0].value.search_items[i]
-          //@ts-ignore
-          test.push(allCriterias.filter((item) => item.key === groupColumnsItem.key))
-          //@ts-ignore
-          dispatch(searchSlice.actions.setActiveCriteriaReportsColumn(allCriterias.filter((item) => item.key === groupColumnsItem.key)))
-          dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: groupColumnsItem.key, values: [...groupColumnsItem.values]}));
+          for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
+            //@ts-ignore
+            const groupColumnsItem = groupByColumns[0].value.search_items[i]
+            //@ts-ignore
+            test.push(allCriterias.filter((item) => item.key === groupColumnsItem.key))
+            //@ts-ignore
+            dispatch(searchSlice.actions.setActiveCriteriaReportsColumn(allCriterias.filter((item) => item.key === groupColumnsItem.key)))
+            dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: groupColumnsItem.key, values: [...groupColumnsItem.values]}));
+          }
         }
       }
     }
@@ -719,8 +758,8 @@ const Reports = React.memo(() => {
   const formReport = async () => {
     setLoading(true);
     await dispatch(getCallReport());
-    setLoading(false);
-    switchVisibleParameters();
+    await setLoading(false);
+    hideVisibleParameters();
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
@@ -732,7 +771,7 @@ const Reports = React.memo(() => {
     else {
       setValidateInputItem(false);
       await dispatch(setReports());
-      //to do: мини прелоадер?
+      //to do: snackbar
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({value: reportName, label: reportName}));
     }
@@ -743,6 +782,7 @@ const Reports = React.memo(() => {
     await dispatch(getAllReports());
     await dispatch(reportsSlice.actions.setInitialSavedReport(''));
     await handleClose();
+    //to do: snackbar
   }
 
   const getCalls = async (callIds: any[]) => {
@@ -754,8 +794,11 @@ const Reports = React.memo(() => {
     } else setCallSwitch(false);
   }
 
-  function switchVisibleParameters() {
-    setVisibleParameters(!visibleParameters);
+  const hideVisibleParameters = () => {
+    setVisibleParameters(false);
+  }
+  const showVisibleParameters = () => {
+    setVisibleParameters(true);
   }
 
   const [isOpen, setIsOpen] = useState(false);
@@ -767,9 +810,9 @@ const Reports = React.memo(() => {
   }
 
   //высота таблицы
-  const [heightTable, setHeightTable] = useState('1500px');
-
+  const [heightTable, setHeightTable] = useState('1200px');
   const gridWrapperRef = React.useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const gridDiv = gridWrapperRef.current;
     if (gridDiv != undefined || gridDiv != null && columns.length > 0 || rows.length > 0){
@@ -788,8 +831,7 @@ const Reports = React.memo(() => {
         }
       }
     }
-  }, [columns, rows]);
-
+  }, [tableColumns, tableRows, isLoading, activeReport]);
 
   return(
     <div>
@@ -801,9 +843,12 @@ const Reports = React.memo(() => {
               className={visibleParameters ? classes.reportOptionsButtonActive : classes.reportOptionsButton}
               color="primary"
               variant="text"
-              onClick={switchVisibleParameters}
+              endIcon={visibleParameters ? <OnTopArrow style={{margin: '0 7px 0 5px'}}/> : <OnBottomArrow  style={{margin: '0 7px 0 5px'}}/>}
+              onClick={() => {
+                visibleParameters ? hideVisibleParameters() : showVisibleParameters()
+              }}
             >
-              Параметры отчета
+              {translate('reportOptions', language)}
             </LoadingButton>
             <LoadingButton
               className={classes.getReportsButton}
@@ -811,11 +856,11 @@ const Reports = React.memo(() => {
               variant="contained"
               onClick={formReport}
             >
-              Сформировать отчет
+              {translate('makeReport', language)}
             </LoadingButton>
           </div>
           <div style={{display: 'flex', alignItems: 'center'}}>
-            <Typography style={{marginRight: '20px', whiteSpace: 'nowrap'}}>Сохраненные отчеты:</Typography>
+            <Typography style={{marginRight: '20px', whiteSpace: 'nowrap'}}>{translate('savedReports', language)}:</Typography>
             <div style={{display: 'flex'}}>
               <ContainedSelect
                 height={'38px'}
@@ -833,54 +878,13 @@ const Reports = React.memo(() => {
         </div>
       </div>
       {visibleParameters ?
-        <BlockBox padding="24px">
-          {/* фильтры звонков */}
-          <div>
-            <div className={classes.filtersBlock}>
-              <div className={classes.filterBlockWrapper}>
-                <div className={classes.searchTitleLeft}>
-                  <Typography className={classes.searchTitleLeftText} variant="h6">
-                    Фильтры звонков
-                  </Typography>
-                  <div style={{display: 'flex', alignItems: 'center'}}>
-                    <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
-                      <TextSelect
-                        name={'moreSelect'}
-                        value={null}
-                        handleValueChange={onAllCriteriasSelectValueChange}
-                        options={op}
-                        iconPosition={'left'}
-                        customControl={
-                          <div style={{display: 'flex', alignItems: 'center'}}>
-                            <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                          </div>
-                        }
-                        ifArrowColor={'#722ED1'}
-                        notClose={true}
-                        menuPosition={'right'}
-                        height={"400px"}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={classes.criteriaList}>
-                <CriteriasList
-                  allCriterias={allCriterias}
-                  activeCriterias={activeCriteriasReports}
-                  block={"reports"}
-                />
-              </div>
-            </div>
-          </div>
-
+        <BlockBox padding="16px">
           {/* звонки */}
           <div className={classes.filtersBlock}>
             <div className={classes.searchTitle}>
               <div className={classes.searchTitleLeft}>
                 <Typography className={classes.searchTitleLeftText} variant="h6">
-                  Параметры отчета
+                  {translate('reportOptions', language)}
                 </Typography>
               </div>
             </div>
@@ -889,10 +893,10 @@ const Reports = React.memo(() => {
                 {/* название */}
                 <div className={classes.parameterBlock}>
                   <div className={classes.flexCenter}>
-                    <Typography className={classes.parameterItemTitle}>Название отчета</Typography>
+                    <Typography className={classes.parameterItemTitle}>{translate('reportTitle', language)}</Typography>
                     <div style={{width: '265px'}} className={validateInputItem ? classes.errorInput : classes.reportName}>
                       <span>
-                        <Typography className={classes.errorTitle}>Укажите название отчета</Typography>
+                        <Typography className={classes.errorTitle}>{translate('reportTitleMes', language)}</Typography>
                       </span>
                       <Input
                         name={"report_name"}
@@ -913,7 +917,7 @@ const Reports = React.memo(() => {
                 {/* тип отчета */}
                 <div className={classes.parameterBlock}>
                   <div className={classes.flexCenter}>
-                    <Typography className={classes.parameterItemTitle}>Тип отчета по</Typography>
+                    <Typography className={classes.parameterItemTitle}>{translate('reportType', language)}</Typography>
                     <ContainedSelect
                       height={'38px'}
                       width={'265px'}
@@ -931,7 +935,7 @@ const Reports = React.memo(() => {
                 {/* по строкам */}
                 <div className={classes.parameterBlock}>
                   <div className={classes.flexCenter}>
-                    <Typography className={classes.parameterItemTitle}>Группировка по строкам</Typography>
+                    <Typography className={classes.parameterItemTitle}>{translate('reportGroupByRow', language)}</Typography>
                     <ContainedSelect
                       height={'38px'}
                       width={'265px'}
@@ -981,7 +985,6 @@ const Reports = React.memo(() => {
                         }
                         options={timeColumnsReportOptions}
                         value={timeColumnsReportValue}
-                        // value={timeColumnTest}
                       />
                     </div>
                     : <></>
@@ -995,7 +998,7 @@ const Reports = React.memo(() => {
                     {/* типо дефолтный */}
                     <div style={{display: 'inline-flex', color: '#2F3747'}}>
                       <div className={classes.flexCenter}>
-                        <Typography className={classes.parameterItemTitle}>Группировка по столбцам</Typography>
+                        <Typography className={classes.parameterItemTitle}>{translate('reportGroupByColumns', language)}</Typography>
                         <ContainedSelect
                           height={'38px'}
                           width={'265px'}
@@ -1026,7 +1029,7 @@ const Reports = React.memo(() => {
                               height={'38px'}
                               bcColor={"#FFFFFF"}
                               border={'1px solid #E3E8EF'}
-                              label={"заголовок столбца"}
+                              label={`${translate('reportColumnHeading', language)}`}
                               value={reportNameColumnDefault}
                               handleChange={(event: any) => {
                                 dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: event.target.value }));
@@ -1081,6 +1084,15 @@ const Reports = React.memo(() => {
                           options={tagNamesColOptions}
                           value={tagNamesColValue}
                         />
+                      </div>
+                      :
+                      <></>
+                    }
+                    {groupByColumnsValue && groupByColumnsValue.type === 'input' ?
+                      <div style={{display: 'inline-flex', width: '265px'}}>
+                        {/*<SearchSelect*/}
+
+                        {/*/>*/}
                       </div>
                       :
                       <></>
@@ -1144,7 +1156,7 @@ const Reports = React.memo(() => {
                                         height={'38px'}
                                         bcColor={"#FFFFFF"}
                                         border={'1px solid #E3E8EF'}
-                                        label={"заголовок столбца"}
+                                        label={`${translate('reportColumnHeading', language)}`}
                                         value={item[0].nameColumn.value}
                                         handleChange={(event: any) => {
                                           dispatch(reportsSlice.actions.setNameColumnFieldValue({
@@ -1181,19 +1193,18 @@ const Reports = React.memo(() => {
                                       height={"400px"}
                                     />
                                   </div>
-
-                                  <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '16px'}}>
-                                    {item[0].callFilters.activeValues.length > 0 ?
-                                      <div className={classes.filterBlockFlex}>
-                                        <CriteriasList
-                                          allCriterias={item[0].callFilters.values}
-                                          activeCriterias={item[0].callFilters.activeValues}
-                                          index={{arrayIndex: arrayIndex}}
-                                        />
-                                      </div>
-                                      :<></>
-                                    }
+                                  {item[0].callFilters.activeValues.length > 0 ?
+                                  <div style={{display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '8px'}}>
+                                    <div className={classes.filterBlockFlex}>
+                                      <CriteriasList
+                                        allCriterias={item[0].callFilters.values}
+                                        activeCriterias={item[0].callFilters.activeValues}
+                                        index={{arrayIndex: arrayIndex}}
+                                      />
+                                    </div>
                                   </div>
+                                    : <></>
+                                  }
                                 </>
                                 : <></>
                               }
@@ -1228,30 +1239,72 @@ const Reports = React.memo(() => {
               </div>
             </div>
           </div>
-            <Dialog
+
+          {/* фильтры звонков */}
+          <div>
+            <div className={classes.filtersBlock}>
+              <div className={classes.filterBlockWrapper}>
+                <div className={classes.searchTitleLeft}>
+                  <Typography className={classes.searchTitleLeftText} variant="h6">
+                    {translate('reportCallFilters', language)}
+                  </Typography>
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
+                      <TextSelect
+                        name={'moreSelect'}
+                        value={null}
+                        handleValueChange={onAllCriteriasSelectValueChange}
+                        options={op}
+                        iconPosition={'left'}
+                        customControl={
+                          <div style={{display: 'flex', alignItems: 'center'}}>
+                            <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                          </div>
+                        }
+                        ifArrowColor={'#722ED1'}
+                        notClose={true}
+                        menuPosition={'right'}
+                        height={"400px"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={classes.criteriaList}>
+                <CriteriasList
+                  allCriterias={allCriterias}
+                  activeCriterias={activeCriteriasReports}
+                  block={"reports"}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Dialog
               open={isOpen}
               onClose={handleClose}
             >
             <div className={classes.deleteModal}>
-              <Typography style={{fontWeight: '600'}}>Вы точно хотите удалить отчет?</Typography>
+              <Typography style={{fontWeight: '600'}}>{translate('reportDeleteMes', language)}</Typography>
               <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                 <LoadingButton
                   variant="outlined"
                   color="primary"
                   onClick={handleClose}
                 >
-                  Назад
+                  {translate('cancelButton', language)}
                 </LoadingButton>
                 <LoadingButton
                   variant="contained"
                   color="primary"
                   onClick={deleteReportAsync}
                 >
-                  Удалить
+                  {translate('deleteButton', language)}
                 </LoadingButton>
               </div>
             </div>
-            </Dialog>
+          </Dialog>
 
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             {currentSavedReport.value ?
@@ -1261,7 +1314,7 @@ const Reports = React.memo(() => {
                 variant="outlined"
                 onClick={handleOpen}
               >
-                Удалить отчет
+                {translate('reportDeleteReport', language)}
               </LoadingButton>
               : <></>
             }
@@ -1271,237 +1324,251 @@ const Reports = React.memo(() => {
               variant="outlined"
               onClick={saveReportAsync}
             >
-              Сохранить отчет
+              {translate('reportSaveReport', language)}
             </LoadingButton>
           </div>
         </BlockBox>
         : null
       }
 
-      {callReport.report_parameters_hash  ?
+      {isLoading ?
+        <Box sx={{display: 'flex',
+          height: '100%',
+          width: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: '14% 0'}}
+        >
+          <CircularProgress />
+        </Box>
+        :
         <>
-          {totalCalls === 0 ?
-            <div className={classes.notFoundCalls}>Не найдено звонков в выбранном периоде</div>
-            :
-            <div style={{marginBottom: '60px'}}>
-              <div className={classes.reportItemInfo}>
-                <div className={classes.flexCenterMb}>
-                  <LoadingButton
-                    className={classes.reportOptionsButton}
-                    color="primary"
-                    variant="text"
-                    loadingPosition="start"
-                    startIcon={<ExportIcon/>}
-                  >
-                    Экспорт в Excel
-                  </LoadingButton>
-                </div>
-                <div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <Typography className={classes.reportTitle} variant="h6">
-                      {reportName}
-                    </Typography>
-                    <FormGroup className={classes.checkboxDiff}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            onChange={handleChangeCheck}
-                            checked={checkboxValue}
-                          />}
-                        label="Показать разницу с прошлым периодом"
-                      />
-                    </FormGroup>
-                  </div>
-                </div>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <div className={classes.reportFindNumber}>
-                    Под условия фильтра попало звонков: &nbsp;
-                    {totalCalls}
-                  </div>
-                  <FormGroup className={classes.checkboxDiffValues}>
-                    <FormControlLabel
-                      className={classes.checkboxDiffLabel}
-                      control={
-                        <Checkbox
-                          onChange={handleChangeCheckCalls}
-                          checked={checkboxCalls}
-                        />}
-                      label="Звонки"
-                    />
-                    <FormControlLabel
-                      className={classes.checkboxDiffLabel}
-                      control={
-                        <Checkbox
-                          onChange={handleChangeCheckMinutes}
-                          checked={checkboxMinutes}
-                        />}
-                      label="Минуты"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          onChange={handleChangeCheckPercent}
-                          checked={checkboxPercent}
-                        />}
-                      label="Проценты"
-                    />
-                  </FormGroup>
-                </div>
-              </div>
-              <div className={classes.table}>
-                <div style={{ display: 'flex', height: '100%'}}>
-                  <div style={{ flexGrow: 1,  background: '#fff', height: heightTable }}>
-                    <Box
-                      sx={{
-                        height: 60,
-                        border: 'none',
-                        borderRadius: '10px',
-                        backgroundColor: '#fff',
-                        '& .light-header--theme .MuiDataGrid-columnHeaderTitle': {
-                          color: '#738094',
-                          fontWeight: 600,
-                          padding: '0 5px',
-                          lineHeight: 1.3,
-                        },
-                        '& .MuiDataGrid-root': {
-                          backgroundColor: '#fff',
-                        },
-                        '& .MuiDataGrid-cell': {
-                          color: '#2F3747',
-                          maxHeight: 'none !important',
-                          overflow: 'auto',
-                          whiteSpace: 'initial !important',
-                          lineHeight: '16px !important',
-                          display: 'flex !important',
-                          alignItems: 'center',
-                          paddingTop: '5px !important',
-                          paddingBottom: '5px !important',
-                          textAlign: 'center',
-                          fontSize: '12px !important',
-                        },
-                        '.MuiDataGrid-columnSeparator': {
-                          display: 'none',
-                        },
-                        '&.MuiDataGrid-root': {
-                          border: 'none',
-                        },
-                        '& .cell-active': {
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          color: '#531DAB',
-                          fontWeight: '600',
-                        },
-                        '& .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon':{
-                          opacity: '0.5 !important'
-                        },
-                        // костыль для скрытия пагинации
-                        '& .MuiDataGrid-footerContainer': {
-                          display: 'none !important'
-                        },
-                        "& .MuiDataGrid-root .MuiDataGrid-columnHeader .MuiDataGrid-iconButtonContainer": {
-                          visibility: "visible",
-                          width: 'auto',
-                          alignSelf: 'flex-end',
-                          marginBottom: '-3px'
-                        },
-                        '& .MuiDataGrid-columnHeader:nth-of-type(3n + 1) .MuiDataGrid-columnSeparator svg' :{
-                          // fontSize: '2rem !important',
-                          color: 'rgba(115, 128, 148, 0.7) !important'
-                        },
-                        "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
-                          opacity: 0.5
-                        },
-                        '& .MuiDataGrid-iconButtonContainer': {
-                          '& button': {
-                            padding: '1px',
-                            '& svg': {
-                              fontSize: '1.1rem',
-                              padding: '1px'
-                            }
-                          }
-                        },
-                        '& .MuiDataGrid-columnHeaderTitleContainer': {
-                          overflow: 'hidden !important',
-                          padding: '7px 5px !important'
-                        },
-                        '& .MuiDataGrid-root .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-root .MuiDataGrid-columnHeader:focus-within, ' :{
-                          outline: 'none !important',
-                        },
-                        '& .MuiDataGrid-viewport, & .MuiDataGrid-row, & .MuiDataGrid-renderingZone': {
-                          maxHeight: 'none !important',
-                        },
-                        //sticky header
-                        '& .MuiDataGrid-columnHeaders': {
-                          position: "sticky",
-                          top: '-1px',
-                          backgroundColor: '#fff',
-                          zIndex: 1000
-                        },
-                        '& .MuiDataGrid-virtualScroller': {
-                          marginTop: "0 !important"
-                        },
-                        '& .MuiDataGrid-main': {
-                          overflow: "visible"
-                        }
-                      }}
-                    >
-                      <div ref={gridWrapperRef} style={{height: heightTable}}>
-                        <DataGrid
-                          autoHeight
-                          pagination
-                          rows={tableRows}
-                          columns={tableColumns}
-                          pageSize={rows.length}
-                          rowsPerPageOptions={[rows.length]}
-                          loading={isLoading}
-                          disableColumnMenu={true}
-                          // disableSelectionOnClick
-                          onCellClick={(params, event: MuiEvent<React.MouseEvent>) => {
-                            if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field]);
-                          }}
+          {callReport.report_parameters_hash  ?
+            <>
+              {totalCalls === 0 ?
+                <div className={classes.notFoundCalls}>{translate('reportNotFind', language)}</div>
+                :
+                <div style={{marginBottom: '60px'}}>
+                  <div className={classes.reportItemInfo}>
+                    <div className={classes.flexCenterMb}>
+                      <LoadingButton
+                        className={classes.reportOptionsButton}
+                        color="primary"
+                        variant="text"
+                        loadingPosition="start"
+                        startIcon={<ExportIcon/>}
+                      >
+                        {translate('reportExport', language)}
+                      </LoadingButton>
+                    </div>
+                    <div>
+                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <Typography className={classes.reportTitle} variant="h6">
+                          {reportName}
+                        </Typography>
+                        <FormGroup className={classes.checkboxDiff}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                onChange={handleChangeCheck}
+                                checked={checkboxValue}
+                              />}
+                            label={`${translate('reportDiff', language)}`}
+                          />
+                        </FormGroup>
+                      </div>
+                    </div>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                      <div className={classes.reportFindNumber}>
+                        {translate('reportCallFind', language)}: &nbsp;
+                        {totalCalls}
+                      </div>
+                      <FormGroup className={classes.checkboxDiffValues}>
+                        <FormControlLabel
+                          className={classes.checkboxDiffLabel}
+                          control={
+                            <Checkbox
+                              onChange={handleChangeCheckCalls}
+                              checked={checkboxCalls}
+                            />}
+                          label={`${translate('reportCalls', language)}`}
                         />
+                        <FormControlLabel
+                          className={classes.checkboxDiffLabel}
+                          control={
+                            <Checkbox
+                              onChange={handleChangeCheckMinutes}
+                              checked={checkboxMinutes}
+                            />}
+                          label={`${translate('reportMinutes', language)}`}
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              onChange={handleChangeCheckPercent}
+                              checked={checkboxPercent}
+                            />}
+                          label={`${translate('reportPercent', language)}`}
+                        />
+                      </FormGroup>
+                    </div>
+                  </div>
+                  <div className={classes.table}>
+                    <div style={{ display: 'flex', height: '100%'}}>
+                      <div style={{ flexGrow: 1,  background: '#fff', height: heightTable }}>
+                        <Box
+                          sx={{
+                            height: 60,
+                            border: 'none',
+                            borderRadius: '10px',
+                            backgroundColor: '#fff',
+                            '& .light-header--theme .MuiDataGrid-columnHeaderTitle': {
+                              color: '#738094',
+                              fontWeight: 600,
+                              padding: '0 5px',
+                              lineHeight: 1.3,
+                            },
+                            '& .MuiDataGrid-root': {
+                              backgroundColor: '#fff',
+                            },
+                            '& .MuiDataGrid-cell': {
+                              color: '#2F3747',
+                              maxHeight: 'none !important',
+                              overflow: 'auto',
+                              whiteSpace: 'initial !important',
+                              lineHeight: '16px !important',
+                              display: 'flex !important',
+                              alignItems: 'center',
+                              paddingTop: '5px !important',
+                              paddingBottom: '5px !important',
+                              textAlign: 'center',
+                              fontSize: '12px !important',
+                            },
+                            '.MuiDataGrid-columnSeparator': {
+                              display: 'none',
+                            },
+                            '&.MuiDataGrid-root': {
+                              border: 'none',
+                            },
+                            '& .cell-active': {
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              color: '#531DAB',
+                              fontWeight: '600',
+                            },
+                            '& .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon':{
+                              opacity: '0.5 !important'
+                            },
+                            // костыль для скрытия пагинации
+                            '& .MuiDataGrid-footerContainer': {
+                              display: 'none !important'
+                            },
+                            "& .MuiDataGrid-root .MuiDataGrid-columnHeader .MuiDataGrid-iconButtonContainer": {
+                              visibility: "visible",
+                              width: 'auto',
+                              alignSelf: 'flex-end',
+                              marginBottom: '-3px'
+                            },
+                            '& .MuiDataGrid-columnHeader:nth-of-type(3n + 1) .MuiDataGrid-columnSeparator svg' :{
+                              // fontSize: '2rem !important',
+                              color: 'rgba(115, 128, 148, 0.7) !important'
+                            },
+                            "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
+                              opacity: 0.5
+                            },
+                            '& .MuiDataGrid-iconButtonContainer': {
+                              '& button': {
+                                padding: '1px',
+                                '& svg': {
+                                  fontSize: '1.1rem',
+                                  padding: '1px'
+                                }
+                              }
+                            },
+                            '& .MuiDataGrid-columnHeaderTitleContainer': {
+                              overflow: 'hidden !important',
+                              padding: '7px 5px !important'
+                            },
+                            '& .MuiDataGrid-root .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-root .MuiDataGrid-columnHeader:focus-within, ' :{
+                              outline: 'none !important',
+                            },
+                            '& .MuiDataGrid-viewport, & .MuiDataGrid-row, & .MuiDataGrid-renderingZone': {
+                              maxHeight: 'none !important',
+                            },
+                            //sticky header
+                            '& .MuiDataGrid-columnHeaders': {
+                              position: "sticky",
+                              top: '-1px',
+                              backgroundColor: '#fff',
+                              zIndex: 10
+                            },
+                            '& .MuiDataGrid-virtualScroller': {
+                              marginTop: "0 !important"
+                            },
+                            '& .MuiDataGrid-main': {
+                              overflow: "visible"
+                            }
+                          }}
+                        >
+                          <div ref={gridWrapperRef} style={{height: heightTable}}>
+                            <DataGrid
+                              autoHeight
+                              pagination
+                              rows={tableRows}
+                              columns={tableColumns}
+                              pageSize={rows.length}
+                              rowsPerPageOptions={[rows.length]}
+                              loading={isLoading}
+                              disableColumnMenu={true}
+                              // disableSelectionOnClick
+                              onCellClick={(params, event: MuiEvent<React.MouseEvent>) => {
+                                if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field]);
+                              }}
+                            />
+                          </div>
+                        </Box>
                       </div>
-                    </Box>
+                    </div>
+                  </div>
+                  <div>
+                    {calls.length != 0 && callsSwitch ?
+                      <CallsHeader
+                        found={foundCalls}
+                        switchTitleFound={true}
+                      />
+                      : <></>
+                    }
+                    {calls.length != 0 && callsSwitch ?
+                      calls.map((callsArrays: CallType[]) => {
+                        const callsArrayIndex = calls.indexOf(callsArrays)
+                        return (
+                          <div>
+                            {callsArrays.map((call: CallType) => {
+                              return (
+                                <CallStubMiddleware
+                                  callInfo={call.info} callAudio={call.audio} callStt={call.stt}
+                                  bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
+                                  handleExpandedChange={handleExpandedChange}
+                                />
+                              )
+                            })}
+                          </div>
+                        )
+                      })
+                      : <></>
+                    }
                   </div>
                 </div>
-              </div>
-              <div>
-                {calls.length != 0 && callsSwitch ?
-                  <CallsHeader
-                    found={foundCalls}
-                    switchTitleFound={true}
-                  />
-                  : <></>
-                }
-                {calls.length != 0 && callsSwitch ?
-                  calls.map((callsArrays: CallType[]) => {
-                    const callsArrayIndex = calls.indexOf(callsArrays)
-                    return (
-                      <div>
-                        {callsArrays.map((call: CallType) => {
-                          return (
-                            <CallStubMiddleware
-                              callInfo={call.info} callAudio={call.audio} callStt={call.stt}
-                              bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
-                              handleExpandedChange={handleExpandedChange}
-                            />
-                          )
-                        })}
-                      </div>
-                    )
-                  })
-                  : <></>
-                }
+              }
+            </>
+            :
+            <div className={classes.centerMessage}>
+              <div className={classes.centerMessageTitle}>
+                {translate('reportsMakeReport', language)}
               </div>
             </div>
           }
         </>
-        :
-        <div className={classes.centerMessage}>
-          <div className={classes.centerMessageTitle}>
-            Для построения отчета <br/> выберите необходимые параметры <br/>и нажмите кнопку <br/> "Сформировать отчет"
-          </div>
-        </div>
       }
     </div>
   )
