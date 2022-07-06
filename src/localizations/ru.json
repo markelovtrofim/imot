@@ -21,6 +21,7 @@
   "lastWeek": "Последняя неделя",
   "lastMonth": "Последний месяц",
   "lastYear": "Последний год",
+  "allTime": "За все время",
   "placeholderCalendar": "дд.мм.гггг ~ дд.мм.гггг",
 
 
@@ -78,5 +79,47 @@
   "MW": "MW",
   "sendButtonMW": "Отправиь",
   "deleteButtonMW": "Удалить",
-  "cancelButtonMW": "Отмена"
+  "cancelButtonMW": "Отмена",
+
+
+  "REPORTS": "REPORTS",
+  "savedReports": "Сохраненные отчеты",
+  "reportOptions": "Параметры отчета",
+  "makeReport": "Сформировать отчет",
+  "reportTitle": "Название отчета",
+  "reportTitleMes": "Укажите название отчета",
+  "reportType": "Тип отчета",
+  "reportTypeCalls": "по звонкам",
+
+  "reportGroupByRow": "Группировка по строкам",
+  "reportGroupByRowTime": "по времени",
+  "reportGroupByRowTag": "по тегу",
+  "reportGroupByRowOperatorPhone": "по номеру оператора",
+  "reportGroupByRowClientPhone": "по номеру клиента",
+  "reportGroupByRowTagList" : "по списку значений тегов",
+
+  "reportGroupByColumns": "Группировка по столбцам",
+  "reportGroupByRowSearchItems": "по фильтрам звонка",
+  "reportGroupByRowCallsCount": "по количеству звонков",
+  "reportGroupByRowSttEngine": "STT-движок",
+
+  "reportGroupByTimeHour": "по часам",
+  "reportGroupByTimeDay": "по дням",
+  "reportGroupByTimeWeek": "по неделям",
+  "reportGroupByTimeMonth": "по месяцам",
+
+  "reportColumnHeading": "заголовок столбца",
+  "reportCallFilters": "Фильтры звонков",
+  "reportDeleteReport": "Удалить отчет",
+  "reportSaveReport": "Сохранить отчет",
+  "reportExport": "Экспорт в Excel",
+  "reportDiff": "Показать разницу с прошлым периодом",
+  "reportCalls": "Звонки",
+  "reportMinutes": "Минуты",
+  "reportPercent": "Проценты",
+  "reportDeleteMes": "Вы точно хотите удалить отчет?",
+  "reportNotFind": "Не найдено звонков в выбранном периоде",
+  "reportCallFind": "Под условия фильтра попало звонков",
+  "reportsMakeReport": "Для построения отчета выберите необходимые параметры и нажмите кнопку \"Сформировать отчет\""
+
 }

@@ -40,7 +40,7 @@ const useStyles = makeStyles(({
   headerIconWrapper: {
     maxWidth: '73px',
     width: '73px',
-    margin: '0 24px'
+    margin: '0 24px 4px 24px'
   },
   headerIcon: {
     display: 'block',

@@ -123,12 +123,21 @@ export const getBaseCallsData = createAsyncThunk(
 
       let startDate = convertDate(state.search.date[0]);
       let endDate = convertDate(state.search.date[1]);
+
+      let requestParameters =
+        `skip=${state.calls.skip}&limit=${state.calls.limit}` +
+        `&start_date=${startDate}` +
+        `&end_date=${endDate}`;
+
+      if (!startDate && !endDate) {
+        requestParameters =
+          `skip=${state.calls.skip}&limit=${state.calls.limit}`
+      }
+
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
       const response = await instance.post<ResponseBaseCallsDataType>(
         `search_calls/?` +
-        `skip=${state.calls.skip}&limit=${state.calls.limit}` +
-        `&start_date=${startDate}` +
-        `&end_date=${endDate}`,
+        requestParameters,
         requestData,
         {
           headers: {

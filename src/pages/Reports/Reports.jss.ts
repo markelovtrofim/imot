@@ -14,7 +14,7 @@ export const reportsStyles = makeStyles(({
     fontWeight: '700 !important'
   },
   reportButtonsGroup: {
-    margin: '24px 0 24px 0',
+    margin: '24px 0 16px 0',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
@@ -45,7 +45,7 @@ export const reportsStyles = makeStyles(({
   },
 
   searchTitle: {
-    height: '40px',
+    // height: '40px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -101,8 +101,8 @@ export const reportsStyles = makeStyles(({
   filtersBlock: {
     border: '1px solid #E3E8EF',
     borderRadius: '13px',
-    padding: ' 16px',
-    marginBottom: '16px'
+    padding: '16px',
+    marginBottom: '8px'
   },
   filterBlockFlex: {
     display: 'flex',
@@ -110,11 +110,10 @@ export const reportsStyles = makeStyles(({
     width: '100%',
     border: '1px solid #E3E8EF',
     borderRadius: '13px',
-    padding: ' 16px',
-    marginBottom: '16px'
+    padding: '16px 16px 0 16px',
   },
   filterBlockWrapper: {
-    height: '40px',
+    // height: '40px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
@@ -135,7 +134,10 @@ export const reportsStyles = makeStyles(({
     alignItems: 'center',
     marginBottom: '16px',
     width: '100%',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    '&:last-of-type': {
+      marginBottom: 0
+    }
   },
   flexCenter: {
     display: 'flex',
@@ -205,7 +207,7 @@ export const reportsStyles = makeStyles(({
     color: '#A3AEBE !important',
     fontWeight: '700 !important',
     textAlign: 'center',
-    margin: '20px 0 20px'
+    margin: '14% 0'
   },
   deleteModal: {
     padding: '20px',
