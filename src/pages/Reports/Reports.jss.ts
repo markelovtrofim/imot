@@ -19,9 +19,7 @@ export const reportsStyles = makeStyles(({
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  reportButtonsGroupLeft: {
-
-  },
+  reportButtonsGroupLeft: {},
   reportOptionsButton: {
     // @ts-ignore
     textTransform: 'none !important',
