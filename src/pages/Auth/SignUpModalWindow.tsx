@@ -1,15 +1,15 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import ModalWindowBox from "../../components/common/ModalWindowBox";
-import {IconButton, Typography} from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
 import Input from "../../components/common/Input";
-import {LoadingButton} from "@mui/lab";
-import {makeStyles} from "@mui/styles";
+import { LoadingButton } from "@mui/lab";
+import { makeStyles } from "@mui/styles";
 import MuiPhoneNumber from 'mui-phone-number';
-import {Form, Formik} from "formik";
-import {useAppSelector} from "../../hooks/redux";
-import {translate} from "../../localizations";
+import { Form, Formik } from "formik";
+import { useAppSelector } from "../../hooks/redux";
+import { translate } from "../../localizations";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -62,11 +62,11 @@ const useStyles = makeStyles(({
   }
 }));
 
-const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
+const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
   const classes = useStyles();
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
 
-  const {language} = useAppSelector(state => state.lang);
+  const { language } = useAppSelector(state => state.lang);
 
 
   const validate = (values: {
@@ -102,12 +102,12 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
           alert(JSON.stringify(values, null, 2));
         }}
         render={({
-                   handleChange,
-                   setFieldValue,
-                 }) => {
+          handleChange,
+          setFieldValue,
+        }) => {
           return (
             <Form>
-              <div style={{marginTop: '25px'}}>
+              <div style={{ marginTop: '25px' }}>
                 <Input
                   name={"name"}
                   type={"text"}
@@ -116,7 +116,7 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
                   handleChange={handleChange}
                 />
               </div>
-              <div style={{marginTop: '25px'}}>
+              <div style={{ marginTop: '25px' }}>
                 <Input
                   name={"email"}
                   type={"email"}
@@ -125,18 +125,18 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
                   handleChange={handleChange}
                 />
               </div>
-              <div style={{margin: '25px 0'}}>
-                <Typography style={{color: '#738094', margin: '0 0 10px 9px', fontSize: '11px'}}>
+              <div style={{ margin: '25px 0' }}>
+                <Typography style={{ color: '#738094', margin: '0 0 10px 9px', fontSize: '11px' }}>
                   Номер телефона</Typography>
                 <MuiPhoneNumber onChange={e => setFieldValue("phoneNumber", e)}
-                                className={classes.mwNumberInput}
-                                defaultCountry={'ru'}/>
+                  className={classes.mwNumberInput}
+                  defaultCountry={'ru'} />
               </div>
               <div className={classes.mwButtonBox}>
                 <LoadingButton
                   type="submit"
                   disabled={submitButtonDisabled}
-                  style={{marginRight: '15px'}}
+                  style={{ marginRight: '15px' }}
                   variant="contained"
                   color="primary"
                 >

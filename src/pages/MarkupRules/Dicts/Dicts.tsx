@@ -1,24 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import ModalWindow from "../../../components/common/ModalWindowBox";
 import Groups from "../../../components/MarkupRules/Groups/Groups";
 import Items from "../../../components/MarkupRules/Items/Items";
 import DictDetails from "./DictsDetail";
-import {MarkupRulesButtons, SearchInput} from "../MarkupRules";
-import {makeStyles} from "@mui/styles";
-import {useDispatch} from "react-redux";
-import {useAppSelector} from "../../../hooks/redux";
-import {dictsSlice, getDict, getDicts, getGroups, postDict} from "../../../store/dicts/dicts.slice";
-import {DictType, GroupType} from "../../../store/dicts/dicts.types";
-import {LoadingButton} from "@mui/lab";
+import { MarkupRulesButtons, SearchInput } from "../MarkupRules";
+import { makeStyles } from "@mui/styles";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../../hooks/redux";
+import { dictsSlice, getDict, getDicts, getGroups, postDict } from "../../../store/dicts/dicts.slice";
+import { DictType, GroupType } from "../../../store/dicts/dicts.types";
+import { LoadingButton } from "@mui/lab";
 import Snackbar from "../../../components/common/Snackbar";
-import {useFormik} from "formik";
-import {useHistory} from "react-router-dom";
-import {Input} from "../../../components/common";
-import {RootState} from "../../../store/store";
-import {translate} from "../../../localizations";
+import { useFormik } from "formik";
+import { useHistory } from "react-router-dom";
+import { Input } from "../../../components/common";
+import { RootState } from "../../../store/store";
+import { translate } from "../../../localizations";
 import queryString from 'query-string';
-import {tagsSlice} from "../../../store/tags/tags.slice";
-import {langSlice} from "../../../store/lang/lang.slice";
+import { tagsSlice } from "../../../store/tags/tags.slice";
+import { langSlice } from "../../../store/lang/lang.slice";
 
 export function createQueryString(queryObj: any) {
   let str = '';
@@ -132,7 +132,7 @@ const DictsPage = () => {
     let output: any = {};
     for (let i = 0; i < searchStringArray.length; i++) {
       const query = queryString.parse(searchStringArray[i]);
-      output = {...output, ...query}
+      output = { ...output, ...query }
     }
     return output;
   }
@@ -159,14 +159,14 @@ const DictsPage = () => {
     let dicts = null
     if (currentGroupLocal && searchParamsObject.search) {
       dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
-      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group, filter: searchParamsObject.search}));
+      const dictsData = await dispatch(getDicts({ group: currentGroupLocal.group, filter: searchParamsObject.search }));
       // @ts-ignore
       dicts = dictsData.payload;
     }
     if (currentGroupLocal && !searchParamsObject.search) {
       dispatch(dictsSlice.actions.setCurrentGroup(currentGroupLocal));
       dispatch(tagsSlice.actions.setSearchInput(""));
-      const dictsData = await dispatch(getDicts({group: currentGroupLocal.group}));
+      const dictsData = await dispatch(getDicts({ group: currentGroupLocal.group }));
       // @ts-ignore
       dicts = dictsData.payload;
     }
@@ -192,7 +192,7 @@ const DictsPage = () => {
 
     if (searchParams.length < 2) {
       dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
-      const dictsData = await dispatch(getDicts({group: groups[0].group}));
+      const dictsData = await dispatch(getDicts({ group: groups[0].group }));
       // @ts-ignore
       const dicts: DictType[] = dictsData.payload;
       dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}&id=${dicts[0].id}`));
@@ -253,7 +253,7 @@ const DictsPage = () => {
       // @ts-ignore
       const group = groupsData.payload.filter((item) => item.group === e.groupName)[0];
       dispatch(dictsSlice.actions.setCurrentGroup(group))
-      await dispatch(getDicts({group: e.groupName}));
+      await dispatch(getDicts({ group: e.groupName }));
       await dispatch(getDict(newDictId));
       setSuccessSnackbarOpen(true);
       setAddButtonLoading(false);
@@ -286,7 +286,7 @@ const DictsPage = () => {
   const [isErrorSnackbarOpen, setErrorSnackbarOpen] = useState<boolean>(false);
   const [isSuccessSnackbarOpen, setSuccessSnackbarOpen] = useState<boolean>(false);
 
-  const {language} = useAppSelector((state: RootState) => state.lang);
+  const { language } = useAppSelector((state: RootState) => state.lang);
 
 
   return (
@@ -294,22 +294,22 @@ const DictsPage = () => {
       <div className={classes.dpLeftBlock}>
         <div className={classes.dpLeftBlockGroups}>
           {/* local url handler */}
-          <MarkupRulesButtons/>
+          <MarkupRulesButtons />
 
           {currentGroup &&
-          <Snackbar
-            type={'success'}
-            open={isSuccessSnackbarOpen}
-            onClose={() => {
-              setSuccessSnackbarOpen(false)
-            }}
-            text={`Словарь добавлен`}
-            time={2000}
-          />}
+            <Snackbar
+              type={'success'}
+              open={isSuccessSnackbarOpen}
+              onClose={() => {
+                setSuccessSnackbarOpen(false)
+              }}
+              text={`Словарь добавлен`}
+              time={2000}
+            />}
 
           {/* groups */}
           <div className={classes.dpBothBox}>
-            <Groups/>
+            <Groups />
           </div>
         </div>
 
@@ -321,7 +321,7 @@ const DictsPage = () => {
               debugger
               dispatch(dictsSlice.actions.setEmptyDicts(null));
               dispatch(dictsSlice.actions.setCurrentDict(null));
-              const dictsData = await dispatch(getDicts({group: searchObj.group, filter: values.search}));
+              const dictsData = await dispatch(getDicts({ group: searchObj.group, filter: values.search }));
               // @ts-ignore
               const dicts: DictType[] = dictsData.payload;
               if (dicts.length < 1) {
@@ -330,7 +330,7 @@ const DictsPage = () => {
                 await dispatch(getDict(dicts[0].id));
               }
             }}
-            handleMWOpen={handleMWOpen}/>
+            handleMWOpen={handleMWOpen} />
           <Snackbar
             type={'error'}
             open={isErrorSnackbarOpen}
@@ -352,7 +352,7 @@ const DictsPage = () => {
 
       {/* detail */}
       <div className={classes.dpRightBlock}>
-        <DictDetails/>
+        <DictDetails />
       </div>
 
       {/* modal window */}
@@ -373,7 +373,7 @@ const DictsPage = () => {
             bcColor={'#F8FAFC'}
             label={'Словарь'}
           />
-          <div style={{marginTop: '20px'}}>
+          <div style={{ marginTop: '20px' }}>
             <Input
               height={'36px'}
               value={formik.values.groupName}
@@ -388,7 +388,7 @@ const DictsPage = () => {
           <div className={classes.MWButtons}>
             <LoadingButton
               loading={addButtonLoading}
-              style={{marginRight: '15px'}}
+              style={{ marginRight: '15px' }}
               variant="contained"
               color="primary"
               type="submit"

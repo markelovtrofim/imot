@@ -1,6 +1,6 @@
-import {makeStyles} from "@mui/styles";
-import {Theme} from "@mui/material";
-import {TagType} from "../../../../../store/tags/tags.types";
+import { makeStyles } from "@mui/styles";
+import { Theme } from "@mui/material";
+import { TagType } from "../../../../../store/tags/tags.types";
 
 type TagItemStylesType = {
   isActive: boolean,

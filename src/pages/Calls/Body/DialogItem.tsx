@@ -1,21 +1,21 @@
-import React, {FC, memo, MutableRefObject, useState} from 'react';
-import {makeStyles} from "@mui/styles";
-import {BlockBox} from "../../../components/common";
-import {Typography} from "@mui/material";
+import React, { FC, memo, MutableRefObject, useState } from 'react';
+import { makeStyles } from "@mui/styles";
+import { BlockBox } from "../../../components/common";
+import { Typography } from "@mui/material";
 import cn from 'classnames';
-import {BaseTag} from "../../../components/common/Tag";
-import {CallSttFragmentType} from "../../../store/calls/calls.types";
-import {timeConverter} from "../Call";
+import { BaseTag } from "../../../components/common/Tag";
+import { CallSttFragmentType } from "../../../store/calls/calls.types";
+import { timeConverter } from "../Call";
 
 type DialogItemType = {
-  prevFragment: CallSttFragmentType | {direction: string},
+  prevFragment: CallSttFragmentType | { direction: string },
   fragment: CallSttFragmentType,
   fragmentIndex: number,
   callId: string,
   audioPlayerRef: any
 };
 
-const DialogItem: FC<DialogItemType> = memo(({prevFragment, fragment, fragmentIndex, callId, audioPlayerRef}) => {
+const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentIndex, callId, audioPlayerRef }) => {
   const useStyles = makeStyles(({
     diItem: {
       display: 'flex',
@@ -76,16 +76,16 @@ const DialogItem: FC<DialogItemType> = memo(({prevFragment, fragment, fragmentIn
           className={classes.dateTypography}>
           {timeConverter(fragment.begin, false)}
         </Typography>
-          <Typography
-            className={cn(classes.typographyTitle, condition ? classes.titleCustomer : classes.titleEmployee)}
-          >
-            {prevFragment
-              ?
-              prevFragment.direction !== fragment.direction && <>{`${condition ? 'Клиент' : 'Сотрудник'}:`}</>
-              :
-              <></>
-            }
-          </Typography>
+        <Typography
+          className={cn(classes.typographyTitle, condition ? classes.titleCustomer : classes.titleEmployee)}
+        >
+          {prevFragment
+            ?
+            prevFragment.direction !== fragment.direction && <>{`${condition ? 'Клиент' : 'Сотрудник'}:`}</>
+            :
+            <></>
+          }
+        </Typography>
         <Typography className={classes.diBodyText}>
           {fragment.words.map((word, j) => (
             <span
@@ -97,8 +97,8 @@ const DialogItem: FC<DialogItemType> = memo(({prevFragment, fragment, fragmentIn
               className={classes.diFragment}
               key={j}
             >
-                {word.word}
-              </span>
+              {word.word}
+            </span>
           ))}
         </Typography>
       </div>

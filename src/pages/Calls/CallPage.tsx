@@ -1,13 +1,13 @@
-import React, {useEffect} from 'react';
-import {Link, useHistory} from "react-router-dom";
-import {useAppSelector} from "../../hooks/redux";
+import React, { useEffect } from 'react';
+import { Link, useHistory } from "react-router-dom";
+import { useAppSelector } from "../../hooks/redux";
 import queryString from "query-string";
-import {useDispatch} from "react-redux";
-import {callsSlice, getCallAudio, getCallInfo, getCallStt} from "../../store/calls/calls.slice";
+import { useDispatch } from "react-redux";
+import { callsSlice, getCallAudio, getCallInfo, getCallStt } from "../../store/calls/calls.slice";
 import Call from "./Call";
-import {makeStyles} from "@mui/styles";
+import { makeStyles } from "@mui/styles";
 import Preloader from '../../assets/loading.svg';
-import {Alert, CircularProgress, Typography} from "@mui/material";
+import { Alert, CircularProgress, Typography } from "@mui/material";
 
 const CallPage = () => {
 
@@ -36,9 +36,9 @@ const CallPage = () => {
     const id = searchParamsObject.id;
     const token = searchParamsObject.token;
     if (id && token) {
-      const callInfoData = await dispatch(getCallInfo({id, token}));
-      const callAudioData = await dispatch(getCallAudio({id, token}));
-      const callSttData = await dispatch(getCallStt({id, token}));
+      const callInfoData = await dispatch(getCallInfo({ id, token }));
+      const callAudioData = await dispatch(getCallAudio({ id, token }));
+      const callSttData = await dispatch(getCallStt({ id, token }));
 
       // @ts-ignore
       const callInfo = callInfoData.payload;
@@ -77,10 +77,10 @@ const CallPage = () => {
   const currentCall = useAppSelector(state => state.calls.currentCall);
   const currentUser = useAppSelector(state => state.users.currentUser);
   const isAuth = useAppSelector(state => state.auth.isAuth);
-  const {language} = useAppSelector(state => state.lang);
+  const { language } = useAppSelector(state => state.lang);
 
   return (
-    <div style={{marginTop: '40px'}}>
+    <div style={{ marginTop: '40px' }}>
       {currentCall && (
         <div className={classes.callPageBox}>
           <Call
@@ -96,19 +96,19 @@ const CallPage = () => {
         </div>
       )}
       {currentCall === null && (
-        <div style={{position: 'absolute', top: '35%', left: 'calc(50% - 100px)'}}>
-          <CircularProgress style={{width: '100px', height: '100px'}}/>
+        <div style={{ position: 'absolute', top: '35%', left: 'calc(50% - 100px)' }}>
+          <CircularProgress style={{ width: '100px', height: '100px' }} />
         </div>
       )}
       {currentCall === false && (
-        <div style={{width: '400px'}}>
+        <div style={{ width: '400px' }}>
           <Alert severity="error">Введены неверные параметры</Alert>
           {isAuth ? (
-            <Link style={{fontSize: '11px', marginLeft: '20px'}} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
+            <Link style={{ fontSize: '11px', marginLeft: '20px' }} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
               На главную страницу →
             </Link>
           ) : (
-            <Link style={{fontSize: '11px', marginLeft: '20px'}} to={`/${language}/auth`}>
+            <Link style={{ fontSize: '11px', marginLeft: '20px' }} to={`/${language}/auth`}>
               Открыть полную версию приложения →
             </Link>
           )}

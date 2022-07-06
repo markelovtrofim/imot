@@ -1,25 +1,25 @@
-import React, {FC, memo} from "react";
-import {Skeleton, Typography} from "@mui/material";
-import {useDispatch} from "react-redux";
-import {useHistory} from "react-router-dom";
-import {useTagGroupStyles} from "./TagGroup.jss";
-import {TagDetailedType, TagGroupType, TagType} from "../../../../../store/tags/tags.types";
-import {PurpleCircleSvg} from "./TagGroup.svg";
-import {createNullArray, getTag, getTags, tagsSlice} from "../../../../../store/tags/tags.slice";
-import {useAppSelector} from "../../../../../hooks/redux";
-import {RootState} from "../../../../../store/store";
+import React, { FC, memo } from "react";
+import { Skeleton, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { useTagGroupStyles } from "./TagGroup.jss";
+import { TagDetailedType, TagGroupType, TagType } from "../../../../../store/tags/tags.types";
+import { PurpleCircleSvg } from "./TagGroup.svg";
+import { createNullArray, getTag, getTags, tagsSlice } from "../../../../../store/tags/tags.slice";
+import { useAppSelector } from "../../../../../hooks/redux";
+import { RootState } from "../../../../../store/store";
 
 type TagGroupPropsType = {
   group: TagGroupType | null,
   isActive: boolean
 };
 
-const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
-  const classes = useTagGroupStyles({isActive});
+const TagGroup: FC<TagGroupPropsType> = memo(({ group, isActive }) => {
+  const classes = useTagGroupStyles({ isActive });
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const {language} = useAppSelector((state: RootState) => state.lang);
+  const { language } = useAppSelector((state: RootState) => state.lang);
 
   const userIdData = useAppSelector(state => state.users.currentUser?.id);
   const userId = userIdData ? userIdData : "_";
@@ -35,7 +35,7 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
       await dispatch(tagsSlice.actions.removeSetTags(null));
       dispatch(tagsSlice.actions.setCurrentTagGroup(group));
 
-      const tagsData = await dispatch(getTags({group: group.group}));
+      const tagsData = await dispatch(getTags({ group: group.group }));
       // @ts-ignore
       const tags: TagType[] = tagsData.payload;
       if (tags.length > 0) {
@@ -57,7 +57,7 @@ const TagGroup: FC<TagGroupPropsType> = memo(({group, isActive}) => {
           ? <Typography className={classes.groupTopBlockText}>{group.group}</Typography>
           : <Skeleton variant="text" width={250} height={20} />
         }
-        {isActive && <PurpleCircleSvg/>}
+        {isActive && <PurpleCircleSvg />}
       </div>
 
       <div className={classes.groupBottomBlock}>

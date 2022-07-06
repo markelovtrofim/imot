@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
-import {MarkupRulesButtons, SearchInput} from "../MarkupRules";
+import React, { useState } from 'react';
+import { MarkupRulesButtons, SearchInput } from "../MarkupRules";
 import ModalWindow from "../../../components/common/ModalWindowBox";
-import {Input} from "../../../components/common";
-import {makeStyles} from "@mui/styles";
+import { Input } from "../../../components/common";
+import { makeStyles } from "@mui/styles";
 import ChecklistsDetail from './ChecklistsDetail';
 
 const ChecklistsPage = () => {
@@ -37,10 +37,10 @@ const ChecklistsPage = () => {
     <div className={classes.checklistsContainer}>
       <div className={classes.checklistsLeftBlock}>
         {/* local url handler */}
-        <MarkupRulesButtons/>
-        <div style={{marginTop: '25px'}}>
+        <MarkupRulesButtons />
+        <div style={{ marginTop: '25px' }}>
           <SearchInput
-            onSubmit={(values) => {}}
+            onSubmit={(values) => { }}
             handleMWOpen={handleMWOpen}
           />
         </div>
@@ -48,7 +48,7 @@ const ChecklistsPage = () => {
 
       {/* detail */}
       <div className={classes.checklistsRightBlock}>
-        <ChecklistsDetail/>
+        <ChecklistsDetail />
       </div>
 
     </div>
