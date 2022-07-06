@@ -20,6 +20,7 @@ import { Fragment } from "../../../components/common/Tag";
 import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
 import { useAppSelector } from "../../../hooks/redux";
+import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -206,7 +207,6 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     const host = window.location.origin;
 
     const publicUrl = `${host}/imot/#/${language}/call?id=${id}&token=${publicToken.access_token}`;
-    debugger
     navigator.clipboard.writeText(publicUrl);
   }
 
@@ -323,13 +323,25 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
             </div>
           </div>
         </div>
+
         <div style={{ backgroundColor: 'fff', width: '370px', marginTop: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '14px' }}>
-            <Back onClick={(event) => { formPublicToken(callId) }} />
-            <Download />
-            <History />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px' }}>
+            <Back
+              onClick={(event) => {
+                formPublicToken(callId)
+              }}
+            />
+            <Download href={callAudio} />
             <Reboot />
-            <Plus margin={'0'} />
+            <CustomControlSelect
+              handleSelectChange={(event) => {
+
+              }}
+              svg={"vertical"}
+              options={[{ value: 'test', label: "test" }]}
+              optionsPosition={"bottom"}
+            />
+            {/*<History/>*/}
           </div>
 
           {/* Params block*/}

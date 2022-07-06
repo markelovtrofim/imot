@@ -15,7 +15,9 @@ import Input from "../../components/common/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
 import Button from '@mui/material/Button';
 import SignUpModalWindow from "./SignUpModalWindow";
+
 import { useDispatch } from "react-redux";
+import { getChildUser, getChildUsers, getMe } from "../../store/users/users.slice"
 
 const useStyles = makeStyles(({
   authWrapper: {
@@ -172,10 +174,22 @@ const Auth = () => {
     },
     onSubmit: async (values) => {
       setButtonClick(true);
-      await dispatch(fetchAuthToken(values));
+      const authData = await dispatch(fetchAuthToken(values));
       setButtonClick(false);
-      history.location.pathname = "/";
-      history.push(`/${language}/${currentUser ? currentUser.id : "_"}/calls`)
+
+      // @ts-ignore
+      if (authData.payload) {
+        const meData = await dispatch(getMe());
+        // @ts-ignore
+        const me = meData.payload;
+
+        await dispatch(getChildUser());
+        await dispatch(getChildUsers());
+
+        history.location.pathname = "/";
+        history.push(`/${language}/${me ? me.id : "_"}/calls`)
+      }
+
     },
   });
 
