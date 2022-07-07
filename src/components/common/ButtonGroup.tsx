@@ -56,6 +56,7 @@ const useStyles = makeStyles(({
     textTransform: 'none !important',
     color: '#738094 !important',
     backgroundColor: '#ffffff !important',
+    whiteSpace: 'nowrap',
     '&.Mui-selected': {
       backgroundColor: '#D6D9DF !important',
       color: '#000 !important'
@@ -64,14 +65,15 @@ const useStyles = makeStyles(({
 }));
 
 type ButtonsPropsType = {
+  date: Date[] | null[],
   items: {
     value: string,
     onClick: () => void,
-    unitOfTime: Date[]
+    unitOfTime: Date[] | null[]
   }[]
 };
 
-const ButtonGroup: FC<ButtonsPropsType> = ({items}) => {
+const ButtonGroup: FC<ButtonsPropsType> = ({date, items}) => {
   const classes = useStyles();
 
   const [alignment, setAlignment] = useState<string | null>(null);
@@ -82,13 +84,14 @@ const ButtonGroup: FC<ButtonsPropsType> = ({items}) => {
     setAlignment(newAlignment);
   };
 
-  const date = useAppSelector(state => state.search.date);
-
   useEffect(() => {
     for (let i = 0; i < items.length; i++) {
-      if (date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
+      //@ts-ignore
+      if (items[i].unitOfTime[0] && date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
         setAlignment(items[i].value);
         break
+      } else if (items[i].unitOfTime[0] === null && items[i].unitOfTime[0] === date[0]) {
+        setAlignment(items[i].value);
       } else {
         setAlignment(null);
       }

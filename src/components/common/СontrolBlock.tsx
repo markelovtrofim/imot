@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {makeStyles} from '@mui/styles';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../store/store";
@@ -90,7 +90,8 @@ export const unitsOfTime = {
   yesterday: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)],
   week: [new Date(Date.now() - 168 * 60 * 60 * 1000), new Date(Date.now())],
   month: [new Date(Date.now() - 720 * 60 * 60 * 1000), new Date(Date.now())],
-  year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())]
+  year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())],
+  allTime: [null, null]
 }
 
 const ControlBlock = (props: any) => {
@@ -102,12 +103,18 @@ const ControlBlock = (props: any) => {
 
   const {language} = useSelector((state: RootState) => state.lang);
   const classes = useStyles();
-  const date = useAppSelector(state => state.search.date);
+  const dateSearch = useAppSelector(state => state.search.date);
   const dateReports = useAppSelector(state => state.reports.date);
   const dispatch = useDispatch();
 
   const [errorSnackbar, setErrorSnackbar] = useState<boolean>(false);
+  const [disabledCalendar, setDisabledCalendar] = useState<boolean>(false);
+  const [disabledCalendarReport, setDisabledCalendarReport] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (dateSearch[0] === null) setDisabledCalendar(true)
+    if (dateReports[0] === null) setDisabledCalendarReport(true)
+  }, [dateSearch, dateReports])
 
   return (
     <div className={classes.controlBlockWrapper}>
@@ -118,8 +125,9 @@ const ControlBlock = (props: any) => {
             <DateRangePickerWrapper
               id={'dateRangePicker'}
               value={dateReports}
+              disabled={disabledCalendarReport}
               onChange={(value: [Date, Date],) => {
-                dispatch(reportsSlice.actions.setDate(value))
+                dispatch(reportsSlice.actions.setDate(value));
               }}
               onClean={() => {
                 dispatch(reportsSlice.actions.setDate([null, null]));
@@ -128,7 +136,8 @@ const ControlBlock = (props: any) => {
             :
             <DateRangePickerWrapper
               id={'dateRangePicker'}
-              value={date}
+              value={dateSearch}
+              disabled={disabledCalendar}
               onChange={(value: [Date, Date],) => {
                 dispatch(searchSlice.actions.setDate(value));
               }}
@@ -137,50 +146,91 @@ const ControlBlock = (props: any) => {
               }}
             />
           }
-          <ButtonGroup
-            items={[
-              {
-                value: 'today', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.today))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.today))
-                  }
-                }, unitOfTime: unitsOfTime.today
-              },
-              {
-                value: 'yesterday', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.yesterday))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday))
-                  }                  
-                }, unitOfTime: unitsOfTime.yesterday
-              },
-              {
-                value: 'week', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.week))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.week))
-                  }
-                }, unitOfTime: unitsOfTime.week
-              },
-              {
-                value: 'month', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.month))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.month))
-                  }
-                }, unitOfTime: unitsOfTime.month
-              },
-              {
-                value: 'year', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.year))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.year))
-                  }
-                }, unitOfTime: unitsOfTime.year
-              }
-            ]}
-          />
+          {props.switchEntity === 'reports' ?
+            <ButtonGroup
+              date={dateReports}
+              items={[
+                {
+                  value: 'today', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.today));
+                  }, unitOfTime: unitsOfTime.today
+                },
+                {
+                  value: 'yesterday', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.yesterday));
+                  }, unitOfTime: unitsOfTime.yesterday
+                },
+                {
+                  value: 'week', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.week));
+                  }, unitOfTime: unitsOfTime.week
+                },
+                {
+                  value: 'month', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.month));
+                  }, unitOfTime: unitsOfTime.month
+                },
+                {
+                  value: 'year', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.year));
+                  }, unitOfTime: unitsOfTime.year
+                },
+                {
+                  value: 'allTime', onClick: () => {
+                    setDisabledCalendarReport(true);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.allTime));
+                  }, unitOfTime: unitsOfTime.allTime
+                },
+              ]}
+            />
+            :
+            <ButtonGroup
+              date={dateSearch}
+              items={[
+                {
+                  value: 'today', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.today));
+                  }, unitOfTime: unitsOfTime.today
+                },
+                {
+                  value: 'yesterday', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday));
+                  }, unitOfTime: unitsOfTime.yesterday
+                },
+                {
+                  value: 'week', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.week));
+                  }, unitOfTime: unitsOfTime.week
+                },
+                {
+                  value: 'month', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.month));
+                  }, unitOfTime: unitsOfTime.month
+                },
+                {
+                  value: 'year', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.year));
+                  }, unitOfTime: unitsOfTime.year
+                },
+                {
+                  value: 'allTime', onClick: () => {
+                    setDisabledCalendar(true);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.allTime));
+                  }, unitOfTime: unitsOfTime.allTime
+                },
+              ]}
+            />
+          }
         </div>
       </div>
       <Snackbar
