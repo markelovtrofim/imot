@@ -68,6 +68,7 @@ const CallPage = () => {
   }, [searchParams]);
 
   useEffect(() => {
+    document.title = "Звонок | IMOT.io";
     return () => {
       dispatch(callsSlice.actions.setCallPageSearchParams(""));
       dispatch(callsSlice.actions.setCurrentCall(null));

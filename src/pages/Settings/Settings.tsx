@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { makeStyles } from "@mui/styles";
 import { BlockBox } from "../../components/common";
 import { Typography } from "@mui/material";
@@ -48,6 +48,10 @@ const Settings = () => {
   const classes = useSettingsStyles();
 
   const [settingsPageChanger, setSettingsPageChanger] = useState<'menu' | 'body'>('menu');
+
+  useEffect(() => {
+    document.title = "Настройки | IMOT.io";
+  }, [])
 
   return (
     <div className={classes.settingsBox}>

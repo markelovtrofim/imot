@@ -319,6 +319,7 @@ const MarkupRules = memo(() => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    document.title = "Правила разметки | IMOT.io";
     if (pathActivePage) {
       dispatch(dictsSlice.actions.setActivePage(pathActivePage));
     } else {

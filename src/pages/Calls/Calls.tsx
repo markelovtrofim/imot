@@ -79,6 +79,7 @@ const Calls = React.memo(() => {
   };
 
   useEffect(() => {
+    document.title = "Звонки | IMOT.io";
     dispatch(langSlice.actions.setLoading(false));
     if (calls.length < 2) {
       pushNewCalls().then();

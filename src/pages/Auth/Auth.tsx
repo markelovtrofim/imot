@@ -194,6 +194,7 @@ const Auth = () => {
   });
 
   useEffect(() => {
+    document.title = "Авторизация | IMOT.io";
     return () => {
       setButtonClick(false);
       dispatch(authSlice.actions.setError(null));

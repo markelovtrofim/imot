@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import IconButton from "../../components/common/IconButton";
 import { makeStyles } from "@mui/styles";
 import { BlockBox } from "../../components/common";
@@ -83,6 +83,11 @@ const LoadCall = () => {
   const handleClose = () => {
     setSnackbarIsOpen(false);
   };
+
+  useEffect(() => {
+    document.title = "Загрузить звонок | IMOT.io";
+  }, [])
+
 
   return (
     <BlockBox margin={'60px auto 110px auto'} width={'540px'}>
