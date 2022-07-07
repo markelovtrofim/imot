@@ -1,4 +1,4 @@
-import {makeStyles} from "@mui/styles";
+import { makeStyles } from "@mui/styles";
 
 export const reportsStyles = makeStyles(({
   reportItemInfo: {
@@ -186,7 +186,7 @@ export const reportsStyles = makeStyles(({
   },
   errorInput: {
     position: 'relative',
-    '& .MuiFormControl-root' : {
+    '& .MuiFormControl-root': {
       borderColor: '#F5222D !important'
     },
     '& span': {
@@ -271,6 +271,6 @@ export const reportsStyles = makeStyles(({
   },
   centerMessageTitle: {
     maxWidth: '300px',
-    textAlign:'center'
+    textAlign: 'center'
   }
 }));

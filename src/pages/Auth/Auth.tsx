@@ -15,8 +15,9 @@ import Input from "../../components/common/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
 import Button from '@mui/material/Button';
 import SignUpModalWindow from "./SignUpModalWindow";
-import {useDispatch} from "react-redux";
-import {getChildUser, getChildUsers, getMe} from "../../store/users/users.slice"
+
+import { useDispatch } from "react-redux";
+import { getChildUser, getChildUsers, getMe } from "../../store/users/users.slice"
 
 const useStyles = makeStyles(({
   authWrapper: {

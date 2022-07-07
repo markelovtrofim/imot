@@ -1,19 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {MarkupRulesButtons, SearchInput} from "../MarkupRules";
+import React, { useEffect, useState } from 'react';
+import { MarkupRulesButtons, SearchInput } from "../MarkupRules";
 import TagDetails from "./TagDetails/TagDetails";
-import {useDispatch} from "react-redux";
-import {createNullArray, getTag, getTagGroups, getTags, tagsSlice} from "../../../store/tags/tags.slice";
-import {TagGroupType, TagType} from "../../../store/tags/tags.types";
-import {useTagsStyles} from './TagPage.jss';
+import { useDispatch } from "react-redux";
+import { createNullArray, getTag, getTagGroups, getTags, tagsSlice } from "../../../store/tags/tags.slice";
+import { TagGroupType, TagType } from "../../../store/tags/tags.types";
+import { useTagsStyles } from './TagPage.jss';
 import TagGroups from "./TagGroups/TagGroups";
 import TagItems from "./TagItems/TagItems";
-import {useAppSelector} from "../../../hooks/redux";
+import { useAppSelector } from "../../../hooks/redux";
 import PostModalWindow from "./TagDetails/PostModalWindow";
-import Snackbar, {SnackbarType} from "../../../components/common/Snackbar";
-import {useHistory} from "react-router-dom";
+import Snackbar, { SnackbarType } from "../../../components/common/Snackbar";
+import { useHistory } from "react-router-dom";
 import queryString from "query-string";
-import {createQueryString} from "../Dicts/Dicts";
-import {langSlice} from "../../../store/lang/lang.slice";
+import { createQueryString } from "../Dicts/Dicts";
+import { langSlice } from "../../../store/lang/lang.slice";
 
 export function searchStringParserInObj(initialString: string) {
   const searchString = initialString.slice(1);
@@ -22,7 +22,7 @@ export function searchStringParserInObj(initialString: string) {
   let output: any = {};
   for (let i = 0; i < searchStringArray.length; i++) {
     const query = queryString.parse(searchStringArray[i]);
-    output = {...output, ...query}
+    output = { ...output, ...query }
   }
   return output;
 }
@@ -61,7 +61,7 @@ const TagPage = () => {
       dispatch(tagsSlice.actions.setCurrentTagGroup(currentGroup));
 
       // запрашиваю теги текущей группы.
-      const tagsData = await dispatch(getTags({group: currentGroup.group}));
+      const tagsData = await dispatch(getTags({ group: currentGroup.group }));
       // @ts-ignore
       const tags: TagType[] = tagsData.payload;
 
@@ -93,7 +93,7 @@ const TagPage = () => {
 
   const history = useHistory();
 
-  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  const { path } = JSON.parse(localStorage.getItem('path') || '{}');
   let pathArray = [];
   if (path) {
     pathArray = path.split("/");
@@ -125,14 +125,14 @@ const TagPage = () => {
 
     if (currentGroupLocal && searchParamsObject.search) {
       dispatch(tagsSlice.actions.setCurrentTagGroup(currentGroupLocal));
-      const tagsData = await dispatch(getTags({group: currentGroupLocal.group, filter: searchParamsObject.search}));
+      const tagsData = await dispatch(getTags({ group: currentGroupLocal.group, filter: searchParamsObject.search }));
       // @ts-ignore
       tags = tagsData.payload;
     }
     if (currentGroupLocal && !searchParamsObject.search) {
       dispatch(tagsSlice.actions.setCurrentTagGroup(currentGroupLocal));
       dispatch(tagsSlice.actions.setSearchInput(""));
-      const tagsData = await dispatch(getTags({group: currentGroupLocal.group}));
+      const tagsData = await dispatch(getTags({ group: currentGroupLocal.group }));
       // @ts-ignore
       tags = tagsData.payload;
     }
@@ -170,11 +170,11 @@ const TagPage = () => {
       <div className={classes.dpLeftBlock}>
         <div className={classes.dpLeftBlockGroups}>
           {/* local url handler */}
-          <MarkupRulesButtons/>
+          <MarkupRulesButtons />
 
           {/* groups */}
           <div className={classes.dpBothBox}>
-            <TagGroups/>
+            <TagGroups />
           </div>
         </div>
 
@@ -185,7 +185,7 @@ const TagPage = () => {
               const searchObj = searchStringParserInObj(history.location.search);
               dispatch(tagsSlice.actions.setTags(createNullArray(20)));
               dispatch(tagsSlice.actions.setCurrentTag(null));
-              const tagsData = await dispatch(getTags({group: searchObj.group, filter: values.search}));
+              const tagsData = await dispatch(getTags({ group: searchObj.group, filter: values.search }));
               // @ts-ignore
               const tags: TagType[] = tagsData.payload;
               if (tags.length < 1) {
@@ -199,14 +199,14 @@ const TagPage = () => {
             }}
           />
           <div className={classes.dpBothBox}>
-            <TagItems/>
+            <TagItems />
           </div>
         </div>
       </div>
 
       {/* detail */}
       <div className={classes.dpRightBlock}>
-        <TagDetails/>
+        <TagDetails />
       </div>
 
       <PostModalWindow
@@ -216,15 +216,15 @@ const TagPage = () => {
       />
 
       {snackbar.value &&
-      <Snackbar
-        type={snackbar.type}
-        open={snackbar.value}
-        onClose={() => {
-          setSnackbar({...snackbar, value: false})
-        }}
-        text={snackbar.text}
-        time={snackbar.time}
-      />
+        <Snackbar
+          type={snackbar.type}
+          open={snackbar.value}
+          onClose={() => {
+            setSnackbar({ ...snackbar, value: false })
+          }}
+          text={snackbar.text}
+          time={snackbar.time}
+        />
       }
 
     </div>
