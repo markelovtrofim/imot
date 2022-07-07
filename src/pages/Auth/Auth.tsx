@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from 'react';
+
+import { LoadingButton } from "@mui/lab";
 import { makeStyles } from "@mui/styles";
 import { Typography } from "@mui/material";
+import SendIcon from '@mui/icons-material/Send';
+import Alert from "@mui/material/Alert";
+import Button from '@mui/material/Button';
+import { Redirect, useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useFormik } from 'formik';
 import cn from 'classnames';
+
 import { PhonePng, DashboardPng, SoundPng } from '../../assets/images/Auth';
 import LogoImg from '../../assets/images/logo.svg';
 import { authSlice, fetchAuthToken } from "../../store/auth/auth.slice";
 import { useAppSelector } from "../../hooks/redux";
-import { useFormik } from 'formik';
-import { LoadingButton } from "@mui/lab";
-import { Redirect, useHistory } from "react-router-dom";
-import SendIcon from '@mui/icons-material/Send';
-import Alert from "@mui/material/Alert";
 import Input from "../../components/common/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
-import Button from '@mui/material/Button';
 import SignUpModalWindow from "./SignUpModalWindow";
+import { getChildUser, getChildUsers, getMe } from "../../store/users/users.slice";
 
-import { useDispatch } from "react-redux";
-import { getChildUser, getChildUsers, getMe } from "../../store/users/users.slice"
 
 const useStyles = makeStyles(({
   authWrapper: {

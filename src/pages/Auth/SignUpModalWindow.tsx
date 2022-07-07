@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import ModalWindowBox from "../../components/common/ModalWindowBox";
+
 import { IconButton, Typography } from "@mui/material";
-import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
-import Input from "../../components/common/Input";
 import { LoadingButton } from "@mui/lab";
 import { makeStyles } from "@mui/styles";
 import MuiPhoneNumber from 'mui-phone-number';
 import { Form, Formik } from "formik";
+import { useDispatch } from "react-redux";
+import cn from "classnames";
+
+import { registerNewUser } from '../../store/auth/auth.slice';
+import ModalWindowBox from "../../components/common/ModalWindowBox";
 import { useAppSelector } from "../../hooks/redux";
+import Input from "../../components/common/Input";
 import { translate } from "../../localizations";
 
 const useStyles = makeStyles(({
@@ -62,19 +66,18 @@ const useStyles = makeStyles(({
   }
 }));
 
-const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
+const SignUpModalWindow = ({ isOpen, handleClose }: any) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
 
   const { language } = useAppSelector(state => state.lang);
-
 
   const validate = (values: {
     name: string,
     email: string,
     phoneNumber: string
   }) => {
-    console.log(values.phoneNumber.replace(/\D+/g, "").toString().length)
     if (values.name.length > 0 && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email) && values.phoneNumber.replace(/\D+/g, "").toString().length > 5) {
       setSubmitButtonDisabled(false);
     } else {
@@ -82,10 +85,15 @@ const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
     }
   };
 
+  function closeThisModalWindow() {
+    setSubmitButtonDisabled(true);
+    handleClose();
+  }
+
   return (
     <ModalWindowBox
       isMWOpen={isOpen}
-      handleMWClose={handleClose}
+      handleMWClose={closeThisModalWindow}
       text={"Забронировать бесплатную версию"}
     >
       <Typography className={cn(classes.mwHelp, classes.mwText)}>
@@ -98,8 +106,16 @@ const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
           phoneNumber: ''
         }}
         validate={validate}
-        onSubmit={values => {
-          alert(JSON.stringify(values, null, 2));
+        onSubmit={async values => {
+          const data = await dispatch(registerNewUser(values));
+           // @ts-ignore
+          const me = data.payload;
+          
+          if(me) {
+            console.log("200");
+          } else {
+            console.log("Что-то пошло не так. Попробуйте авторизоваться снова");
+          }
         }}
         render={({
           handleChange,
@@ -136,14 +152,14 @@ const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
                 <LoadingButton
                   type="submit"
                   disabled={submitButtonDisabled}
-                  style={{ marginRight: '15px' }}
+                  style={{ marginRight: '15px', textTransform: "none" }}
                   variant="contained"
                   color="primary"
                 >
                   {translate("sendButton", language)}
                 </LoadingButton>
                 <LoadingButton
-                  onClick={handleClose}
+                  onClick={closeThisModalWindow}
                   variant="contained"
                   color="secondary"
                 >
@@ -159,4 +175,4 @@ const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
   );
 };
 
-export default ForgotPasswordModalWindow;
+export default SignUpModalWindow;

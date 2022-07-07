@@ -112,7 +112,7 @@ const App = () => {
 
   useEffect(() => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    debugger
+    // debugger
     if (token) {
       dispatch(authSlice.actions.setAuth(true))
     }

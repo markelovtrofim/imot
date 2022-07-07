@@ -1,11 +1,30 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {AuthResponseErrors} from "./auth.types";
-import {instance} from "../api";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AuthResponseErrors } from "./auth.types";
+import { instance } from "../api";
 
 type AuthType = {
   access_token: "string",
   token_type: "string"
 };
+
+export const registerNewUser = createAsyncThunk(
+  'auth/registerNewUser',
+  async (authData: { name: string, email: string, phoneNumber: string }) => {
+    const { name, email, phoneNumber } = authData;
+    const setUserData = {
+      fullname: name,
+      email: email,
+      phone_number: phoneNumber,
+    };
+    const response = await instance.post<string>('/user/register', JSON.stringify(setUserData), {
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      }
+    });
+    return response.data;
+  }
+);
 
 export const fetchAuthToken = createAsyncThunk(
   'auth/fetchAuthToken',
@@ -19,13 +38,13 @@ export const fetchAuthToken = createAsyncThunk(
           'Content-Security-Policy': 'block-all-mixed-content'
         }
       });
-      await localStorage.setItem('token', JSON.stringify({
+      localStorage.setItem('token', JSON.stringify({
         token: response.data.access_token
       }));
-      await localStorage.setItem('mainToken', JSON.stringify({
+      localStorage.setItem('mainToken', JSON.stringify({
         mainToken: response.data.access_token
       }));
-      await thunkAPI.dispatch(authSlice.actions.setAuth(true));
+      thunkAPI.dispatch(authSlice.actions.setAuth(true));
       return response.data;
     } catch (error) {
       // @ts-ignore
@@ -43,7 +62,7 @@ export const fetchAuthToken = createAsyncThunk(
 
 export const removeAuthToken = createAsyncThunk(
   'auth/removeAuthToken',
-  async (_, {dispatch}) => {
+  async (_, { dispatch }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('path');
     dispatch(authSlice.actions.setAuth(false));
