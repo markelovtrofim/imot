@@ -1,9 +1,9 @@
-import React, {FC, useState} from 'react';
-import {makeStyles} from "@mui/styles";
-import {BlockBox} from "../../components/common";
-import {Typography} from "@mui/material";
+import React, { FC, useState, useEffect } from 'react';
+import { makeStyles } from "@mui/styles";
+import { BlockBox } from "../../components/common";
+import { Typography } from "@mui/material";
 
-const MenuItem: FC<{ isActive: boolean, text: string, handleClick: () => void }> = ({isActive, text, handleClick}) => {
+const MenuItem: FC<{ isActive: boolean, text: string, handleClick: () => void }> = ({ isActive, text, handleClick }) => {
   const useMenuItemStyles = makeStyles(({
     menuItem: {
       cursor: 'pointer',
@@ -49,6 +49,10 @@ const Settings = () => {
 
   const [settingsPageChanger, setSettingsPageChanger] = useState<'menu' | 'body'>('menu');
 
+  useEffect(() => {
+    document.title = "Настройки | IMOT.io";
+  }, [])
+
   return (
     <div className={classes.settingsBox}>
       <div className={classes.settingsMenu}>
@@ -71,22 +75,22 @@ const Settings = () => {
       <BlockBox width={'450px'} padding={'24px'}>
         <div className={classes.settingsBodyInner}>
           {settingsPageChanger === 'menu' &&
-          <div>
             <div>
-              <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h4">Профиль пользователя</Typography>
-              <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
+              <div>
+                <Typography style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)' }} variant="h4">Профиль пользователя</Typography>
+                <Typography style={{ textAlign: 'center', color: '#722ED1', fontSize: '10px' }} variant="h2">
+                  in developing
+                </Typography>
+              </div>
+            </div>
+          }
+          {settingsPageChanger === 'body' &&
+            <div>
+              <Typography style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)' }} variant="h4">Действия со звонком</Typography>
+              <Typography style={{ textAlign: 'center', color: '#722ED1', fontSize: '10px' }} variant="h2">
                 in developing
               </Typography>
             </div>
-          </div>
-          }
-          {settingsPageChanger === 'body' &&
-          <div>
-            <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h4">Действия со звонком</Typography>
-            <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
-              in developing
-            </Typography>
-          </div>
           }
         </div>
       </BlockBox>

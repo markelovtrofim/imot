@@ -66,6 +66,7 @@ const Reports = React.memo(() => {
 
 
   useEffect(() => {
+    document.title = "Отчёты | IMOT.io";
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
       dispatch(getDefaultCriterias());
