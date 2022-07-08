@@ -157,6 +157,7 @@ const Auth = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [buttonClick, setButtonClick] = useState<boolean>(false);
+  const [isUserApprove, setIsUserApprove] = useState<boolean | null>(null);
 
   const [openChangePasswordWindow, setOpenChangePasswordWindow] = useState<boolean>(false);
   const handleOpenChangePasswordWindow = () => setOpenChangePasswordWindow(true);
@@ -202,16 +203,20 @@ const Auth = () => {
     const approveTokenData = await dispatch(approveUserToken(authToken));
     // @ts-ignore
     const isApprove = approveTokenData.payload;
+    console.log(isApprove)
 
-    console.log(isApprove);
+    if (isApprove < 300) {
+      console.log('Всё хорошо');
+      setIsUserApprove(true);
+    } else {
+      console.log('Всё плохо');
+    }
   }
 
   useEffect(() => {
     document.title = "Авторизация | IMOT.io";
-    
-    if(authToken) {
-      approveAuthToken()
-    }
+
+    authToken && approveAuthToken()
 
     return () => {
       setButtonClick(false);
@@ -277,12 +282,12 @@ const Auth = () => {
             </div>
 
             <LoadingButton
-              className={classes.authButton} 
-              loading={buttonClick} 
+              className={classes.authButton}
+              loading={buttonClick}
               loadingPosition="end"
-              endIcon={<SendIcon />} 
+              endIcon={<SendIcon />}
               type="submit"
-              variant="contained" 
+              variant="contained"
               color="primary"
             >
               Войти
@@ -297,6 +302,12 @@ const Auth = () => {
           </Button>
           <div style={{ height: '48px' }}>
             {error ? <Alert severity="error">{error}</Alert> : null}
+            {isUserApprove === null 
+              ? null
+              : isUserApprove
+                ? <Alert severity="success">Ваш токен подтверждён, теперь можете войти</Alert>
+                : <Alert severity="error">Ваш токен не подтверждён</Alert>
+            }
           </div>
         </div>
         <ForgotPasswordModalWindow isOpen={openChangePasswordWindow} handleClose={handleCloseChangePasswordWindow} />

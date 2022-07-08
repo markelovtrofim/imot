@@ -23,22 +23,25 @@ export const registerNewUser = createAsyncThunk(
         'accept': 'application/json',
       }
     });
-    return response.data;
+    console.log(response);
+    return response.status;
   }
 );
 
 export const approveUserToken = createAsyncThunk(
   'auth/approveToken',
   async (token: any) => {
-    console.log(JSON.stringify(token));
-    const response = await instance.post<string>('/user/approve', JSON.stringify(token), {
+    const tokenData = {
+      token: token
+    }
+    const response = await instance.post<string>('/user/approve', JSON.stringify(tokenData), {
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json'
       }
     });
     console.log(response);
-    return response.data;
+    return response.status;
   }
 )
 

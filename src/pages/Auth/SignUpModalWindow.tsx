@@ -120,9 +120,10 @@ const SignUpModalWindow = ({ isOpen, handleClose }: any) => {
                   const data = await dispatch(registerNewUser(values));
                   // @ts-ignore
                   const me = data.payload;
+                  console.log(me);
 
                   if (me) {
-                    console.log("200");
+                    console.log(me);
                     setIsUserRegistered(true);
                   } else {
                     console.log("Что-то пошло не так. Попробуйте авторизоваться снова");
