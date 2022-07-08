@@ -35,7 +35,10 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
       height: '100% !important',
       lineHeight: '22px !important',
       color: '#738094 !important',
-      paddingRight: '45px !important'
+      paddingRight: '45px !important',
+      padding: '7px',
+      paddingTop: '0px',
+      border: '1px solid black'
     },
     dateTypography: {
       fontSize: '14px !important',
@@ -68,6 +71,18 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
   const classes = useStyles();
   const condition = fragment.direction === 'client';
 
+  function onMouseUpFunction() {
+    if (window.getSelection()) {
+      const select: any = window.getSelection();
+      const selectionText = select.toString();
+      
+      if(selectionText) {
+        alert(selectionText);
+        console.log(selectionText.replace(/\s+/g, ' ').trim());
+      }
+    }
+  }
+
   return (
     <div className={classes.diItem}>
       {/* DIBody */}
@@ -86,7 +101,8 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
             <></>
           }
         </Typography>
-        <Typography className={classes.diBodyText}>
+
+        <Typography className={classes.diBodyText} onMouseUp={onMouseUpFunction}>
           {fragment.words.map((word, j) => (
             <span
               onClick={() => {
