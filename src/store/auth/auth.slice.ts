@@ -15,6 +15,7 @@ export const registerNewUser = createAsyncThunk(
       fullname: name,
       email: email,
       phone_number: phoneNumber,
+      url_base: `${window.location.protocol}//${window.location.host}`,
     };
     const response = await instance.post<string>('/user/register', JSON.stringify(setUserData), {
       headers: {
@@ -25,6 +26,21 @@ export const registerNewUser = createAsyncThunk(
     return response.data;
   }
 );
+
+export const approveUserToken = createAsyncThunk(
+  'auth/approveToken',
+  async (token: any) => {
+    console.log(JSON.stringify(token));
+    const response = await instance.post<string>('/user/approve', JSON.stringify(token), {
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      }
+    });
+    console.log(response);
+    return response.data;
+  }
+)
 
 export const fetchAuthToken = createAsyncThunk(
   'auth/fetchAuthToken',

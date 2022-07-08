@@ -11,9 +11,9 @@ import { useDispatch } from "react-redux";
 import { useFormik } from 'formik';
 import cn from 'classnames';
 
+import { authSlice, fetchAuthToken, approveUserToken } from "../../store/auth/auth.slice";
 import { PhonePng, DashboardPng, SoundPng } from '../../assets/images/Auth';
 import LogoImg from '../../assets/images/logo.svg';
-import { authSlice, fetchAuthToken } from "../../store/auth/auth.slice";
 import { useAppSelector } from "../../hooks/redux";
 import Input from "../../components/common/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
@@ -120,6 +120,8 @@ const useStyles = makeStyles(({
   },
   authButton: {
     width: '100%',
+    // @ts-ignore
+    textTransform: 'none !important',
     margin: '16px 0 30px 0 !important',
     '& .MuiLoadingButton-loadingIndicator': {
       right: '123px'
@@ -151,6 +153,7 @@ const PasswordSvg = (props: React.SVGProps<SVGSVGElement>) => {
 };
 
 const Auth = () => {
+  const authToken = new URLSearchParams(window.location.search).get('token');
   const classes = useStyles();
   const dispatch = useDispatch();
   const [buttonClick, setButtonClick] = useState<boolean>(false);
@@ -195,8 +198,21 @@ const Auth = () => {
     },
   });
 
+  async function approveAuthToken() {
+    const approveTokenData = await dispatch(approveUserToken(authToken));
+    // @ts-ignore
+    const isApprove = approveTokenData.payload;
+
+    console.log(isApprove);
+  }
+
   useEffect(() => {
     document.title = "Авторизация | IMOT.io";
+    
+    if(authToken) {
+      approveAuthToken()
+    }
+
     return () => {
       setButtonClick(false);
       dispatch(authSlice.actions.setError(null));
@@ -261,9 +277,13 @@ const Auth = () => {
             </div>
 
             <LoadingButton
-              className={classes.authButton} loading={buttonClick} loadingPosition="end"
-              endIcon={<SendIcon />} type="submit"
-              variant="contained" color="primary"
+              className={classes.authButton} 
+              loading={buttonClick} 
+              loadingPosition="end"
+              endIcon={<SendIcon />} 
+              type="submit"
+              variant="contained" 
+              color="primary"
             >
               Войти
             </LoadingButton>
