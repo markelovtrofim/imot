@@ -1,35 +1,46 @@
 import React, { FC, memo, useEffect, useState, useRef } from 'react';
-import { getAllReports, getReport, setReports, getCallReport, deleteReport, getSelectors, getTagNames } from "../../store/reports/reports.slice";
+
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../hooks/redux";
-import { RootState } from '../../store/store';
-import { BlockBox, СontrolBlock } from "../../components/common";
 import { DataGrid, GridColDef, GridRowsProp, MuiEvent } from '@mui/x-data-grid';
-import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey } from '../../utils/optionsCreator';
 import { Typography } from '@mui/material';
-import { reportsSlice } from '../../store/reports/reports.slice';
 import { LoadingButton } from '@mui/lab';
-import ContainedSelect from '../../components/common/Selects/ContainedSelect';
-import { translate } from "../../localizations";
-import { CallType } from '../../store/calls/calls.types';
-import { CriteriasType } from '../../store/search/search.types';
-import CallStubMiddleware from '../Calls/Call';
-import { getCallsInfoById, callsSlice } from '../../store/calls/calls.slice';
-import CallsHeader from '../Calls/CallsHeader';
-import CriteriasList from '../../components/common/Criterias/CriteriasList';
-import TextSelect from '../../components/common/Selects/TextSelect/TextSelect';
-import { getAllSearchCriterias, getDefaultCriterias, searchSlice } from "../../store/search/search.slice"
-import Input from "../../components/common/Input";
 import Box from '@mui/material/Box';
-import Plus from '../../components/common/Buttons/Plus';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import CircularProgress from '@mui/material/CircularProgress';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
-import cloneDeep from "lodash.clonedeep";
-import { reportsStyles } from './Reports.jss';
 import Dialog from "@mui/material/Dialog";
-import CircularProgress from '@mui/material/CircularProgress';
+import Slide, { SlideProps } from '@mui/material/Slide';
+import cloneDeep from "lodash.clonedeep";
+
+import { RootState } from '../../store/store';
+import { translate } from "../../localizations";
+import CallsHeader from '../Calls/CallsHeader';
+import CallStubMiddleware from '../Calls/Call';
+import { CallType } from '../../store/calls/calls.types';
+import { getCallsInfoById, callsSlice } from '../../store/calls/calls.slice';
+import { CriteriasType } from '../../store/search/search.types';
+import { getAllSearchCriterias, getDefaultCriterias, searchSlice } from "../../store/search/search.slice";
+import ContainedSelect from '../../components/common/Selects/ContainedSelect';
+import CriteriasList from '../../components/common/Criterias/CriteriasList';
+import TextSelect from '../../components/common/Selects/TextSelect/TextSelect';
+import Input from "../../components/common/Input";
+import Plus from '../../components/common/Buttons/Plus';
+import Snackbar, { SnackbarType } from "../../components/common/Snackbar";
+import { BlockBox, СontrolBlock } from "../../components/common";
+import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey } from '../../utils/optionsCreator';
+import { reportsStyles } from './Reports.jss';
 import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg } from "./Reports.svg";
+import { reportsSlice,
+  getAllReports,
+  getReport,
+  setReports,
+  getCallReport,
+  deleteReport,
+  getSelectors,
+  getTagNames
+} from '../../store/reports/reports.slice';
 
 const Reports = React.memo(() => {
   const classes = reportsStyles();
@@ -64,6 +75,13 @@ const Reports = React.memo(() => {
   const [visibleParameters, setVisibleParameters] = React.useState(false);
   const [isLoading, setLoading] = useState(false);
 
+  //error
+  const error = useAppSelector(state => state.reports.error);
+  useEffect(() => {
+    if (error) {
+      setSnackbar({ type: 'error', value: true, text: error, time: 2000 });
+    }
+  }, [error])
 
   useEffect(() => {
     document.title = "Отчёты | IMOT.io";
@@ -115,9 +133,12 @@ const Reports = React.memo(() => {
         local.push({ value: options[i], label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title' });
       } else if (options[i] === 'tag') {
         local.push({ value: options[i], label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag' });
-      } else if (options[i] === 'tag_list') {
+      } else if (options[i] === 'tag_name_list') {
         // new
-        local.push({ value: options[i], label: `${translate('reportGroupByRowTagList', language)}`, type: 'input' });
+        local.push({ value: options[i], label: `${translate('reportGroupByRowTagNameList', language)}`, type: 'input' });
+      }  else if (options[i] === 'tag_value_list') {
+        // new
+        local.push({ value: options[i], label: `${translate('reportGroupByRowTagValueList', language)}`, type: 'input-value' });
       } else if (options[i] === 'operator_phone') {
         local.push({ value: options[i], label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean' });
       } else if (options[i] === 'client_phone') {
@@ -146,9 +167,12 @@ const Reports = React.memo(() => {
       local = { value: options.group_by, label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title' };
     } else if (options.group_by === 'tag') {
       local = { value: options.group_by, label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag' };
-    } else if (options.group_by === 'tag_list') {
+    } else if (options.group_by === 'tag_name_list') {
       // new
-      local = { value: options.group_by, label: `${translate('reportGroupByRowTagList', language)}`, type: 'input' };
+      local = { value: options.group_by, label: `${translate('reportGroupByRowTagNameList', language)}`, type: 'input' };
+    } else if (options.group_by === 'tag_value_list') {
+      // new
+      local = { value: options.group_by, label: `${translate('reportGroupByRowTagValueList', language)}`, type: 'input-value' };
     } else if (options.group_by === 'operator_phone') {
       local = { value: options.group_by, label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean' };
     } else if (options.group_by === 'client_phone') {
@@ -170,14 +194,13 @@ const Reports = React.memo(() => {
   }
 
 
-  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null, activeCriterias: CriteriasType[] | null) => {
+  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null , activeCriterias: CriteriasType[]) => {
     if (allCriteriasArr) {
-      let local: { value: {}, label: string, icon?: string }[] = [];
+      let local: { value: { key: string }, label: string, icon?: string }[] = [];
       allCriteriasArr.forEach((item, i) => {
         local.push({ value: allCriteriasArr[i], label: allCriteriasArr[i].title });
       })
       for (let i = 0; i < local.length; i++) {
-        //@ts-ignore
         if (activeCriterias.find((item) => item.key === local[i].value.key)) {
           local[i].icon = 'minus';
         } else {
@@ -370,9 +393,6 @@ const Reports = React.memo(() => {
   const tableColumns = useAppSelector(state => state.reports.tableColumns);
   const rowGroupHeaderTitle = useAppSelector(state => state.reports.callReport.report.row_group_header);
 
-  //to do: oптимизировать функции ниже
-  //for table
-
   const columnsTable = function () {
     const columnsArray: any[] = [{
       field: 'idName',
@@ -556,15 +576,11 @@ const Reports = React.memo(() => {
 
       //количество звонков/ минут/ %
       callReport.report.cols.forEach((itemCol, indexCol) => {
-        // @ts-ignore
         result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_count;
-        // @ts-ignore
         result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_minutes;
-        // @ts-ignorer
         result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total}%`;
 
         if (checkboxValue) {
-          // @ts-ignore
           const diffValue = callReport.diff_report[itemRow].cols[itemCol].calls_count;
           let diffAdd = '';
           if (diffValue > 0) {
@@ -572,10 +588,8 @@ const Reports = React.memo(() => {
           } else {
             diffAdd = ` (${diffValue})`;
           }
-          // @ts-ignore
           result[indexRow][`calls_count_${indexCol}`] += diffAdd;
 
-          // @ts-ignore
           const diffValueMinutes = callReport.diff_report[itemRow].cols[itemCol].calls_minutes;
           let diffAddMinutes = '';
           if (diffValueMinutes > 0) {
@@ -583,10 +597,8 @@ const Reports = React.memo(() => {
           } else {
             diffAddMinutes = ` (${diffValueMinutes})`;
           }
-          // @ts-ignore
           result[indexRow][`calls_minutes_${indexCol}`] += diffAddMinutes;
 
-          // @ts-ignore
           const diffValuePercent = callReport.diff_report[itemRow].cols[itemCol].percent_calls_count_from_total;
           let diffAddPercent = '';
           if (diffValuePercent > 0) {
@@ -594,28 +606,19 @@ const Reports = React.memo(() => {
           } else {
             diffAddPercent = ` (${diffValuePercent}%)`;
           }
-          // @ts-ignore
           result[indexRow][`percent_calls_count_from_total_${indexCol}`] += diffAddPercent;
         }
-
-        // @ts-ignore
         result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].call_ids;
         //массив ids
-        // @ts-ignore
         resultIds.push(...callReport.report.values[itemRow].cols[itemCol].call_ids);
       })
       //общее время по строке
-      // @ts-ignore
       result[indexRow]['row_sum_calls_count'] = callReport.report.values[itemRow].row_info.row_sum_calls_count;
-      // @ts-ignore
       result[indexRow]['row_sum_calls_minutes'] = callReport.report.values[itemRow].row_info.row_sum_calls_minutes;
-      // @ts-ignore
       result[indexRow]['row_percent_count_from_total'] = `${callReport.report.values[itemRow].row_info.row_percent_count_from_total}%`;
-      // @ts-ignore
       result[indexRow]['row_total_processed_calls_count'] = callReport.report.values[itemRow].row_info.row_total_processed_calls_count;
 
       if (checkboxValue) {
-        // @ts-ignore
         const diffValue = callReport.diff_report[itemRow].row_info.row_sum_calls_count;
         let diffAdd = '';
         if (diffValue > 0) {
@@ -623,10 +626,8 @@ const Reports = React.memo(() => {
         } else {
           diffAdd = ` (${diffValue})`;
         }
-        // @ts-ignore
         result[indexRow][`row_sum_calls_count`] += diffAdd;
 
-        // @ts-ignore
         const diffValueMinutes = callReport.diff_report[itemRow].row_info.row_sum_calls_minutes;
         let diffAddMinutes = '';
         if (diffValueMinutes > 0) {
@@ -634,10 +635,8 @@ const Reports = React.memo(() => {
         } else {
           diffAddMinutes = ` (${diffValueMinutes})`;
         }
-        // @ts-ignore
         result[indexRow][`row_sum_calls_minutes`] += diffAddMinutes;
 
-        // @ts-ignore
         const diffValuePercent = callReport.diff_report[itemRow].row_info.row_percent_count_from_total;
         let diffAddPercent = '';
         if (diffValuePercent > 0) {
@@ -645,10 +644,8 @@ const Reports = React.memo(() => {
         } else {
           diffAddPercent = ` (${diffValuePercent}%)`;
         }
-        // @ts-ignore
         result[indexRow][`row_percent_count_from_total`] += diffAddPercent;
 
-        // @ts-ignore
         const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls_count;
         let diffAddCount = '';
         if (diffValueCount > 0) {
@@ -656,11 +653,9 @@ const Reports = React.memo(() => {
         } else {
           diffAddCount = ` (${diffValueCount}%)`;
         }
-        // @ts-ignore
         result[indexRow][`row_total_processed_calls_count`] += diffAddCount;
       }
       //массив ids
-      // @ts-ignore
       result[indexRow]['callIds']['row_sum_calls_count'] = resultIds;
       resultIds = [];
     })
@@ -675,6 +670,7 @@ const Reports = React.memo(() => {
   }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
 
   const getCallParameters = async (event: any) => {
+    hideVisibleParameters();
     setLoading(true);
     //обнуление параметров
     dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
@@ -683,7 +679,6 @@ const Reports = React.memo(() => {
     await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
     await dispatch(getCallReport());
-    hideVisibleParameters();
     setLoading(false);
   }
 
@@ -691,15 +686,12 @@ const Reports = React.memo(() => {
   useEffect(() => {
     if (groupByColumns.length > 0) {
       if (groupByColumns[0].group_by === 'search_items') {
-        const test = [];
         //@ts-ignore
         if (groupByColumns[0].value.search_items) {
           //@ts-ignore
           for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
             //@ts-ignore
             const groupColumnsItem = groupByColumns[0].value.search_items[i]
-            //@ts-ignore
-            test.push(allCriterias.filter((item) => item.key === groupColumnsItem.key))
             //@ts-ignore
             dispatch(searchSlice.actions.setActiveCriteriaReportsColumn(allCriterias.filter((item) => item.key === groupColumnsItem.key)))
             dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({ key: groupColumnsItem.key, values: [...groupColumnsItem.values] }));
@@ -739,7 +731,8 @@ const Reports = React.memo(() => {
 
             let activeSearchItems = cloneDeep(activeColsCriterias);
             for (let y = 0; y < activeSearchItems.length; y++) {
-              activeSearchItems[j][y].values = searchItem.values
+              //@ts-ignore
+              activeSearchItems[j].values = searchItem.values
             }
             dispatch(reportsSlice.actions.setActiveCriteriaColumn({
               arrayIndex: i - 1,
@@ -772,9 +765,15 @@ const Reports = React.memo(() => {
     else {
       setValidateInputItem(false);
       await dispatch(setReports());
-      //to do: snackbar
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
+      
+      setSnackbar({
+        type: 'success',
+        value: true,
+        text: `${translate('reportSaved', language)}`,
+        time: 3000
+      });
     }
   }
   // удаление отчета
@@ -783,7 +782,17 @@ const Reports = React.memo(() => {
     await dispatch(getAllReports());
     await dispatch(reportsSlice.actions.setInitialSavedReport(''));
     await handleClose();
-    //to do: snackbar
+
+    dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
+    dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
+    dispatch(reportsSlice.actions.removeAllActiveParameters(null));
+
+    setSnackbar({
+      type: 'success',
+      value: true,
+      text:`${translate('reportDeleted', language)}`,
+      time: 3000
+    });
   }
 
   const getCalls = async (callIds: any[]) => {
@@ -822,17 +831,24 @@ const Reports = React.memo(() => {
         const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
         const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
-          setHeightTable(`${gridEl.clientHeight}px`);
+          setHeightTable(`${ gridEl.clientHeight - 5 }px`);
         }
         if (gridElHeader && gridElHeaderInner) {
           const height = gridElHeaderInner.clientHeight
-          gridElHeader.style.minHeight = `${gridElHeaderInner.clientHeight}px`;
-          gridElHeader.style.maxHeight = `${gridElHeaderInner.clientHeight}px`;
-          gridElHeader.style.lineHeight = `${gridElHeaderInner.clientHeight}px`;
+          gridElHeader.style.minHeight = `${height}px`;
+          gridElHeader.style.maxHeight = `${height}px`;
+          gridElHeader.style.lineHeight = `${height}px`;
         }
       }
     }
-  }, [tableColumns, tableRows, isLoading, activeReport]);
+  }, [tableColumns, tableRows, activeReport, columns, rows, isOpen]);
+
+  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
+    type: 'success',
+    text: '',
+    value: false,
+    time: null
+  });
 
   return (
     <div>
@@ -1093,6 +1109,7 @@ const Reports = React.memo(() => {
                       <div style={{ display: 'inline-flex', width: '265px' }}>
                         {/*<SearchSelect*/}
 
+
                         {/*/>*/}
                       </div>
                       :
@@ -1308,6 +1325,18 @@ const Reports = React.memo(() => {
             </div>
           </Dialog>
 
+          {snackbar.value &&
+            <Snackbar
+              type={snackbar.type}
+              open={snackbar.value}
+              onClose={() => {
+                setSnackbar({ ...snackbar, value: false })
+              }}
+              text={snackbar.text}
+              time={snackbar.time}
+            />
+          }
+
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             {currentSavedReport.value ?
               <LoadingButton
@@ -1423,8 +1452,6 @@ const Reports = React.memo(() => {
                         <Box
                           sx={{
                             height: 60,
-                            border: 'none',
-                            borderRadius: '10px',
                             backgroundColor: '#fff',
                             '& .light-header--theme .MuiDataGrid-columnHeaderTitle': {
                               color: '#738094',
@@ -1434,6 +1461,8 @@ const Reports = React.memo(() => {
                             },
                             '& .MuiDataGrid-root': {
                               backgroundColor: '#fff',
+                              border: 'none !important',
+                              borderRadius: '10px',
                             },
                             '& .MuiDataGrid-cell': {
                               color: '#2F3747',
@@ -1447,6 +1476,7 @@ const Reports = React.memo(() => {
                               paddingBottom: '5px !important',
                               textAlign: 'center',
                               fontSize: '12px !important',
+                              borderBottom: 'none !important'
                             },
                             '.MuiDataGrid-columnSeparator': {
                               display: 'none',
@@ -1504,7 +1534,10 @@ const Reports = React.memo(() => {
                               position: "sticky",
                               top: '-1px',
                               backgroundColor: '#fff',
-                              zIndex: 10
+                              zIndex: 10,
+                              borderTopLeftRadius: '10px !important',
+                              borderTopRightRadius: '10px !important',
+                              borderBottom: 'none !important'
                             },
                             '& .MuiDataGrid-virtualScroller': {
                               marginTop: "0 !important"
