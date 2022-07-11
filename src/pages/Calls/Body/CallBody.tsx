@@ -2,14 +2,15 @@ import React, { FC, useEffect, useRef } from 'react';
 import { makeStyles } from "@mui/styles";
 import { Typography } from "@mui/material";
 import 'react-h5-audio-player/lib/styles.css';
-import { callsSlice, getCallPublicToken } from "../../../store/calls/calls.slice";
 import { useDispatch } from "react-redux";
+
 import {
   CallAudioType,
   CallInfoType,
   CallSttType,
   CallTagType,
 } from "../../../store/calls/calls.types";
+import { callsSlice, getCallPublicToken } from "../../../store/calls/calls.slice";
 import Plus from "../../../components/common/Buttons/Plus";
 import Reboot from "../../../components/common/Buttons/Reboot";
 import History from "../../../components/common/Buttons/History";

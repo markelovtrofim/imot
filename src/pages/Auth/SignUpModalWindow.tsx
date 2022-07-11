@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import ModalWindowBox from "../../components/common/ModalWindowBox";
+
 import { IconButton, Typography } from "@mui/material";
-import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
-import Input from "../../components/common/Input";
 import { LoadingButton } from "@mui/lab";
 import { makeStyles } from "@mui/styles";
 import MuiPhoneNumber from 'mui-phone-number';
 import { Form, Formik } from "formik";
+import { useDispatch } from "react-redux";
+import cn from "classnames";
+
+import { registerNewUser } from '../../store/auth/auth.slice';
+import ModalWindowBox from "../../components/common/ModalWindowBox";
 import { useAppSelector } from "../../hooks/redux";
+import Input from "../../components/common/Input";
 import { translate } from "../../localizations";
 
 const useStyles = makeStyles(({
@@ -62,19 +66,19 @@ const useStyles = makeStyles(({
   }
 }));
 
-const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
+const SignUpModalWindow = ({ isOpen, handleClose }: any) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
+  const [isUserRegistered, setIsUserRegistered] = useState<boolean>(false);
 
   const { language } = useAppSelector(state => state.lang);
-
 
   const validate = (values: {
     name: string,
     email: string,
     phoneNumber: string
   }) => {
-    console.log(values.phoneNumber.replace(/\D+/g, "").toString().length)
     if (values.name.length > 0 && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email) && values.phoneNumber.replace(/\D+/g, "").toString().length > 5) {
       setSubmitButtonDisabled(false);
     } else {
@@ -82,81 +86,109 @@ const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
     }
   };
 
+  function closeThisModalWindow() {
+    setSubmitButtonDisabled(true);
+    handleClose();
+  }
+
   return (
     <ModalWindowBox
       isMWOpen={isOpen}
-      handleMWClose={handleClose}
-      text={"Забронировать бесплатную версию"}
+      handleMWClose={closeThisModalWindow}
+      text={`${isUserRegistered ? "Вы успешно зарегистрировались" : "Забронировать бесплатную версию"}`}
     >
-      <Typography className={cn(classes.mwHelp, classes.mwText)}>
-        Пожалуйста, заполните форму, и наша команда свяжется с вами
-      </Typography>
-      <Formik
-        initialValues={{
-          name: '',
-          email: '',
-          phoneNumber: ''
-        }}
-        validate={validate}
-        onSubmit={values => {
-          alert(JSON.stringify(values, null, 2));
-        }}
-        render={({
-          handleChange,
-          setFieldValue,
-        }) => {
-          return (
-            <Form>
-              <div style={{ marginTop: '25px' }}>
-                <Input
-                  name={"name"}
-                  type={"text"}
-                  bcColor={"#EEF2F6"}
-                  label={"Ваше имя"}
-                  handleChange={handleChange}
-                />
-              </div>
-              <div style={{ marginTop: '25px' }}>
-                <Input
-                  name={"email"}
-                  type={"email"}
-                  bcColor={"#EEF2F6"}
-                  label={"Email"}
-                  handleChange={handleChange}
-                />
-              </div>
-              <div style={{ margin: '25px 0' }}>
-                <Typography style={{ color: '#738094', margin: '0 0 10px 9px', fontSize: '11px' }}>
-                  Номер телефона</Typography>
-                <MuiPhoneNumber onChange={e => setFieldValue("phoneNumber", e)}
-                  className={classes.mwNumberInput}
-                  defaultCountry={'ru'} />
-              </div>
-              <div className={classes.mwButtonBox}>
-                <LoadingButton
-                  type="submit"
-                  disabled={submitButtonDisabled}
-                  style={{ marginRight: '15px' }}
-                  variant="contained"
-                  color="primary"
-                >
-                  {translate("sendButton", language)}
-                </LoadingButton>
-                <LoadingButton
-                  onClick={handleClose}
-                  variant="contained"
-                  color="secondary"
-                >
-                  {translate("cancelButton", language)}
-                </LoadingButton>
-              </div>
-            </Form>
+      {
+        isUserRegistered
+          ? (
+            <Typography className={cn(classes.mwHelp, classes.mwText)}>
+              Поздравляем, вы успешно зарегистрировались! <br />
+              Проверьте указанную вами почту)
+            </Typography>
+          ) : (
+            <>
+              <Typography className={cn(classes.mwHelp, classes.mwText)}>
+                Пожалуйста, заполните форму, и наша команда свяжется с вами
+              </Typography>
+              <Formik
+                initialValues={{
+                  name: '',
+                  email: '',
+                  phoneNumber: ''
+                }}
+                validate={validate}
+                onSubmit={async values => {
+                  const data = await dispatch(registerNewUser(values));
+                  // @ts-ignore
+                  const me = data.payload;
+                  console.log(me);
+
+                  if (me) {
+                    console.log(me);
+                    setIsUserRegistered(true);
+                  } else {
+                    console.log("Что-то пошло не так. Попробуйте авторизоваться снова");
+                    setIsUserRegistered(false)
+                  }
+                }}
+                render={({
+                  handleChange,
+                  setFieldValue,
+                }) => {
+                  return (
+                    <Form>
+                      <div style={{ marginTop: '25px' }}>
+                        <Input
+                          name={"name"}
+                          type={"text"}
+                          bcColor={"#EEF2F6"}
+                          label={"Ваше имя"}
+                          handleChange={handleChange}
+                        />
+                      </div>
+                      <div style={{ marginTop: '25px' }}>
+                        <Input
+                          name={"email"}
+                          type={"email"}
+                          bcColor={"#EEF2F6"}
+                          label={"Email"}
+                          handleChange={handleChange}
+                        />
+                      </div>
+                      <div style={{ margin: '25px 0' }}>
+                        <Typography style={{ color: '#738094', margin: '0 0 10px 9px', fontSize: '11px' }}>
+                          Номер телефона</Typography>
+                        <MuiPhoneNumber onChange={e => setFieldValue("phoneNumber", e)}
+                          className={classes.mwNumberInput}
+                          defaultCountry={'ru'} />
+                      </div>
+                      <div className={classes.mwButtonBox}>
+                        <LoadingButton
+                          type="submit"
+                          disabled={submitButtonDisabled}
+                          style={{ marginRight: '15px', textTransform: "none" }}
+                          variant="contained"
+                          color="primary"
+                        >
+                          {translate("sendButton", language)}
+                        </LoadingButton>
+                        <LoadingButton
+                          onClick={closeThisModalWindow}
+                          variant="contained"
+                          color="secondary"
+                        >
+                          {translate("cancelButton", language)}
+                        </LoadingButton>
+                      </div>
+                    </Form>
+                  )
+                }}
+              >
+              </Formik>
+            </>
           )
-        }}
-      >
-      </Formik>
+      }
     </ModalWindowBox>
   );
 };
 
-export default ForgotPasswordModalWindow;
+export default SignUpModalWindow;
