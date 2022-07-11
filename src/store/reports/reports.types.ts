@@ -12,7 +12,7 @@ export type ReportItemType =  {
 
 export type CallReportType = {
   report: CallReportItem,
-  diff_report: {},
+  diff_report:  { [key: string]: CallReportItemValues },
   report_parameters_hash: string,
 }
 export type CallReportItem = {
@@ -20,38 +20,36 @@ export type CallReportItem = {
   rows: [],
   total_calls: number,
   row_group_header: string,
-  values: {},
+  values: { [key: string]: CallReportItemValues },
 }
 export type CallReportItemValues = {
-  cols: {},
-  row_info: {},
+  cols: { [key: string]: CallReportItemCols },
+  row_info: CallReportItemRow,
 }
-
 export type CallReportItemCols = {
-}
-export type CallReportItemColsValues = {
   calls_count: number,
-  calls_total_minutes: number,
+  calls_minutes: number,
   percent_count_from_total: number,
-  call_ids: [] | null
+  percent_calls_count_from_total: number,
+  call_ids: []
 }
 export type CallReportItemRow = {
+  row_sum_calls_count: number,
+  row_sum_calls_minutes: number,
   row_percent_count_from_total: number,
-  row_total_calls_count: number,
-  row_total_calls_minutes: number,
+  row_total_processed_calls_count: number,
 }
-
 
 export type ReportParametersType = {
   report_name: string,
   report_type: string,
   rows_group_by: {},
-  cols_group_by: ColsGroupByParametresType[],
+  cols_group_by: ColsGroupByParametersType[],
   call_search_items: [],
 }
-export type ColsGroupByParametresType = {
+export type ColsGroupByParametersType = {
   group_by: string,
-  value?: null | string | {
+  value?: string | {
     col_name: string,
     search_items: [{
       key: string,
@@ -60,7 +58,7 @@ export type ColsGroupByParametresType = {
   }
 }
 
-export type SelectorsValuesParametresType = {
+export type SelectorsValuesParametersType = {
   cols_groupings : [],
   groupings_by_time: [],
   report_types: [],

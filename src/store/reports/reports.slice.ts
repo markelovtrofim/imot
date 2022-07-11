@@ -1,13 +1,14 @@
-import {createAsyncThunk, createSlice, PayloadAction, current} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction, current } from "@reduxjs/toolkit";
+
 import {
   ReportsType,
   CallReportType,
   ReportParametersType,
-  SelectorsValuesParametresType,
+  SelectorsValuesParametersType,
   defaultParamType
 } from "./reports.types";
-import {instance} from "../api";
-import {RootState} from "../store";
+import { instance } from "../api";
+import { RootState } from "../store";
 import cloneDeep from "lodash.clonedeep";
 
 const convertDate = (date: Date | null) => {
@@ -135,7 +136,7 @@ export const setReports = createAsyncThunk(
       return response.data;
     } catch(error) {
       console.log(error);
-      console.log(payload);
+      thunkAPI.dispatch(reportsSlice.actions.setError('Проблема с сохранением отчета'))
     }
   }
 );
@@ -157,7 +158,6 @@ export const getReport = createAsyncThunk(
       return
     } catch(error) {
       console.log(error)
-      console.log(payload)
     }
   }
 )
@@ -181,14 +181,18 @@ export const getCallReport = createAsyncThunk(
       const requestData = convertCallSearch(requestCriterias, requestColsGroupBy);
       console.log(requestData);
 
-      const response = await instance.post(`reports/make/calls/?start_date=${startDate}&end_date=${endDate}`, requestData, {
+      let requestParameters = `reports/make/calls/?start_date=${startDate}&end_date=${endDate}`;
+      if (!startDate && !endDate) {
+        requestParameters = `reports/make/calls`
+      }
+
+      const response = await instance.post(requestParameters, requestData, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       console.log(response.data)
       thunkAPI.dispatch(reportsSlice.actions.setCallReport(response.data))
-
       return response.data
     } catch(error) {
       console.log(error)
@@ -211,8 +215,8 @@ export const deleteReport = createAsyncThunk(
 
       thunkAPI.dispatch(getAllReports())
     } catch(error) {
+      thunkAPI.dispatch(reportsSlice.actions.setError('Проблема с удалением отчета'))
       console.log(error)
-      console.log(payload)
     }
   }
 )
@@ -228,10 +232,10 @@ export const getSelectors = createAsyncThunk(
         }
       });
       thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues(response.data));
+      console.log(response.data);
 
     } catch(error) {
       console.log(error)
-      console.log(payload)
     }
   }
 )
@@ -261,11 +265,12 @@ type InitialStateType = {
   callReport: CallReportType,
   date: Date[] | null[],
   activeReport: ReportParametersType,
-  selectors: SelectorsValuesParametresType,
+  selectors: SelectorsValuesParametersType,
   activeParameters: defaultParamType[][],
   tagNames: [],
   tableRows: [],
   tableColumns: [],
+  error: string | null,
 }
 
 const initialState: InitialStateType = {
@@ -280,15 +285,44 @@ const initialState: InitialStateType = {
       total_calls: 0,
       row_group_header: '',
       values: {
-        cols: {},
-        row_info: {
-          row_percent_count_from_total: 0,
-          row_total_calls_count: 0,
-          row_total_calls_minutes: 0,
-        }
+        any: {
+          cols: {
+            any: {
+              calls_count: 0,
+              calls_minutes: 0,
+              percent_count_from_total: 0,
+              percent_calls_count_from_total: 0,
+              call_ids: []
+            }
+          },
+          row_info: {
+            row_sum_calls_count: 0,
+            row_sum_calls_minutes: 0,
+            row_percent_count_from_total: 0,
+            row_total_processed_calls_count: 0,
+          }
+        },
       }
     },
-    diff_report: {},
+    diff_report: {
+      any: {
+        cols: {
+          any: {
+            calls_count: 0,
+            calls_minutes: 0,
+            percent_count_from_total: 0,
+            percent_calls_count_from_total: 0,
+            call_ids: []
+          }
+        },
+        row_info: {
+          row_sum_calls_count: 0,
+          row_sum_calls_minutes: 0,
+          row_percent_count_from_total: 0,
+          row_total_processed_calls_count: 0,
+        }
+      },
+    },
     report_parameters_hash: '',
   },
 
@@ -297,7 +331,9 @@ const initialState: InitialStateType = {
     report_name: '',
     report_type: '',
     rows_group_by: {},
-    cols_group_by: [],
+    cols_group_by: [{
+      group_by: '',
+    }],
     call_search_items: []
   },
   selectors: {
@@ -311,12 +347,18 @@ const initialState: InitialStateType = {
 
   tableRows: [],
   tableColumns: [],
+
+  error: null
 }
 
 export const reportsSlice = createSlice({
   name: 'reports',
   initialState,
   reducers: {
+    setError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+    },
+
     setReports(state, action: PayloadAction<[]>) {
       state.allReports = action.payload;
     },
