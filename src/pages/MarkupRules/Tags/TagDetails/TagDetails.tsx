@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, FC, useContext } from 'react';
 import { IconButton, InputBase, Typography } from "@mui/material";
 import { BlockBox } from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
@@ -35,6 +35,7 @@ import Switch from "../../../../components/common/Switch";
 import ModalWindow from "../../../../components/common/ModalWindowBox";
 import { TagGroupType, TagType } from "../../../../store/tags/tags.types";
 import { useHistory } from "react-router-dom";
+import { SnackbarContext } from '../../../../App';
 
 export const AddButton: FC<{ onClick?: () => void }> = ({ onClick, children }) => {
   const classes = useTagDetailsStyles();
@@ -172,6 +173,10 @@ const TagDetails: FC = () => {
   const { language } = useAppSelector((state: RootState) => state.lang);
 
 
+  // @ts-ignore
+  const {snackbar, setSnackbar} = useContext(SnackbarContext);
+
+
   const [render, setRender] = useState(false);
   useEffect(() => {
     if (currentTag && currentGroup) {
@@ -181,15 +186,6 @@ const TagDetails: FC = () => {
     }
     setRender(!render);
   }, [currentTag]);
-
-  // snackbars
-  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
-    type: 'success',
-    text: '',
-    value: false,
-    time: null
-  });
-
 
   const userIdData = useAppSelector(state => state.users.currentUser?.id);
   const userId = userIdData ? userIdData : "_";
@@ -826,21 +822,6 @@ const TagDetails: FC = () => {
                 />
               </div>
             </div>
-          </div>
-
-          {/* Снаскбар */}
-          <div>
-            {snackbar.value &&
-              <Snackbar
-                type={snackbar.type}
-                open={snackbar.value}
-                onClose={() => {
-                  setSnackbar({ value: false, type: 'success', time: null, text: '' })
-                }}
-                text={snackbar.text}
-                time={snackbar.time}
-              />
-            }
           </div>
 
         </div>
