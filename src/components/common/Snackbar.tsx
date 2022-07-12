@@ -37,11 +37,16 @@ const SuccessSvg = () => {
   );
 };
 
-export type SnackbarType = 'info' | 'warning' | 'error' | 'loading' | 'success';
+export type SnackbarType = {
+  type: string,
+  text: string,
+  value: boolean,
+  time: number | null
+}
 
 
 type SnackbarPropsType = {
-  type: SnackbarType,
+  type: string,
   open: boolean,
   onClose: (event: any) => void,
   text: string,

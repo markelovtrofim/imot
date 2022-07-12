@@ -17,7 +17,6 @@ import {
 import {Header} from './components/common';
 import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
-import LinearDeterminate from "./components/common/LinearDeterminate";
 import {dictsSlice} from "./store/dicts/dicts.slice";
 import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
@@ -150,15 +149,10 @@ const App = () => {
 
 
   // Snackbar
-  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
-    type: 'success',
-    text: '',
-    value: false,
-    time: null
-  });
+  const snackbar = useAppSelector(state => state.lang.snackbar);
 
   return (
-    <SnackbarContext.Provider value={{snackbar, setSnackbar}}>
+    <div>
       <div className={classes.wrapper}>
         {isAuth ? (
           <Switch>
@@ -263,7 +257,7 @@ const App = () => {
           </Switch>
         )}
       </div>
-      
+
       {/* Снаскбар */}
       <div>
         {snackbar.value &&
@@ -271,7 +265,7 @@ const App = () => {
           type={snackbar.type}
           open={snackbar.value}
           onClose={() => {
-            setSnackbar({ value: false, type: 'success', time: null, text: '' })
+            dispatch(langSlice.actions.setSnackbar({value: false, type: 'success', time: null, text: ''}));
           }}
           text={snackbar.text}
           time={snackbar.time}
@@ -279,8 +273,7 @@ const App = () => {
         }
       </div>
 
-    </SnackbarContext.Provider>
-
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {instance} from "../api";
+import {SnackbarType} from "../../components/common/Snackbar";
 
 export type LangType = 'ru' | 'en';
 
@@ -23,12 +24,19 @@ export const getLang = createAsyncThunk(
 
 type InitialStateType = {
   language: string,
-  loading: boolean
+  loading: boolean,
+  snackbar: SnackbarType
 }
 
 const initialState: InitialStateType = {
   language: 'ru',
-  loading: false
+  loading: false,
+  snackbar: {
+    type: 'success',
+    text: '',
+    value: false,
+    time: null
+  }
 };
 
 export const langSlice = createSlice({
@@ -46,6 +54,11 @@ export const langSlice = createSlice({
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
     },
+
+    setSnackbar(state, action: PayloadAction<SnackbarType>) {
+      state.snackbar = action.payload;
+    },
+
     langReset: () => initialState
   }
 })
