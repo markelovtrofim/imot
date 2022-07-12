@@ -114,9 +114,7 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
          }));
         setCursorPosition({ top: y, left: x })
         setIsUserSelectText(true);
-        setSelectionText(selectionText);
-
-        console.log(selectionText.replace(/\s+/g, ' ').trim());
+        setSelectionText(selectionText.replace(/\s+/g, ' ').trim());
       }
     }
   }

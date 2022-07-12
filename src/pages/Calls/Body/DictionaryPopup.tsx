@@ -23,9 +23,9 @@ const DictionaryPopup = ({ popupPosition, selectionText }: DictionaryPopupPropTy
       <Paper>
         <MenuList>
           {/* @ts-ignore */}
+          <p className="dictionary-textarea-title">Редактировать</p>
           <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
-          <MenuItem>My account</MenuItem>
-          <MenuItem>Logout</MenuItem>
+          <MenuItem>Отправить в словарь</MenuItem>
         </MenuList>
       </Paper>
     </div >
