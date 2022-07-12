@@ -1,4 +1,4 @@
-import {makeStyles} from "@mui/styles";
+import { makeStyles } from "@mui/styles";
 
 export const reportsStyles = makeStyles(({
   reportItemInfo: {
@@ -19,9 +19,7 @@ export const reportsStyles = makeStyles(({
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  reportButtonsGroupLeft: {
-
-  },
+  reportButtonsGroupLeft: {},
   reportOptionsButton: {
     // @ts-ignore
     textTransform: 'none !important',
@@ -188,7 +186,7 @@ export const reportsStyles = makeStyles(({
   },
   errorInput: {
     position: 'relative',
-    '& .MuiFormControl-root' : {
+    '& .MuiFormControl-root': {
       borderColor: '#F5222D !important'
     },
     '& span': {
@@ -219,12 +217,21 @@ export const reportsStyles = makeStyles(({
   },
   table: {
     width: 'auto',
-    marginTop: '20px',
+    marginTop: '24px',
     marginBottom: '30px',
     height: '100%',
     //@ts-ignore
     overflowX: 'auto !important',
-    overflowY: 'hidden'
+    overflowY: 'hidden',
+    '&::-webkit-scrollbar': {
+      height: '6px',
+      backgroundColor: '#fff',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundСolor: '#A3AEBE',
+      background: '#A3AEBE',
+      borderRadius: '14px',
+    }
   },
   flexCenterMb: {
     display: 'flex',
@@ -273,6 +280,6 @@ export const reportsStyles = makeStyles(({
   },
   centerMessageTitle: {
     maxWidth: '300px',
-    textAlign:'center'
+    textAlign: 'center'
   }
 }));

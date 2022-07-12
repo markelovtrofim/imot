@@ -1,10 +1,15 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, { FC, useEffect, useState } from 'react';
+
 import ToggleButton from "@mui/material/ToggleButton";
-import {translate} from "../../localizations";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import {makeStyles} from "@mui/styles";
-import {useAppSelector} from "../../hooks/redux";
-import {RootState} from "../../store/store";
+import { makeStyles } from "@mui/styles";
+import { useDispatch, useSelector } from "react-redux";
+
+import { translate } from "../../localizations";
+import { useAppSelector } from "../../hooks/redux";
+import { RootState } from "../../store/store";
+import { reportsSlice } from './../../store/reports/reports.slice';
+import { unitsOfTime } from './СontrolBlock';
 
 const useStyles = makeStyles(({
   cbDateItems: {
@@ -56,6 +61,7 @@ const useStyles = makeStyles(({
     textTransform: 'none !important',
     color: '#738094 !important',
     backgroundColor: '#ffffff !important',
+    whiteSpace: 'nowrap',
     '&.Mui-selected': {
       backgroundColor: '#D6D9DF !important',
       color: '#000 !important'
@@ -64,15 +70,35 @@ const useStyles = makeStyles(({
 }));
 
 type ButtonsPropsType = {
+  date: Date[] | null[],
   items: {
     value: string,
     onClick: () => void,
-    unitOfTime: Date[]
-  }[]
+    unitOfTime: Date[] | null[]
+  }[],
+  period?: string | null
 };
 
-const ButtonGroup: FC<ButtonsPropsType> = ({items}) => {
+const periods: { [key: string]: string } = {
+  today: 'today',
+  yesterday: 'yesterday',
+  week: 'this_week',
+  month: 'this_mont',
+  year: 'this_year',
+  allTime: 'all_time'
+}
+
+const getPeriod = (period: string) => {
+  return periods[period]
+}       
+
+const getNamePeriod = (period: string) => {
+  return Object.keys(periods).find((key) => periods[key] === period)
+}
+
+const ButtonGroup: FC<ButtonsPropsType> = ({date, items, period}) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   const [alignment, setAlignment] = useState<string | null>(null);
   const handleChange = (
@@ -82,15 +108,29 @@ const ButtonGroup: FC<ButtonsPropsType> = ({items}) => {
     setAlignment(newAlignment);
   };
 
-  const date = useAppSelector(state => state.search.date);
+  useEffect(() => {
+    if (period) {
+      //@ts-ignore
+      setAlignment(getNamePeriod(period))
+      //@ts-ignore
+      dispatch(reportsSlice.actions.setDate(unitsOfTime[getNamePeriod(period)]));
+    }
+  }, [period])
+
 
   useEffect(() => {
     for (let i = 0; i < items.length; i++) {
-      if (date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
+      //@ts-ignore
+      if (items[i].unitOfTime[0] && date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
         setAlignment(items[i].value);
+        dispatch(reportsSlice.actions.setPeriod(getPeriod(items[i].value)))
         break
+      } else if (items[i].unitOfTime[0] === null && items[i].unitOfTime[0] === date[0]) {
+        setAlignment(items[i].value);
+        dispatch(reportsSlice.actions.setPeriod(getPeriod(items[i].value)));
       } else {
         setAlignment(null);
+        dispatch(reportsSlice.actions.setPeriod(null));
       }
     }
   }, [date]);

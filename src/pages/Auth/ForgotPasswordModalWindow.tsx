@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import ModalWindowBox from "../../components/common/ModalWindowBox";
-import {IconButton, Typography} from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import cn from "classnames";
 import CloseIcon from "@mui/icons-material/Close";
 import Input from "../../components/common/Input";
-import {LoadingButton} from "@mui/lab";
-import {makeStyles} from "@mui/styles";
-import {useFormik} from "formik";
-import {useAppSelector} from "../../hooks/redux";
-import {translate} from "../../localizations";
+import { LoadingButton } from "@mui/lab";
+import { makeStyles } from "@mui/styles";
+import { useFormik } from "formik";
+import { useAppSelector } from "../../hooks/redux";
+import { translate } from "../../localizations";
 
 const useStyles = makeStyles(({
   mwTitle: {
@@ -33,7 +33,7 @@ const useStyles = makeStyles(({
   }
 }));
 
-const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
+const ForgotPasswordModalWindow = ({ isOpen, handleClose }: any) => {
   const classes = useStyles();
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState<boolean>(true);
 
@@ -58,7 +58,7 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
     formik.values.email = '';
   }, [handleClose])
 
-  const {language} = useAppSelector(state => state.lang);
+  const { language } = useAppSelector(state => state.lang);
 
   return (
     <ModalWindowBox
@@ -84,7 +84,7 @@ const ForgotPasswordModalWindow = ({isOpen, handleClose}: any) => {
           <LoadingButton
             disabled={submitButtonDisabled}
             type="submit"
-            style={{marginRight: '15px'}}
+            style={{ marginRight: '15px' }}
             variant="contained"
             color="primary"
           >

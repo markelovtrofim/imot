@@ -1,13 +1,15 @@
-import React, {useState} from 'react';
-import {makeStyles} from '@mui/styles';
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../store/store";
+import React, { useEffect, useState } from 'react';
+
+import { makeStyles } from '@mui/styles';
+import { useDispatch, useSelector } from "react-redux";
 import ButtonGroup from "./ButtonGroup";
-import {useAppSelector} from "../../hooks/redux";
-import {searchSlice} from "../../store/search/search.slice";
-import Snackbar from "./Snackbar";
 import DateRangePickerWrapper from './DateRangePickerWrapper';
-import {reportsSlice} from './../../store/reports/reports.slice';
+import Snackbar from "./Snackbar";
+
+import { RootState } from "../../store/store";
+import { useAppSelector } from "../../hooks/redux";
+import { searchSlice } from "../../store/search/search.slice";
+import { reportsSlice } from './../../store/reports/reports.slice';
 
 // Svg
 const DownloadSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -21,17 +23,6 @@ const DownloadSvg = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-
-const CalendarSvg = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
-    <svg width="1em" height="1em" viewBox="0 0 13 15" fill="none" xmlns="http://www.w3.org/2000/svg"
-      style={{position: 'absolute', right: '8px',  top: 'calc(50% - 8px)'}}
-    >
-      <path 
-        d="M4.64286 0.9375V1.875H8.35714V0.9375C8.35714 0.419824 8.7721 0 9.28571 0C9.79933 0 10.2143 0.419824 10.2143 0.9375V1.875H11.6071C12.3761 1.875 13 2.50459 13 3.28125V4.6875H0V3.28125C0 2.50459 0.623594 1.875 1.39286 1.875H2.78571V0.9375C2.78571 0.419824 3.20067 0 3.71429 0C4.2279 0 4.64286 0.419824 4.64286 0.9375ZM0 5.625H13V13.5938C13 14.3701 12.3761 15 11.6071 15H1.39286C0.623594 15 0 14.3701 0 13.5938V5.625ZM1.85714 8.90625C1.85714 9.16406 2.06491 9.375 2.32143 9.375H3.25C3.50536 9.375 3.71429 9.16406 3.71429 8.90625V7.96875C3.71429 7.71094 3.50536 7.5 3.25 7.5H2.32143C2.06491 7.5 1.85714 7.71094 1.85714 7.96875V8.90625ZM5.57143 8.90625C5.57143 9.16406 5.78036 9.375 6.03571 9.375H6.96429C7.21964 9.375 7.42857 9.16406 7.42857 8.90625V7.96875C7.42857 7.71094 7.21964 7.5 6.96429 7.5H6.03571C5.78036 7.5 5.57143 7.71094 5.57143 7.96875V8.90625ZM9.75 7.5C9.49464 7.5 9.28571 7.71094 9.28571 7.96875V8.90625C9.28571 9.16406 9.49464 9.375 9.75 9.375H10.6786C10.9339 9.375 11.1429 9.16406 11.1429 8.90625V7.96875C11.1429 7.71094 10.9339 7.5 10.6786 7.5H9.75ZM1.85714 12.6562C1.85714 12.9141 2.06491 13.125 2.32143 13.125H3.25C3.50536 13.125 3.71429 12.9141 3.71429 12.6562V11.7188C3.71429 11.4609 3.50536 11.25 3.25 11.25H2.32143C2.06491 11.25 1.85714 11.4609 1.85714 11.7188V12.6562ZM6.03571 11.25C5.78036 11.25 5.57143 11.4609 5.57143 11.7188V12.6562C5.57143 12.9141 5.78036 13.125 6.03571 13.125H6.96429C7.21964 13.125 7.42857 12.9141 7.42857 12.6562V11.7188C7.42857 11.4609 7.21964 11.25 6.96429 11.25H6.03571ZM9.28571 12.6562C9.28571 12.9141 9.49464 13.125 9.75 13.125H10.6786C10.9339 13.125 11.1429 12.9141 11.1429 12.6562V11.7188C11.1429 11.4609 10.9339 11.25 10.6786 11.25H9.75C9.49464 11.25 9.28571 11.4609 9.28571 11.7188V12.6562Z" fill="#B37FEB"/>
-    </svg>
-  )
-}
 
 // Styles
 const useStyles = makeStyles(({
@@ -90,11 +81,11 @@ export const unitsOfTime = {
   yesterday: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 24 * 60 * 60 * 1000)],
   week: [new Date(Date.now() - 168 * 60 * 60 * 1000), new Date(Date.now())],
   month: [new Date(Date.now() - 720 * 60 * 60 * 1000), new Date(Date.now())],
-  year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())]
+  year: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())],
+  allTime: [null, null]
 }
 
 const ControlBlock = (props: any) => {
-
   const element = document.getElementById("dateRangePicker");
   if (element) {
     element.classList.remove("rs-picker-toggle-active");
@@ -102,12 +93,23 @@ const ControlBlock = (props: any) => {
 
   const {language} = useSelector((state: RootState) => state.lang);
   const classes = useStyles();
-  const date = useAppSelector(state => state.search.date);
+  const dateSearch = useAppSelector(state => state.search.date);
   const dateReports = useAppSelector(state => state.reports.date);
+  const periodReports = useAppSelector(state => state.reports.activeReport.period);
   const dispatch = useDispatch();
 
   const [errorSnackbar, setErrorSnackbar] = useState<boolean>(false);
+  const [disabledCalendar, setDisabledCalendar] = useState<boolean>(false);
+  const [disabledCalendarReport, setDisabledCalendarReport] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (periodReports && periodReports != 'all_time') setDisabledCalendarReport(false);
+  }, [periodReports])
+
+  useEffect(() => {
+    if (dateSearch[0] === null) setDisabledCalendar(true);
+    if (dateReports[0] === null) setDisabledCalendarReport(true);
+  }, [dateSearch, dateReports])
 
   return (
     <div className={classes.controlBlockWrapper}>
@@ -118,8 +120,9 @@ const ControlBlock = (props: any) => {
             <DateRangePickerWrapper
               id={'dateRangePicker'}
               value={dateReports}
+              disabled={disabledCalendarReport}
               onChange={(value: [Date, Date],) => {
-                dispatch(reportsSlice.actions.setDate(value))
+                dispatch(reportsSlice.actions.setDate(value));
               }}
               onClean={() => {
                 dispatch(reportsSlice.actions.setDate([null, null]));
@@ -128,7 +131,8 @@ const ControlBlock = (props: any) => {
             :
             <DateRangePickerWrapper
               id={'dateRangePicker'}
-              value={date}
+              value={dateSearch}
+              disabled={disabledCalendar}
               onChange={(value: [Date, Date],) => {
                 dispatch(searchSlice.actions.setDate(value));
               }}
@@ -137,50 +141,92 @@ const ControlBlock = (props: any) => {
               }}
             />
           }
-          <ButtonGroup
-            items={[
-              {
-                value: 'today', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.today))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.today))
-                  }
-                }, unitOfTime: unitsOfTime.today
-              },
-              {
-                value: 'yesterday', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.yesterday))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday))
-                  }                  
-                }, unitOfTime: unitsOfTime.yesterday
-              },
-              {
-                value: 'week', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.week))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.week))
-                  }
-                }, unitOfTime: unitsOfTime.week
-              },
-              {
-                value: 'month', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.month))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.month))
-                  }
-                }, unitOfTime: unitsOfTime.month
-              },
-              {
-                value: 'year', onClick: () => {
-                  {props.switchEntity === 'reports' ? 
-                    dispatch(reportsSlice.actions.setDate(unitsOfTime.year))
-                  : dispatch(searchSlice.actions.setDate(unitsOfTime.year))
-                  }
-                }, unitOfTime: unitsOfTime.year
-              }
-            ]}
-          />
+          {props.switchEntity === 'reports' ?
+            <ButtonGroup
+              date={dateReports}
+              period={periodReports}
+              items={[
+                {
+                  value: 'today', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.today));
+                  }, unitOfTime: unitsOfTime.today
+                },
+                {
+                  value: 'yesterday', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.yesterday));
+                  }, unitOfTime: unitsOfTime.yesterday
+                },
+                {
+                  value: 'week', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.week));
+                  }, unitOfTime: unitsOfTime.week
+                },
+                {
+                  value: 'month', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.month));
+                  }, unitOfTime: unitsOfTime.month
+                },
+                {
+                  value: 'year', onClick: () => {
+                    setDisabledCalendarReport(false);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.year));
+                  }, unitOfTime: unitsOfTime.year
+                },
+                {
+                  value: 'allTime', onClick: () => {
+                    setDisabledCalendarReport(true);
+                    dispatch(reportsSlice.actions.setDate(unitsOfTime.allTime));
+                  }, unitOfTime: unitsOfTime.allTime
+                },
+              ]}
+            />
+            :
+            <ButtonGroup
+              date={dateSearch}
+              items={[
+                {
+                  value: 'today', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.today));
+                  }, unitOfTime: unitsOfTime.today
+                },
+                {
+                  value: 'yesterday', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.yesterday));
+                  }, unitOfTime: unitsOfTime.yesterday
+                },
+                {
+                  value: 'week', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.week));
+                  }, unitOfTime: unitsOfTime.week
+                },
+                {
+                  value: 'month', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.month));
+                  }, unitOfTime: unitsOfTime.month
+                },
+                {
+                  value: 'year', onClick: () => {
+                    setDisabledCalendar(false);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.year));
+                  }, unitOfTime: unitsOfTime.year
+                },
+                {
+                  value: 'allTime', onClick: () => {
+                    setDisabledCalendar(true);
+                    dispatch(searchSlice.actions.setDate(unitsOfTime.allTime));
+                  }, unitOfTime: unitsOfTime.allTime
+                },
+              ]}
+            />
+          }
         </div>
       </div>
       <Snackbar

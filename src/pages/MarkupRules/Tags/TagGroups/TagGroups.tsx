@@ -1,5 +1,5 @@
-import React, {FC} from 'react';
-import {useAppSelector} from "../../../../hooks/redux";
+import React, { FC } from 'react';
+import { useAppSelector } from "../../../../hooks/redux";
 import TagGroup from "./TagGroup/TagGroup";
 
 
@@ -8,7 +8,7 @@ const TagGroups: FC = () => {
   const currentGroup = useAppSelector(state => state.tags.currentTagGroup);
 
   return (
-    <div style={{padding: '5px 0'}}>
+    <div style={{ padding: '5px 0' }}>
       {tagGroups.map((group) => {
         return (
           <TagGroup

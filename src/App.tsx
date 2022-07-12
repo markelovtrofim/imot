@@ -17,7 +17,6 @@ import {
 import {Header} from './components/common';
 import {useAppSelector} from "./hooks/redux";
 import {authSlice} from "./store/auth/auth.slice";
-import LinearDeterminate from "./components/common/LinearDeterminate";
 import {dictsSlice} from "./store/dicts/dicts.slice";
 import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
@@ -147,7 +146,6 @@ const App = () => {
     })
   }, [history]);
 
-
   const snackbar = useAppSelector(state => state.lang.snackbar);
 
   return (
@@ -162,7 +160,6 @@ const App = () => {
                 <Calls/>
               </div>
             </Route>
-
             {/* Звонок */}
             <Route path="/:lang/call">
               <Header/>
@@ -170,7 +167,6 @@ const App = () => {
                 <CallPage/>
               </div>
             </Route>
-
             {/* Отсчеты */}
             <Route path="/:lang/:userId/reports">
               <Header/>
@@ -243,7 +239,7 @@ const App = () => {
 
             {/* Звонок */}
             <Route path="/:lang/call">
-              <Header/>1
+              <Header/>
               <div className={classes.container}>
                 <CallPage/>
               </div>

@@ -1,15 +1,15 @@
-import React, {FC, useEffect, useState} from 'react';
-import {InputBase, Tooltip, Typography} from "@mui/material";
+import React, { FC, useEffect, useState } from 'react';
+import { InputBase, Tooltip, Typography } from "@mui/material";
 import Checkbox from "../../../components/common/Checkbox";
 import Switch from "../../../components/common/Switch";
 import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
-import {InfoCircleActive} from "../MarkupRules";
-import {useAppSelector} from "../../../hooks/redux";
+import { InfoCircleActive } from "../MarkupRules";
+import { useAppSelector } from "../../../hooks/redux";
 import Field from "../../../components/common/FIeld";
-import {makeStyles} from "@mui/styles";
-import {useFormik} from "formik";
-import {LoadingButton} from "@mui/lab";
-import {useDispatch} from "react-redux";
+import { makeStyles } from "@mui/styles";
+import { useFormik } from "formik";
+import { LoadingButton } from "@mui/lab";
+import { useDispatch } from "react-redux";
 import {
   deleteDict,
   dictActions, dictsSlice,
@@ -18,14 +18,14 @@ import {
   getGroups,
   updateDict
 } from "../../../store/dicts/dicts.slice";
-import {BlockBox} from "../../../components/common";
+import { BlockBox } from "../../../components/common";
 import ModalWindow from "../../../components/common/ModalWindowBox";
-import {DictType, DictTypeDetailed, GroupType} from "../../../store/dicts/dicts.types";
-import Snackbar, {SnackbarType} from "../../../components/common/Snackbar";
-import {useHistory} from "react-router-dom";
+import { DictType, DictTypeDetailed, GroupType } from "../../../store/dicts/dicts.types";
+import Snackbar, { SnackbarType } from "../../../components/common/Snackbar";
+import { useHistory } from "react-router-dom";
 import noResultsPng from '../../../assets/images/no-results.png';
-import {RootState} from "../../../store/store";
-import {translate} from "../../../localizations";
+import { RootState } from "../../../store/store";
+import { translate } from "../../../localizations";
 import Preloader from "../../../assets/loading.svg";
 
 const DictDetailsStubMiddleware: FC = () => {
@@ -33,9 +33,9 @@ const DictDetailsStubMiddleware: FC = () => {
   if (currentDict === null) {
     return (
       <BlockBox padding={'24px'}>
-        <div style={{position: 'relative', height: '100%'}}>
-          <div style={{position: 'absolute', top: '30%', left: '32%'}}>
-            <img src={Preloader} alt=""/>
+        <div style={{ position: 'relative', height: '100%' }}>
+          <div style={{ position: 'absolute', top: '30%', left: '32%' }}>
+            <img src={Preloader} alt="" />
           </div>
         </div>
       </BlockBox>
@@ -43,15 +43,15 @@ const DictDetailsStubMiddleware: FC = () => {
   } else if (currentDict === false) {
     return (
       <BlockBox padding={'5px 24px 0 24px'}>
-        <div style={{textAlign: 'center', marginTop: '150px'}}>
-          <img src={noResultsPng} alt=""/>
+        <div style={{ textAlign: 'center', marginTop: '150px' }}>
+          <img src={noResultsPng} alt="" />
         </div>
       </BlockBox>
     )
-  }  else if (currentDict === undefined) {
+  } else if (currentDict === undefined) {
     return <></>
   } else {
-    return <DictDetails currentDict={currentDict}/>
+    return <DictDetails currentDict={currentDict} />
   }
 };
 
@@ -109,7 +109,7 @@ const useStyles = makeStyles(({
   }
 }));
 
-const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
+const DictDetails: FC<DictDetailsPropsType> = ({ currentDict }) => {
   const classes = useStyles();
 
   const dispatch = useDispatch();
@@ -147,17 +147,17 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         const groups: GroupType[] = groupsData.payload;
         const currentGroup = groups.filter((item) => item.group === formik.values.groupName)[0];
         dispatch(dictsSlice.actions.setCurrentGroup(currentGroup));
-        await dispatch(getDicts({group: formik.values.groupName}))
+        await dispatch(getDicts({ group: formik.values.groupName }))
       }
       if (currentDict.title !== formik.values.title) {
-        await dispatch(getDicts({group: currentDict.group}));
+        await dispatch(getDicts({ group: currentDict.group }));
       }
       setSubmitLoading(false);
-      setSnackbar({type: 'success', value: true, text: 'Изменения сохранены', time: 2000})
+      setSnackbar({ type: 'success', value: true, text: 'Изменения сохранены', time: 2000 })
     },
   });
 
-  const {language} = useAppSelector((state: RootState) => state.lang);
+  const { language } = useAppSelector((state: RootState) => state.lang);
 
   const [render, setRender] = useState(false);
   useEffect(() => {
@@ -172,11 +172,11 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
     for (let i = 0; i < currentDict.allowedActions.length; i++) {
       const action = currentDict.allowedActions[i];
       if (action === 'clone') {
-        result.push({value: action, label: translate("cloneButton_dictDetailSelect", language)});
+        result.push({ value: action, label: translate("cloneButton_dictDetailSelect", language) });
       } else if (action === 'delete') {
-        result.push({value: action, label: translate("deleteButton_dictDetailSelect", language)});
+        result.push({ value: action, label: translate("deleteButton_dictDetailSelect", language) });
       } else if (action === 'make_global') {
-        result.push({value: action, label: translate("makeGlobal_dictDetailSelect", language)});
+        result.push({ value: action, label: translate("makeGlobal_dictDetailSelect", language) });
       }
     }
     return result;
@@ -199,7 +199,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
   useEffect(() => {
     setDeleteLoading(false);
     if (error) {
-      setSnackbar({type: 'error', value: true, text: 'Этот словарь нельзя удалить', time: 2000});
+      setSnackbar({ type: 'error', value: true, text: 'Этот словарь нельзя удалить', time: 2000 });
     }
   }, [error])
 
@@ -216,7 +216,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         // @ts-ignore
         const groups: GroupType[] = groupsData.payload;
         dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
-        const dictsData = await dispatch(getDicts({group: groups[0].group}));
+        const dictsData = await dispatch(getDicts({ group: groups[0].group }));
         // @ts-ignore
         const dicts: DictType[] = dictsData.payload;
         await dispatch(getDict(dicts[0].id));
@@ -224,7 +224,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         history.location.pathname = '/';
         history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}&id=${dicts[0].id}`)
       } else {
-        const dataDicts = await dispatch(getDicts({group: currentGroup.group}));
+        const dataDicts = await dispatch(getDicts({ group: currentGroup.group }));
         // @ts-ignore
         const dicts: DictType[] = dataDicts.payload;
         await dispatch(getDict(dicts[0].id));
@@ -234,7 +234,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
       }
       handleMWClose();
       setDeleteDictMWIsOpen(false);
-      setSnackbar({type: "success", text: 'Словарь удален', value: true, time: 2000});
+      setSnackbar({ type: "success", text: 'Словарь удален', value: true, time: 2000 });
       setDeleteLoading(false);
     }
   };
@@ -257,7 +257,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         <Field label={translate("dictName_dictDetail", language)} margin={'0 0 15px 0'}>
           <InputBase
             disabled={!currentDict.group}
-            style={{width: '100%'}}
+            style={{ width: '100%' }}
             name="title"
             type="text"
             value={formik.values.title}
@@ -267,7 +267,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         <Field label={translate("groupName_dictDetail", language)} margin={'0 0 15px 0'}>
           <InputBase
             disabled={!currentDict.group}
-            style={{width: '100%'}}
+            style={{ width: '100%' }}
             name="groupName"
             type="text"
             value={formik.values.groupName}
@@ -275,139 +275,139 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
           />
         </Field>
         <Field margin={'0 0 15px 0'}
-               label={translate("phrasesList_dictDetail", language)}
-               labelBrother={
-                 <div style={{display: 'flex', justifyContent: "space-between", width: '140px', alignItems: 'center'}}>
-                   <div>
-                     {currentDict.allowedActions.includes('enable') && currentDict.allowedActions.includes('disable') &&
-                     <div>
-                       <div style={{display: 'flex', alignItems: 'center'}}>
-                         <Switch
-                           onChecked={async (e) => {
-                             if (currentGroup) {
-                               setChecked(!checked);
-                               setCheckedDisable(true);
-                               setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null})
-                               await dispatch(dictActions({
-                                 dictId: currentDict.id,
-                                 action: currentDict.enabled ? 'disable' : 'enable'
-                               }))
+          label={translate("phrasesList_dictDetail", language)}
+          labelBrother={
+            <div style={{ display: 'flex', justifyContent: "space-between", width: '140px', alignItems: 'center' }}>
+              <div>
+                {currentDict.allowedActions.includes('enable') && currentDict.allowedActions.includes('disable') &&
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Switch
+                        onChecked={async (e) => {
+                          if (currentGroup) {
+                            setChecked(!checked);
+                            setCheckedDisable(true);
+                            setSnackbar({ type: 'loading', value: true, text: 'Загрузка...', time: null })
+                            await dispatch(dictActions({
+                              dictId: currentDict.id,
+                              action: currentDict.enabled ? 'disable' : 'enable'
+                            }))
 
 
-                               if (currentGroup.count < 2) {
-                                 const groupsData = await dispatch(getGroups());
-                                 // @ts-ignore
-                                 const groups: GroupType[] = groupsData.payload;
+                            if (currentGroup.count < 2) {
+                              const groupsData = await dispatch(getGroups());
+                              // @ts-ignore
+                              const groups: GroupType[] = groupsData.payload;
 
-                                 dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
-                                 const dictsData = await dispatch(getDicts({group: groups[0].group}))
-                                 // @ts-ignore
-                                 const dicts: DictType[] = dictsData.payload;
-                                 dispatch(dictsSlice.actions.setCurrentDict(undefined));
-                                 dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}`));
-                                 history.location.pathname = '/';
-                                 history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}`);
-                               } else {
-                                 await dispatch(getDicts({group: currentGroup.group}))
-                                 dispatch(dictsSlice.actions.setCurrentDict(undefined));
-                                 dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}`))
-                                 history.location.pathname = '/';
-                                 history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}`)
-                               }
+                              dispatch(dictsSlice.actions.setCurrentGroup(groups[0]));
+                              const dictsData = await dispatch(getDicts({ group: groups[0].group }))
+                              // @ts-ignore
+                              const dicts: DictType[] = dictsData.payload;
+                              dispatch(dictsSlice.actions.setCurrentDict(undefined));
+                              dispatch(dictsSlice.actions.setSearch(`?group=${groups[0].group}`));
+                              history.location.pathname = '/';
+                              history.replace(`${language}/${userId}/markuprules/dictionaries?group=${groups[0].group}`);
+                            } else {
+                              await dispatch(getDicts({ group: currentGroup.group }))
+                              dispatch(dictsSlice.actions.setCurrentDict(undefined));
+                              dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}`))
+                              history.location.pathname = '/';
+                              history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}`)
+                            }
 
 
-                               setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
-                               setSnackbar({
-                                 type: 'success',
-                                 value: true,
-                                 text: `Словарь ${currentDict.enabled ? 'выключен' : 'включён'}`,
-                                 time: 1000
-                               });
-                               setChecked(checked);
-                               setCheckedDisable(false);
-                             }
-                           }}
-                           checked={checked}
-                           disabled={checkedDisable}
-                         />
-                         <Typography className={classes.switchText}>
-                           {currentDict.enabled ? 'Вкл' : 'Выкл'}
-                         </Typography>
-                       </div>
-                     </div>
-                     }
-                   </div>
-                   <Tooltip
-                     disableInteractive={true}
-                     classes={{tooltip: classes.tooltip}}
-                     title={
-                       <div>
-                         <Typography>Правила заполнения словарей</Typography>
-                         <ul style={{marginTop: '0', paddingLeft: '20px'}}>
-                           <li style={{margin: '5px 0'}}>
-                             Каждая фраза размещается на отдельной строке.
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Поиск по содержимому осуществляется по целому слову.
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Поиск части слова осуществляется с заменой окончания символом * (например: в слове
-                             интернет*
-                             найдет
-                             и интернета/интернету/интернетов).
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Между слов во фразе при поиске возможно попадание до трех любых слов
-                             (например запись в словаре `плох* интернет` найдет фразу `плохо работает ваш интернет`).
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Для поиска фразы с точным совпадением (без лишних слов) необходимо расставить
-                             кавычки (например: "не работает", без кавычек найдет "не знаю наверное работает").
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Для поиска любого кол-ва слов в фразе, вместо пробела нужно поставить символ
-                             ~ (например: "телефон~заработал" найдет "телефон сломался,
-                             ничего не показывает, что я только ни делал чтобы он заработал").
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Для пропуска не более X слов, нужно вместо
-                             пробела поставить нижнее подчёркивание _ столько раз, сколько максимум
-                             будет слов (например: "уже_работает" найдет "уже все работает",
-                             но не найдет "уже теперь все работает").
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Символ `-` перед словом означает
-                             требование остутствие слова в фразе. (например `-не работает`
-                             будет находить фразы где есть слово `работает` но перед ним нет слова `не`.
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Символ `!` перед словом означает
-                             требование остутствие слова в ЛЮБОЙ части в фразе.
-                             (например `!плохо работает` не сработает на фразе `работает очень плохо`).
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             Можно указывать несколько слов через слеш `/`, тогда поиска делается
-                             по любому их указанных слов. (например:
-                             `доброе/добрый утро/день/вечер` найдет и фразы
-                             `доброе утро`, `добрый день` и `добрый вечер`).
-                           </li>
-                           <li style={{margin: '5px 0'}}>
-                             У фразы словаря можно указывать `:` и фразу замены, фраза замены используется для
-                             словаря автозамены, а так же при применении правла тегирования. В правиле тегирования
-                             в значения тега будет проставляться значение указанное после `:` а искать будем по тому
-                             что до ':' (например сделаем записи в словаре "беха:bmw","ауди:audi", "иск 5:bmw",
-                             и делаем правило тегирования которое ишет эти фразы, и заполняет тег "марка автомобиля",
-                             в значение тега будет проставлено audi или bmw).
-                           </li>
-                         </ul>
-                       </div>
-                     }
-                     placement="left"
-                   >
-                     <div><InfoCircleActive/></div>
-                   </Tooltip>
-                 </div>
-               }
+                            setSnackbar({ type: 'loading', value: false, text: 'Загрузка...', time: null })
+                            setSnackbar({
+                              type: 'success',
+                              value: true,
+                              text: `Словарь ${currentDict.enabled ? 'выключен' : 'включён'}`,
+                              time: 1000
+                            });
+                            setChecked(checked);
+                            setCheckedDisable(false);
+                          }
+                        }}
+                        checked={checked}
+                        disabled={checkedDisable}
+                      />
+                      <Typography className={classes.switchText}>
+                        {currentDict.enabled ? 'Вкл' : 'Выкл'}
+                      </Typography>
+                    </div>
+                  </div>
+                }
+              </div>
+              <Tooltip
+                disableInteractive={true}
+                classes={{ tooltip: classes.tooltip }}
+                title={
+                  <div>
+                    <Typography>Правила заполнения словарей</Typography>
+                    <ul style={{ marginTop: '0', paddingLeft: '20px' }}>
+                      <li style={{ margin: '5px 0' }}>
+                        Каждая фраза размещается на отдельной строке.
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Поиск по содержимому осуществляется по целому слову.
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Поиск части слова осуществляется с заменой окончания символом * (например: в слове
+                        интернет*
+                        найдет
+                        и интернета/интернету/интернетов).
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Между слов во фразе при поиске возможно попадание до трех любых слов
+                        (например запись в словаре `плох* интернет` найдет фразу `плохо работает ваш интернет`).
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Для поиска фразы с точным совпадением (без лишних слов) необходимо расставить
+                        кавычки (например: "не работает", без кавычек найдет "не знаю наверное работает").
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Для поиска любого кол-ва слов в фразе, вместо пробела нужно поставить символ
+                        ~ (например: "телефон~заработал" найдет "телефон сломался,
+                        ничего не показывает, что я только ни делал чтобы он заработал").
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Для пропуска не более X слов, нужно вместо
+                        пробела поставить нижнее подчёркивание _ столько раз, сколько максимум
+                        будет слов (например: "уже_работает" найдет "уже все работает",
+                        но не найдет "уже теперь все работает").
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Символ `-` перед словом означает
+                        требование остутствие слова в фразе. (например `-не работает`
+                        будет находить фразы где есть слово `работает` но перед ним нет слова `не`.
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Символ `!` перед словом означает
+                        требование остутствие слова в ЛЮБОЙ части в фразе.
+                        (например `!плохо работает` не сработает на фразе `работает очень плохо`).
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        Можно указывать несколько слов через слеш `/`, тогда поиска делается
+                        по любому их указанных слов. (например:
+                        `доброе/добрый утро/день/вечер` найдет и фразы
+                        `доброе утро`, `добрый день` и `добрый вечер`).
+                      </li>
+                      <li style={{ margin: '5px 0' }}>
+                        У фразы словаря можно указывать `:` и фразу замены, фраза замены используется для
+                        словаря автозамены, а так же при применении правла тегирования. В правиле тегирования
+                        в значения тега будет проставляться значение указанное после `:` а искать будем по тому
+                        что до ':' (например сделаем записи в словаре "беха:bmw","ауди:audi", "иск 5:bmw",
+                        и делаем правило тегирования которое ишет эти фразы, и заполняет тег "марка автомобиля",
+                        в значение тега будет проставлено audi или bmw).
+                      </li>
+                    </ul>
+                  </div>
+                }
+                placement="left"
+              >
+                <div><InfoCircleActive /></div>
+              </Tooltip>
+            </div>
+          }
         >
           <textarea
             className={classes.ddTextarea}
@@ -418,62 +418,62 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
           />
         </Field>
 
-        <div style={{marginTop: '45px'}}>
+        <div style={{ marginTop: '45px' }}>
 
-          <div style={{display: 'flex', justifyContent: "space-between", alignItems: 'center'}}>
+          <div style={{ display: 'flex', justifyContent: "space-between", alignItems: 'center' }}>
             <div>
               <Typography className={classes.rulesText}>{translate("rulesName_dictDetail", language)}</Typography>
 
               {/* Checkbox block */}
-              <div style={{margin: '18px 0 24px 0'}}>
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
+              <div style={{ margin: '18px 0 24px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
                   <Checkbox
                     disabled={!currentDict.group}
-                    style={{marginRight: '8px'}}
+                    style={{ marginRight: '8px' }}
                   />
                   <Typography>{translate("autocorrectDict_dictDetail", language)}</Typography>
                 </div>
               </div>
             </div>
-            <div style={{display: 'flex', alignItems: 'center'}}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <LoadingButton
                 type={"submit"}
-                style={{marginRight: '24px'}}
+                style={{ marginRight: '24px' }}
                 variant={"contained"}
                 loading={submitLoading}
                 disabled={!currentDict.group}
               >
                 {translate("saveButton_dictDetail", language)}
               </LoadingButton>
-              <div style={{width: '40px', height: '40px'}}>
+              <div style={{ width: '40px', height: '40px' }}>
                 {currentDict.allowedActions.length > 0 &&
-                <CustomControlSelect
-                  disabled={!currentDict}
-                  optionsPosition={"top"}
-                  options={createSelectOptions()}
-                  svg={'horizontal'}
-                  handleSelectChange={async (e) => {
-                    if (e.value === 'delete') {
-                      handleMWOpen();
-                    } else if (e.value === 'clone' && currentGroup) {
-                      setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null})
-                      await dispatch(dictActions({
-                        dictId: currentDict.id,
-                        action: 'clone'
-                      }));
+                  <CustomControlSelect
+                    disabled={!currentDict}
+                    optionsPosition={"top"}
+                    options={createSelectOptions()}
+                    svg={'horizontal'}
+                    handleSelectChange={async (e) => {
+                      if (e.value === 'delete') {
+                        handleMWOpen();
+                      } else if (e.value === 'clone' && currentGroup) {
+                        setSnackbar({ type: 'loading', value: true, text: 'Загрузка...', time: null })
+                        await dispatch(dictActions({
+                          dictId: currentDict.id,
+                          action: 'clone'
+                        }));
 
-                      const dictsData = await dispatch(getDicts({group: currentGroup.group}))
-                      // @ts-ignore
-                      const dicts: DictType[] = dictsData.payload;
-                      await dispatch(getDict(dicts[0].id))
-                      dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${dicts[0].id}`))
-                      history.location.pathname = '/';
-                      history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
-                      setSnackbar({type: 'loading', value: false, text: 'Загрузка...', time: null})
-                      setSnackbar({type: 'success', value: true, text: 'Словарь склонирован', time: 2000})
-                    }
-                  }}
-                />
+                        const dictsData = await dispatch(getDicts({ group: currentGroup.group }))
+                        // @ts-ignore
+                        const dicts: DictType[] = dictsData.payload;
+                        await dispatch(getDict(dicts[0].id))
+                        dispatch(dictsSlice.actions.setSearch(`?group=${currentGroup.group}&id=${dicts[0].id}`))
+                        history.location.pathname = '/';
+                        history.replace(`${language}/${userId}/markuprules/dictionaries?group=${currentGroup.group}&id=${dicts[0].id}`)
+                        setSnackbar({ type: 'loading', value: false, text: 'Загрузка...', time: null })
+                        setSnackbar({ type: 'success', value: true, text: 'Словарь склонирован', time: 2000 })
+                      }
+                    }}
+                  />
                 }
               </div>
             </div>
@@ -482,15 +482,15 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
       </form>
 
       {snackbar.value &&
-      <Snackbar
-        type={snackbar.type}
-        open={snackbar.value}
-        onClose={() => {
-          setSnackbar({...snackbar, value: false})
-        }}
-        text={snackbar.text}
-        time={snackbar.time}
-      />
+        <Snackbar
+          type={snackbar.type}
+          open={snackbar.value}
+          onClose={() => {
+            setSnackbar({ ...snackbar, value: false })
+          }}
+          text={snackbar.text}
+          time={snackbar.time}
+        />
       }
 
 
@@ -501,10 +501,10 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
         text={"Вы уверены, что хотите удалить словарь?"}
       >
         <Field label={''}>{currentDict.title}</Field>
-        <div style={{display: 'flex', marginTop: '10px'}}>
+        <div style={{ display: 'flex', marginTop: '10px' }}>
           <LoadingButton
             loading={deleteLoading}
-            style={{marginRight: '15px'}}
+            style={{ marginRight: '15px' }}
             variant="contained"
             color="error"
             onClick={dictHandleDelete}

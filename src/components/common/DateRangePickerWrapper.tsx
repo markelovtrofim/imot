@@ -27,7 +27,7 @@ const useStyles = makeStyles(({
     '& .rs-picker-toggle.rs-btn': {
       height: '100%',
       paddingTop: '8px',
-      '&:hover, &.rs-picker-toggle-active': {
+      '&:hover:not(.rs-btn-disabled), &.rs-picker-toggle-active': {
         borderColor: '#722ED1'
       },
       '&.rs-picker-toggle-active': {
@@ -108,6 +108,7 @@ const DateRangePickerWrapper = (props: any) => {
   return (    
     <DateRangePicker
       id={props.id}
+      disabled={props.disabled}
       menuClassName={classes.dateRangePanel}
       ranges={[
         {

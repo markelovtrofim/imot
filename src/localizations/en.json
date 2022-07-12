@@ -81,12 +81,14 @@
   "reportTitleMes": "Specify the name of the report",
   "reportType": "Report type",
   "reportTypeCalls": "calls",
+
   "reportGroupByRow": "Rows grouping",
   "reportGroupByRowTime": "by time",
   "reportGroupByRowTag": "by tag",
   "reportGroupByRowOperatorPhone": "by operator phone",
   "reportGroupByRowClientPhone": "by client phone",
-  "reportGroupByRowTagList" : "by tag list",
+  "reportGroupByRowTagNameList" : "by tag list",
+  "reportGroupByRowTagValueList" : "by tag values list",
 
   "reportGroupByColumns": "Columns grouping",
   "reportGroupByRowSearchItems": "by search items",
@@ -110,5 +112,8 @@
   "reportDeleteMes": "Are you sure to delete the report?",
   "reportNotFind": "No calls found in the selected period",
   "reportCallFind": "Found calls",
-  "reportsMakeReport": "To make a report, select the parameters and click the \"Make report\" button"
+  "reportsMakeReport": "To make a report, select the parameters and click the \"Make report\" button",
+
+  "reportSaved": "Report saved!",
+  "reportDeleted": "Report deleted!"
 }
