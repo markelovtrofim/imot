@@ -185,9 +185,9 @@ const TagDetails: FC = () => {
     }
     setRender(!render);
   }, [currentTag]);
-
   const userIdData = useAppSelector(state => state.users.currentUser?.id);
   const userId = userIdData ? userIdData : "_";
+
   // ${language}/${userId}/
 
   async function onClickSaveButton() {
@@ -519,7 +519,10 @@ const TagDetails: FC = () => {
                                               checked={fragmentField.value.value}
                                             />
                                             <Typography
-                                              className={classes.typographyTitleMiniThree}>{fragmentField.title}</Typography>
+                                              className={classes.typographyTitleMiniThree}
+                                            >
+                                              {fragmentField.title}
+                                            </Typography>
                                           </div>
                                         </div>
                                       ) ||

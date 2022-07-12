@@ -45,6 +45,8 @@ const Test = () => {
   return <></>
 }
 
+export const SnackbarContext = createContext({});
+
 const App = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -114,7 +116,6 @@ const App = () => {
 
   useEffect(() => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    // debugger
     if (token) {
       dispatch(authSlice.actions.setAuth(true))
     }
@@ -145,8 +146,6 @@ const App = () => {
     })
   }, [history]);
 
-
-  // Snackbar
   const snackbar = useAppSelector(state => state.lang.snackbar);
 
   return (
@@ -161,7 +160,6 @@ const App = () => {
                 <Calls/>
               </div>
             </Route>
-
             {/* Звонок */}
             <Route path="/:lang/call">
               <Header/>
@@ -169,7 +167,6 @@ const App = () => {
                 <CallPage/>
               </div>
             </Route>
-
             {/* Отсчеты */}
             <Route path="/:lang/:userId/reports">
               <Header/>
@@ -258,17 +255,17 @@ const App = () => {
 
       {/* Снаскбар */}
       <div>
-        {snackbar.value &&
-        <Snackbar
-          type={snackbar.type}
-          open={snackbar.value}
-          onClose={() => {
-            dispatch(langSlice.actions.setSnackbar({value: false, type: 'success', time: null, text: ''}));
-          }}
-          text={snackbar.text}
-          time={snackbar.time}
-        />
-        }
+        {snackbar.value && (
+          <Snackbar
+            type={snackbar.type}
+            open={snackbar.value}
+            onClose={() => {
+              dispatch(langSlice.actions.setSnackbar({value: false, type: 'success', time: null, text: ''}));
+            }}
+            text={snackbar.text}
+            time={snackbar.time}
+          />
+        )}
       </div>
 
     </div>

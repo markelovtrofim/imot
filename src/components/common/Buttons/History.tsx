@@ -14,12 +14,16 @@ const HistorySvg = () => {
 const History: FC = () => {
   return (
     <IconButton
-      margin={'0 15px 0 0'}
-      backgroundColor="#E3E8EF"
-      icon={<HistorySvg/>}
       onClick={(event: any) => {
         // эмпти.
       }}
+      disabled={true}
+
+      icon={<HistorySvg/>}
+      backgroundColor="#E3E8EF"
+      margin={'0 15px 0 0'}
+      //tooltipTitle="История"
+      //tooltipPlacement="top"
     />
   );
 };

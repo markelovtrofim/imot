@@ -62,8 +62,12 @@ const TrashSvg = (props: React.SVGProps<SVGSVGElement>) => {
 const CloneSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2.16602 5.99935C2.16602 3.88226 3.88226 2.16602 5.99935 2.16602H10.6746C10.9507 2.16602 11.1746 2.38988 11.1746 2.66602C11.1746 2.94216 10.9507 3.16602 10.6746 3.16602H5.99935C4.43454 3.16602 3.16602 4.43454 3.16602 5.99935V10.7373C3.16602 11.0134 2.94216 11.2373 2.66602 11.2373C2.38988 11.2373 2.16602 11.0134 2.16602 10.7373V5.99935Z" fill="#738094"/>
-      <path d="M12.2691 4.52877C10.1084 4.28729 7.89292 4.28729 5.7323 4.52877C5.11679 4.59756 4.62217 5.08195 4.54961 5.70225C4.29336 7.89326 4.29336 10.1066 4.54961 12.2976C4.62217 12.9179 5.11679 13.4023 5.7323 13.4711C7.89292 13.7126 10.1084 13.7126 12.2691 13.4711C12.8845 13.4023 13.3792 12.9179 13.4517 12.2976C13.708 10.1066 13.708 7.89326 13.4517 5.70225C13.3792 5.08195 12.8845 4.59756 12.2691 4.52877Z" fill="#A3AEBE"/>
+      <path
+        d="M2.16602 5.99935C2.16602 3.88226 3.88226 2.16602 5.99935 2.16602H10.6746C10.9507 2.16602 11.1746 2.38988 11.1746 2.66602C11.1746 2.94216 10.9507 3.16602 10.6746 3.16602H5.99935C4.43454 3.16602 3.16602 4.43454 3.16602 5.99935V10.7373C3.16602 11.0134 2.94216 11.2373 2.66602 11.2373C2.38988 11.2373 2.16602 11.0134 2.16602 10.7373V5.99935Z"
+        fill="#738094"/>
+      <path
+        d="M12.2691 4.52877C10.1084 4.28729 7.89292 4.28729 5.7323 4.52877C5.11679 4.59756 4.62217 5.08195 4.54961 5.70225C4.29336 7.89326 4.29336 10.1066 4.54961 12.2976C4.62217 12.9179 5.11679 13.4023 5.7323 13.4711C7.89292 13.7126 10.1084 13.7126 12.2691 13.4711C12.8845 13.4023 13.3792 12.9179 13.4517 12.2976C13.708 10.1066 13.708 7.89326 13.4517 5.70225C13.3792 5.08195 12.8845 4.59756 12.2691 4.52877Z"
+        fill="#A3AEBE"/>
     </svg>
   );
 };
@@ -71,13 +75,19 @@ const CloneSvg = (props: React.SVGProps<SVGSVGElement>) => {
 // TYPES BLOCK
 type CustomControlSelectPropsType = {
   handleSelectChange: (event: any) => void,
-  svg: 'horizontal' | 'vertical',
-  options: {value: any, label: any}[],
+  svg: 'horizontal' | 'vertical' | string,
+  options: { value: any, label: any }[],
   optionsPosition: 'top' | 'bottom',
   disabled?: boolean
 };
 
-const CustomControlSelect: FC<CustomControlSelectPropsType> = ({disabled, handleSelectChange, svg, options, optionsPosition}) => {
+const CustomControlSelect: FC<CustomControlSelectPropsType> = ({
+                                                                 disabled,
+                                                                 handleSelectChange,
+                                                                 svg,
+                                                                 options,
+                                                                 optionsPosition
+                                                               }) => {
   // STYLES BLOCK
   const customDotsStyles = {
     container: (base: any) => ({
@@ -183,7 +193,15 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({disabled, handle
       placeholder={''}
       isSearchable={false}
       components={{
-        DropdownIndicator: () => svg === 'horizontal' ? <HorizontalDotsSvg/> : <VerticalDotsSvg/>,
+        DropdownIndicator: () => (
+          <>
+            {
+              (svg === 'horizontal' && <HorizontalDotsSvg/>) ||
+              (svg === 'vertical' && <VerticalDotsSvg/>) ||
+              (svg && <div>{svg}</div>)
+            }
+          </>
+        ),
         IndicatorSeparator: () => null,
         SingleValue: () => null,
         Option: CustomOption

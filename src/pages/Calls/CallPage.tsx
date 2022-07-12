@@ -31,7 +31,6 @@ const CallPage = () => {
   }, [history]);
 
   async function fetchCallInfoData() {
-    debugger
     const searchParamsObject = queryString.parse(history.location.search);
     const id = searchParamsObject.id;
     const token = searchParamsObject.token;
@@ -63,7 +62,6 @@ const CallPage = () => {
 
   // добавление параметров поиска
   useEffect(() => {
-    debugger
     fetchCallInfoData().then();
   }, [searchParams]);
 

@@ -1,5 +1,6 @@
 import React, {FC} from 'react';
 import IconButton from "../IconButton";
+import {useAppSelector} from "../../../hooks/redux";
 
 const DownloadSvg = () => {
   return (
@@ -21,16 +22,25 @@ type DownloadPropsType = {
 }
 
 const Download: FC<DownloadPropsType> = ({href}) => {
+  const currentCall = useAppSelector(state => state.calls.currentCall);
+
   return (
     <IconButton
+      onClick={() => {}}
+
       disabled={!href}
+      icon={
+        // @ts-ignore
+        <a href={href ? href : currentCall ? currentCall.audio : ""} download="">
+          <DownloadSvg/>
+        </a>
+      }
+
       margin={'0 15px 0 0'}
       backgroundColor="#E3E8EF"
-      icon={<a href={href ? href : ""} download="">
-        <DownloadSvg/>
-      </a>
-      }
-      onClick={() => {}}
+
+      tooltipTitle={"Скопировать публичную ссылку"}
+      tooltipPlacement={"top"}
     />
   );
 };
