@@ -45,6 +45,7 @@ export type CallReportItemRow = {
 export type ReportParametersType = {
   report_name: string,
   report_type: string,
+  period: string | null,
   rows_group_by: {},
   cols_group_by: ColsGroupByParametresType[],
   call_search_items: [],

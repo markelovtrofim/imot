@@ -296,6 +296,7 @@ const initialState: InitialStateType = {
   activeReport: {
     report_name: '',
     report_type: '',
+    period: null,
     rows_group_by: {},
     cols_group_by: [],
     call_search_items: []
@@ -339,6 +340,9 @@ export const reportsSlice = createSlice({
     setDate(state, action: PayloadAction<typeof initialState.date | null[]>) {
       state.date = action.payload;
     },
+    setPeriod(state, action: any) {
+      state.activeReport.period = action.payload;
+    },
 
     setTagNames(state, action: PayloadAction<[]>) {
       state.tagNames = action.payload;
@@ -370,9 +374,9 @@ export const reportsSlice = createSlice({
 
     // первая дефолтная группировка по столбцам
     setDefaultColsGroupBy(state, action: any) {
-      if (action.payload.group_by.value === 'calls_count' || action.payload.group_by.value === 'stt_engine') {
+      // if (action.payload.group_by.value === 'calls_count' || action.payload.group_by.value === 'stt_engine') {
         state.activeReport.cols_group_by[0] = {group_by: action.payload.group_by.value};
-      }
+      // }
     },
     // по тегу
     setDefaultColsTagGroupBy(state, action: any) {
