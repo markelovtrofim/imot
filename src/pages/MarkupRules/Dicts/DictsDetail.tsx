@@ -241,7 +241,7 @@ const DictDetails: FC<DictDetailsPropsType> = ({currentDict}) => {
 
 
   // snackbars
-  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
+  const [snackbar, setSnackbar] = useState<SnackbarType>({
     type: 'success',
     text: '',
     value: false,

@@ -148,16 +148,10 @@ const App = () => {
   }, [history]);
 
 
-  // Snackbar
-  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
-    type: 'success',
-    text: '',
-    value: false,
-    time: null
-  });
+  const snackbar = useAppSelector(state => state.lang.snackbar);
 
   return (
-    <SnackbarContext.Provider value={{snackbar, setSnackbar}}>
+    <div>
       <div className={classes.wrapper}>
         {isAuth ? (
           <Switch>
@@ -249,7 +243,7 @@ const App = () => {
 
             {/* Звонок */}
             <Route path="/:lang/call">
-              <Header/>
+              <Header/>1
               <div className={classes.container}>
                 <CallPage/>
               </div>
@@ -270,7 +264,7 @@ const App = () => {
             type={snackbar.type}
             open={snackbar.value}
             onClose={() => {
-              setSnackbar({value: false, type: 'success', time: null, text: ''})
+              dispatch(langSlice.actions.setSnackbar({value: false, type: 'success', time: null, text: ''}));
             }}
             text={snackbar.text}
             time={snackbar.time}
@@ -278,7 +272,7 @@ const App = () => {
         )}
       </div>
 
-    </SnackbarContext.Provider>
+    </div>
   );
 };
 

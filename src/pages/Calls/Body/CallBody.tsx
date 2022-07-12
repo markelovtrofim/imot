@@ -29,6 +29,7 @@ import History from "../../../components/common/Buttons/History";
 import {LoadingButton} from "@mui/lab";
 import Logo from "../../../assets/images/logo.png";
 import Yandex from "../../../assets/images/yandex_PNG20.png";
+import {langSlice} from "../../../store/lang/lang.slice";
 
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -209,11 +210,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   }, []);
 
-
-  // @ts-ignore
-  const {snackbar, setSnackbar} = useContext(SnackbarContext);
   const {language} = useAppSelector(state => state.lang);
-
 
   const onListen = (eventCurrentTime: any) => {
     let currentTimeLocal;
@@ -304,12 +301,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
     const publicUrl = `${host}/imot/#/${language}/call?id=${id}&token=${publicToken.access_token}`;
     navigator.clipboard.writeText(publicUrl);
-    setSnackbar({
+    dispatch(langSlice.actions.setSnackbar({
       type: "success",
       text: "Публичная ссылка скопированна",
       value: true,
       time: 2000
-    })
+    }));
   }
 
   async function rebootAction() {
@@ -345,12 +342,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
         index: bundleIndex
       }));
 
-      setSnackbar({
+      dispatch(langSlice.actions.setSnackbar({
         type: "success",
         text: "Звонок перераспознан",
         value: true,
         time: 2000
-      });
+      }));
     }
   }
 
@@ -371,12 +368,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
       }));
       handleMWClose();
       setMWButtonLoading(false);
-      setSnackbar({
+      dispatch(langSlice.actions.setSnackbar({
         type: "info",
         text: "Запрос на перераспознание отправлен",
         value: true,
         time: 2000
-      });
+      }));
     }
   }
 
@@ -499,13 +496,13 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                         keep_fragments: false
                       }
                     }));
-                    dispatch(callsSlice.actions.deleteCall({id: callInfo.id, bundleIndex: bundleIndex}))
-                    setSnackbar({
+                    dispatch(callsSlice.actions.deleteCall({id: callInfo.id, bundleIndex: bundleIndex}));
+                    dispatch(langSlice.actions.setSnackbar({
                       type: "success",
                       text: "Звонок удален",
                       value: true,
                       time: 1500
-                    });
+                    }));
                   } else if (event.value === "swap_channels") {
                     if (callStt) {
                       dispatch(callsSlice.actions.setStt({
@@ -529,12 +526,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                         id: callInfo.id,
                         index: bundleIndex
                       }));
-                      setSnackbar({
+                      dispatch(langSlice.actions.setSnackbar({
                         type: "success",
                         text: "Каналы поменяны местами",
                         value: true,
                         time: 2000
-                      });
+                      }));
                     }
                   }
                 }
