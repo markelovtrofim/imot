@@ -91,14 +91,15 @@
   "reportType": "Тип отчета",
   "reportTypeCalls": "по звонкам",
 
-  "reportGroupByRow": "Группировка по строкам",
+  "reportGroupByRow": "Группировка строк",
   "reportGroupByRowTime": "по времени",
   "reportGroupByRowTag": "по тегу",
   "reportGroupByRowOperatorPhone": "по номеру оператора",
   "reportGroupByRowClientPhone": "по номеру клиента",
-  "reportGroupByRowTagList" : "по списку значений тегов",
+  "reportGroupByRowTagNameList" : "по списку тегов",
+  "reportGroupByRowTagValueList" : "по списку значений тегов",
 
-  "reportGroupByColumns": "Группировка по столбцам",
+  "reportGroupByColumns": "Группировка столбцов",
   "reportGroupByRowSearchItems": "по фильтрам звонка",
   "reportGroupByRowCallsCount": "по количеству звонков",
   "reportGroupByRowSttEngine": "STT-движок",
@@ -120,6 +121,9 @@
   "reportDeleteMes": "Вы точно хотите удалить отчет?",
   "reportNotFind": "Не найдено звонков в выбранном периоде",
   "reportCallFind": "Под условия фильтра попало звонков",
-  "reportsMakeReport": "Для построения отчета выберите необходимые параметры и нажмите кнопку \"Сформировать отчет\""
+  "reportsMakeReport": "Для построения отчета выберите необходимые параметры и нажмите кнопку \"Сформировать отчет\"",
+
+  "reportSaved": "Отчет сохранен!",
+  "reportDeleted": "Отчет удален!"
 
 }
