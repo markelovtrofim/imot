@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { BlockBox, Search, СontrolBlock } from "../../components/common";
+
+import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { CircularProgress, Grid, Typography } from "@mui/material";
+import { makeStyles } from '@mui/styles';
+
+import { BlockBox, Search, СontrolBlock } from "../../components/common";
 import { useAppSelector } from "../../hooks/redux";
-import { useDispatch } from "react-redux";
 import { callsSlice, getBaseCallsData } from "../../store/calls/calls.slice";
 import { searchSlice } from '../../store/search/search.slice';
 import { CallType } from "../../store/calls/calls.types";
 import CallStubMiddleware from "./Call";
 import { RootState } from "../../store/store";
 import { translate } from "../../localizations";
-import { useHistory } from "react-router-dom";
 import CallsHeader from './CallsHeader';
-import { makeStyles } from '@mui/styles';
-
 import { langSlice } from "../../store/lang/lang.slice";
+import DictionaryPopup from './Body/DictionaryPopup';
 
 const useStyles = makeStyles(({
   callsHeader: {},
@@ -50,6 +52,8 @@ const ClockSvg = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 const Calls = React.memo(() => {
+
+  const { popupVisible, popupPosition } = useSelector((state: any) => state.calls);
   const dispatch = useDispatch();
   const classes = useStyles();
   const [fetching, setFetching] = useState<boolean>(false);
@@ -156,16 +160,19 @@ const Calls = React.memo(() => {
                   {callsArrays.map((call: CallType) => {
                     return (
                       <CallStubMiddleware
-                        callInfo={call.info} callAudio={call.audio} callStt={call.stt}
-                        bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
+                        callInfo={call.info}
+                        callAudio={call.audio}
+                        callStt={call.stt}
+                        bundleIndex={callsArrayIndex}
+                        expanded={expanded === call.info?.id}
                         handleExpandedChange={handleExpandedChange}
                       />
                     )
                   })}
                 </div>
               )
-            }) :
-            <BlockBox padding={'24px'}><Typography>{translate('callsEmpty', language)}</Typography></BlockBox>}
+            })
+            : <BlockBox padding={'24px'}><Typography>{translate('callsEmpty', language)}</Typography></BlockBox>}
         </div>
 
         <div style={{ textAlign: 'center' }}>
@@ -173,6 +180,11 @@ const Calls = React.memo(() => {
         </div>
 
       </BlockBox>
+
+      {/* {
+        popupVisible
+        && <DictionaryPopup popupPosition={popupPosition} />
+      } */}
     </div>
   );
 });

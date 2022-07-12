@@ -1,0 +1,7 @@
+.dictionary-popup {
+  position: absolute;
+  z-index: 1;
+}
+.dictionary-textarea {
+  height: 150px;
+}

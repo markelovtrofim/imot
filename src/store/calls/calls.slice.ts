@@ -12,6 +12,14 @@ type ResponseBaseCallsDataType = {
   call_ids: string[]
 };
 
+type DictionaryPopupType = {
+  popupVisible: boolean,
+  popupPosition: {
+    top: number,
+    left: number,
+  }
+};
+
 const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   let requestArray = [];
   for (let i = 0; i < defaultCriterias.length; i++) {
@@ -230,7 +238,12 @@ type InitialStateType = {
   callIds: null,
   calls: CallType[][] | [],
   currentCall: CallType | null | false,
-  callPageSearchParams: string
+  callPageSearchParams: string,
+  popupVisible: boolean,
+  popupPosition: {
+    top: number,
+    left: number,
+  },
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -254,9 +267,13 @@ const initialState: InitialStateType = {
   limit: 10,
   callIds: null,
   calls: createInitialCalls(),
-
   currentCall: null,
-  callPageSearchParams: ""
+  callPageSearchParams: "",
+  popupVisible: false,
+  popupPosition: {
+    top: 0,
+    left: 0,
+  },
 };
 
 export const callsSlice = createSlice({
@@ -266,7 +283,10 @@ export const callsSlice = createSlice({
     setCallPageSearchParams(state, action: PayloadAction<string>) {
       state.callPageSearchParams = action.payload;
     },
-
+    setDictionaryPopupParams(state, action: PayloadAction<DictionaryPopupType>) {
+      state.popupVisible = action.payload.popupVisible;
+      state.popupPosition = action.payload.popupPosition;
+    },
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       let calls = [];
       for (let i = 0; i < action.payload.call_ids.length; i++) {
