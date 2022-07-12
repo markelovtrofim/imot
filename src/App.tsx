@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 
-import { Redirect, Route, Switch, Link, useHistory } from 'react-router-dom';
-import { makeStyles } from '@mui/styles';
-import { Typography } from '@mui/material';
-import { useDispatch } from "react-redux";
+import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
+import {makeStyles} from '@mui/styles';
+import {Typography} from '@mui/material';
+import {useDispatch} from "react-redux";
 import "rsuite/dist/rsuite.min.css";
 
 import {
@@ -14,15 +14,15 @@ import {
   LoadCall,
   Settings
 } from './pages';
-import { Header } from './components/common';
-import { useAppSelector } from "./hooks/redux";
-import { authSlice } from "./store/auth/auth.slice";
-import LinearDeterminate from "./components/common/LinearDeterminate";
-import { dictsSlice } from "./store/dicts/dicts.slice";
-import { tagsSlice } from "./store/tags/tags.slice";
-import { getLang, langSlice } from "./store/lang/lang.slice";
+import {Header} from './components/common';
+import {useAppSelector} from "./hooks/redux";
+import {authSlice} from "./store/auth/auth.slice";
+import {dictsSlice} from "./store/dicts/dicts.slice";
+import {tagsSlice} from "./store/tags/tags.slice";
+import {getLang, langSlice} from "./store/lang/lang.slice";
 import CallPage from "./pages/Calls/CallPage";
-import { callsSlice } from "./store/calls/calls.slice";
+import {callsSlice} from "./store/calls/calls.slice";
+import Snackbar, {SnackbarType} from "./components/common/Snackbar";
 
 
 export const useStyles = makeStyles(({
@@ -50,7 +50,7 @@ const App = () => {
   const dispatch = useDispatch();
   const isAuth = useAppSelector(state => state.auth.isAuth);
 
-  const { path } = JSON.parse(localStorage.getItem('path') || '{}');
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
   let pathArray = [];
   if (path) {
     pathArray = path.split("/");
@@ -64,7 +64,7 @@ const App = () => {
   const searchDictsParams = useAppSelector(state => state.dicts.search);
   const searchTagsParams = useAppSelector(state => state.tags.searchParams);
   const searchCallParams = useAppSelector(state => state.calls.callPageSearchParams);
-  const { language } = useAppSelector(state => state.lang);
+  const {language} = useAppSelector(state => state.lang);
 
   const history = useHistory();
 
@@ -113,7 +113,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     // debugger
     if (token) {
       dispatch(authSlice.actions.setAuth(true))
@@ -130,7 +130,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     if (token) {
       dispatch(authSlice.actions.setAuth(true))
     }
@@ -146,110 +146,131 @@ const App = () => {
   }, [history]);
 
 
+  // Snackbar
+  const snackbar = useAppSelector(state => state.lang.snackbar);
+
   return (
-    <div className={classes.wrapper}>
-      {isAuth ? (
-        <Switch>
-          {/* Звонки */}
-          <Route path="/:lang/:userId/calls">
-            <Header />
-            <div className={classes.container}>
-              <Calls />
-            </div>
-          </Route>
-
-          {/* Звонок */}
-          <Route path="/:lang/call">
-            <Header />
-            <div className={classes.container}>
-              <CallPage />
-            </div>
-          </Route>
-
-          {/* Отсчеты */}
-          <Route path="/:lang/:userId/reports">
-            <Header />
-            <div className={classes.container}>
-              <Reports />
-            </div>
-          </Route>
-
-          {/* Правила разметки */}
-          <Route path="/:lang/:userId/markuprules">
-            <Header />
-            <MarkupRules />
-          </Route>
-
-          {/* Загрузить звонок */}
-          <Route path="/:lang/:userId/upload">
-            <Header />
-            <div className={classes.container}>
-              <LoadCall />
-            </div>
-          </Route>
-
-          {/* Оповещение */}
-          <Route path="/:lang/:userId/alert">
-            <Header />
-            <div className={classes.container}>
+    <div>
+      <div className={classes.wrapper}>
+        {isAuth ? (
+          <Switch>
+            {/* Звонки */}
+            <Route path="/:lang/:userId/calls">
+              <Header/>
               <div className={classes.container}>
-                <Typography style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)' }} variant="h2">
-                  Alert
-                </Typography>
-                <Typography style={{ textAlign: 'center', color: '#722ED1', fontSize: '10px' }} variant="h2">
-                  in developing
-                </Typography>
+                <Calls/>
               </div>
-            </div>
-          </Route>
+            </Route>
 
-          {/* Настройки */}
-          <Route path="/:lang/:userId/settings">
-            <Header />
-            <div className={classes.container}>
-              <Settings />
-            </div>
-          </Route>
+            {/* Звонок */}
+            <Route path="/:lang/call">
+              <Header/>
+              <div className={classes.container}>
+                <CallPage/>
+              </div>
+            </Route>
 
-          <Route exact path={`/${language}/auth`}>
-            <Redirect to={path ? `${path}` : `/${language}/${currentUser ? currentUser.id : "_"}/calls`} />
-          </Route>
+            {/* Отсчеты */}
+            <Route path="/:lang/:userId/reports">
+              <Header/>
+              <div className={classes.container}>
+                <Reports/>
+              </div>
+            </Route>
 
-          <Route exact path="/">
-            <Redirect to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`} />
-          </Route>
+            {/* Правила разметки */}
+            <Route path="/:lang/:userId/markuprules">
+              <Header/>
+              <MarkupRules/>
+            </Route>
 
-          <Route exact path="*">
-            <div style={{ textAlign: "center", marginTop: "250px" }}>
-              <h1 style={{ fontSize: '80px', marginBottom: '30px' }}>404</h1>
-              <Link style={{ fontSize: '18px' }} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
-                На главную страницу →
-              </Link>
-            </div>
-          </Route>
+            {/* Загрузить звонок */}
+            <Route path="/:lang/:userId/upload">
+              <Header/>
+              <div className={classes.container}>
+                <LoadCall/>
+              </div>
+            </Route>
 
-        </Switch>
-      ) : (
-        <Switch>
-          {/* Авторизация */}
-          <Route exact path="/:lang/auth">
-            <Auth />
-          </Route>
+            {/* Оповещение */}
+            <Route path="/:lang/:userId/alert">
+              <Header/>
+              <div className={classes.container}>
+                <div className={classes.container}>
+                  <Typography style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.2)'}} variant="h2">
+                    Alert
+                  </Typography>
+                  <Typography style={{textAlign: 'center', color: '#722ED1', fontSize: '10px'}} variant="h2">
+                    in developing
+                  </Typography>
+                </div>
+              </div>
+            </Route>
 
-          {/* Звонок */}
-          <Route path="/:lang/call">
-            <Header />
-            <div className={classes.container}>
-              <CallPage />
-            </div>
-          </Route>
+            {/* Настройки */}
+            <Route path="/:lang/:userId/settings">
+              <Header/>
+              <div className={classes.container}>
+                <Settings/>
+              </div>
+            </Route>
 
-          <Route path="*">
-            <CallPage />
-          </Route>
+            <Route exact path={`/${language}/auth`}>
+              <Redirect to={path ? `${path}` : `/${language}/${currentUser ? currentUser.id : "_"}/calls`}/>
+            </Route>
 
-        </Switch>
-      )}
+            <Route exact path="/">
+              <Redirect to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}/>
+            </Route>
+
+            <Route exact path="*">
+              <div style={{textAlign: "center", marginTop: "250px"}}>
+                <h1 style={{fontSize: '80px', marginBottom: '30px'}}>404</h1>
+                <Link style={{fontSize: '18px'}} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
+                  На главную страницу →
+                </Link>
+              </div>
+            </Route>
+
+          </Switch>
+        ) : (
+          <Switch>
+            {/* Авторизация */}
+            <Route exact path="/:lang/auth">
+              <Auth/>
+            </Route>
+
+            {/* Звонок */}
+            <Route path="/:lang/call">
+              <Header/>
+              <div className={classes.container}>
+                <CallPage/>
+              </div>
+            </Route>
+
+            <Route path="*">
+              <CallPage/>
+            </Route>
+
+          </Switch>
+        )}
+      </div>
+
+      {/* Снаскбар */}
+      <div>
+        {snackbar.value &&
+        <Snackbar
+          type={snackbar.type}
+          open={snackbar.value}
+          onClose={() => {
+            dispatch(langSlice.actions.setSnackbar({value: false, type: 'success', time: null, text: ''}));
+          }}
+          text={snackbar.text}
+          time={snackbar.time}
+        />
+        }
+      </div>
+
     </div>
   );
 };
