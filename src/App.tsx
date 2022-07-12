@@ -45,8 +45,6 @@ const Test = () => {
   return <></>
 }
 
-export const SnackbarContext = createContext({});
-
 const App = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
