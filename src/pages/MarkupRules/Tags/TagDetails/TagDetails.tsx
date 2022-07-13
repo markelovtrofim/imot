@@ -27,7 +27,6 @@ import { LoadingButton } from "@mui/lab";
 import { translate } from "../../../../localizations";
 import { RootState } from "../../../../store/store";
 import cloneDeep from "lodash.clonedeep";
-import Snackbar, { SnackbarType } from "../../../../components/common/Snackbar";
 import noResultsPng from "../../../../assets/images/no-results.png";
 import CustomControlSelect from "../../../../components/common/Selects/CustomControlSelect";
 import { GroupType } from "../../../../store/dicts/dicts.types";
@@ -35,7 +34,6 @@ import Switch from "../../../../components/common/Switch";
 import ModalWindow from "../../../../components/common/ModalWindowBox";
 import { TagGroupType, TagType } from "../../../../store/tags/tags.types";
 import { useHistory } from "react-router-dom";
-import { SnackbarContext } from '../../../../App';
 import {langSlice} from "../../../../store/lang/lang.slice";
 
 export const AddButton: FC<{ onClick?: () => void }> = ({ onClick, children }) => {

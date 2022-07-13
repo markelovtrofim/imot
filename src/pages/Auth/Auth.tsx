@@ -7,9 +7,10 @@ import SendIcon from '@mui/icons-material/Send';
 import Alert from "@mui/material/Alert";
 import Button from '@mui/material/Button';
 import { Redirect, useHistory } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch } from "react-redux"
 import { useFormik } from 'formik';
 import cn from 'classnames';
+
 
 import { authSlice, fetchAuthToken, approveUserToken } from "../../store/auth/auth.slice";
 import { PhonePng, DashboardPng, SoundPng } from '../../assets/images/Auth';
