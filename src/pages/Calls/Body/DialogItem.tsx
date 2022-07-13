@@ -11,6 +11,7 @@ import { callsSlice } from '../../../store/calls/calls.slice';
 import { CallSttFragmentType } from "../../../store/calls/calls.types";
 import { timeConverter } from "../Call";
 import DictionaryPopup from './DictionaryPopup';
+import DictionaryStep from "./DictionaryStep"; 
 
 type DialogItemType = {
   prevFragment: CallSttFragmentType | { direction: string },
@@ -119,6 +120,10 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
     }
   }
 
+  function clearDictionaryData() {
+    setIsUserSelectText(false);
+  }
+
   return (
     <div className={classes.diItem}>
       {/* DIBody */}
@@ -155,7 +160,8 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
 
           {
             isUserSelectText
-            && <DictionaryPopup popupPosition={cursorPosition} selectionText={selectionText} />
+            && <DictionaryStep selectionText={selectionText} closeDictionaryFunc={clearDictionaryData} />
+            // && <DictionaryPopup popupPosition={cursorPosition} selectionText={selectionText} />
           }
         </Typography>
       </div>
