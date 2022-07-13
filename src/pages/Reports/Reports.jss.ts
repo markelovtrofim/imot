@@ -217,12 +217,21 @@ export const reportsStyles = makeStyles(({
   },
   table: {
     width: 'auto',
-    marginTop: '20px',
+    marginTop: '24px',
     marginBottom: '30px',
     height: '100%',
     //@ts-ignore
     overflowX: 'auto !important',
-    overflowY: 'hidden'
+    overflowY: 'hidden',
+    '&::-webkit-scrollbar': {
+      height: '6px',
+      backgroundColor: '#fff',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundСolor: '#A3AEBE',
+      background: '#A3AEBE',
+      borderRadius: '14px',
+    }
   },
   flexCenterMb: {
     display: 'flex',

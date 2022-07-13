@@ -1,7 +1,8 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import {CallType} from "./calls.types";
+import {CallActionDataType, CallInfoType, CallType} from "./calls.types";
 import {RootState} from "../store";
 import {instance} from "../api";
+import cloneDeep from "lodash.clonedeep";
 
 // get all calls
 type ResponseBaseCallsDataType = {
@@ -228,6 +229,23 @@ export const getCallsInfoById = createAsyncThunk(
   }
 );
 
+export const callAction =  createAsyncThunk(
+  'calls/callAction',
+  async (payload: {id: string, data: CallActionDataType}, thunkAPI) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.post(`call/${payload.id}/action`, payload.data,  {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 type InitialStateType = {
   bundleLength: number,
@@ -277,16 +295,35 @@ const initialState: InitialStateType = {
 };
 
 export const callsSlice = createSlice({
-  name: 'calls',
-  initialState,
   reducers: {
     setCallPageSearchParams(state, action: PayloadAction<string>) {
       state.callPageSearchParams = action.payload;
     },
+    
     setDictionaryPopupParams(state, action: PayloadAction<DictionaryPopupType>) {
       state.popupVisible = action.payload.popupVisible;
       state.popupPosition = action.payload.popupPosition;
     },
+
+    deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {
+      if (action.payload.bundleIndex || action.payload.bundleIndex === 0) {
+        let currentCalls = cloneDeep(current(state.calls[action.payload.bundleIndex]));
+        const call = currentCalls.find(item => {
+          if (item.info) {
+            return item.info.id === action.payload.id;
+          }
+        })
+        let callIndex = -1;
+        if (call) {
+          callIndex = currentCalls.indexOf(call);
+        }
+        if (callIndex != -1) {
+          currentCalls.splice(callIndex, 1);
+        }
+        state.calls[action.payload.bundleIndex] = currentCalls
+      }
+    },
+
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       let calls = [];
       for (let i = 0; i < action.payload.call_ids.length; i++) {
@@ -328,6 +365,16 @@ export const callsSlice = createSlice({
         state.skip = 10;
       }
     },
+    setInfo(state, action: PayloadAction<{info: CallInfoType | null, id: string, index: number | null}>) {
+      if (action.payload.index || action.payload.index === 0) {
+        state.calls[action.payload.index].map((item) => {
+          if (item.info && (item.info.id === action.payload.id)) {
+            debugger
+            item.info = action.payload.info;
+          }
+        });
+      }
+    },
     setAudio(state, action: PayloadAction<any>) {
       state.calls[action.payload.index].map((item) => {
         if (item.info && (item.info.id === action.payload.id)) {
@@ -335,13 +382,14 @@ export const callsSlice = createSlice({
         }
       });
     },
-    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number }>) {
-      state.calls[action.payload.index].map(i => {
-        // @ts-ignore
-        if (i.info.id === action.payload.id) {
-          i.stt = action.payload.stt
-        }
-      });
+    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number | null}>) {
+      if (action.payload.index || action.payload.index === 0) {
+        state.calls[action.payload.index].map(i => {
+          if (i.info && (i.info.id === action.payload.id)) {
+            i.stt = action.payload.stt
+          }
+        });
+      }
     },
 
     removeAudio(state, action: PayloadAction<{ id: string, bundleIndex: number }>) {
@@ -367,5 +415,7 @@ export const callsSlice = createSlice({
     setCurrentCall(state, action: PayloadAction<CallType | null | false>) {
       state.currentCall = action.payload;
     }
-  }
+  },
+  name: 'calls',
+  initialState
 });

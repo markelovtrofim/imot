@@ -18,7 +18,6 @@ import {getGroups} from "../../store/dicts/dicts.slice";
 import {getChildUser, getChildUsers, getMe, getUserToken} from "../../store/users/users.slice";
 import ContainedSelect from "./Selects/ContainedSelect";
 import {getLang, langSlice} from "../../store/lang/lang.slice";
-import queryString from "query-string";
 
 const useStyles = makeStyles(({
   headerWrapper: {
@@ -119,34 +118,30 @@ export const LogoutSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 const Header: React.FC = () => {
   const {language} = useAppSelector((state: RootState) => state.lang);
-  const {loading} = useAppSelector(state => state.lang);
 
   const classes = useStyles();
   const dispatch = useDispatch();
-
-  async function handleLangChange(event: SelectChangeEvent) {
-    // let pathArray = [];
-    // pathArray = location.pathname.split("/");
-    // const languageParam = pathArray[1];
-
-    const currentLang = event.target.value;
-    await dispatch(getLang(currentLang));
-
-    history.location.pathname = '/'
-    history.push(`${currentLang}/_/calls`)
-  }
+  const currentUser = useAppSelector(state => state.users.currentUser);
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
 
   const history = useHistory();
-  let historyPathArray;
+  let historyPathArray: any = [];
   if (path) {
     historyPathArray = path.split('/');
   }
-  const pagePath = history.location.pathname.split('/')[1];
-  const activeMarkupRulesPage = useAppSelector(state => state.dicts.activePage);
+  const pagePath = history.location.pathname.split('/')[3];
+  const activePage = useAppSelector(state => state.dicts.activePage);
 
-  const currentUser = useAppSelector(state => state.users.currentUser);
+  async function handleLangChange(event: SelectChangeEvent) {
+    const historyLocal = history.location.pathname;
+    const currentLang = event.target.value;
+    await dispatch(getLang(currentLang));
+
+    history.location.pathname = '/'
+    history.replace(`${currentLang}/${currentUser ? currentUser.id : "_"}/${pagePath}`);
+  }
+
   const childUsers = useAppSelector(state => state.users.childUsers);
   const currentChildUser = useAppSelector(state => state.users.currentChildUser);
 
@@ -157,7 +152,12 @@ const Header: React.FC = () => {
       const pathArray = location.pathname.split('/');
       setAlignment(pathArray[3]);
     })
-  }, [history.location.pathname]);
+  }, [history]);
+
+  useEffect(() => {
+    const pathArray = history.location.pathname.split('/');
+    setAlignment(pathArray[3]);
+  }, [history]);
 
   const handleRouteChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -248,7 +248,7 @@ const Header: React.FC = () => {
                 onClick={() => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/calls`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/calls`);
                 }}
                 className={classes.headerItemText}
               >
@@ -263,7 +263,7 @@ const Header: React.FC = () => {
                 onClick={() => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/reports`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/reports`);
                 }}
                 className={classes.headerItemText}
               >
@@ -278,7 +278,7 @@ const Header: React.FC = () => {
                 onClick={async () => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/markuprules/${activeMarkupRulesPage}`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/markuprules/${activePage}`);
                   await dispatch(getGroups());
                 }}
                 className={classes.headerItemText}
@@ -294,7 +294,7 @@ const Header: React.FC = () => {
                 onClick={() => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/upload`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/upload`);
                 }}
                 className={classes.headerItemText}
               >
@@ -310,7 +310,7 @@ const Header: React.FC = () => {
                 onClick={() => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/alert`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/alert`);
                 }}
                 className={classes.headerItemText}
               >
@@ -325,7 +325,7 @@ const Header: React.FC = () => {
                 onClick={() => {
                   dispatch(langSlice.actions.setLoading(true));
                   history.location.pathname = '/'
-                  history.replace(`${language}/${currentUser ? currentUser.id : "#"}/settings`);
+                  history.replace(`${language}/${currentUser ? currentUser.id : "_"}/settings`);
                 }}
                 className={classes.headerItemText}
               >
@@ -338,14 +338,14 @@ const Header: React.FC = () => {
 
         <div className={classes.headerRightBlock}>
           <div style={{display: 'flex', marginRight: '30px'}}>
-            {currentChildUser && currentUser && currentUser.accessRights.includes('admin') &&
-            <ContainedSelect
-              width={'220px'}
-              onSelectChange={handleUserChange}
-              options={convertedOptions}
-              value={convertedValue}
-            />
-            }
+            {currentChildUser && currentUser && currentUser.accessRights.includes('admin') && (
+              <ContainedSelect
+                width={'220px'}
+                onSelectChange={handleUserChange}
+                options={convertedOptions}
+                value={convertedValue}
+              />
+            )}
             {/* Смена языка */}
             <Select
               MenuProps={{
