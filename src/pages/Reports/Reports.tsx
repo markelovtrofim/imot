@@ -32,7 +32,8 @@ import { BlockBox, СontrolBlock } from "../../components/common";
 import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey } from '../../utils/optionsCreator';
 import { reportsStyles } from './Reports.jss';
 import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg } from "./Reports.svg";
-import { reportsSlice,
+import {
+  reportsSlice,
   getAllReports,
   getReport,
   setReports,
@@ -85,6 +86,7 @@ const Reports = React.memo(() => {
 
   useEffect(() => {
     document.title = "Отчёты | IMOT.io";
+    console.log("Huy from reports");
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
       dispatch(getDefaultCriterias());
@@ -136,7 +138,7 @@ const Reports = React.memo(() => {
       } else if (options[i] === 'tag_name_list') {
         // new
         local.push({ value: options[i], label: `${translate('reportGroupByRowTagNameList', language)}`, type: 'input' });
-      }  else if (options[i] === 'tag_value_list') {
+      } else if (options[i] === 'tag_value_list') {
         // new
         local.push({ value: options[i], label: `${translate('reportGroupByRowTagValueList', language)}`, type: 'input-value' });
       } else if (options[i] === 'operator_phone') {
@@ -194,7 +196,7 @@ const Reports = React.memo(() => {
   }
 
 
-  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null , activeCriterias: CriteriasType[]) => {
+  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null, activeCriterias: CriteriasType[]) => {
     if (allCriteriasArr) {
       let local: { value: { key: string }, label: string, icon?: string }[] = [];
       allCriteriasArr.forEach((item, i) => {
@@ -767,7 +769,7 @@ const Reports = React.memo(() => {
       await dispatch(setReports());
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
-      
+
       setSnackbar({
         type: 'success',
         value: true,
@@ -790,7 +792,7 @@ const Reports = React.memo(() => {
     setSnackbar({
       type: 'success',
       value: true,
-      text:`${translate('reportDeleted', language)}`,
+      text: `${translate('reportDeleted', language)}`,
       time: 3000
     });
   }
@@ -831,7 +833,7 @@ const Reports = React.memo(() => {
         const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
         const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
-          setHeightTable(`${ gridEl.clientHeight - 5 }px`);
+          setHeightTable(`${gridEl.clientHeight - 5}px`);
         }
         if (gridElHeader && gridElHeaderInner) {
           const height = gridElHeaderInner.clientHeight
