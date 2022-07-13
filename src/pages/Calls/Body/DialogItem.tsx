@@ -94,7 +94,7 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
       const select: any = window.getSelection();
       const selectionText = select.toString();
 
-      if (selectionText) {
+      if (selectionText && !isUserSelectText) {
         const bounds = event.currentTarget.getBoundingClientRect();
         const y = event.clientY - bounds.top;
         const x = event.clientX - bounds.left;
