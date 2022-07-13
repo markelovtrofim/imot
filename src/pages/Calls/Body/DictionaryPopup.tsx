@@ -26,12 +26,11 @@ const DictionaryPopup = ({ popupPosition, selectionText }: DictionaryPopupPropTy
   }
 
   useEffect(() => {
-    popupRef.current?.focus();
-  }, [])
+    // popupRef.current?.focus();
+  }, []);
 
   return (
     <div 
-      ref={popupRef} 
       className="dictionary-popup" 
       style={{ top: `${popupPosition.top}px`, left: `${popupPosition.left}px` }} 
       onBlur={closePopup}
