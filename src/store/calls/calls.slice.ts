@@ -136,7 +136,7 @@ export const getBaseCallsData = createAsyncThunk(
       }
 
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
-      const response = await instance.post<ResponseBaseCallsDataType>(
+      const {data} = await instance.post<ResponseBaseCallsDataType>(
         `search_calls/?` +
         requestParameters,
         requestData,
@@ -147,9 +147,10 @@ export const getBaseCallsData = createAsyncThunk(
         });
       thunkAPI.dispatch(callsSlice.actions.incrementSkip(null));
       // @ts-ignore
-      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({...response.data, skip: thunkAPI.getState().calls.skip}));
+      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({...data, skip: thunkAPI.getState().calls.skip}));
       // @ts-ignore
-      await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]))
+      await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]));
+      return data;
     } catch (error) {
       thunkAPI.dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     }
