@@ -53,6 +53,12 @@
   "analyze": "Перераспознать",
   "stt": "Перетегировать",
 
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Дата",
+  "duration": "Длительность",
+  "grade": "Оценка",
+
+
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Словари",
   "buttonTagsName_dicts": "Теги",

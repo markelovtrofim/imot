@@ -115,7 +115,7 @@ export const getCallAudio = createAsyncThunk(
 
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
-  async (_, thunkAPI) => {
+  async (payload: {sort?: string}, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
 
@@ -128,13 +128,13 @@ export const getBaseCallsData = createAsyncThunk(
       let requestParameters =
         `skip=${state.calls.skip}&limit=${state.calls.limit}` +
         `&start_date=${startDate}` +
-        `&end_date=${endDate}`;
+        `&end_date=${endDate}` +
+        `&sort=${payload.sort ? (payload.sort !== "date" ? payload.sort : "") : ""}`;
 
       if (!startDate && !endDate) {
         requestParameters =
           `skip=${state.calls.skip}&limit=${state.calls.limit}`
       }
-
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
       const response = await instance.post<ResponseBaseCallsDataType>(
         `search_calls/?` +
@@ -245,6 +245,7 @@ type InitialStateType = {
   found: number | null,
   skip: number,
   limit: number,
+  sort: string,
   callIds: null,
   calls: CallType[][] | [],
   currentCall: CallType | null | false,
@@ -268,6 +269,7 @@ const initialState: InitialStateType = {
   bundleLength: 10,
   total: null,
   found: null,
+  sort: "date",
   skip: 0,
   limit: 10,
   callIds: null,
@@ -281,6 +283,10 @@ export const callsSlice = createSlice({
   reducers: {
     setCallPageSearchParams(state, action: PayloadAction<string>) {
       state.callPageSearchParams = action.payload;
+    },
+
+    setSort(state, action: PayloadAction<string>) {
+      state.sort = action.payload;
     },
 
     deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {
