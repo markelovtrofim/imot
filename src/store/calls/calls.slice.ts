@@ -248,6 +248,8 @@ type InitialStateType = {
   limit: number,
   callIds: null,
   calls: CallType[][] | [],
+  selectedCalls: string[],
+  isSelectAllCalls: boolean,
   currentCall: CallType | null | false,
   callPageSearchParams: string
 }
@@ -274,6 +276,9 @@ const initialState: InitialStateType = {
   callIds: null,
   calls: createInitialCalls(),
 
+  selectedCalls: [],
+  isSelectAllCalls: false,
+
   currentCall: null,
   callPageSearchParams: ""
 };
@@ -282,6 +287,23 @@ export const callsSlice = createSlice({
   reducers: {
     setCallPageSearchParams(state, action: PayloadAction<string>) {
       state.callPageSearchParams = action.payload;
+    },
+
+    // selected calls actions
+    pushSelectedCall(state, action: PayloadAction<string>) {
+      state.selectedCalls.push(action.payload);
+    },
+    removeSelectedCall(state, action: PayloadAction<string>) {
+      let currentSelectedCalls = [...current(state.selectedCalls)];
+      const callId = currentSelectedCalls.find(id => id === action.payload);
+      if (callId) {
+        const callIdIndex = currentSelectedCalls.indexOf(callId);
+        currentSelectedCalls.splice(callIdIndex, 1);
+      }
+      state.selectedCalls = currentSelectedCalls;
+    },
+    setSelectAllCalls(state, action: PayloadAction<boolean>) {
+      state.isSelectAllCalls = action.payload;
     },
 
     deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {

@@ -37,28 +37,19 @@ export const useStyles = makeStyles(({
   }
 }));
 
-const Test = () => {
-  const history = useHistory();
-  useEffect(() => {
-    history.location.pathname = "/";
-    history.push("/ru/auth");
-  }, [history]);
-  return <></>
-}
-
-export const SnackbarContext = createContext({});
 
 const App = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const isAuth = useAppSelector(state => state.auth.isAuth);
 
+
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
-  let pathArray = [];
+  let pathArray: string[] = [];
   if (path) {
     pathArray = path.split("/");
   }
-  const activePage = pathArray[3];
+  const activePage = pathArray[3]
   const isDtOrTg = pathArray[4];
 
 
@@ -101,9 +92,14 @@ const App = () => {
   }, [languageParam, currentUser]);
 
   async function getUserData() {
-    await dispatch(getMe());
+    debugger
+    const userData = await dispatch(getMe());
+    // @ts-ignore
+    const user = userData.payload;
     await dispatch(getChildUser());
     await dispatch(getChildUsers());
+    history.location.pathname = `/`;
+    history.replace(`${languageParam}/${user ? user.id : "_"}/${pathArray[3]}`);
   }
   useEffect(() => {
     if (!currentUser) getUserData().then();

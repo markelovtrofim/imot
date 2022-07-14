@@ -6,6 +6,8 @@ import { useAppSelector } from "../../hooks/redux";
 import { useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
 import { translate } from "../../localizations";
+import CustomCheckbox from "../../components/common/Checkbox";
+import {callsSlice} from "../../store/calls/calls.slice";
 
 const useStyles = makeStyles(({
   callsHeader: {
@@ -66,6 +68,7 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo(({
   const classes = useStyles();
   const dispatch = useDispatch();
   const { language } = useAppSelector((state: RootState) => state.lang);
+  const selectAllCalls = useAppSelector(state => state.calls.isSelectAllCalls);
 
   return (
     <div className={classes.callsHeader}>
@@ -77,6 +80,17 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo(({
         }
       </div>
       <Grid container className={classes.callsCols}>
+        <Grid item xs={0.2} style={{ minWidth: '10px', display: 'flex', alignItems: 'center' }}>
+          <CustomCheckbox
+            checked={selectAllCalls}
+            onClick={(event) => {
+              // @ts-ignore
+              dispatch(callsSlice.actions.setSelectAllCalls(event.target.checked));
+              debugger
+            }}
+          />
+        </Grid>
+
         <Grid item xs={0.5} style={{ minWidth: '50px', display: 'flex', alignItems: 'center' }}>
           <span style={{ marginRight: '15px' }}><ClockSvg /></span>
           <ArrowsSvg />

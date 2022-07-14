@@ -24,7 +24,7 @@ const BpCheckedIcon = styled(BpIcon)({
     content: '""',
   },
   'input:hover ~ &': {
-    backgroundColor: '#722ED1',
+    backgroundColor: '#5116A1',
   },
 });
 
