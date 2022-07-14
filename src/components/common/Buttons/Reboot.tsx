@@ -9,16 +9,22 @@ const RebootSvg = () => {
   );
 };
 
+type RebootPropsType = {
+  onClick: any,
+}
 
-const Reboot: FC = () => {
+const Reboot: FC<RebootPropsType> = ({onClick}) => {
   return (
     <IconButton
       margin={'0 15px 0 0'}
       backgroundColor="#E3E8EF"
       icon={<RebootSvg/>}
       onClick={(event: any) => {
-        // эмпти.
+        onClick()
       }}
+
+      tooltipTitle={`Переобработка звонка`}
+      tooltipPlacement="top"
     />
   );
 };

@@ -1,19 +1,16 @@
-import React, { FC, useEffect, useRef } from 'react';
-import { makeStyles } from "@mui/styles";
-import { Typography } from "@mui/material";
+import React, {FC, useEffect, useRef, useState} from 'react';
+import {makeStyles} from "@mui/styles";
+import {CircularProgress, Typography} from "@mui/material";
 import 'react-h5-audio-player/lib/styles.css';
-import { useDispatch } from "react-redux";
-
+import {callAction, callsSlice, getCallInfo, getCallPublicToken, getCallStt} from "../../../store/calls/calls.slice";
+import {useDispatch} from "react-redux";
 import {
   CallAudioType,
   CallInfoType,
   CallSttType,
   CallTagType,
 } from "../../../store/calls/calls.types";
-import { callsSlice, getCallPublicToken } from "../../../store/calls/calls.slice";
-import Plus from "../../../components/common/Buttons/Plus";
 import Reboot from "../../../components/common/Buttons/Reboot";
-import History from "../../../components/common/Buttons/History";
 import Download from "../../../components/common/Buttons/Download";
 import Back from "../../../components/common/Buttons/Back";
 import { BlockBox } from "../../../components/common";
@@ -22,6 +19,17 @@ import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
 import { useAppSelector } from "../../../hooks/redux";
 import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
+import {translate} from "../../../localizations";
+import ModalWindow from "../../../components/common/ModalWindowBox";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import CustomCheckbox from "../../../components/common/Checkbox";
+import History from "../../../components/common/Buttons/History";
+import {LoadingButton} from "@mui/lab";
+import Logo from "../../../assets/images/logo.png";
+import Yandex from "../../../assets/images/yandex_PNG20.png";
+import {langSlice} from "../../../store/lang/lang.slice";
+
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -145,6 +153,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
   const classes = useStyles();
   const dispatch = useDispatch();
 
+  const currentCall = useAppSelector(state => state.calls.currentCall);
+  const isAuth = useAppSelector(state => state.auth.isAuth);
 
   useEffect(() => {
     if (!expanded && callAudio && bundleIndex) {
@@ -201,16 +211,6 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
   const { language } = useAppSelector(state => state.lang);
 
-  async function formPublicToken(id: string) {
-    const publicTokenData = await dispatch(getCallPublicToken(id));
-    // @ts-ignore
-    const publicToken: { access_token: string, token_type: string } = publicTokenData.payload;
-    const host = window.location.origin;
-
-    const publicUrl = `${host}/imot/#/${language}/call?id=${id}&token=${publicToken.access_token}`;
-    navigator.clipboard.writeText(publicUrl);
-  }
-
   const onListen = (eventCurrentTime: any) => {
     let currentTimeLocal;
     if (!!eventCurrentTime.target) {
@@ -255,6 +255,127 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   }
 
+
+  const callActionSelectConverter = (values: any = []) => {
+    let local: { value: any, label: string }[] = [];
+    for (let i = 0; i < values.length; i++) {
+      if (values[i] !== "analyze" && values[i] !== "get_api_tags") {
+        if (values[i] === "delete") {
+          local.unshift({value: values[i], label: translate(values[i], language)});
+        } else {
+          local.push({value: values[i], label: translate(values[i], language)});
+        }
+      }
+    }
+    return local;
+  };
+
+  // MW
+  const [isOpen, setOpen] = useState(false);
+  function handleMWOpen() {
+    setOpen(true);
+  }
+  function handleMWClose() {
+    setOpen(false);
+  }
+  // MW button
+  const [MWButtonLoading, setMWButtonLoading] = useState(false);
+
+  type SttFormType = {
+    engine: "yandex" | "imot",
+    keepFragments: boolean
+  }
+  const [sttForm, setSttForm] = useState<SttFormType>({
+    engine: "imot",
+    keepFragments: false
+  });
+
+
+  // onClick's действий со звонком
+  async function formPublicToken(id: string) {
+    const publicTokenData = await dispatch(getCallPublicToken(id));
+    // @ts-ignore
+    const publicToken: { access_token: string, token_type: string } = publicTokenData.payload;
+    const host = window.location.origin;
+
+    const publicUrl = `${host}/imot/#/${language}/call?id=${id}&token=${publicToken.access_token}`;
+    navigator.clipboard.writeText(publicUrl);
+    dispatch(langSlice.actions.setSnackbar({
+      type: "success",
+      text: "Публичная ссылка скопированна",
+      value: true,
+      time: 2000
+    }));
+  }
+
+  async function rebootAction() {
+    if (callStt) {
+      dispatch(callsSlice.actions.setStt({
+        stt: null,
+        id: callInfo.id,
+        index: bundleIndex
+      }));
+
+      await dispatch(callAction({
+        id: callInfo.id,
+        data: {
+          action: "analyze",
+          engine: callStt.engine,
+          keep_fragments: false
+        }
+      }));
+
+      const newCallInfoData = await dispatch(getCallInfo({id: callInfo.id}));
+      dispatch(callsSlice.actions.setInfo({
+        // @ts-ignore
+        info: newCallInfoData.payload,
+        id: callInfo.id,
+        index: bundleIndex
+      }));
+
+      const newCallSttData = await dispatch(getCallStt({id: callInfo.id}));
+      dispatch(callsSlice.actions.setStt({
+        // @ts-ignore
+        stt: newCallSttData.payload,
+        id: callInfo.id,
+        index: bundleIndex
+      }));
+
+      dispatch(langSlice.actions.setSnackbar({
+        type: "success",
+        text: "Звонок перераспознан",
+        value: true,
+        time: 2000
+      }));
+    }
+  }
+
+  async function sttAction() {
+    handleMWOpen()
+  }
+
+  async function sttActionSubmit() {
+    if (callStt) {
+      setMWButtonLoading(true);
+      await dispatch(callAction({
+        id: callInfo.id,
+        data: {
+          action: "stt",
+          engine: sttForm.engine,
+          keep_fragments: sttForm.keepFragments
+        }
+      }));
+      handleMWClose();
+      setMWButtonLoading(false);
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Запрос на перераспознание отправлен",
+        value: true,
+        time: 2000
+      }));
+    }
+  }
+
   return (
     <div className={classes.callBodyWrapper}>
       <div ref={audioRef} className={classes.audioPlayerBox}>
@@ -287,62 +408,137 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                 </div>
               </>
             }
-            <Typography style={{ marginBottom: '10px' }} className={classes.typographyTitle}>
-              Текстовый диалог:
-            </Typography>
-            <div className={classes.cbDialogItems} id={callId}>
-              {callStt ?
-                <div>
-                  {callStt.fragments.map((phrase, i, array) => {
-                    return (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                        id={`${phrase.id}-phrase`}>
-                        <div style={{ width: '85%' }}>
-                          <DialogItem
-                            audioPlayerRef={audioPlayerRef}
-                            prevFragment={array[i - 1] ? array[i - 1] : { direction: phrase.direction === 'client' ? 'operator' : 'client' }}
-                            fragment={phrase}
-                            callId={callId}
-                            fragmentIndex={i}
-                          />
-                        </div>
-                        <div style={{ textAlign: 'center', width: '15%' }}>
-                          {fragments.map((fragment, j) => {
-                            if (phrase.begin === fragment.fBegin && phrase.end === fragment.fEnd) {
-                              return <div>
-                                <Fragment matchData={fragment.matchData}>{fragment.name}</Fragment>
-                              </div>;
-                            }
-                            return null;
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div> : null
-              }
-            </div>
+
+            {callStt ?
+              <div>
+                <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+                  Текстовый диалог:
+                </Typography>
+                <div className={classes.cbDialogItems} id={callId}>
+                  <div>
+                    {callStt.fragments.length > 1 ?
+                      callStt.fragments.map((phrase, i, array) => {
+                        return (
+                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+                               id={`${phrase.id}-phrase`}>
+                            <div style={{width: '85%'}}>
+                              <DialogItem
+                                audioPlayerRef={audioPlayerRef}
+                                prevFragment={array[i - 1] ? array[i - 1] : {direction: phrase.direction === 'client' ? 'operator' : 'client'}}
+                                fragment={phrase}
+                                callId={callId}
+                                fragmentIndex={i}
+                              />
+                            </div>
+                            <div style={{textAlign: 'center', width: '15%'}}>
+                              {fragments.map((fragment, j) => {
+                                if (phrase.begin === fragment.fBegin && phrase.end === fragment.fEnd) {
+                                  return <div>
+                                    <Fragment matchData={fragment.matchData}>{fragment.name}</Fragment>
+                                  </div>;
+                                }
+                                return null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })
+                      : <Typography>У этого звонка нет stt</Typography>
+                    }
+                  </div>
+                </div>
+              </div> :
+              <div style={{textAlign: "center"}}>
+                <CircularProgress size={80}/>
+              </div>
+            }
           </div>
         </div>
 
-        <div style={{ backgroundColor: 'fff', width: '370px', marginTop: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px' }}>
-            <Back
-              onClick={(event) => {
-                formPublicToken(callId)
-              }}
-            />
-            <Download href={callAudio} />
-            <Reboot />
-            <CustomControlSelect
-              handleSelectChange={(event) => {
+        {/* Кнопочки */}
+        <div style={{backgroundColor: 'fff', width: '370px', marginTop: '20px'}}>
+          <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px'}}>
 
+            {isAuth && (
+              <Back
+                onClick={(event) => {
+                  formPublicToken(callId)
+                }}
+              />
+            )}
+
+            {/* Скачать */}
+            <Download href={callAudio}/>
+
+            {/* Перераспознать */}
+            {callInfo.allowedActions.indexOf("analyze") != -1 && (
+              <Reboot onClick={() => {
+                rebootAction()
+              }}/>
+            )}
+
+            {/* История */}
+            <History/>
+
+            {/* Удаление и смена каналов. */}
+            <CustomControlSelect
+              handleSelectChange={async (event) => {
+                if (callStt) {
+                  if (event.value === "stt") {
+                    sttAction()
+                  } else if (event.value === "delete") {
+                    await dispatch(callAction({
+                      id: callInfo.id,
+                      data: {
+                        action: event.value,
+                        engine: callStt.engine,
+                        keep_fragments: false
+                      }
+                    }));
+                    dispatch(callsSlice.actions.deleteCall({id: callInfo.id, bundleIndex: bundleIndex}));
+                    dispatch(langSlice.actions.setSnackbar({
+                      type: "success",
+                      text: "Звонок удален",
+                      value: true,
+                      time: 1500
+                    }));
+                  } else if (event.value === "swap_channels") {
+                    if (callStt) {
+                      dispatch(callsSlice.actions.setStt({
+                        stt: null,
+                        id: callInfo.id,
+                        index: bundleIndex
+                      }));
+
+                      await dispatch(callAction({
+                        id: callInfo.id,
+                        data: {
+                          action: event.value,
+                          engine: callStt.engine,
+                          keep_fragments: false
+                        }
+                      }));
+                      const newCallSttData = await dispatch(getCallStt({id: callInfo.id}));
+                      await dispatch(callsSlice.actions.setStt({
+                        // @ts-ignore
+                        stt: newCallSttData.payload,
+                        id: callInfo.id,
+                        index: bundleIndex
+                      }));
+                      dispatch(langSlice.actions.setSnackbar({
+                        type: "success",
+                        text: "Каналы поменяны местами",
+                        value: true,
+                        time: 2000
+                      }));
+                    }
+                  }
+                }
               }}
               svg={"vertical"}
-              options={[{ value: 'test', label: "test" }]}
+              options={callActionSelectConverter(callInfo.allowedActions)}
               optionsPosition={"bottom"}
             />
-            {/*<History/>*/}
           </div>
 
           {/* Params block*/}
@@ -367,6 +563,70 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
         </div>
       </div>
+      <ModalWindow
+        isMWOpen={isOpen}
+        handleMWClose={handleMWClose}
+        text={"Параметры перераспознования"}
+        width={'400px'}
+      >
+        <ToggleButtonGroup
+          style={{marginTop: '15px'}}
+          value={sttForm.engine}
+          exclusive
+          onChange={() => {
+          }}
+        >
+          <ToggleButton
+            value={"imot"}
+            onClick={() => {
+              setSttForm({...sttForm, engine: "imot"})
+            }}
+          >
+            <img src={Logo} alt=""/>
+          </ToggleButton>
+
+          <ToggleButton
+            value={"yandex"}
+            onClick={() => {
+              setSttForm({...sttForm, engine: "yandex"})
+            }}
+          >
+            <img src={Yandex} width={60} alt=""/>
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <div style={{display: 'flex', margin: '15px 0'}}>
+          <CustomCheckbox
+            style={{marginRight: '10px'}}
+            onClick={(event) => {
+              setSttForm({...sttForm, keepFragments: !sttForm.keepFragments})
+            }}
+            checked={sttForm.keepFragments}
+          />
+          <Typography style={{cursor: "pointer"}}>
+            Сохранять фрагменты
+          </Typography>
+        </div>
+        <div>
+          <LoadingButton
+            loading={MWButtonLoading}
+            style={{marginRight: '15px'}}
+            variant="contained"
+            color="primary"
+            onClick={sttActionSubmit}
+          >
+            {translate("sendButton", language)}
+          </LoadingButton>
+          <LoadingButton
+            variant="contained"
+            color="secondary"
+            onClick={handleMWClose}
+          >
+            {translate("cancelButton", language)}
+          </LoadingButton>
+        </div>
+      </ModalWindow>
+
     </div>
   );
 });

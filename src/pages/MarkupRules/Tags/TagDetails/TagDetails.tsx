@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, FC, useContext } from 'react';
 import { IconButton, InputBase, Typography } from "@mui/material";
 import { BlockBox } from "../../../../components/common";
 import Field from "../../../../components/common/FIeld";
@@ -27,7 +27,6 @@ import { LoadingButton } from "@mui/lab";
 import { translate } from "../../../../localizations";
 import { RootState } from "../../../../store/store";
 import cloneDeep from "lodash.clonedeep";
-import Snackbar, { SnackbarType } from "../../../../components/common/Snackbar";
 import noResultsPng from "../../../../assets/images/no-results.png";
 import CustomControlSelect from "../../../../components/common/Selects/CustomControlSelect";
 import { GroupType } from "../../../../store/dicts/dicts.types";
@@ -35,6 +34,7 @@ import Switch from "../../../../components/common/Switch";
 import ModalWindow from "../../../../components/common/ModalWindowBox";
 import { TagGroupType, TagType } from "../../../../store/tags/tags.types";
 import { useHistory } from "react-router-dom";
+import {langSlice} from "../../../../store/lang/lang.slice";
 
 export const AddButton: FC<{ onClick?: () => void }> = ({ onClick, children }) => {
   const classes = useTagDetailsStyles();
@@ -171,6 +171,8 @@ const TagDetails: FC = () => {
 
   const { language } = useAppSelector((state: RootState) => state.lang);
 
+  const snackbar = useAppSelector(state => state.lang.snackbar);
+
 
   const [render, setRender] = useState(false);
   useEffect(() => {
@@ -181,18 +183,9 @@ const TagDetails: FC = () => {
     }
     setRender(!render);
   }, [currentTag]);
-
-  // snackbars
-  const [snackbar, setSnackbar] = useState<{ type: SnackbarType, text: string, value: boolean, time: number | null }>({
-    type: 'success',
-    text: '',
-    value: false,
-    time: null
-  });
-
-
   const userIdData = useAppSelector(state => state.users.currentUser?.id);
   const userId = userIdData ? userIdData : "_";
+
   // ${language}/${userId}/
 
   async function onClickSaveButton() {
@@ -243,12 +236,12 @@ const TagDetails: FC = () => {
     }));
 
     setLoading(false);
-    setSnackbar({
+    dispatch(langSlice.actions.setSnackbar({
       type: 'success',
       value: true,
       time: 2000,
       text: 'Тег обнавлен'
-    })
+    }))
   }
 
   const [deleteMWIsOpen, setDeleteMWIsOpen] = useState(false);
@@ -524,7 +517,10 @@ const TagDetails: FC = () => {
                                               checked={fragmentField.value.value}
                                             />
                                             <Typography
-                                              className={classes.typographyTitleMiniThree}>{fragmentField.title}</Typography>
+                                              className={classes.typographyTitleMiniThree}
+                                            >
+                                              {fragmentField.title}
+                                            </Typography>
                                           </div>
                                         </div>
                                       ) ||
@@ -725,7 +721,7 @@ const TagDetails: FC = () => {
                 <Switch
                   onChecked={async (e) => {
                     if (currentGroup) {
-                      setSnackbar({ type: 'loading', value: true, text: 'Загрузка...', time: null })
+                      dispatch(langSlice.actions.setSnackbar({type: 'loading', value: true, text: 'Загрузка...', time: null }))
 
                       await dispatch(tagsActions({
                         tagId: currentTag.id,
@@ -750,12 +746,12 @@ const TagDetails: FC = () => {
                         history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${currentTag.id}`)
                       }
 
-                      setSnackbar({
+                      dispatch(langSlice.actions.setSnackbar({
                         type: 'success',
                         value: true,
                         text: `Словарь ${currentTag.enabled ? 'выключен' : 'включён'}`,
                         time: 1000
-                      });
+                      }))
                     }
                   }}
                   checked={currentTag.enabled}
@@ -787,7 +783,9 @@ const TagDetails: FC = () => {
                     if (e.value === 'delete') {
                       handleDeleteMWOpen();
                     } else if (e.value === 'clone' && currentGroup) {
-                      setSnackbar({ type: 'loading', value: true, text: 'Загрузка...', time: null })
+                      dispatch(langSlice.actions.setSnackbar({
+                        type: 'loading', value: true, text: 'Загрузка...', time: null
+                      }))
                       await dispatch(tagsActions({
                         tagId: currentTag.id,
                         action: 'clone'
@@ -819,28 +817,17 @@ const TagDetails: FC = () => {
                         history.replace(`${language}/${userId}/markuprules/tags?group=${currentGroup.group}&id=${tags[0].id}`);
                       }
 
-                      setSnackbar({ type: 'loading', value: false, text: 'Загрузка...', time: null })
-                      setSnackbar({ type: 'success', value: true, text: 'Тег склонирован', time: 2000 })
+                      dispatch(langSlice.actions.setSnackbar({
+                        type: 'loading', value: false, text: 'Загрузка...', time: null
+                      }))
+                      dispatch(langSlice.actions.setSnackbar({
+                        type: 'success', value: true, text: 'Тег склонирован', time: 2000
+                      }))
                     }
                   }}
                 />
               </div>
             </div>
-          </div>
-
-          {/* Снаскбар */}
-          <div>
-            {snackbar.value &&
-              <Snackbar
-                type={snackbar.type}
-                open={snackbar.value}
-                onClose={() => {
-                  setSnackbar({ value: false, type: 'success', time: null, text: '' })
-                }}
-                text={snackbar.text}
-                time={snackbar.time}
-              />
-            }
           </div>
 
         </div>
@@ -887,7 +874,10 @@ const TagDetails: FC = () => {
                   }
                   handleDeleteMWClose();
                   // setDeleteDictMWIsOpen(false);
-                  setSnackbar({ type: "success", text: 'Словарь удален', value: true, time: 2000 });
+
+                  dispatch(langSlice.actions.setSnackbar({
+                    type: "success", text: 'Словарь удален', value: true, time: 2000
+                  }))
                 }
                 setButtonLoading(false);
               }}

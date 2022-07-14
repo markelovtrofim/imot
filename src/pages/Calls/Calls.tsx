@@ -74,7 +74,7 @@ const Calls = React.memo(() => {
 
   const pushNewCalls = async () => {
     setFetching(true);
-    await dispatch(getBaseCallsData());
+    await dispatch(getBaseCallsData({}));
     setFetching(false);
   };
 
@@ -98,7 +98,7 @@ const Calls = React.memo(() => {
   });
   const scrollHandler = (e: any) => {
     // @ts-ignore
-    if (found > 10 && calls[0][0].info && !fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 500)) {
+    if (!fetching && (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight) < 500)) {
       pushNewCalls().then();
     }
   };

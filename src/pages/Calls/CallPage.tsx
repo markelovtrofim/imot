@@ -31,7 +31,6 @@ const CallPage = () => {
   }, [history]);
 
   async function fetchCallInfoData() {
-    debugger
     const searchParamsObject = queryString.parse(history.location.search);
     const id = searchParamsObject.id;
     const token = searchParamsObject.token;
@@ -63,7 +62,6 @@ const CallPage = () => {
 
   // добавление параметров поиска
   useEffect(() => {
-    debugger
     fetchCallInfoData().then();
   }, [searchParams]);
 
@@ -97,7 +95,7 @@ const CallPage = () => {
         </div>
       )}
       {currentCall === null && (
-        <div style={{ position: 'absolute', top: '35%', left: 'calc(50% - 100px)' }}>
+        <div style={{ position: 'absolute', top: '35%', left: 'calc(50% - 50px)' }}>
           <CircularProgress style={{ width: '100px', height: '100px' }} />
         </div>
       )}

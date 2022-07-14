@@ -48,6 +48,15 @@
   "callsEmpty": "Фильтры звонков не выбраны",
   "callsTime": "Время",
   "callsDuration": "Длительность",
+  "delete": "Удалить",
+  "swap_channels": "Поменять каналы местами",
+  "analyze": "Перераспознать",
+  "stt": "Перетегировать",
+
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Дата",
+  "duration": "Длительность",
+  "grade": "Оценка",
 
 
   "DICTS": "DICTS",

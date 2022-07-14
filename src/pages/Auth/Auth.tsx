@@ -7,9 +7,10 @@ import SendIcon from '@mui/icons-material/Send';
 import Alert from "@mui/material/Alert";
 import Button from '@mui/material/Button';
 import { Redirect, useHistory } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch } from "react-redux"
 import { useFormik } from 'formik';
 import cn from 'classnames';
+
 
 import { authSlice, fetchAuthToken, approveUserToken } from "../../store/auth/auth.slice";
 import { PhonePng, DashboardPng, SoundPng } from '../../assets/images/Auth';
@@ -18,8 +19,7 @@ import { useAppSelector } from "../../hooks/redux";
 import Input from "../../components/common/Input";
 import ForgotPasswordModalWindow from "./ForgotPasswordModalWindow";
 import SignUpModalWindow from "./SignUpModalWindow";
-import { getChildUser, getChildUsers, getMe } from "../../store/users/users.slice";
-
+import {getChildUser, getChildUsers, getMe} from "../../store/users/users.slice"
 
 const useStyles = makeStyles(({
   authWrapper: {

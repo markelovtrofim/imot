@@ -49,6 +49,16 @@
   "callsEmpty": "No call filters selected",
   "callsTime": "Time",
   "callsDuration": "Duration",
+  "delete": "Delete",
+  "swap_channels": "Change chanels",
+  "analyze": "Reboot",
+  "stt": "Update stt",
+
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Date",
+  "duration": "Duration",
+  "grade": "Grade",
+
 
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Dictionary",

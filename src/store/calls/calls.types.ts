@@ -21,6 +21,7 @@ export type CallInfoType = {
   uniqueId: string,
   conversationId: string,
   duration: number,
+  allowedActions: string[],
   tags: CallTagType[]
 };
 
@@ -56,3 +57,10 @@ export type CallSttWordType = {
 
 // Audio
 export type CallAudioType = string;
+
+
+export type CallActionDataType = {
+  action: string,
+  engine: string,
+  keep_fragments: boolean
+}
