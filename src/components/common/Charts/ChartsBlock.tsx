@@ -30,7 +30,7 @@ type ChartsBlockType = {
 const ChartsBlock: FC<ChartsBlockType> = React.memo(({ chartTypeValue, tableRows , dataChart, handleCheckChart, checkChart }) => {
   const { language } = useAppSelector((state: RootState) => state.lang);
   return (
-    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '30px'}}>
+    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '30px', zIndex: '5'}}>
       <BlockBox padding="24px" width="calc(70% - 30px)">
         <div>
           {/* to do: подготовить данные */}

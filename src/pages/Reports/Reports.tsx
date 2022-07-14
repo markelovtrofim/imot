@@ -703,10 +703,11 @@ const Reports = React.memo(() => {
   useEffect(() => {
     dispatch(reportsSlice.actions.setTableRows(rows));
     dispatch(reportsSlice.actions.setTableColumns(columns));
-    //
-    setDataChart(getDataChartFunc());
+  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
 
-  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent, checkChart])
+  useEffect(() => {
+    setDataChart(getDataChartFunc());
+  }, [callReport])
 
   const getCallParameters = async (event: any) => {
     hideVisibleParameters();
