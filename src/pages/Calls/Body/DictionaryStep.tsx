@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 
+import { useSelector, useDispatch } from "react-redux";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
@@ -10,7 +12,9 @@ import MobileStepper from "@mui/material/MobileStepper";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import CircularProgress from '@mui/material/CircularProgress';
 
+import { getAllUserDicts, getAllWordInDictionary } from "../../../store/calls/calls.slice";
 import "../style.css";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -27,36 +31,181 @@ interface DictionaryStepPropType {
   closeDictionaryFunc: any,
 }
 
-const steps = [
-  {
-    label: "Редактировать",
-    description: <TextareaComponent />,
-  },
-  {
-    label: "Выберите в какой словарь добавить",
-    description: "Список словарей"
-  },
-  {
-    label: "Слова в словаре",
-    description: "Список слов"
-  }
-];
+// const steps = [
+//   {
+//     label: "Редактировать",
+//     description: <TextareaComponent />,
+//   },
+//   {
+//     label: "Выберите в какой словарь добавить",
+//     description: <AllUserDictsComponent />,
+//   },
+//   {
+//     label: "Слова в словаре",
+//     description: "Список слов"
+//   }
+// ];
 
-function TextareaComponent() {
-  const [textareaValue, setTextareaValue] = useState<string>("");
+// function TextareaComponent() {
+//   const [textareaValue, setTextareaValue] = useState<string>("");
 
-  useEffect(() => {
-    const select: any = window.getSelection();
-    const selectionText = select.toString().replace(/\s+/g, ' ').trim();
+//   useEffect(() => {
+//     const select: any = window.getSelection();
+//     const selectionText = select.toString().replace(/\s+/g, ' ').trim();
 
-    setTextareaValue(selectionText);
-  }, [])
+//     setTextareaValue(selectionText);
+//   }, [])
 
-  return (
-    <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
-  )
-}
+//   return (
+//     <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
+//   )
+// }
+// function AllUserDictsComponent() {
+//   const [allUserDicts, setAllUserDicts] = useState<any>([]);
+//   // const { getAllUserDicts } = useSelector((state: any) => state.calls);
+
+//   // console.log(getAllUserDicts);
+
+//   const dispatch = useDispatch();
+
+//   async function getAllUserDictsFunc() {
+//     const userDicts = await dispatch(getAllUserDicts());
+//     // @ts-ignore
+//     // console.log(userDicts.payload);
+//     // @ts-ignore
+//     setAllUserDicts(userDicts.payload);
+//   }
+
+//   async function chooseOneDict(id: string) {
+//     console.log("Id словаря", id);
+//     dispatch(getAllWordInDictionary({ id: id }));
+//   }
+
+//   useEffect(() => {
+//     getAllUserDictsFunc();
+//   }, []);
+
+//   function renderDicts(item: any) {
+//     return (
+//       <div className="dict-item" onClick={() => chooseOneDict(item.id)}>
+//         <p>{item.title}</p>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="dicts-block">
+//       {
+//         allUserDicts.length > 0
+//           ? (
+//             allUserDicts.map(renderDicts)
+//           ) : (
+//             <div className="wait-dicts-loader">
+//               <CircularProgress />
+//             </div>
+//           )
+//       }
+//     </div>
+//   )
+// }
+
 function TextMobileStepper() {
+  const steps = [
+    {
+      label: "Редактировать",
+      description: <TextareaComponent />,
+    },
+    {
+      label: "Выберите в какой словарь добавить",
+      description: <AllUserDictsComponent />,
+    },
+    {
+      label: "Слова в словаре",
+      description: "Список слов"
+    }
+  ];
+  
+  function TextareaComponent() {
+    const [textareaValue, setTextareaValue] = useState<string>("");
+  
+    useEffect(() => {
+      const select: any = window.getSelection();
+      const selectionText = select.toString().replace(/\s+/g, ' ').trim();
+  
+      setTextareaValue(selectionText);
+    }, [])
+  
+    return (
+      <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
+    )
+  }
+  function AllUserDictsComponent() {
+    const [allUserDicts, setAllUserDicts] = useState<any>([]);
+    // const { getAllUserDicts } = useSelector((state: any) => state.calls);
+  
+    // console.log(getAllUserDicts);
+  
+    const dispatch = useDispatch();
+  
+    async function getAllUserDictsFunc() {
+      const userDicts = await dispatch(getAllUserDicts());
+      // @ts-ignore
+      // console.log(userDicts.payload);
+      // @ts-ignore
+      setAllUserDicts(userDicts.payload);
+    }
+  
+    async function chooseOneDict(id: string) {
+      console.log("Id словаря", id);
+      dispatch(getAllWordInDictionary({ id: id }));
+      handleNext();
+    }
+  
+    useEffect(() => {
+      getAllUserDictsFunc();
+    }, []);
+  
+    function renderDicts(item: any) {
+      return (
+        <div className="dict-item" onClick={() => chooseOneDict(item.id)}>
+          <p>{item.title}</p>
+        </div>
+      )
+    }
+  
+    return (
+      <div className="dicts-block">
+        {
+          allUserDicts.length > 0
+            ? (
+              allUserDicts.map(renderDicts)
+            ) : (
+              <div className="wait-dicts-loader">
+                <CircularProgress />
+              </div>
+            )
+        }
+      </div>
+    )
+  }
+  function AllPhraseInDictComponent() {
+    const dispatch = useDispatch();
+    const [textareaValue, setTextareaValue] = useState<string>("");
+
+    async function getAllPhraseInDict() {
+      
+    }
+
+    useEffect(() => {
+      getAllPhraseInDict();
+    }, []);
+
+    return (
+      <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
+
+    )
+  }
+
   const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
   const maxSteps = steps.length;
@@ -68,6 +217,8 @@ function TextMobileStepper() {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
+
 
   return (
     <Box sx={{ width: 400, flexGrow: 1 }}>
@@ -123,6 +274,7 @@ function TextMobileStepper() {
 
 const DictionaryStep = ({ selectionText, closeDictionaryFunc }: DictionaryStepPropType) => {
   const [open, setOpen] = React.useState(true);
+  const dispatch = useDispatch();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -132,9 +284,16 @@ const DictionaryStep = ({ selectionText, closeDictionaryFunc }: DictionaryStepPr
     setOpen(false);
   };
 
-  useEffect(() => {
-    console.log("Test useEffect");
-  }, []);
+  // async function getAllUserDictsFunc() {
+  //   const userDicts = await dispatch(getAllUserDicts());
+  //   // @ts-ignore
+  //   console.log(userDicts.payload);
+  // }
+
+  // useEffect(() => {
+  //   console.log("Test useEffect");
+  //   getAllUserDictsFunc();
+  // }, []);
 
   return (
     <div>

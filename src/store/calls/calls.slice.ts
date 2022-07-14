@@ -89,6 +89,40 @@ export const getCallStt = createAsyncThunk(
   }
 );
 
+export const getAllUserDicts = createAsyncThunk(
+  'dicts/getAllUserDicts',
+  async (thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+
+    const {data} = await instance.get(`/dicts/?show_disabled=false&only_local=false`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'accept': `application/json`,
+      }
+    });
+
+    // @ts-ignore
+    // await thunkAPI.dispatch(callsSlice.actions.setAllUserDicts({allUserDicts: data}));
+    // console.log(data);
+    return data;
+  }
+);
+
+export const getAllWordInDictionary = createAsyncThunk(
+  'dicts/getAllWordInDictionary',
+  async (payload: {id: string}) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+
+    const {data} = await instance.get(`/dict/${payload.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'accept': `application/json`,
+      }
+    });
+
+    console.log(data);
+  }
+)
 
 export const getAndSetCallAudio = createAsyncThunk(
   'calls/getAndSetCallAudio',
@@ -262,6 +296,7 @@ type InitialStateType = {
     top: number,
     left: number,
   },
+  allUserDicts: any,
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -292,6 +327,7 @@ const initialState: InitialStateType = {
     top: 0,
     left: 0,
   },
+  allUserDicts: [],
 };
 
 export const callsSlice = createSlice({
@@ -323,7 +359,9 @@ export const callsSlice = createSlice({
         state.calls[action.payload.bundleIndex] = currentCalls
       }
     },
-
+    setAllUserDicts(state, action: any) {
+      state.allUserDicts = action.payload.allUserDicts;
+    },
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       let calls = [];
       for (let i = 0; i < action.payload.call_ids.length; i++) {
