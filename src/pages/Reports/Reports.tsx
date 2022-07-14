@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState, useRef } from 'react';
+import React, { FC, memo, useEffect, useState } from 'react';
 
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../hooks/redux";
@@ -11,7 +11,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import Dialog from "@mui/material/Dialog";
-import Slide, { SlideProps } from '@mui/material/Slide';
 import cloneDeep from "lodash.clonedeep";
 
 import { RootState } from '../../store/store';
@@ -32,6 +31,7 @@ import { BlockBox, СontrolBlock } from "../../components/common";
 import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey } from '../../utils/optionsCreator';
 import { reportsStyles } from './Reports.jss';
 import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg } from "./Reports.svg";
+import ChartsBlock from '../../components/common/Charts/ChartsBlock';
 import { reportsSlice,
   getAllReports,
   getReport,
@@ -72,7 +72,7 @@ const Reports = React.memo(() => {
   const activeCriteriasColumn = useAppSelector(state => state.search.activeCriteriasColumn);
   const activeParameters = useAppSelector(state => state.reports.activeParameters);
 
-  const [visibleParameters, setVisibleParameters] = React.useState(false);
+  const [visibleParameters, setVisibleParameters] = React.useState(true);
   const [isLoading, setLoading] = useState(false);
 
   //error
@@ -106,93 +106,98 @@ const Reports = React.memo(() => {
     await dispatch(getAllSearchCriterias());
   }
 
-  const handleOptionsTypeReports = (options: any) => {
-    let local: { value: any, label: string }[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i] === 'calls') {
-        local.push({ value: options[i], label: `${translate('reportTypeCalls', language)}` });
-      }
+  interface selectNamesType {
+    [key: string]: {
+      label: string,
+      type: string | null,
     }
-    return local;
   }
-  const handleOptionsTypeReportsObj = (options: any) => {
-    let local = {};
-    if (options === 'calls') {
-      local = { value: options.group_by, label: `${translate('reportTypeCalls', language)}` };
-    }
-    return local;
+  const selectNames: selectNamesType = {
+    calls: {
+      label: `${translate('reportTypeCalls', language)}`,
+      type: null
+    },
+    time : {
+      label: `${translate('reportGroupByRowTime', language)}`,
+      type: 'select'
+    },
+    search_items : {
+      label: `${translate('reportGroupByRowSearchItems', language)}`,
+      type: 'title'
+    },
+    tag : {
+      label: `${translate('reportGroupByRowTag', language)}`,
+      type: 'select-tag'
+    },
+    tag_name_list : {
+      label: `${translate('reportGroupByRowTagNameList', language)}`,
+      type: 'input'
+    },
+    tag_value_list : {
+      label: `${translate('reportGroupByRowTagValueList', language)}`,
+      type: 'input-value'
+    },
+    operator_phone : {
+      label: `${translate('reportGroupByRowOperatorPhone', language)}`,
+      type: 'boolean'
+    },
+    client_phone : {
+      label: `${translate('reportGroupByRowClientPhone', language)}`,
+      type: 'boolean'
+    },
+    calls_count : {
+      label: `${translate('reportGroupByRowCallsCount', language)}`,
+      type: 'boolean'
+    },
+    stt_engine: {
+      label: `${translate('reportGroupByRowSttEngine', language)}`,
+      type: 'boolean'
+    },
+    hour: {
+      label: `${translate('reportGroupByTimeHour', language)}`,
+      type: null
+    },
+    day: {
+      label: `${translate('reportGroupByTimeDay', language)}`,
+      type: null
+    },
+    week: {
+      label: `${translate('reportGroupByTimeWeek', language)}`,
+      type: null
+    },
+    month: {
+      label: `${translate('reportGroupByTimeMonth', language)}`,
+      type: null
+    },
   }
+  const chartTypes = [
+    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
+    {label: `${translate('barChart', language)}`, value: 'barChart' },
+    {label: `${translate('pieChart', language)}`, value: 'pieChart' },
+    {label: `${translate('radarChart', language)}`, value: 'radarChart' },
+  ]  
+  const chartTypeOptions = chartTypes;
+  const [chartTypeValue, setChartTypeValue] = useState(chartTypeOptions[0]);
 
-  //to do: переделать
   const handleOptionsReportsSelect = (options: any) => {
-    let local: { value: any, label: string, type?: string }[] = [];
+    let local: { value: any, label: string, type: string | null }[] = [];
     for (let i = 0; i < options.length; i++) {
-      if (options[i] === 'time') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowTime', language)}`, type: 'select' });
-      } else if (options[i] === 'search_items') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title' });
-      } else if (options[i] === 'tag') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag' });
-      } else if (options[i] === 'tag_name_list') {
-        // new
-        local.push({ value: options[i], label: `${translate('reportGroupByRowTagNameList', language)}`, type: 'input' });
-      }  else if (options[i] === 'tag_value_list') {
-        // new
-        local.push({ value: options[i], label: `${translate('reportGroupByRowTagValueList', language)}`, type: 'input-value' });
-      } else if (options[i] === 'operator_phone') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean' });
-      } else if (options[i] === 'client_phone') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowClientPhone', language)}`, type: 'boolean' });
-      } else if (options[i] === 'calls_count') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowCallsCount', language)}`, type: 'boolean' });
-      } else if (options[i] === 'stt_engine') {
-        local.push({ value: options[i], label: `${translate('reportGroupByRowSttEngine', language)}`, type: 'boolean' });
-      } else if (options[i] === 'hour') {
-        local.push({ value: options[i], label: `${translate('reportGroupByTimeHour', language)}` });
-      } else if (options[i] === 'day') {
-        local.push({ value: options[i], label: `${translate('reportGroupByTimeDay', language)}` });
-      } else if (options[i] === 'week') {
-        local.push({ value: options[i], label: `${translate('reportGroupByTimeWeek', language)}` });
-      } else {
-        local.push({ value: options[i], label: `${translate('reportGroupByTimeMonth', language)}` });
-      }
+      let selectTitle: string = options[i]
+      local.push({ value: options[i], label: selectNames[selectTitle].label, type: selectNames[selectTitle].type })
     }
     return local;
   }
   const handleOptionsReportsSelectObj = (options: any) => {
     let local = {};
-    if (options.group_by === 'time') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowTime', language)}`, type: 'select' };
-    } else if (options.group_by === 'search_items') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowSearchItems', language)}`, type: 'title' };
-    } else if (options.group_by === 'tag') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowTag', language)}`, type: 'select-tag' };
-    } else if (options.group_by === 'tag_name_list') {
-      // new
-      local = { value: options.group_by, label: `${translate('reportGroupByRowTagNameList', language)}`, type: 'input' };
-    } else if (options.group_by === 'tag_value_list') {
-      // new
-      local = { value: options.group_by, label: `${translate('reportGroupByRowTagValueList', language)}`, type: 'input-value' };
-    } else if (options.group_by === 'operator_phone') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowOperatorPhone', language)}`, type: 'boolean' };
-    } else if (options.group_by === 'client_phone') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowClientPhone', language)}`, type: 'boolean' };
-    } else if (options.group_by === 'calls_count') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowCallsCount', language)}`, type: 'boolean' };
-    } else if (options.group_by === 'stt_engine') {
-      local = { value: options.group_by, label: `${translate('reportGroupByRowSttEngine', language)}`, type: 'boolean' };
-    } else if (options.group_by === 'hour') {
-      local = { value: options.group_by, label: `${translate('reportGroupByTimeHour', language)}` };
-    } else if (options.group_by === 'day') {
-      local = { value: options.group_by, label: `${translate('reportGroupByTimeDay', language)}` };
-    } else if (options.group_by === 'week') {
-      local = { value: options.group_by, label: `${translate('reportGroupByTimeWeek', language)}` };
-    } else {
-      local = { value: options.group_by, label: `${translate('reportGroupByTimeMonth', language)}` };
+    if (options.length || options.group_by) {
+      if (options === 'calls') {
+        local = { value: options, label: selectNames[options].label };
+      } else {
+        local = { value: options.group_by, label: selectNames[options.group_by].label, type: selectNames[options.group_by].type };
+      }
     }
     return local;
   }
-
 
   const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null , activeCriterias: CriteriasType[]) => {
     if (allCriteriasArr) {
@@ -261,7 +266,6 @@ const Reports = React.memo(() => {
       const allOptions = local2;
       dispatch(reportsSlice.actions.setOptionsCriterias({ arrayIndex: arrayIndex, criteria: allOptions }));
     }
-
   }
 
   const activeReport = useAppSelector(state => state.reports.activeReport);
@@ -274,9 +278,9 @@ const Reports = React.memo(() => {
   const reportName = useAppSelector(state => state.reports.activeReport.report_name);
 
   // тип отчета
-  const typeReportOptions = handleOptionsTypeReports(selectorsValues.report_types);
+  const typeReportOptions = handleOptionsReportsSelect(selectorsValues.report_types);
   const typeReport = useAppSelector(state => state.reports.activeReport.report_type);
-  const typeReportValue = handleOptionsTypeReportsObj(typeReport);
+  const typeReportValue = handleOptionsReportsSelectObj(typeReport);
 
   // по строкам
   const groupByRowsReportOptions = handleOptionsReportsSelect(selectorsValues.rows_groupings);
@@ -389,6 +393,16 @@ const Reports = React.memo(() => {
   const handleChangeCheckPercent = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxPercent(event.target.checked);
   }
+  //chart
+  const [checkboxShowChart, setCheckboxShowChart] = useState(false);
+  const handleCheckboxShowChart = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckboxShowChart(event.target.checked);
+  }
+  const [checkChart, setCheckChart] = useState('calls');
+  const handleCheckChart = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckChart((event.target as HTMLInputElement).value);
+  }
+
   const tableRows = useAppSelector(state => state.reports.tableRows);
   const tableColumns = useAppSelector(state => state.reports.tableColumns);
   const rowGroupHeaderTitle = useAppSelector(state => state.reports.callReport.report.row_group_header);
@@ -396,6 +410,7 @@ const Reports = React.memo(() => {
   const columnsTable = function () {
     const columnsArray: any[] = [{
       field: 'idName',
+      name: `${rowGroupHeaderTitle}`,
       headerName: `${rowGroupHeaderTitle}`,
       minWidth: 160,
       height: 75,
@@ -410,7 +425,8 @@ const Reports = React.memo(() => {
       if (checkboxCalls) {
         columnsArray.push({
           field: `calls_count_${index}`,
-          headerName: `Звонки`,
+          name: `${item}`,
+          headerName: `${translate('reportCalls', language)}`,
           minWidth: 150,
           height: 75,
           minHeight: 100,
@@ -423,7 +439,7 @@ const Reports = React.memo(() => {
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
               <div className={classes.tableHeaderSubTitle}>{item}</div>
-              <div className={classes.tableHeaderSubSubTitle}>{'Звонки'}</div>
+              <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportCalls', language)}`}</div>
             </div>
           )
         })
@@ -432,7 +448,8 @@ const Reports = React.memo(() => {
       if (checkboxMinutes) {
         columnsArray.push({
           field: `calls_minutes_${index}`,
-          headerName: `Минуты`,
+          name: `${item}`,
+          headerName: `${translate('reportMinutes', language)}`,
           minWidth: 150,
           height: 75,
           minHeight: 100,
@@ -445,7 +462,7 @@ const Reports = React.memo(() => {
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
               <div className={classes.tableHeaderSubTitle}>{item}</div>
-              <div className={classes.tableHeaderSubSubTitle}>{'Минуты'}</div>
+              <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportMinutes', language)}`}</div>
             </div>
           )
         })
@@ -454,6 +471,7 @@ const Reports = React.memo(() => {
       if (checkboxPercent) {
         columnsArray.push({
           field: `percent_calls_count_from_total_${index}`,
+          name: `${item}`,
           headerName: `%`,
           minWidth: 150,
           height: 75,
@@ -477,7 +495,7 @@ const Reports = React.memo(() => {
     if (checkboxCalls) {
       columnsArray.push({
         field: 'row_sum_calls_count',
-        headerName: 'Сумма звонков',
+        headerName: `${translate('reportSumCalls', language)}`,
         minWidth: 150,
         height: 75,
         minHeight: 100,
@@ -488,8 +506,8 @@ const Reports = React.memo(() => {
         cellClassName: 'cell-active',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
-            <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
-            <div className={classes.tableHeaderSubSubTitle}>{'Сумма звонков'}</div>
+            <div className={classes.tableHeaderSubTitle}>{`${translate('reportAll', language)}`}</div>
+            <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportSumCalls', language)}`}</div>
           </div>
         )
       })
@@ -497,7 +515,7 @@ const Reports = React.memo(() => {
     if (checkboxMinutes) {
       columnsArray.push({
         field: 'row_sum_calls_minutes',
-        headerName: 'Кол-во минут',
+        headerName: `${translate('reportCountMinutes', language)}`,
         minWidth: 150,
         height: 75,
         minHeight: 100,
@@ -509,8 +527,8 @@ const Reports = React.memo(() => {
         content: 'minuts',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
-            <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
-            <div className={classes.tableHeaderSubSubTitle}>{'Кол-во минут'}</div>
+            <div className={classes.tableHeaderSubTitle}>{`${translate('reportAll', language)}`}</div>
+            <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportCountMinutes', language)}`}</div>
           </div>
         )
       })
@@ -530,7 +548,7 @@ const Reports = React.memo(() => {
         content: 'percent',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
-            <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
+            <div className={classes.tableHeaderSubTitle}>{`${translate('reportAll', language)}`}</div>
             <div className={classes.tableHeaderSubSubTitle}>{'%'}</div>
           </div>
         )
@@ -539,7 +557,7 @@ const Reports = React.memo(() => {
     if (checkboxCalls) {
       columnsArray.push({
         field: 'row_total_processed_calls_count',
-        headerName: 'Кол-во всего звонков',
+        headerName: `${translate('reportAllCount', language)}`,
         minWidth: 150,
         height: 75,
         minHeight: 100,
@@ -550,8 +568,8 @@ const Reports = React.memo(() => {
         content: 'percent',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
-            <div className={classes.tableHeaderSubTitle}>{'Всего'}</div>
-            <div className={classes.tableHeaderSubSubTitle}>{'Кол-во всего звонков'}</div>
+            <div className={classes.tableHeaderSubTitle}>{`${translate('reportAll', language)}`}</div>
+            <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportAllCount', language)}`}</div>
           </div>
         )
       })
@@ -579,6 +597,7 @@ const Reports = React.memo(() => {
         result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_count;
         result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_minutes;
         result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total}%`;
+        result[indexRow][`percent_calls_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total;
 
         if (checkboxValue) {
           const diffValue = callReport.diff_report[itemRow].cols[itemCol].calls_count;
@@ -663,11 +682,31 @@ const Reports = React.memo(() => {
   }
   const rows: GridRowsProp = rowsTable();
 
+  const [dataChart, setDataChart] = useState<any>([]);
+  const getDataChartFunc = () => {
+    let arr: any[] = [];
+    if (checkChart === 'calls') {
+      callReport.report.cols.forEach((itemCol, indexCol) => {
+        arr.push(`calls_count_${indexCol}`)
+      })
+    } else if (checkChart === 'minutes') {
+      callReport.report.cols.forEach((itemCol, indexCol) => {
+        arr.push(`calls_minutes_${indexCol}`)
+      })
+    } else {
+      callReport.report.cols.forEach((itemCol, indexCol) => {
+        arr.push(`percent_calls_${indexCol}`)
+      })
+    }
+    return arr
+  }
   useEffect(() => {
     dispatch(reportsSlice.actions.setTableRows(rows));
     dispatch(reportsSlice.actions.setTableColumns(columns));
+    //
+    setDataChart(getDataChartFunc());
 
-  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
+  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent, checkChart])
 
   const getCallParameters = async (event: any) => {
     hideVisibleParameters();
@@ -730,10 +769,10 @@ const Reports = React.memo(() => {
             activeColsCriterias.push(allCriterias.filter((item) => item.key === searchItem.key));
 
             let activeSearchItems = cloneDeep(activeColsCriterias);
-            for (let y = 0; y < activeSearchItems.length; y++) {
+            // for (let y = 0; y < activeSearchItems.length; y++) {
               //@ts-ignore
               activeSearchItems[j].values = searchItem.values
-            }
+            // }
             dispatch(reportsSlice.actions.setActiveCriteriaColumn({
               arrayIndex: i - 1,
               criteria: activeSearchItems[j]
@@ -866,14 +905,6 @@ const Reports = React.memo(() => {
               }}
             >
               {translate('reportOptions', language)}
-            </LoadingButton>
-            <LoadingButton
-              className={classes.getReportsButton}
-              color="primary"
-              variant="contained"
-              onClick={formReport}
-            >
-              {translate('makeReport', language)}
             </LoadingButton>
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -1337,26 +1368,62 @@ const Reports = React.memo(() => {
             />
           }
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            {currentSavedReport.value ?
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{display: 'flex', alignItems: 'center', marginRight: '20px'}}>
+              <FormGroup className={classes.checkboxDiff}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      onChange={handleCheckboxShowChart}
+                      checked={checkboxShowChart}
+                    />}
+                  label={`${translate('reportToggleChart', language)}`}
+                />
+              </FormGroup>
+              <div>
+                <ContainedSelect
+                  height={'38px'}
+                  width={'265px'}
+                  justify={'center'}
+                  onSelectChange={(event: any) => {
+                    setChartTypeValue(event)
+                  }}
+                  options={chartTypeOptions}
+                  value={chartTypeValue}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              {currentSavedReport.value ?
+                <LoadingButton
+                  className={classes.getReportsButton}
+                  color="error"
+                  variant="outlined"
+                  onClick={handleOpen}
+                >
+                  {translate('reportDeleteReport', language)}
+                </LoadingButton>
+                : <></>
+              }
               <LoadingButton
                 className={classes.getReportsButton}
-                color="error"
+                color="primary"
                 variant="outlined"
-                onClick={handleOpen}
+                onClick={saveReportAsync}
               >
-                {translate('reportDeleteReport', language)}
+                {translate('reportSaveReport', language)}
               </LoadingButton>
-              : <></>
-            }
-            <LoadingButton
-              className={classes.getReportsButton}
-              color="primary"
-              variant="outlined"
-              onClick={saveReportAsync}
-            >
-              {translate('reportSaveReport', language)}
-            </LoadingButton>
+
+              <LoadingButton
+                className={classes.getReportsButton}
+                color="primary"
+                variant="contained"
+                onClick={formReport}
+              >
+                {translate('makeReport', language)}
+              </LoadingButton>
+            </div>
+            
           </div>
         </BlockBox>
         : null
@@ -1383,7 +1450,8 @@ const Reports = React.memo(() => {
                 :
                 <div style={{ marginBottom: '60px' }}>
                   <div className={classes.reportItemInfo}>
-                    <div className={classes.flexCenterMb}>
+
+                    {/* <div className={classes.flexCenterMb}>
                       <LoadingButton
                         className={classes.reportOptionsButton}
                         color="primary"
@@ -1393,7 +1461,19 @@ const Reports = React.memo(() => {
                       >
                         {translate('reportExport', language)}
                       </LoadingButton>
-                    </div>
+                    </div> */}
+                    
+                    {tableRows.length > 0  && dataChart.length > 0 && checkboxShowChart ?
+                      <ChartsBlock
+                        chartTypeValue={chartTypeValue}
+                        tableRows={tableRows}
+                        dataChart={dataChart}
+                        handleCheckChart={handleCheckChart}
+                        checkChart={checkChart}
+                      />
+                    : <></>
+                    }
+
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography className={classes.reportTitle} variant="h6">
@@ -1534,7 +1614,7 @@ const Reports = React.memo(() => {
                               position: "sticky",
                               top: '-1px',
                               backgroundColor: '#fff',
-                              zIndex: 10,
+                              // zIndex: 10,
                               borderTopLeftRadius: '10px !important',
                               borderTopRightRadius: '10px !important',
                               borderBottom: 'none !important'
@@ -1547,6 +1627,7 @@ const Reports = React.memo(() => {
                             }
                           }}
                         >
+                          
                           <div ref={gridWrapperRef} style={{ height: heightTable }}>
                             <DataGrid
                               autoHeight

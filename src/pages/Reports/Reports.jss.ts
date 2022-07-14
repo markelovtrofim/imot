@@ -249,7 +249,7 @@ export const reportsStyles = makeStyles(({
   },
   tableHeaderSubTitle: {
     whiteSpace: 'break-spaces',
-    paddingBottom: '12px',
+    paddingBottom: '17px',
     textAlign: 'center',
     position: 'relative',
     fontSize: '13px',
