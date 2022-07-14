@@ -165,7 +165,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     setLoading(true);
     dispatch(callsSlice.actions.zeroingSkip(null));
     await dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
-    await dispatch(getBaseCallsData());
+    await dispatch(getBaseCallsData({}));
     setLoading(false);
   }; 
   function switchSearchItemCLassName(className: string) {

@@ -54,6 +54,12 @@
   "analyze": "Reboot",
   "stt": "Update stt",
 
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Date",
+  "duration": "Duration",
+  "grade": "Grade",
+
+
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Dictionary",
   "buttonTagsName_dicts": "Tags",
