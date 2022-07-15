@@ -370,6 +370,11 @@ export const callsSlice = createSlice({
       state.sort = action.payload;
     },
 
+    setDictionaryPopupParams(state, action: PayloadAction<DictionaryPopupType>) {
+      state.popupVisible = action.payload.popupVisible;
+      state.popupPosition = action.payload.popupPosition;
+    },
+
     deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {
       if (action.payload.bundleIndex || action.payload.bundleIndex === 0) {
         let currentCalls = cloneDeep(current(state.calls[action.payload.bundleIndex]));
