@@ -15,6 +15,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { getAllUserDicts, getAllWordInDictionary } from "../../../store/calls/calls.slice";
+import TextMobileStepper from "./TextMobileStepper";
 import "../style.css";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -30,270 +31,20 @@ interface DictionaryStepPropType {
   selectionText: string,
   closeDictionaryFunc: any,
 }
-
-// const steps = [
-//   {
-//     label: "Редактировать",
-//     description: <TextareaComponent />,
-//   },
-//   {
-//     label: "Выберите в какой словарь добавить",
-//     description: <AllUserDictsComponent />,
-//   },
-//   {
-//     label: "Слова в словаре",
-//     description: "Список слов"
-//   }
-// ];
-
-// function TextareaComponent() {
-//   const [textareaValue, setTextareaValue] = useState<string>("");
-
-//   useEffect(() => {
-//     const select: any = window.getSelection();
-//     const selectionText = select.toString().replace(/\s+/g, ' ').trim();
-
-//     setTextareaValue(selectionText);
-//   }, [])
-
-//   return (
-//     <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
-//   )
-// }
-// function AllUserDictsComponent() {
-//   const [allUserDicts, setAllUserDicts] = useState<any>([]);
-//   // const { getAllUserDicts } = useSelector((state: any) => state.calls);
-
-//   // console.log(getAllUserDicts);
-
-//   const dispatch = useDispatch();
-
-//   async function getAllUserDictsFunc() {
-//     const userDicts = await dispatch(getAllUserDicts());
-//     // @ts-ignore
-//     // console.log(userDicts.payload);
-//     // @ts-ignore
-//     setAllUserDicts(userDicts.payload);
-//   }
-
-//   async function chooseOneDict(id: string) {
-//     console.log("Id словаря", id);
-//     dispatch(getAllWordInDictionary({ id: id }));
-//   }
-
-//   useEffect(() => {
-//     getAllUserDictsFunc();
-//   }, []);
-
-//   function renderDicts(item: any) {
-//     return (
-//       <div className="dict-item" onClick={() => chooseOneDict(item.id)}>
-//         <p>{item.title}</p>
-//       </div>
-//     )
-//   }
-
-//   return (
-//     <div className="dicts-block">
-//       {
-//         allUserDicts.length > 0
-//           ? (
-//             allUserDicts.map(renderDicts)
-//           ) : (
-//             <div className="wait-dicts-loader">
-//               <CircularProgress />
-//             </div>
-//           )
-//       }
-//     </div>
-//   )
-// }
-
-function TextMobileStepper() {
-  const steps = [
-    {
-      label: "Редактировать",
-      description: <TextareaComponent />,
-    },
-    {
-      label: "Выберите в какой словарь добавить",
-      description: <AllUserDictsComponent />,
-    },
-    {
-      label: "Слова в словаре",
-      description: "Список слов"
-    }
-  ];
-  
-  function TextareaComponent() {
-    const [textareaValue, setTextareaValue] = useState<string>("");
-  
-    useEffect(() => {
-      const select: any = window.getSelection();
-      const selectionText = select.toString().replace(/\s+/g, ' ').trim();
-  
-      setTextareaValue(selectionText);
-    }, [])
-  
-    return (
-      <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
-    )
-  }
-  function AllUserDictsComponent() {
-    const [allUserDicts, setAllUserDicts] = useState<any>([]);
-    // const { getAllUserDicts } = useSelector((state: any) => state.calls);
-  
-    // console.log(getAllUserDicts);
-  
-    const dispatch = useDispatch();
-  
-    async function getAllUserDictsFunc() {
-      const userDicts = await dispatch(getAllUserDicts());
-      // @ts-ignore
-      // console.log(userDicts.payload);
-      // @ts-ignore
-      setAllUserDicts(userDicts.payload);
-    }
-  
-    async function chooseOneDict(id: string) {
-      console.log("Id словаря", id);
-      dispatch(getAllWordInDictionary({ id: id }));
-      handleNext();
-    }
-  
-    useEffect(() => {
-      getAllUserDictsFunc();
-    }, []);
-  
-    function renderDicts(item: any) {
-      return (
-        <div className="dict-item" onClick={() => chooseOneDict(item.id)}>
-          <p>{item.title}</p>
-        </div>
-      )
-    }
-  
-    return (
-      <div className="dicts-block">
-        {
-          allUserDicts.length > 0
-            ? (
-              allUserDicts.map(renderDicts)
-            ) : (
-              <div className="wait-dicts-loader">
-                <CircularProgress />
-              </div>
-            )
-        }
-      </div>
-    )
-  }
-  function AllPhraseInDictComponent() {
-    const dispatch = useDispatch();
-    const [textareaValue, setTextareaValue] = useState<string>("");
-
-    async function getAllPhraseInDict() {
-      
-    }
-
-    useEffect(() => {
-      getAllPhraseInDict();
-    }, []);
-
-    return (
-      <textarea className="dictionary-textarea" name="" id="" value={textareaValue} onChange={event => setTextareaValue(event.target.value)}></textarea>
-
-    )
-  }
-
-  const theme = useTheme();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = steps.length;
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-
-
-  return (
-    <Box sx={{ width: 400, flexGrow: 1 }}>
-      <Paper
-        square
-        elevation={0}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          height: 50,
-          pl: 2,
-          bgcolor: "background.default"
-        }}
-      >
-        <Typography>{steps[activeStep].label}</Typography>
-      </Paper>
-      <Box sx={{ height: 255, maxWidth: 400, width: "100%", p: 2 }}>
-        {steps[activeStep].description}
-      </Box>
-      <MobileStepper
-        variant="text"
-        steps={maxSteps}
-        position="static"
-        activeStep={activeStep}
-        nextButton={
-          <Button
-            size="small"
-            onClick={handleNext}
-            disabled={activeStep === maxSteps - 1}
-          >
-            Далее
-            {theme.direction === "rtl" ? (
-              <KeyboardArrowLeft />
-            ) : (
-              <KeyboardArrowRight />
-            )}
-          </Button>
-        }
-        backButton={
-          <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-            {theme.direction === "rtl" ? (
-              <KeyboardArrowRight />
-            ) : (
-              <KeyboardArrowLeft />
-            )}
-            Назад
-          </Button>
-        }
-      />
-    </Box>
-  );
+interface TextMobileStepperPropType {
+  selectedText: string,
+  changeSelectedText: any,
 }
 
 const DictionaryStep = ({ selectionText, closeDictionaryFunc }: DictionaryStepPropType) => {
-  const [open, setOpen] = React.useState(true);
-  const dispatch = useDispatch();
+  const [open, setOpen] = useState<boolean>(true);
+  const [selectedText, setSelectedText] = useState<string>(selectionText);
+  const [choosedDictId, setChoosedDictId] = useState<string>("");
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
   const handleClose = () => {
     closeDictionaryFunc();
     setOpen(false);
   };
-
-  // async function getAllUserDictsFunc() {
-  //   const userDicts = await dispatch(getAllUserDicts());
-  //   // @ts-ignore
-  //   console.log(userDicts.payload);
-  // }
-
-  // useEffect(() => {
-  //   console.log("Test useEffect");
-  //   getAllUserDictsFunc();
-  // }, []);
 
   return (
     <div>
@@ -305,7 +56,12 @@ const DictionaryStep = ({ selectionText, closeDictionaryFunc }: DictionaryStepPr
         aria-labelledby="customized-dialog-title"
         open={open}
       >
-        <TextMobileStepper />
+        <TextMobileStepper
+          selectedText={selectedText}
+          changeSelectedText={setSelectedText}
+          choosedDictId={choosedDictId}
+          setChoosedDictId={setChoosedDictId}
+        />
       </BootstrapDialog>
     </div>
   );

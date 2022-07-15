@@ -10,8 +10,15 @@
 }
 .dictionary-textarea {
   width: 100%;
+  max-width: 368px;
   height: 70px;
   outline: 0;
+}
+.phrases-textarea {
+  height: 243px;
+  max-height: 243px;
+  min-height: 243px;
+  resize: none;
 }
 
 .dict-item {
@@ -37,4 +44,14 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.menu-stepper {
+  width: 100%;
+  height: 100%;
+  padding: 11px 15px;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
 }
