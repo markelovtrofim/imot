@@ -173,13 +173,13 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   const history = useHistory();
   const searchRequest = async () => {
     setLoading(true);
-    dispatch(callsSlice.actions.zeroingSkip(null));
+    dispatch(callsSlice.actions.zeroingSkip(null)); 
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
     const bastCallDataResponse = await dispatch(getBaseCallsData());
     // @ts-ignore
     const bastCallData = bastCallDataResponse.payload;
 
-    history.push(`?searchHash=${bastCallData.search_filter_hash}`);
+    history.push(`?searchHash=${bastCallData.search_filter_hash}`); 
     setLoading(false);
   };
 

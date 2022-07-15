@@ -54,6 +54,12 @@
   "analyze": "Reboot",
   "stt": "Update stt",
 
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Date",
+  "duration": "Duration",
+  "grade": "Grade",
+
+
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Dictionary",
   "buttonTagsName_dicts": "Tags",
@@ -109,11 +115,21 @@
   "reportCalls": "Calls",
   "reportMinutes": "Minutes",
   "reportPercent": "Percent",
+  "reportSumCalls": "Sum of calls",
+  "reportAll": "Total",
+  "reportCountMinutes": "Number of minutes",
+  "reportAllCount": "Number of total calls",
   "reportDeleteMes": "Are you sure to delete the report?",
   "reportNotFind": "No calls found in the selected period",
   "reportCallFind": "Found calls",
   "reportsMakeReport": "To make a report, select the parameters and click the \"Make report\" button",
-
+  "reportShow": "Show",
   "reportSaved": "Report saved!",
-  "reportDeleted": "Report deleted!"
+  "reportDeleted": "Report deleted!",
+  "reportToggleChart": "Show graph",
+  "lineChart": "Line chart",
+  "barChart": "Bar chart",
+  "pieChart": "Pie chart",
+  "radarChart": "Radar chart"
+
 }

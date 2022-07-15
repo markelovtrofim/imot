@@ -42,16 +42,18 @@ type ContainedSelectPropsType = {
 }
 
 
-const ContainedSelect: FC<ContainedSelectPropsType> = ({
-                                                         width,
-                                                         height,
-                                                         justify,
-                                                         marginRight,
+const ContainedSelect: FC<ContainedSelectPropsType> = (
+  {
+    width,
+    height,
+    justify,
+    marginRight,
 
-                                                         onSelectChange,
-                                                         options,
-                                                         value
-                                                       }) => {
+    onSelectChange,
+    options,
+    value
+  }
+) => {
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {
@@ -134,7 +136,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = ({
     }),
     option: (provided: any, state: any) => ({
       cursor: 'pointer',
-      padding: '10px 24px',
+      padding: '10px 24px 10px 10px',
       fontFamily: 'Inter, sans-serif',
       fontSize: '14px',
       backgroundColor: '#ffffff',

@@ -1,5 +1,5 @@
-import React, {FC} from 'react';
-import {Typography} from "@mui/material";
+ import React, {useEffect, FC, useState} from 'react';
+import {CircularProgress, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
@@ -17,6 +17,7 @@ import {langSlice} from "../../store/lang/lang.slice";
 
 const useStyles = makeStyles(({
   callsHeader: {
+
     background: '#fff',
     borderRadius: '10px 10px 0 0'
   },
@@ -76,9 +77,17 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
   const classes = useStyles();
   const dispatch = useDispatch();
   const {language} = useAppSelector((state: RootState) => state.lang);
+
   const selectAllCalls = useAppSelector(state => state.calls.isSelectAllCalls);
   const currentUser = useAppSelector(state => state.users.currentUser);
   const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
+
+  const sortParams = useAppSelector(state => state.calls.sort);
+  const sortArray = [
+    {value: "date", label: translate("date", language)},
+    {value: "duration", label: translate("duration", language)},
+    {value: "grade", label: translate("grade", language)}
+  ];
 
   return (
     <div className={classes.callsHeader}>
@@ -91,7 +100,6 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
           }
         </div>
         <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-
           {/* Скачать */}
           <DownloadOnClick
             onClick={async (event) => {
@@ -177,10 +185,38 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
               {value: "stt", label: "Перетегировать"}
             ]}
             optionsPosition={"bottom"}
+            />
+          </div>
+
+        <div>
+          <ContainedSelect
+            width={"150px"}
+            onSelectChange={(event) => {
+              if (event.value === "grade") {
+                dispatch(langSlice.actions.setSnackbar({
+                  type: "error",
+                  text: "Этот вид сортировки пока не работает",
+                  value: true,
+                  time: 2000
+                }));
+              } else {
+                dispatch(callsSlice.actions.setSort(event.value));
+                dispatch(callsSlice.actions.zeroingSkip(null));
+                dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}))
+                if (event.value === "duration") {
+                  dispatch(getBaseCallsData({sort: event.value}))
+                } else if (event.value === "date") {
+                  dispatch(getBaseCallsData({}))
+                }
+              }
+            }}
+            options={sortArray}
+            value={{value: sortParams, label: translate(sortParams, language)}}
+
           />
         </div>
       </div>
-      <Grid container className={classes.callsCols}>
+      <Grid container className={classes.callsCols}> 
         {/*<Grid item xs={0.2} style={{minWidth: '10px', display: 'flex', alignItems: 'center'}}>*/}
         {/*  <CustomCheckbox*/}
         {/*    checked={selectAllCalls}*/}
@@ -190,7 +226,7 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
         {/*    }}*/}
         {/*  />*/}
         {/*</Grid>*/}
-
+ 
         <Grid item xs={0.5} style={{minWidth: '50px', display: 'flex', alignItems: 'center'}}>
           <span style={{marginRight: '15px'}}><ClockSvg/></span>
           <ArrowsSvg/>
