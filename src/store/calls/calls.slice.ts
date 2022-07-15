@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import {CallActionDataType, CallInfoType, CallType} from "./calls.types";
+import {CallActionDataType, CallInfoType, CallsActionDataType, CallType} from "./calls.types";
 import {RootState} from "../store";
 import {instance} from "../api";
 import cloneDeep from "lodash.clonedeep";
@@ -222,23 +222,74 @@ export const getCallsInfoById = createAsyncThunk(
   }
 );
 
-export const callAction =  createAsyncThunk(
+export const callAction = createAsyncThunk(
   'calls/callAction',
-  async (payload: {id: string, data: CallActionDataType}, thunkAPI) => {
+  async (payload: { id: string, data: CallActionDataType }, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const response = await instance.post(`call/${payload.id}/action`, payload.data,  {
+      const response = await instance.post(`call/${payload.id}/action`, payload.data, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
-
+      return response;
     } catch (error) {
       console.log(error);
     }
   }
 );
+
+export const callsAction = createAsyncThunk(
+  'calls/callsAction',
+  async (payload: CallsActionDataType, thunkAPI) => {
+    try {
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.post(`calls/action`, payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getActionFiles = createAsyncThunk(
+  'calls/getActionFiles',
+  async (taskId: string, thunkAPI) => {
+    try {
+      // /task/{task_id}/attachment
+      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const res = await instance.get(`/task/${taskId}/attachment`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        responseType: 'arraybuffer'
+      });
+      // console.log(res.data)
+      // const disposition = res.request.getResponseHeader('Content-Disposition')
+      // let fileName = "";
+      // let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+      // let matches = filenameRegex.exec(disposition);
+      // if (matches != null && matches[1]) {
+      //   fileName = matches[1].replace(/['"]/g, '');
+      // }
+      debugger
+      let blob = new Blob([res.data], { type: 'application/zip' })
+      const downloadUrl = URL.createObjectURL(blob)
+      let a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "whileJustFile";
+      document.body.appendChild(a);
+      a.click();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+)
 
 type InitialStateType = {
   bundleLength: number,
@@ -306,7 +357,7 @@ export const callsSlice = createSlice({
       state.isSelectAllCalls = action.payload;
     },
 
-    deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {
+    deleteCall(state, action: PayloadAction<{ id: string, bundleIndex: number | null }>) {
       if (action.payload.bundleIndex || action.payload.bundleIndex === 0) {
         let currentCalls = cloneDeep(current(state.calls[action.payload.bundleIndex]));
         const call = currentCalls.find(item => {
@@ -366,7 +417,7 @@ export const callsSlice = createSlice({
         state.skip = 10;
       }
     },
-    setInfo(state, action: PayloadAction<{info: CallInfoType | null, id: string, index: number | null}>) {
+    setInfo(state, action: PayloadAction<{ info: CallInfoType | null, id: string, index: number | null }>) {
       if (action.payload.index || action.payload.index === 0) {
         state.calls[action.payload.index].map((item) => {
           if (item.info && (item.info.id === action.payload.id)) {
@@ -383,7 +434,7 @@ export const callsSlice = createSlice({
         }
       });
     },
-    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number | null}>) {
+    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number | null }>) {
       if (action.payload.index || action.payload.index === 0) {
         state.calls[action.payload.index].map(i => {
           if (i.info && (i.info.id === action.payload.id)) {

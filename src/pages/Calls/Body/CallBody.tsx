@@ -11,7 +11,7 @@ import {
   CallTagType,
 } from "../../../store/calls/calls.types";
 import Reboot from "../../../components/common/Buttons/Reboot";
-import Download from "../../../components/common/Buttons/Download";
+import {DownloadHref} from "../../../components/common/Buttons/Download";
 import Back from "../../../components/common/Buttons/Back";
 import { BlockBox } from "../../../components/common";
 import { Fragment } from "../../../components/common/Tag";
@@ -468,7 +468,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
             )}
 
             {/* Скачать */}
-            <Download href={callAudio}/>
+            <DownloadHref href={callAudio}/>
 
             {/* Перераспознать */}
             {callInfo.allowedActions.indexOf("analyze") != -1 && (

@@ -17,17 +17,16 @@ const DownloadSvg = () => {
 };
 
 
-type DownloadPropsType = {
-  href: string | null
+type DownloadHrefPropsType = {
+  href: string | null,
 }
 
-const Download: FC<DownloadPropsType> = ({href}) => {
+export const DownloadHref: FC<DownloadHrefPropsType> = ({href}) => {
   const currentCall = useAppSelector(state => state.calls.currentCall);
 
   return (
     <IconButton
       onClick={() => {}}
-
       disabled={!href}
       icon={
         // @ts-ignore
@@ -39,10 +38,31 @@ const Download: FC<DownloadPropsType> = ({href}) => {
       margin={'0 15px 0 0'}
       backgroundColor="#E3E8EF"
 
-      tooltipTitle={"Скопировать публичную ссылку"}
+      tooltipTitle={"Скачать"}
       tooltipPlacement={"top"}
     />
   );
 };
 
-export default Download;
+
+type DownloadOnClickPropsType = {
+  onClick: (event: any) => void,
+}
+
+export const DownloadOnClick: FC<DownloadOnClickPropsType> = ({onClick}) => {
+  const currentCall = useAppSelector(state => state.calls.currentCall);
+
+  return (
+    <IconButton
+      onClick={onClick}
+      icon={<DownloadSvg/>}
+
+      margin={'0 15px 0 0'}
+      backgroundColor="#E3E8EF"
+
+      tooltipTitle={"Скачать"}
+      tooltipPlacement={"top"}
+    />
+  );
+};
+

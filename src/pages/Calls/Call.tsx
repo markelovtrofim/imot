@@ -152,13 +152,11 @@ const CallStubMiddleware = memo(({
     },
     callMNumberBox: {
       minWidth: '120px',
-      paddingTop: '12px'
     },
     callMNumber: {
       fontSize: '15px !important'
     },
     callTagsTitle: {
-      margin: '5px !important',
       color: '#738094 !important',
       minWidth: '120px',
       fontSize: '12px !important',
@@ -185,36 +183,34 @@ const CallStubMiddleware = memo(({
         {/* Первичная информация о звонке. */}
         <AccordionSummary className={classes.accordion} disabled>
           <Grid container className={classes.callInner}>
+            <div style={{textAlign: 'center', margin: '12px 12px 0 0'}}>
+              <CustomCheckbox
+                checked={false}
+                onChange={() => {}}
+              />
+            </div>
 
             {/* Сотрудник. */}
             <Grid item xs={1.8} style={{minWidth: '145px'}}>
               {/* Имя и фамилия. */}
               <div className={classes.employee}>
-                <Typography className={classes.employeeText}>
-                  <Skeleton width={60} height={20} variant="text"/>
-                </Typography>
-                <CallSvg/>
+                <Skeleton width={108} height={20} variant="text"/>
+                <CallSvg style={{marginLeft: '35px'}}/>
               </div>
               {/* Дата звонка.*/}
               <div className={classes.callDateBox}>
-                <Typography className={classes.callDate}>
-                  <Skeleton width={100} height={20} variant="text"/>
-                </Typography>
-              </div>
-              {/* Время звонка. */}
-              <div className={classes.callDurationBox}>
-                <Typography className={classes.callDuration}>
-                  <Skeleton width={60} height={20} variant="text"/>
-                </Typography>
+                <Skeleton width={147} height={20} variant="text"/>
               </div>
             </Grid>
 
             {/* Клиент. */}
             <Grid item xs={1.5} className={classes.callMNumberBox}>
               {/* Номер телефона. */}
-              <Typography className={classes.callMNumber}>
-                <Skeleton style={{maxWidth: '100px'}} height={20} variant="text"/>
-              </Typography>
+              <Skeleton style={{maxWidth: '100px'}} width={108} height={20} variant="text"/>
+              {/* Время звонка. */}
+              <div className={classes.callDurationBox}>
+                <Skeleton width={147} height={20} variant="text"/>
+              </div>
             </Grid>
 
             <Grid item xs={6.7}>
@@ -223,7 +219,7 @@ const CallStubMiddleware = memo(({
               <div style={{display: 'flex'}}>
                 <Typography className={classes.callTagsTitle}>Теги звонка</Typography>
                 <div style={{width: '100%'}}>
-                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 10px 10px'}} height={20} variant="text"/>
                 </div>
               </div>
 
@@ -231,7 +227,7 @@ const CallStubMiddleware = memo(({
               <div style={{display: 'flex'}}>
                 <Typography className={classes.callTagsTitle}>Теги фрагмента</Typography>
                 <div style={{width: '100%'}}>
-                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={27} variant="text"/>
+                  <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={20} variant="text"/>
                 </div>
               </div>
 
@@ -535,7 +531,7 @@ const Call = memo((props: CallPropsType) => {
           id={'accordionSummary'}
           className={classes.accordionSummary} tabIndex={-1}
         >
-          <div style={{textAlign: 'center', marginTop: '20px'}}>
+          <div style={{textAlign: 'center', margin: '12px 12px 0 0'}}>
             <CustomCheckbox
               checked={(selectedCalls.find(id => id === props.callInfo.id) === props.callInfo.id) || selectAllCalls}
               onChange={(event) => {
