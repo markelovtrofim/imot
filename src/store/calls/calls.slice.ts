@@ -1,7 +1,7 @@
-import {createAsyncThunk, createSlice, current, PayloadAction} from "@reduxjs/toolkit";
-import {CallActionDataType, CallInfoType, CallType} from "./calls.types";
-import {RootState} from "../store";
-import {instance} from "../api";
+import { createAsyncThunk, createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { CallActionDataType, CallInfoType, CallType } from "./calls.types";
+import { RootState } from "../store";
+import { instance } from "../api";
 import cloneDeep from "lodash.clonedeep";
 
 // get all calls
@@ -13,16 +13,24 @@ type ResponseBaseCallsDataType = {
   call_ids: string[]
 };
 
+type DictionaryPopupType = {
+  popupVisible: boolean,
+  popupPosition: {
+    top: number,
+    left: number,
+  }
+};
+
 const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   let requestArray = [];
   for (let i = 0; i < defaultCriterias.length; i++) {
     if (defaultCriterias[i].values.length > 0) {
-      requestArray.push({key: defaultCriterias[i].key, values: defaultCriterias[i].values})
+      requestArray.push({ key: defaultCriterias[i].key, values: defaultCriterias[i].values })
     }
   }
   for (let i = 0; i < activeCriterias.length; i++) {
     if (activeCriterias[i].values.length > 0) {
-      requestArray.push({key: activeCriterias[i].key, values: activeCriterias[i].values});
+      requestArray.push({ key: activeCriterias[i].key, values: activeCriterias[i].values });
     }
   }
   return requestArray;
@@ -48,8 +56,8 @@ const convertDate = (date: Date | null) => {
 export const getCallPublicToken = createAsyncThunk(
   'calls/getCallPublicToken',
   async (id: string, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await instance.get(`call/${id}/public_token`, {
+    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+    const { data } = await instance.get(`call/${id}/public_token`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -61,18 +69,18 @@ export const getCallPublicToken = createAsyncThunk(
 export const getAndSetCallStt = createAsyncThunk(
   'calls/getCallStt',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
-    const callSttData = await thunkAPI.dispatch(getCallStt({id: payload.id}));
+    const callSttData = await thunkAPI.dispatch(getCallStt({ id: payload.id }));
     // @ts-ignore
     const callStt = callSttData.payload;
-    thunkAPI.dispatch(callsSlice.actions.setStt({stt: callStt, id: payload.id, index: payload.bundleIndex}));
+    thunkAPI.dispatch(callsSlice.actions.setStt({ stt: callStt, id: payload.id, index: payload.bundleIndex }));
   }
 );
 
 export const getCallStt = createAsyncThunk(
   'calls/getCallStt',
   async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await instance.get(`call/${payload.id}/stt`, {
+    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+    const { data } = await instance.get(`call/${payload.id}/stt`, {
       headers: {
         'Authorization': `Bearer ${payload.token ? payload.token : token}`
       }
@@ -81,22 +89,84 @@ export const getCallStt = createAsyncThunk(
   }
 );
 
+export const getAllUserDicts = createAsyncThunk(
+  'dicts/getAllUserDicts',
+  async (thunkAPI) => {
+    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+
+    const { data } = await instance.get(`/dicts/?show_disabled=false&only_local=false`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'accept': `application/json`,
+      }
+    });
+
+    // @ts-ignore
+    // await thunkAPI.dispatch(callsSlice.actions.setAllUserDicts({allUserDicts: data}));
+
+    console.log("DICTS", data);
+    return data;
+  }
+);
+
+export const getAllWordInDictionary = createAsyncThunk(
+  'dicts/getAllWordInDictionary',
+  async (payload: { id: string }) => {
+    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+
+    const { data } = await instance.get(`/dict/${payload.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'accept': `application/json`,
+      }
+    });
+
+    return data;
+  }
+);
+
+export const updateDict = createAsyncThunk(
+  'dicts/updateDictPhrases',
+  async (payload: { dictId: string, phrases: any[] }) => {
+    try {
+      const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+      console.log(payload);
+      const sendData = {
+        phrases: payload.phrases
+      }
+      // @ts-ignore
+      const response = await instance.put<string>(`/dict/${payload.dictId}`, JSON.stringify(sendData), {
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      console.log(response);
+      console.log(payload);
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+)
 
 export const getAndSetCallAudio = createAsyncThunk(
   'calls/getAndSetCallAudio',
   async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
-    const audioLinkData = await thunkAPI.dispatch(getCallAudio({id: payload.id}));
+    const audioLinkData = await thunkAPI.dispatch(getCallAudio({ id: payload.id }));
     // @ts-ignore
     const audioLink = audioLinkData.payload;
-    thunkAPI.dispatch(callsSlice.actions.setAudio({audio: audioLink, id: payload.id, index: payload.bundleIndex}))
+    thunkAPI.dispatch(callsSlice.actions.setAudio({ audio: audioLink, id: payload.id, index: payload.bundleIndex }))
   }
 );
 
 export const getCallAudio = createAsyncThunk(
   'calls/getCallAudio',
   async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
-    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-    const {data} = await instance.get(`call/${payload.id}/audio`, {
+    const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+    const { data } = await instance.get(`call/${payload.id}/audio`, {
       responseType: 'arraybuffer',
       headers: {
         'Authorization': `Bearer ${payload.token ? payload.token : token}`,
@@ -117,7 +187,7 @@ export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
   async (payload: {sort?: string}, thunkAPI) => {
     try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const { token } = JSON.parse(localStorage.getItem('token') || '{}');
 
       // @ts-ignore;
       const state: RootState = thunkAPI.getState();
@@ -147,11 +217,11 @@ export const getBaseCallsData = createAsyncThunk(
         });
       thunkAPI.dispatch(callsSlice.actions.incrementSkip(null));
       // @ts-ignore
-      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({...response.data, skip: thunkAPI.getState().calls.skip}));
+      thunkAPI.dispatch(callsSlice.actions.setBaseCallsData({ ...response.data, skip: thunkAPI.getState().calls.skip }));
       // @ts-ignore
       await thunkAPI.dispatch(getCallsInfo(thunkAPI.getState().calls.calls[thunkAPI.getState().calls.calls.length - 1]))
     } catch (error) {
-      thunkAPI.dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
+      thunkAPI.dispatch(callsSlice.actions.setEmptyState({ leaveBundles: 0 }));
     }
   }
 );
@@ -162,7 +232,7 @@ export const getCallsInfo = createAsyncThunk(
     try {
       let localCalls = [];
       for (let i = 0; i < payload.length; i++) {
-        const callInfoData = await thunkAPI.dispatch(getCallInfo({id: payload[i].id}));
+        const callInfoData = await thunkAPI.dispatch(getCallInfo({ id: payload[i].id }));
         const callInfo = callInfoData.payload;
         localCalls.push({
           id: payload[i].id,
@@ -182,7 +252,7 @@ export const getCallInfo = createAsyncThunk(
   'calls/getCallInfo',
   async (payload: { id: string | any, token?: string | any }, thunkAPI) => {
     try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const { token } = JSON.parse(localStorage.getItem('token') || '{}');
       const response = await instance.get(`call/${payload.id}`, {
         headers: {
           'Authorization': `Bearer ${payload.token ? payload.token : token}`
@@ -197,10 +267,10 @@ export const getCallInfo = createAsyncThunk(
 
 export const getCallsInfoById = createAsyncThunk(
   'calls/getCallsInfoById',
-  async (payload: any [], thunkAPI) => {
+  async (payload: any[], thunkAPI) => {
     try {
       let localCalls = [];
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+      const { token } = JSON.parse(localStorage.getItem('token') || '{}');
       for (let i = 0; i < payload.length; i++) {
         const response = await instance.get(`call/${payload[i]}`, {
           headers: {
@@ -221,12 +291,12 @@ export const getCallsInfoById = createAsyncThunk(
   }
 );
 
-export const callAction =  createAsyncThunk(
+export const callAction = createAsyncThunk(
   'calls/callAction',
-  async (payload: {id: string, data: CallActionDataType}, thunkAPI) => {
+  async (payload: { id: string, data: CallActionDataType }, thunkAPI) => {
     try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const response = await instance.post(`call/${payload.id}/action`, payload.data,  {
+      const { token } = JSON.parse(localStorage.getItem('token') || '{}');
+      const response = await instance.post(`call/${payload.id}/action`, payload.data, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -249,7 +319,13 @@ type InitialStateType = {
   callIds: null,
   calls: CallType[][] | [],
   currentCall: CallType | null | false,
-  callPageSearchParams: string
+  callPageSearchParams: string,
+  popupVisible: boolean,
+  popupPosition: {
+    top: number,
+    left: number,
+  },
+  allUserDicts: any,
 }
 
 const createInitialCalls = (lengthEmptyArray: number = 10) => {
@@ -274,9 +350,14 @@ const initialState: InitialStateType = {
   limit: 10,
   callIds: null,
   calls: createInitialCalls(),
-
   currentCall: null,
-  callPageSearchParams: ""
+  callPageSearchParams: "",
+  popupVisible: false,
+  popupPosition: {
+    top: 0,
+    left: 0,
+  },
+  allUserDicts: [],
 };
 
 export const callsSlice = createSlice({
@@ -307,7 +388,9 @@ export const callsSlice = createSlice({
         state.calls[action.payload.bundleIndex] = currentCalls
       }
     },
-
+    setAllUserDicts(state, action: any) {
+      state.allUserDicts = action.payload.allUserDicts;
+    },
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
       let calls = [];
       for (let i = 0; i < action.payload.call_ids.length; i++) {
@@ -349,7 +432,7 @@ export const callsSlice = createSlice({
         state.skip = 10;
       }
     },
-    setInfo(state, action: PayloadAction<{info: CallInfoType | null, id: string, index: number | null}>) {
+    setInfo(state, action: PayloadAction<{ info: CallInfoType | null, id: string, index: number | null }>) {
       if (action.payload.index || action.payload.index === 0) {
         state.calls[action.payload.index].map((item) => {
           if (item.info && (item.info.id === action.payload.id)) {
@@ -366,7 +449,7 @@ export const callsSlice = createSlice({
         }
       });
     },
-    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number | null}>) {
+    setStt(state, action: PayloadAction<{ stt: any, id: string, index: number | null }>) {
       if (action.payload.index || action.payload.index === 0) {
         state.calls[action.payload.index].map(i => {
           if (i.info && (i.info.id === action.payload.id)) {

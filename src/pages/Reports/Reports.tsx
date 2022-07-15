@@ -85,6 +85,7 @@ const Reports = React.memo(() => {
 
   useEffect(() => {
     document.title = "Отчёты | IMOT.io";
+    console.log("Huy from reports");
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
       dispatch(getDefaultCriterias());
@@ -807,7 +808,7 @@ const Reports = React.memo(() => {
       await dispatch(setReports());
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
-      
+
       setSnackbar({
         type: 'success',
         value: true,
@@ -830,7 +831,7 @@ const Reports = React.memo(() => {
     setSnackbar({
       type: 'success',
       value: true,
-      text:`${translate('reportDeleted', language)}`,
+      text: `${translate('reportDeleted', language)}`,
       time: 3000
     });
   }
@@ -871,7 +872,7 @@ const Reports = React.memo(() => {
         const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
         const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
-          setHeightTable(`${ gridEl.clientHeight - 5 }px`);
+          setHeightTable(`${gridEl.clientHeight - 5}px`);
         }
         if (gridElHeader && gridElHeaderInner) {
           const height = gridElHeaderInner.clientHeight
