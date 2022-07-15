@@ -58,6 +58,7 @@
     "react-scroll": "^1.8.4",
     "react-select": "^5.2.2",
     "react-table": "^7.8.0",
+    "recharts": "^2.1.12",
     "redux-thunk": "^2.3.0",
     "rsuite": "^5.8.0",
     "typescript": "^4.1.2",

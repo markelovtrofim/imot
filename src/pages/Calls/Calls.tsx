@@ -78,7 +78,7 @@ const Calls = React.memo(() => {
 
   const pushNewCalls = async () => {
     setFetching(true);
-    await dispatch(getBaseCallsData());
+    await dispatch(getBaseCallsData({}));
     setFetching(false);
   };
 

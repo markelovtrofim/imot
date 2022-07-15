@@ -53,6 +53,12 @@
   "analyze": "Перераспознать",
   "stt": "Перетегировать",
 
+  "CALLS_SORT": "CALLS_SORT",
+  "date": "Дата",
+  "duration": "Длительность",
+  "grade": "Оценка",
+
+
   "DICTS": "DICTS",
   "buttonDictsName_dicts": "Словари",
   "buttonTagsName_dicts": "Теги",
@@ -121,12 +127,21 @@
   "reportCalls": "Звонки",
   "reportMinutes": "Минуты",
   "reportPercent": "Проценты",
+  "reportSumCalls": "Сумма звонков",
+  "reportAll": "Всего",
+  "reportCountMinutes": "Кол-во минут",
+  "reportAllCount": "Кол-во всего звонков",
   "reportDeleteMes": "Вы точно хотите удалить отчет?",
   "reportNotFind": "Не найдено звонков в выбранном периоде",
   "reportCallFind": "Под условия фильтра попало звонков",
   "reportsMakeReport": "Для построения отчета выберите необходимые параметры и нажмите кнопку \"Сформировать отчет\"",
-
+  "reportShow": "Показать",
   "reportSaved": "Отчет сохранен!",
-  "reportDeleted": "Отчет удален!"
+  "reportDeleted": "Отчет удален!",
+  "reportToggleChart": "Показать график",
+  "lineChart": "Линейная диаграмма",
+  "barChart": "Гистограмма",
+  "pieChart": "Круговая диаграмма",
+  "radarChart": "Радиальная диаграмма" 
 
 }
