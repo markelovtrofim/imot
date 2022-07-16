@@ -86,6 +86,7 @@ const Reports = React.memo(() => {
 
   useEffect(() => {
     document.title = "Отчёты | IMOT.io";
+    console.log("Huy from reports");
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
       dispatch(getDefaultCriterias());
@@ -839,7 +840,7 @@ const Reports = React.memo(() => {
       await dispatch(setReports());
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
-      
+
       setSnackbar({
         type: 'success',
         value: true,
@@ -859,7 +860,7 @@ const Reports = React.memo(() => {
     setSnackbar({
       type: 'success',
       value: true,
-      text:`${translate('reportDeleted', language)}`,
+      text: `${translate('reportDeleted', language)}`,
       time: 3000
     });
   }
