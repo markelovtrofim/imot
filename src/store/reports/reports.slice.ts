@@ -181,7 +181,7 @@ export const getCallReport = createAsyncThunk(
       const requestFilters = convertColumn(state.reports.activeReport, requestSearchItemsColumn);
       const requestColsGroupBy = convertColsGroupBy(requestFilters, state.reports.activeParameters);
       const requestData = convertCallSearch(requestCriterias, requestColsGroupBy);
-
+      console.log(requestData)
       let requestParameters = `reports/make/calls/?start_date=${startDate}&end_date=${endDate}`;
       if (!startDate && !endDate) {
         requestParameters = `reports/make/calls`
@@ -223,6 +223,8 @@ export const getSelectors = createAsyncThunk(
   'reports/getSelectors',
   async (payload, thunkAPI) => {
     try {
+      // @ts-ignore;
+      const state: RootState = thunkAPI.getState();
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       const response = await instance.get(`reports/selectors`, {
         headers: {
@@ -230,7 +232,7 @@ export const getSelectors = createAsyncThunk(
         }
       });
       console.log(response.data)
-      thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues(response.data));
+      thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues({selectors: response.data, tags: state.reports.tagNames}));
     } catch(error) {
       console.log(error)
     }
@@ -389,15 +391,14 @@ export const reportsSlice = createSlice({
     },
 
     getSelectorsValues(state, action: any) {
-      state.selectors = action.payload;
-      state.activeReport.report_type = action.payload.report_types[0];
-      state.activeReport.rows_group_by = action.payload.rows_groupings[0];
-      if (action.payload.cols_groupings[0] === 'tag') {
-        // ?? как тут получить значения тегов??
-        state.activeReport.cols_group_by = [{group_by: action.payload.cols_groupings[0], value: ''}];
+      state.selectors = action.payload.selectors;
+      state.activeReport.report_type = action.payload.selectors.report_types[0];
+      state.activeReport.rows_group_by = action.payload.selectors.rows_groupings[0];
+      if (action.payload.selectors.cols_groupings[0] === 'tag') {
+        state.activeReport.cols_group_by = [{group_by: action.payload.selectors.cols_groupings[0], value: action.payload.tags[0]}];
       }
-      if (action.payload.rows_groupings[0] === 'time') {
-        state.activeReport.rows_group_by = {group_by: action.payload.rows_groupings[0], value: action.payload.groupings_by_time[0]};
+      if (action.payload.selectors.rows_groupings[0] === 'time') {
+        state.activeReport.rows_group_by = {group_by: action.payload.selectors.rows_groupings[0], value: action.payload.selectors.groupings_by_time[0]};
       }
     },
 
@@ -417,12 +418,18 @@ export const reportsSlice = createSlice({
       if (action.payload.group_by === 'tag_name_list') {
         state.activeReport.cols_group_by[0] = {group_by: action.payload.group_by, value: [] };
       } else {
-        state.activeReport.cols_group_by[0] = { group_by: action.payload.value };
+        state.activeReport.cols_group_by[0] = { group_by: action.payload.group_by.value };
       }
     },
     // по тегу
     setDefaultColsTagGroupBy(state, action: any) {
-      state.activeReport.cols_group_by[0] = {group_by: 'tag', value: action.payload.group_by.value};
+      if (action.payload.value) {
+        state.activeReport.cols_group_by[0] = {group_by: 'tag', value: action.payload.value.value};
+      }
+    },
+
+    setDefaultColsTagsValue(state, action: any) {
+      state.activeReport.cols_group_by[0].value = action.payload.value.value;
     },
 
     // по search items
