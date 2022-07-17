@@ -86,14 +86,13 @@ const Reports = React.memo(() => {
 
   useEffect(() => {
     document.title = "Отчёты | IMOT.io";
-    console.log("Huy from reports");
     setLoading(true);
     if (isAuth && activeCriteriasReports.length < 1) {
       dispatch(getDefaultCriterias());
     }
     dispatch(getAllReports());
-    func();
     funcForTag();
+    func();    
     funcForCriterias();
     setLoading(false);
   }, []);
@@ -173,8 +172,8 @@ const Reports = React.memo(() => {
     },
   }
   const chartTypes = [
-    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
     {label: `${translate('barChart', language)}`, value: 'barChart' },
+    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
     {label: `${translate('pieChart', language)}`, value: 'pieChart' },
     {label: `${translate('radarChart', language)}`, value: 'radarChart' },
   ]  
@@ -315,18 +314,26 @@ const Reports = React.memo(() => {
   const tagNamesColOptions = optionsCreatorVEL(tagNames);
   //@ts-ignore
   let tagNameColFrom = useAppSelector(state => state.reports.activeReport.cols_group_by[0]);
-  let tagNamesColValue: any = {};
-  if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
-    tagNamesColValue = { label: tagNameColFrom.value, value: tagNameColFrom.value };
-  } else {
-    tagNamesColValue = tagNamesOptions[0];
-  }
+  let tagNamesColValue: any = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+
   let tagNameListValue: any = []
   if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag_name_list' && groupByColumns[0].value) {
     tagNameListValue = tagNameColFrom.value;
   } else {
     tagNameListValue = [];
   }
+
+  useEffect(() => {
+    if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
+      tagNamesColValue = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+    } 
+    else {
+      tagNamesColValue = tagNamesOptions[0];
+      if (groupByColumns[0].group_by === 'tag' && tagNamesOptions[0]) {
+        dispatch(reportsSlice.actions.setDefaultColsTagsValue({ value: tagNamesOptions[0] }))
+      }
+    }
+  }, [tagNamesOptions, groupByColumns, tagNameColFrom])
 
   const [op, setOp] = useState<any>([]);
   useEffect(() => {
@@ -1084,7 +1091,7 @@ const Reports = React.memo(() => {
                           justify={'flex-end'}
                           onSelectChange={(event) => {
                             if (event.type === 'select-tag') {
-                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ group_by: tagNamesColValue }))
+                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: tagNamesColValue }))
                             }
                             else if (event.type === 'title') {
                               dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: reportNameColumnDefault }))
@@ -1092,7 +1099,7 @@ const Reports = React.memo(() => {
                             else if (event.type === 'input') {
                               dispatch(reportsSlice.actions.setDefaultColsGroupBy({group_by: 'tag_name_list', value: []}))
                             }
-                            else  {
+                            else {
                               dispatch(reportsSlice.actions.setDefaultColsGroupBy({ group_by: event }))
                             }
                           }}
@@ -1161,7 +1168,7 @@ const Reports = React.memo(() => {
                           width={'265px'}
                           justify={'flex-end'}
                           onSelectChange={(event) => {
-                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ group_by: event }))
+                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: event }))
                           }}
                           options={tagNamesColOptions}
                           value={tagNamesColValue}
