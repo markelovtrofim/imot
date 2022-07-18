@@ -46,6 +46,8 @@ const convertColumn = (obj: any, parameters: any) => {
     let local2 = {...activeReport.cols_group_by[0].value, search_items: local};
     activeReport.cols_group_by[0].value = local2;
     return activeReport;
+  } else if (groupByName === 'tag_name_list') {
+    return activeReport;
   } else {
     activeReport.cols_group_by[0] = {group_by: groupByName}
     return activeReport
@@ -85,6 +87,9 @@ const convertColsGroupBy = (obj: any, parameters: any) => {
           }
         })
       }
+      if (parameters[i][0].select.value.type === 'input') {
+        local.push({group_by: parameters[i][0].select.value.value, value: parameters[i][0].tagsNameList.value});
+      }
     }
   }
   let test = activeReport.cols_group_by[0];
@@ -108,8 +113,6 @@ export const getAllReports = createAsyncThunk(
         'Authorization': `Bearer ${token}`
       }
     });
-
-    console.log(response.data);
     thunkAPI.dispatch(reportsSlice.actions.setReports(response.data));
   }
 );
@@ -152,7 +155,6 @@ export const getReport = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(payload)
       console.log(response.data)
       thunkAPI.dispatch(reportsSlice.actions.setActiveReport(response.data));
       return
@@ -179,8 +181,7 @@ export const getCallReport = createAsyncThunk(
       const requestFilters = convertColumn(state.reports.activeReport, requestSearchItemsColumn);
       const requestColsGroupBy = convertColsGroupBy(requestFilters, state.reports.activeParameters);
       const requestData = convertCallSearch(requestCriterias, requestColsGroupBy);
-      console.log(requestData);
-
+      console.log(requestData)
       let requestParameters = `reports/make/calls/?start_date=${startDate}&end_date=${endDate}`;
       if (!startDate && !endDate) {
         requestParameters = `reports/make/calls`
@@ -210,9 +211,6 @@ export const deleteReport = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(payload)
-      console.log(response.data)
-
       thunkAPI.dispatch(getAllReports())
     } catch(error) {
       thunkAPI.dispatch(reportsSlice.actions.setError('Проблема с удалением отчета'))
@@ -225,15 +223,16 @@ export const getSelectors = createAsyncThunk(
   'reports/getSelectors',
   async (payload, thunkAPI) => {
     try {
+      // @ts-ignore;
+      const state: RootState = thunkAPI.getState();
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       const response = await instance.get(`reports/selectors`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues(response.data));
-      console.log(response.data);
-
+      console.log(response.data)
+      thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues({selectors: response.data, tags: state.reports.tagNames}));
     } catch(error) {
       console.log(error)
     }
@@ -252,7 +251,6 @@ export const getTagNames = createAsyncThunk(
       });
       thunkAPI.dispatch(reportsSlice.actions.setTagNames(response.data));
       return response.data;
-
     } catch(error) {
       console.log(error)
     }
@@ -271,6 +269,7 @@ type InitialStateType = {
   tableRows: [],
   tableColumns: [],
   error: string | null,
+  showCharts: boolean,
 }
 
 const initialState: InitialStateType = {
@@ -349,7 +348,8 @@ const initialState: InitialStateType = {
   tableRows: [],
   tableColumns: [],
 
-  error: null
+  error: null,
+  showCharts: false,
 }
 
 export const reportsSlice = createSlice({
@@ -391,15 +391,14 @@ export const reportsSlice = createSlice({
     },
 
     getSelectorsValues(state, action: any) {
-      state.selectors = action.payload;
-      state.activeReport.report_type = action.payload.report_types[0];
-      state.activeReport.rows_group_by = action.payload.rows_groupings[0];
-      if (action.payload.cols_groupings[0] === 'tag') {
-        // ?? как тут получить значения тегов??
-        state.activeReport.cols_group_by = [{group_by: action.payload.cols_groupings[0], value: ''}];
+      state.selectors = action.payload.selectors;
+      state.activeReport.report_type = action.payload.selectors.report_types[0];
+      state.activeReport.rows_group_by = action.payload.selectors.rows_groupings[0];
+      if (action.payload.selectors.cols_groupings[0] === 'tag') {
+        state.activeReport.cols_group_by = [{group_by: action.payload.selectors.cols_groupings[0], value: action.payload.tags[0]}];
       }
-      if (action.payload.rows_groupings[0] === 'time') {
-        state.activeReport.rows_group_by = {group_by: action.payload.rows_groupings[0], value: action.payload.groupings_by_time[0]};
+      if (action.payload.selectors.rows_groupings[0] === 'time') {
+        state.activeReport.rows_group_by = {group_by: action.payload.selectors.rows_groupings[0], value: action.payload.selectors.groupings_by_time[0]};
       }
     },
 
@@ -416,13 +415,21 @@ export const reportsSlice = createSlice({
 
     // первая дефолтная группировка по столбцам
     setDefaultColsGroupBy(state, action: any) {
-      // if (action.payload.group_by.value === 'calls_count' || action.payload.group_by.value === 'stt_engine') {
-        state.activeReport.cols_group_by[0] = {group_by: action.payload.group_by.value};
-      // }
+      if (action.payload.group_by === 'tag_name_list') {
+        state.activeReport.cols_group_by[0] = {group_by: action.payload.group_by, value: [] };
+      } else {
+        state.activeReport.cols_group_by[0] = { group_by: action.payload.group_by.value };
+      }
     },
     // по тегу
     setDefaultColsTagGroupBy(state, action: any) {
-      state.activeReport.cols_group_by[0] = {group_by: 'tag', value: action.payload.group_by.value};
+      if (action.payload.value) {
+        state.activeReport.cols_group_by[0] = {group_by: 'tag', value: action.payload.value.value};
+      }
+    },
+
+    setDefaultColsTagsValue(state, action: any) {
+      state.activeReport.cols_group_by[0].value = action.payload.value.value;
     },
 
     // по search items
@@ -445,6 +452,10 @@ export const reportsSlice = createSlice({
           state.activeReport.cols_group_by[0].value.search_items.push({key: action.payload[i].key, values: action.payload[i].values})
         }
       }
+    },
+
+    setDefaultColTagsName(state, action: any) {
+      state.activeReport.cols_group_by[0].value = action.payload;
     },
 
     // доп группировки по столбцам
@@ -472,6 +483,10 @@ export const reportsSlice = createSlice({
           },
           nameColumn: {
             value: '',
+          },
+          tagsNameList: {
+            options: local[i].tagsNameList.options,
+            value: local[i].tagsNameList.value,
           },
 
           callFilters: {
@@ -524,6 +539,11 @@ export const reportsSlice = createSlice({
       state.activeParameters[action.payload.arrayIndex][0].callFilters.options = action.payload.criteria;
     },
 
+    //
+    setActiveColTagsName(state, action: any) {
+      state.activeParameters[action.payload.arrayIndex][0].tagsNameList.value = action.payload.value;
+    },
+
     setActiveCriteriaValuesColumn(state,action: PayloadAction<{arrayIndex: number,  criteria: any}>) {
       // @ts-ignore
       const obj = current(state.activeParameters[action.payload.arrayIndex][0].callFilters.activeValues).find((item: any)=> {
@@ -558,11 +578,28 @@ export const reportsSlice = createSlice({
       state.activeParameters = [];
     },
 
+    removeAll(state, action: any) {
+      state.callReport = initialState.callReport
+    },
+
     setTableRows(state, action: any) {
       state.tableRows = action.payload;
     },
     setTableColumns(state, action: any) {
       state.tableColumns = action.payload;
+    },
+
+    removeTableColumnsRows(state, action: any) {
+      state.tableRows = initialState.tableRows;
+      state.tableColumns = initialState.tableColumns;
+    },
+
+    setShowCharts(state, action: any) {
+      state.showCharts = action.payload;
+    },
+
+    removeShowChart(state, action: any) {
+      state.showCharts = initialState.showCharts;
     },
 
     resetReportParameters: () => initialState

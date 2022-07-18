@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import CreatableSelect from 'react-select/creatable';
 import { FC, memo, useEffect, useRef, useState } from "react";
 import { CriteriasType, RequestDataType } from "../../../store/search/search.types";
@@ -16,6 +17,7 @@ import { useAppSelector } from "../../../hooks/redux";
 import { translate } from '../../../localizations';
 import { RootState } from "../../../store/store";
 import { reportsSlice } from '../../../store/reports/reports.slice';
+import { optionsCreatorVEL } from '../../../utils/optionsCreator'
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
@@ -51,7 +53,6 @@ export const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
-
 export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -67,21 +68,28 @@ export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
 
 // TYPES BLOCK
 type SelectPropsType = {
-  criteriaFull: CriteriasType,
-  criteriaCurrent: CriteriasType | RequestDataType,
+  criteriaFull: CriteriasType | null,
+  criteriaCurrent: CriteriasType | RequestDataType | null,
   isDefaultCriteria: boolean,
   block?: string,
-  index?: { arrayIndex: number },
+  index?: {arrayIndex: number},
+  array?: { value: string, label: string }[],
+  valueList?: [],
+  handlerOnChange?: (e: any) => void
 };
 
-
 const SearchSelect: FC<SelectPropsType> = memo(({
-  criteriaFull,
-  criteriaCurrent,
-  isDefaultCriteria,
-  block,
-  index,
-}) => {
+    criteriaFull,
+    criteriaCurrent,
+    isDefaultCriteria,
+    block,
+    index,
+    array,
+    valueList,
+    handlerOnChange,
+  }) => {
+
+    console.log(valueList)
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {
@@ -295,10 +303,18 @@ const SearchSelect: FC<SelectPropsType> = memo(({
       return <div>
         <components.Option {...props} className={classes.selectOption}>
           {props.children}
-          <Checkbox
-            disableRipple
-            checked={criteriaCurrent.values.indexOf(props.children) >= 0}
-          />
+          {criteriaCurrent ? 
+            <Checkbox
+              disableRipple
+              checked={criteriaCurrent.values.indexOf(props.children) >= 0}
+            />
+          :
+            <Checkbox
+              disableRipple
+               //@ts-ignore
+              checked={Boolean(valueList.find((item) => item === props.children))}
+            />          
+          }
         </components.Option>
       </div>
     }
@@ -309,8 +325,10 @@ const SearchSelect: FC<SelectPropsType> = memo(({
     const selectSearch = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
-      if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
-        selectSearch.current.focus();
+      if (criteriaFull) {
+        if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
+          selectSearch.current.focus();
+        }
       }
     }, [setMenuIsOpen])
 
@@ -362,14 +380,15 @@ const SearchSelect: FC<SelectPropsType> = memo(({
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
 
   // удаление критерии.
-  const removeCriteria = () => {
-    dispatch(templateSlice.actions.setCurrentTemplate(null));
-    dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
-  };
+  // const removeCriteria = () => {
+  //   dispatch(templateSlice.actions.setCurrentTemplate(null));
+  //   if (criteriaFull) {
+  //     dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
+  //   }
+  // };
 
   // выполняется когда меняется значение.
   const handleSelectChange = (event: any) => {
-    dispatch(templateSlice.actions.setCurrentTemplate(null));
     const eventConverter = () => {
       let result = [];
       for (let i = 0; i < event.length; i++) {
@@ -378,23 +397,28 @@ const SearchSelect: FC<SelectPropsType> = memo(({
       return result;
     };
 
-    const eventConverterResult = eventConverter();
-    if (block === 'reports') {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsValues({ key: criteriaFull.key, values: [...eventConverterResult] }));
-    } else if (block === 'reports-column') {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({ key: criteriaFull.key, values: [...eventConverterResult] }));
-    } else if (index) {
-      dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({ arrayIndex: index.arrayIndex, criteria: { key: criteriaFull.key, values: [...eventConverterResult] } }))
-      console.log(index);
+    if (array) {
+      const eventConverterResult = eventConverter();
+      //@ts-ignore
+      handlerOnChange([...eventConverterResult])
+
     } else {
-      if (isDefaultCriteria) {
-        dispatch(searchSlice.actions.setDefaultCriteriaValues({ key: criteriaFull.key, values: [...eventConverterResult] }));
-      } else {
-        dispatch(searchSlice.actions.setActiveCriteriaValues({ key: criteriaFull.key, values: [...eventConverterResult] }));
+      dispatch(templateSlice.actions.setCurrentTemplate(null));
+      const eventConverterResult = eventConverter();
+      if (block === 'reports' && criteriaFull) {
+        dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      }  else if (block === 'reports-column' && criteriaFull) {
+        dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      }  else if (index && criteriaFull) {
+        dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex,  criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
+      }  else {
+        if (isDefaultCriteria && criteriaFull) {
+          dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        } else if (criteriaFull) {
+          dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        }
       }
     }
-
-
   };
 
   const converter = (state: any) => {
@@ -418,67 +442,98 @@ const SearchSelect: FC<SelectPropsType> = memo(({
   }, []);
 
   return (
-    <div className={classes.selectBox}>
-      {criteriaFull.selectType === "multiString" ?
-        <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
-          <CreatableSelect
-            closeMenuOnSelect={false}
-            isMulti
-            createOptionPosition={'first'}
-            styles={customStyles}
-            formatCreateLabel={(str) => str}
-            value={converterCurrentResult}
-            onChange={handleSelectChange}
+    <>
+    {array && array.length > 0 ?
+      <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
+        <CreatableSelect
+          closeMenuOnSelect={false}
+          isMulti
+          createOptionPosition={'first'}
+          styles={customStyles}
+          formatCreateLabel={(str) => str}
+          value={optionsCreatorVEL(valueList)}
+          onChange={handleSelectChange}
 
-            tabIndex={0}
-            isValidNewOption={(str) => true}
-            options={converterFullResult}
-            hideSelectedOptions={false}
-            components={{
-              MenuList: CustomMenuList,
-              Option: CustomOption,
-              DropdownIndicator: CustomInd,
-              IndicatorSeparator: () => null,
-              MultiValueLabel: CustomMultiValueLabel,
-              MultiValueRemove: CustomMultiValueRemove,
-            }}
-            placeholder={translate('allTags', language)}
-            menuIsOpen={menuIsOpen}
+          tabIndex={0}
+          isValidNewOption={(str) => true}
+          options={array}
+          hideSelectedOptions={false}
+          components={{
+            MenuList: CustomMenuList,
+            Option: CustomOption,
+            DropdownIndicator: CustomInd,
+            IndicatorSeparator: () => null,
+            MultiValueLabel: CustomMultiValueLabel,
+            MultiValueRemove: CustomMultiValueRemove,
+          }}
+          placeholder={translate('allTags', language)}
+          menuIsOpen={menuIsOpen}
+        />
+      </div>
+      :
+      <div className={classes.selectBox}>
+        {criteriaFull && criteriaFull.selectType === "multiString" ?
+          <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
+            <CreatableSelect
+              closeMenuOnSelect={false}
+              isMulti
+              createOptionPosition={'first'}
+              styles={customStyles}
+              formatCreateLabel={(str) => str}
+              value={converterCurrentResult}
+              onChange={handleSelectChange}
 
-          />
-        </div> :
-        <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
-          <Select
-            openMenuOnFocus={true}
-            menuIsOpen={menuIsOpen}
-            className={classes.selectItem}
-            name="color"
-            placeholder={translate('allTags', language)}
-            components={{
-              MenuList: CustomMenuList,
-              Option: CustomOption,
-              DropdownIndicator: CustomInd,
-              IndicatorSeparator: () => null,
-              MultiValueLabel: CustomMultiValueLabel,
-              MultiValueRemove: CustomMultiValueRemove,
-              ValueContainer: LimitedChipsContainer,
-            }}
-            onChange={handleSelectChange}
-            isClearable={true}
-            closeMenuOnSelect={false}
-            styles={customStyles}
-            isMulti
-            isSearchable={false}
-            value={converterCurrentResult}
-            options={converterFullResult}
-            hideSelectedOptions={false}
-          />
-          {converterCurrentResult.length < 1 &&
+              tabIndex={0}
+              isValidNewOption={(str) => true}
+              options={converterFullResult}
+              hideSelectedOptions={false}
+              components={{
+                MenuList: CustomMenuList,
+                Option: CustomOption,
+                DropdownIndicator: CustomInd,
+                IndicatorSeparator: () => null,
+                MultiValueLabel: CustomMultiValueLabel,
+                MultiValueRemove: CustomMultiValueRemove,
+              }}
+              placeholder={translate('allTags', language)}
+              menuIsOpen={menuIsOpen}
+
+            />
+          </div> :
+          <div className={classes.selectSelectBox}  onClick={() => setMenuIsOpen(true)}>
+            <Select
+              openMenuOnFocus={true}
+              menuIsOpen={menuIsOpen}
+              className={classes.selectItem}
+              name="color"
+              placeholder={translate('allTags', language)}
+              components={{
+                MenuList: CustomMenuList,
+                Option: CustomOption,
+                DropdownIndicator: CustomInd,
+                IndicatorSeparator: () => null,
+                MultiValueLabel: CustomMultiValueLabel,
+                MultiValueRemove: CustomMultiValueRemove,
+                ValueContainer: LimitedChipsContainer,
+              }}
+              onChange={handleSelectChange}
+              isClearable={true}
+              closeMenuOnSelect={false}
+              styles={customStyles}
+              isMulti
+              isSearchable={false}
+              value={converterCurrentResult}
+              options={converterFullResult}
+              hideSelectedOptions={false}
+            />
+            {converterCurrentResult.length < 1 &&
             <Typography className={classes.selectPlaceholder}>{translate('allTags', language)}</Typography>
-          }
-        </div>
-      }
-    </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    </>
   );
 });
 
