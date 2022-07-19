@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 
 import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
@@ -22,7 +22,7 @@ import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
 import CallPage from "./pages/Calls/CallPage";
 import {callsSlice} from "./store/calls/calls.slice";
-import Snackbar from "./components/common/Snackbar";
+import Snackbar, {SnackbarType} from "./components/common/Snackbar";
 import {getChildUser, getChildUsers, getMe} from "./store/users/users.slice";
 
 
@@ -37,63 +37,69 @@ export const useStyles = makeStyles(({
   }
 }));
 
+
 const App = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+
 
   const {path} = JSON.parse(localStorage.getItem('path') || '{}');
-  let pathArray = [];
+  let pathArray: string[] = [];
   if (path) {
     pathArray = path.split("/");
   }
-  const languageParam = pathArray[1];
-  const activePage = pathArray[3];
+  const activePage = pathArray[3]
   const isDtOrTg = pathArray[4];
 
-  const isAuth = useAppSelector(state => state.auth.isAuth);
-  const {language} = useAppSelector(state => state.lang);
+
   const currentUser = useAppSelector(state => state.users.currentUser);
+  const languageParam = pathArray[1];
   const searchDictsParams = useAppSelector(state => state.dicts.search);
   const searchTagsParams = useAppSelector(state => state.tags.searchParams);
   const searchCallParams = useAppSelector(state => state.calls.callPageSearchParams);
+  const {language} = useAppSelector(state => state.lang);
+
+  const history = useHistory();
+
 
   // lang changer
   useEffect(() => {
     history.listen(async (location) => {
-      if (currentUser) {
-        let pathArray: any = [];
-        if (location.pathname.length > 1) {
-          pathArray = location.pathname.split("/");
-        }
-        const languageParam = pathArray[1];
+      let pathArray: any = [];
+      if (location.pathname) {
         pathArray = location.pathname.split("/");
-        pathArray.splice(0, 2);
+      }
+      const languageParam = pathArray[1];
+      pathArray = location.pathname.split("/");
+      pathArray.splice(0, 2);
 
-        if (languageParam === "ru" || languageParam === "en") {
-          dispatch(langSlice.actions.setLoading(true));
-          await dispatch(getLang(languageParam));
-          dispatch(langSlice.actions.setLoading(false));
-        } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
-          dispatch(langSlice.actions.setDefaultLang(null));
-          debugger
-          if (pathArray.length === 1) {
-            history.location.pathname = `/`;
-            history.replace(`ru/${pathArray.join("/")}`);
-          } else {
-            history.location.pathname = `/`;
-            history.replace(`ru/${currentUser ? currentUser.id : "_"}/${activePage}`);
-          }
+      if (languageParam === "ru" || languageParam === "en") {
+        dispatch(langSlice.actions.setLoading(true));
+        await dispatch(getLang(languageParam));
+        dispatch(langSlice.actions.setLoading(false));
+      } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
+        dispatch(langSlice.actions.setDefaultLang(null));
+        if (pathArray.length === 1) {
+          history.location.pathname = `/`;
+          history.replace(`ru/${pathArray.join("/")}`);
+        } else {
+          history.location.pathname = `/`;
+          history.replace(`ru/${currentUser ? currentUser.id : "_"}/calls`);
         }
       }
     });
   }, [languageParam, currentUser]);
 
-
   async function getUserData() {
-    await dispatch(getMe());
+    debugger
+    const userData = await dispatch(getMe());
+    // @ts-ignore
+    const user = userData.payload;
     await dispatch(getChildUser());
     await dispatch(getChildUsers());
+    history.location.pathname = `/`;
+    history.replace(`${languageParam}/${user ? user.id : "_"}/${pathArray[3]}`);
   }
   useEffect(() => {
     if (!currentUser) getUserData().then();
@@ -114,7 +120,22 @@ const App = () => {
     dispatch(callsSlice.actions.setCallPageSearchParams(newSearch));
   }
 
-  // проверяет наличие токена
+  useEffect(() => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    if (token) {
+      dispatch(authSlice.actions.setAuth(true))
+    }
+  }, []);
+
+  // dicts (прототип 2)
+  if (!searchDictsParams) {
+    let newSearch = history.location.search;
+    if (newSearch[0] !== '?') {
+      newSearch = `?${history.location.search}`
+    }
+    dispatch(dictsSlice.actions.setSearch(newSearch));
+  }
+
   useEffect(() => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     if (token) {
@@ -123,7 +144,6 @@ const App = () => {
   }, []);
 
 
-  // обновляет localStorage всегда когда меняется ulr
   useEffect(() => {
     history.listen((location) => {
       localStorage.setItem('path', JSON.stringify({

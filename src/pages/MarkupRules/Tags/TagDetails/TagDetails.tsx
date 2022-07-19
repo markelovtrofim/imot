@@ -171,7 +171,6 @@ const TagDetails: FC = () => {
 
   const { language } = useAppSelector((state: RootState) => state.lang);
 
-  const snackbar = useAppSelector(state => state.lang.snackbar);
 
 
   const [render, setRender] = useState(false);

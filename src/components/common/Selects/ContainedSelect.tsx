@@ -109,7 +109,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = (
       left: '11px !important',
       top: '9px !important'
     }
-  }));
+  }))
   const customStyles = {
     container: (provided: any) => ({
       ...provided,
