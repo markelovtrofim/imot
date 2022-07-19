@@ -53,3 +53,24 @@ export const TrashSvg = (props: React.SVGProps<SVGSVGElement>) => {
   );
 };
 
+export const CaretDownSvg = (props: any) => {
+  return (
+    <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" style={props.style}>
+      <path fillRule="evenodd" clipRule="evenodd" d="M35.599 19.9991C36.2841 20.7387 36.2841 21.9379 35.599 22.6774L26.2422 32.7785C25.5571 33.5181 24.4464 33.5181 23.7613 32.7785L14.4045 22.6774C13.7193 21.9379 13.7193 20.7387 14.4045 19.9991C15.0896 19.2594 16.2004 19.2594 16.8856 19.9991L25.0018 28.7608L33.118 19.9991C33.8032 19.2594 34.9138 19.2594 35.599 19.9991Z" 
+        fill="#738094"/>
+    </svg>
+  );
+};
+
+export const PlusSvg = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path fillRule="evenodd" clipRule="evenodd"
+        d="M5.99941 0C6.43163 0 6.78201 0.350386 6.78201 0.782609V11.2174C6.78201 11.6496 6.43163 12 5.99941 12C5.56718 12 5.2168 11.6496 5.2168 11.2174V0.782609C5.2168 0.350386 5.56718 0 5.99941 0Z"
+        fill="#722ED1"/>
+      <path fillRule="evenodd" clipRule="evenodd"
+        d="M0 6.00038C0 5.56816 0.350386 5.21777 0.782609 5.21777H11.2174C11.6496 5.21777 12 5.56816 12 6.00038C12 6.4326 11.6496 6.78299 11.2174 6.78299H0.782609C0.350386 6.78299 0 6.4326 0 6.00038Z"
+        fill="#722ED1"/>
+    </svg>
+  );
+};

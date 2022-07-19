@@ -17,7 +17,7 @@ declare global {
     __store__: any
   }
 }
-
+// ЭТО ДЕМО
 window.__store__ = store;
 
 ReactDOM.render(

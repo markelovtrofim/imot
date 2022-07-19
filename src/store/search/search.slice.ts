@@ -30,7 +30,21 @@ export const getDefaultCriterias = createAsyncThunk(
   }
 )
 
+export const getSearchHash = createAsyncThunk(
+  'search/getSearchHash',
+  async (hashKey: string, thunkAPI) => {
+    const {token} = JSON.parse(localStorage.getItem('token') || '{}');
+    return instance.get(`/search_filter_hash/${hashKey}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
+)
+
 type InitialStateType = {
+  searchParams: string,
+
   date: Date[] | null[],
   allCriterias: CriteriasType[] | null,
   defaultCriterias: RequestDataType[],
@@ -40,6 +54,8 @@ type InitialStateType = {
 }
 
 const initialState: InitialStateType = {
+  searchParams: "",
+
   date: [new Date(Date.now() - 8760 * 60 * 60 * 1000), new Date(Date.now())],
   allCriterias: null,
   defaultCriterias: [],
@@ -52,6 +68,10 @@ export const searchSlice = createSlice({
   name: 'search',
   initialState,
   reducers: {
+    setSearchParams(state, action: PayloadAction<string>) {
+      state.searchParams = action.payload;
+    },
+
     setDate(state, action: PayloadAction<typeof initialState.date | null[]>) {
       state.date = action.payload;
     },

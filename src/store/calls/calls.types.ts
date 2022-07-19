@@ -64,3 +64,12 @@ export type CallActionDataType = {
   engine: string,
   keep_fragments: boolean
 }
+
+export type CallsActionDataType = {
+  action: string,
+  engine: string,
+  keep_fragments: boolean,
+  call_ids?: string[],
+  search_filter_hash?: string,
+  columns?: string[]
+}

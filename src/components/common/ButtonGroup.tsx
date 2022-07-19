@@ -92,13 +92,15 @@ const getPeriod = (period: string) => {
   return periods[period]
 }       
 
-const getNamePeriod = (period: string) => {
+export const getNamePeriod = (period: string) => {
   return Object.keys(periods).find((key) => periods[key] === period)
 }
 
 const ButtonGroup: FC<ButtonsPropsType> = ({date, items, period}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+
+  const callReport = useAppSelector(state => state.reports.callReport);
 
   const [alignment, setAlignment] = useState<string | null>(null);
   const handleChange = (
@@ -111,16 +113,16 @@ const ButtonGroup: FC<ButtonsPropsType> = ({date, items, period}) => {
   useEffect(() => {
     if (period) {
       //@ts-ignore
-      setAlignment(getNamePeriod(period))
+      setAlignment(getNamePeriod(period));
       //@ts-ignore
       dispatch(reportsSlice.actions.setDate(unitsOfTime[getNamePeriod(period)]));
     }
-  }, [period])
+  }, [ callReport])
 
 
   useEffect(() => {
     for (let i = 0; i < items.length; i++) {
-      //@ts-ignore
+      // @ts-ignore
       if (items[i].unitOfTime[0] && date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
         setAlignment(items[i].value);
         dispatch(reportsSlice.actions.setPeriod(getPeriod(items[i].value)))
