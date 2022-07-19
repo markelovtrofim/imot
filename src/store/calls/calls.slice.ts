@@ -60,13 +60,11 @@ export const getCallPublicToken = createAsyncThunk(
 
 export const getAndSetCallStt = createAsyncThunk(
   'calls/getCallStt',
-  async (payload: { id: string, bundleIndex: number | null }, thunkAPI) => {
-    if (payload.bundleIndex || payload.bundleIndex === 0) {
-      const callSttData = await thunkAPI.dispatch(getCallStt({id: payload.id}));
-      // @ts-ignore
-      const callStt = callSttData.payload;
-      thunkAPI.dispatch(callsSlice.actions.setStt({stt: callStt, id: payload.id, index: payload.bundleIndex}));
-    }
+  async (payload: { id: string, bundleIndex: number }, thunkAPI) => {
+    const callSttData = await thunkAPI.dispatch(getCallStt({id: payload.id}));
+    // @ts-ignore
+    const callStt = callSttData.payload;
+    thunkAPI.dispatch(callsSlice.actions.setStt({stt: callStt, id: payload.id, index: payload.bundleIndex}));
   }
 );
 
@@ -117,7 +115,7 @@ export const getCallAudio = createAsyncThunk(
 
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
-  async (payload: { sort?: string }, thunkAPI) => {
+  async (payload: {sort?: string}, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
 
@@ -198,18 +196,6 @@ export const getCallInfo = createAsyncThunk(
   }
 );
 
-export const getAndSetCallInfo = createAsyncThunk(
-  'calls/getAndSetCallInfo',
-  async (payload: { id: string, bundleIndex: number | null }, thunkAPI) => {
-    if (payload.bundleIndex || payload.bundleIndex === 0) {
-      const infoData = await thunkAPI.dispatch(getCallInfo({id: payload.id}));
-      // @ts-ignore
-      const info = infoData.payload;
-      thunkAPI.dispatch(callsSlice.actions.setInfo({info: info, id: payload.id, index: payload.bundleIndex}));
-    }
-  }
-);
-
 export const getCallsInfoById = createAsyncThunk(
   'calls/getCallsInfoById',
   async (payload: any [], thunkAPI) => {
@@ -253,23 +239,6 @@ export const callAction = createAsyncThunk(
   }
 );
 
-export const deleteCall = createAsyncThunk(
-  'calls/deleteCall',
-  async (id: string, thunkAPI) => {
-    try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const response = await instance.delete(`call/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      return response;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-);
-
 export const callsAction = createAsyncThunk(
   'calls/callsAction',
   async (payload: CallsActionDataType, thunkAPI) => {
@@ -289,22 +258,30 @@ export const callsAction = createAsyncThunk(
 
 export const getActionFiles = createAsyncThunk(
   'calls/getActionFiles',
-  async (payload: { taskId: string, action: string }, thunkAPI) => {
+  async (taskId: string, thunkAPI) => {
     try {
+      // /task/{task_id}/attachment
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const res = await instance.get(`/task/${payload.taskId}/attachment`, {
+      const res = await instance.get(`/task/${taskId}/attachment`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
         responseType: 'arraybuffer'
       });
-      const contentType = (payload.action === "audio_archive" && 'application/zip') || (payload.action === "stt_export" && "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || "";
-      let blob = new Blob([res.data], {type: contentType});
+      // console.log(res.data)
+      // const disposition = res.request.getResponseHeader('Content-Disposition')
+      // let fileName = "";
+      // let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+      // let matches = filenameRegex.exec(disposition);
+      // if (matches != null && matches[1]) {
+      //   fileName = matches[1].replace(/['"]/g, '');
+      // }
+      debugger
+      let blob = new Blob([res.data], { type: 'application/zip' })
       const downloadUrl = URL.createObjectURL(blob)
       let a = document.createElement("a");
       a.href = downloadUrl;
-      debugger
       a.download = "whileJustFile";
       document.body.appendChild(a);
       a.click();
@@ -313,29 +290,6 @@ export const getActionFiles = createAsyncThunk(
     }
   }
 )
-
-
-export const getTask = createAsyncThunk(
-  'calls/getTask',
-  async (taskId: string, thunkAPI) => {
-    try {
-      const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-      const {data} = await instance.get(`/task/${taskId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-      });
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-)
-
-export type SelectedCallType = {
-  callId: string,
-  bundleIndex: number | null
-}
 
 type InitialStateType = {
   bundleLength: number,
@@ -346,7 +300,7 @@ type InitialStateType = {
   sort: string,
   callIds: null,
   calls: CallType[][] | [],
-  selectedCalls: SelectedCallType[],
+  selectedCalls: string[],
   isSelectAllCalls: boolean,
   currentCall: CallType | null | false,
   callPageSearchParams: string
@@ -387,32 +341,30 @@ export const callsSlice = createSlice({
     setCallPageSearchParams(state, action: PayloadAction<string>) {
       state.callPageSearchParams = action.payload;
     },
-
+ 
     // selected calls actions
-    pushSelectedCall(state, action: PayloadAction<SelectedCallType>) {
+    pushSelectedCall(state, action: PayloadAction<string>) {
       state.selectedCalls.push(action.payload);
     },
-    removeSelectedCall(state, action: PayloadAction<SelectedCallType>) {
-      let currentSelectedCalls = [...current(state.selectedCalls)]
-      const callId = currentSelectedCalls.find(selectedCall => selectedCall.callId === action.payload.callId);
+    removeSelectedCall(state, action: PayloadAction<string>) {
+      let currentSelectedCalls = [...current(state.selectedCalls)];
+      const callId = currentSelectedCalls.find(id => id === action.payload);
       if (callId) {
         const callIdIndex = currentSelectedCalls.indexOf(callId);
         currentSelectedCalls.splice(callIdIndex, 1);
       }
       state.selectedCalls = currentSelectedCalls;
     },
-    removeSelectedCalls(state, action: PayloadAction<null>) {
-      state.selectedCalls.length = 0;
-    },
     setSelectAllCalls(state, action: PayloadAction<boolean>) {
       state.isSelectAllCalls = action.payload;
     },
-
+ 
     setSort(state, action: PayloadAction<string>) {
       state.sort = action.payload;
     },
 
-    deleteCall(state, action: PayloadAction<{ id: string, bundleIndex: number | null }>) {
+    deleteCall(state, action: PayloadAction<{id: string, bundleIndex: number | null}>) {
+ 
       if (action.payload.bundleIndex || action.payload.bundleIndex === 0) {
         let currentCalls = cloneDeep(current(state.calls[action.payload.bundleIndex]));
         const call = currentCalls.find(item => {
@@ -429,10 +381,6 @@ export const callsSlice = createSlice({
         }
         state.calls[action.payload.bundleIndex] = currentCalls
       }
-    },
-
-    setCalls(state, action: PayloadAction<CallType[][]>) {
-      state.calls = action.payload;
     },
 
     setBaseCallsData(state, action: PayloadAction<ResponseBaseCallsDataType>) {
@@ -480,6 +428,7 @@ export const callsSlice = createSlice({
       if (action.payload.index || action.payload.index === 0) {
         state.calls[action.payload.index].map((item) => {
           if (item.info && (item.info.id === action.payload.id)) {
+            debugger
             item.info = action.payload.info;
           }
         });
