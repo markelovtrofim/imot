@@ -175,7 +175,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
     setLoading(true);
     dispatch(callsSlice.actions.zeroingSkip(null)); 
     dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
-    const bastCallDataResponse = await dispatch(getBaseCallsData());
+    const bastCallDataResponse = await dispatch(getBaseCallsData({}));
     // @ts-ignore
     const bastCallData = bastCallDataResponse.payload;
 

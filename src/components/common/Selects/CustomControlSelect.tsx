@@ -105,6 +105,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({
       fontSize: '14px',
       backgroundColor: '#ffffff',
       color: '#000',
+      zIndex: '100000 !important'
     }),
     option: (provided: any, state: any) => ({
       cursor: 'pointer',
@@ -142,7 +143,7 @@ const CustomControlSelect: FC<CustomControlSelectPropsType> = ({
       zIndex: '1'
     }),
     dropdownIndicator: (provided: any, state: any) => ({
-      zIndex: '2'
+      zIndex: '2000'
     })
   };
 

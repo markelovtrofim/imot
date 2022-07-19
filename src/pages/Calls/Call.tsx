@@ -287,7 +287,7 @@ function areEqual(prevProps: CallPropsType, nextProps: CallPropsType) {
   return prevProps.callAudio === nextProps.callAudio && prevProps.callStt === nextProps.callStt && prevProps.expanded === nextProps.expanded;
 }
 
-const Call = memo((props: CallPropsType) => {
+const Call = (props: CallPropsType) => {
   const useStyles = makeStyles(({
     accordion: {
       border: 'none !important',
@@ -516,7 +516,7 @@ const Call = memo((props: CallPropsType) => {
   const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
   const selectAllCalls = useAppSelector(state => state.calls.isSelectAllCalls);
 
-  console.log(selectedCalls.find(id => id === props.callInfo.id));
+  const checked = selectedCalls.length > 0 && selectedCalls.find(selectedCall => selectedCall.callId === props.callInfo.id)
 
   return (
     <Accordion
@@ -533,16 +533,16 @@ const Call = memo((props: CallPropsType) => {
         >
           <div style={{textAlign: 'center', margin: '12px 12px 0 0'}}>
             <CustomCheckbox
-              checked={(selectedCalls.find(id => id === props.callInfo.id) === props.callInfo.id) || selectAllCalls}
+              checked={checked && (checked.callId === props.callInfo.id)}
               onChange={(event) => {
                 if (selectAllCalls) {
                   dispatch(callsSlice.actions.setSelectAllCalls(false));
                 }
 
                 if (event.currentTarget.checked) {
-                  dispatch(callsSlice.actions.pushSelectedCall(props.callInfo.id));
+                  dispatch(callsSlice.actions.pushSelectedCall({callId: props.callInfo.id, bundleIndex: props.bundleIndex}));
                 } else {
-                  dispatch(callsSlice.actions.removeSelectedCall(props.callInfo.id));
+                  dispatch(callsSlice.actions.removeSelectedCall({callId: props.callInfo.id, bundleIndex: props.bundleIndex}));
                 }
               }}
             />
@@ -690,6 +690,6 @@ const Call = memo((props: CallPropsType) => {
       </AccordionDetails>
     </Accordion>
   );
-}, areEqual)
+}
 
 export default CallStubMiddleware;

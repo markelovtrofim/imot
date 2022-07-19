@@ -1,19 +1,33 @@
- import React, {useEffect, FC, useState} from 'react';
-import {CircularProgress, Typography} from "@mui/material";
+import React, {FC, useState} from 'react';
+import {Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Grid from "@mui/material/Grid";
 import {useAppSelector} from "../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
-import CustomCheckbox from "../../components/common/Checkbox";
-import {callsAction, callsSlice, getActionFiles} from "../../store/calls/calls.slice";
+import {
+  callsAction,
+  callsSlice, deleteCall,
+  getActionFiles, getAndSetCallInfo, getAndSetCallStt,
+  getBaseCallsData, getTask,
+  SelectedCallType
+} from "../../store/calls/calls.slice";
 import {DownloadOnClick} from "../../components/common/Buttons/Download";
 import Reboot from "../../components/common/Buttons/Reboot";
-import History from "../../components/common/Buttons/History";
 import IconButton from "../../components/common/IconButton";
 import CustomControlSelect from "../../components/common/Selects/CustomControlSelect";
 import {langSlice} from "../../store/lang/lang.slice";
+import ContainedSelect from "../../components/common/Selects/ContainedSelect";
+import cloneDeep from "lodash.clonedeep";
+import {current} from "@reduxjs/toolkit";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import Logo from "../../assets/images/logo.png";
+import Yandex from "../../assets/images/yandex_PNG20.png";
+import CustomCheckbox from "../../components/common/Checkbox";
+import {LoadingButton} from "@mui/lab";
+import ModalWindow from "../../components/common/ModalWindowBox";
 
 const useStyles = makeStyles(({
   callsHeader: {
@@ -82,12 +96,238 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
   const currentUser = useAppSelector(state => state.users.currentUser);
   const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
 
+  const calls = useAppSelector(state => state.calls.calls);
+
   const sortParams = useAppSelector(state => state.calls.sort);
   const sortArray = [
     {value: "date", label: translate("date", language)},
     {value: "duration", label: translate("duration", language)},
     {value: "grade", label: translate("grade", language)}
   ];
+
+  function selectedCallsConverter(selectedCalls: SelectedCallType[]) {
+    return selectedCalls.map(call => call.callId);
+  }
+
+
+  async function superMegaUltraHardFunction(selectedCalls: SelectedCallType[]) {
+    await selectedCalls.forEach(async (selectedCall) => {
+      await dispatch(getAndSetCallInfo({id: selectedCall.callId, bundleIndex: selectedCall.bundleIndex}));
+      await dispatch(getAndSetCallStt({id: selectedCall.callId, bundleIndex: selectedCall.bundleIndex}));
+    });
+  }
+
+  type SttFormType = {
+    engine: "yandex" | "imot",
+    keepFragments: boolean
+  }
+
+  const [sttForm, setSttForm] = useState<SttFormType>({
+    engine: "imot",
+    keepFragments: false
+  });
+
+  const [MWButtonLoading, setMWButtonLoading] = useState<boolean>(false);
+
+  const [isMWOpen, setMWOpen] = useState<boolean>(false)
+  function handleMWClose() {
+    setMWOpen(false);
+  }
+  function handleMWOpen() {
+    setMWOpen(true);
+  }
+
+  // calls buttons
+  async function downloadAction() {
+    if (currentUser) {
+      const action = "audio_archive";
+      const taskIdData = await dispatch(callsAction({
+        action: action,
+        engine: "imot",
+        keep_fragments: false,
+        call_ids: selectedCallsConverter(selectedCalls),
+      }));
+      // @ts-ignore
+      const taskPayload = taskIdData.payload;
+      if (taskPayload) {
+        const taskId = taskPayload.data.task_id;
+        await dispatch(getActionFiles({taskId, action}));
+      } else {
+        dispatch(langSlice.actions.setSnackbar({
+          type: "info",
+          text: "Выберите звонки",
+          value: true,
+          time: 2000
+        }));
+      }
+    }
+  }
+
+  async function excelAction() {
+    if (currentUser) {
+      const action = "stt_export";
+      const taskIdData = await dispatch(callsAction({
+        action: action,
+        engine: "imot",
+        keep_fragments: false,
+        call_ids: selectedCallsConverter(selectedCalls),
+      }));
+      // @ts-ignore
+      const taskPayload = taskIdData.payload;
+      if (taskPayload) {
+        const taskId = taskPayload.data.task_id;
+        await dispatch(getActionFiles({taskId, action}));
+      } else {
+        dispatch(langSlice.actions.setSnackbar({
+          type: "info",
+          text: "Выберите звонки",
+          value: true,
+          time: 2000
+        }));
+      }
+    }
+  }
+
+  async function rebootAction() {
+    if (currentUser) {
+      const action = "analyze";
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Запрос отправлен",
+        value: true,
+        time: 2000
+      }));
+      const taskIdData = await dispatch(callsAction({
+        action: action,
+        engine: "imot",
+        keep_fragments: false,
+        call_ids: selectedCallsConverter(selectedCalls),
+      }));
+      // @ts-ignore
+      const taskPayload = taskIdData.payload;
+      if (taskPayload) {
+        const taskId = taskPayload.data.task_id;
+        await dispatch(getTask(taskId));
+        superMegaUltraHardFunction(selectedCalls);
+      } else {
+        dispatch(langSlice.actions.setSnackbar({
+          type: "info",
+          text: "Выберите звонки",
+          value: true,
+          time: 2000
+        }));
+      }
+      dispatch(langSlice.actions.setSnackbar({
+        type: "success",
+        text: "Звонки перераспознаны",
+        value: true,
+        time: 2000
+      }));
+    }
+  }
+
+  async function deleteAction() {
+    let callsLocal = [...cloneDeep(calls)];
+    dispatch(langSlice.actions.setSnackbar({
+      type: "info",
+      text: "Запрос отправлен",
+      value: true,
+      time: 2000
+    }));
+    for (const selectedCall of selectedCalls) {
+      if (selectedCall.bundleIndex || selectedCall.bundleIndex === 0) {
+        await dispatch(deleteCall(selectedCall.callId));
+        let currentCalls = callsLocal[selectedCall.bundleIndex];
+        const call = currentCalls.find(item => {
+          if (item.info) {
+            return item.info.id === selectedCall.callId;
+          }
+        })
+        let callIndex = -1;
+        if (call) {
+          callIndex = currentCalls.indexOf(call);
+        }
+        if (callIndex != -1) {
+          currentCalls.splice(callIndex, 1);
+        }
+        callsLocal[selectedCall.bundleIndex] = currentCalls
+      }
+    }
+    dispatch(callsSlice.actions.setCalls(callsLocal));
+    dispatch(callsSlice.actions.removeSelectedCalls(null));
+    dispatch(langSlice.actions.setSnackbar({
+      type: "success",
+      text: "Звонки удалены",
+      value: true,
+      time: 2000
+    }));
+  }
+
+  async function sttSubmit() {
+    handleMWOpen();
+  }
+
+  async function sttActionSubmit() {
+    if (currentUser) {
+      const action = "stt";
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Запрос отправлен",
+        value: true,
+        time: 2000
+      }));
+      const taskIdData = await dispatch(callsAction({
+        action: action,
+        engine: sttForm.engine,
+        keep_fragments: sttForm.keepFragments,
+        call_ids: selectedCallsConverter(selectedCalls),
+      }));
+      // @ts-ignore
+      const taskPayload = taskIdData.payload;
+      if (taskPayload) {
+        const taskId = taskPayload.data.task_id;
+        await dispatch(getTask(taskId));
+        superMegaUltraHardFunction(selectedCalls);
+      } else {
+        dispatch(langSlice.actions.setSnackbar({
+          type: "info",
+          text: "Выберите звонки",
+          value: true,
+          time: 2000
+        }));
+      }
+    }
+  }
+
+  async function swapChannelsAction() {
+    const action = "swap_channels";
+    const taskIdData = await dispatch(callsAction({
+      action: action,
+      engine: "imot",
+      keep_fragments: false,
+      call_ids: selectedCallsConverter(selectedCalls),
+    }));
+    // @ts-ignore
+    const taskPayload = taskIdData.payload;
+    if (taskPayload) {
+      const taskId = taskPayload.data.task_id;
+      await dispatch(getTask(taskId));
+      superMegaUltraHardFunction(selectedCalls);
+    } else {
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Выберите звонки",
+        value: true,
+        time: 2000
+      }));
+    }
+    dispatch(langSlice.actions.setSnackbar({
+      type: "success",
+      text: "Каналы поменяны местами",
+      value: true,
+      time: 2000
+    }));
+  }
 
   return (
     <div className={classes.callsHeader}>
@@ -99,134 +339,72 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
             <Typography className={classes.callsTitleText}>Найдено {found} звонков</Typography>
           }
         </div>
-        <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-          {/* Скачать */}
-          <DownloadOnClick
-            onClick={async (event) => {
-              if (currentUser) {
-                const taskIdData = await dispatch(callsAction({
-                  action: "audio_archive",
-                  engine: "imot",
-                  keep_fragments: false,
-                  call_ids: selectedCalls,
-                }));
-                // @ts-ignore
-                const taskPayload = taskIdData.payload;
-                if (taskPayload) {
-                  const taskId = taskPayload.data.task_id;
-                  debugger
-                  await dispatch(getActionFiles(taskId));
-                } else {
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <div>
+            <ContainedSelect
+              width={"150px"}
+              onSelectChange={(event) => {
+                if (event.value === "grade") {
                   dispatch(langSlice.actions.setSnackbar({
-                    type: "info",
-                    text: "Выберите звонки",
+                    type: "error",
+                    text: "Этот вид сортировки пока не работает",
                     value: true,
                     time: 2000
                   }));
+                } else {
+                  dispatch(callsSlice.actions.setSort(event.value));
+                  dispatch(callsSlice.actions.zeroingSkip(null));
+                  dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}))
+                  if (event.value === "duration") {
+                    dispatch(getBaseCallsData({sort: event.value}))
+                  } else if (event.value === "date") {
+                    dispatch(getBaseCallsData({}))
+                  }
                 }
-              }
-            }}
-          />
-
-          {/* Excel export */}
-          <IconButton
-            onClick={async(event) => {
-            if (currentUser) {
-              const taskIdData = await dispatch(callsAction({
-                action: "stt_export",
-                engine: "imot",
-                keep_fragments: false,
-                call_ids: selectedCalls,
-              }));
-              // @ts-ignore
-              const taskPayload = taskIdData.payload;
-              debugger
-              if (taskPayload) {
-                const taskId = taskPayload.data.task_id;
-                debugger
-                await dispatch(getActionFiles(taskId));
-              } else {
-                dispatch(langSlice.actions.setSnackbar({
-                  type: "info",
-                  text: "Выберите звонки",
-                  value: true,
-                  time: 2000
-                }));
-              }
-            }
-            }}
-            icon={
-              <Typography style={{fontSize: "13px"}}>ex</Typography>
-            }
-            margin={'0 15px 0 0'}
-            backgroundColor="#E3E8EF"
-
-            tooltipTitle={"Excel экспорт"}
-            tooltipPlacement={"top"}
-          />
-
-          {/* Перераспознать */}
-          <Reboot
-            disabled={true}
-
-            onClick={() => {
-              //rebootAction()
-            }}
-          />
-
-          {/*Удаление и смена каналов. */}
-          <CustomControlSelect
-            handleSelectChange={async (event) => {
-
-            }}
-            svg={"vertical"}
-            options={[
-              {value: 'delete', label: "Удалить"},
-              {value: "stt", label: "Перетегировать"}
-            ]}
-            optionsPosition={"bottom"}
+              }}
+              options={sortArray}
+              value={{value: sortParams, label: translate(sortParams, language)}}
             />
           </div>
 
-        <div>
-          <ContainedSelect
-            width={"150px"}
-            onSelectChange={(event) => {
-              if (event.value === "grade") {
-                dispatch(langSlice.actions.setSnackbar({
-                  type: "error",
-                  text: "Этот вид сортировки пока не работает",
-                  value: true,
-                  time: 2000
-                }));
-              } else {
-                dispatch(callsSlice.actions.setSort(event.value));
-                dispatch(callsSlice.actions.zeroingSkip(null));
-                dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}))
-                if (event.value === "duration") {
-                  dispatch(getBaseCallsData({sort: event.value}))
-                } else if (event.value === "date") {
-                  dispatch(getBaseCallsData({}))
-                }
-              }
-            }}
-            options={sortArray}
-            value={{value: sortParams, label: translate(sortParams, language)}}
+          <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginLeft: '20px'}}>
+            {/* Скачать */}
+            <DownloadOnClick onClick={() => {downloadAction().then()}}/>
 
-          />
+            {/* Excel export */}
+            <IconButton
+              onClick={() => {excelAction().then()}}
+              icon={
+                <Typography style={{fontSize: "13px"}}>ex</Typography>
+              }
+              margin={'0 15px 0 0'}
+              backgroundColor="#E3E8EF"
+              tooltipTitle={"Excel экспорт"}
+              tooltipPlacement={"top"}
+            />
+
+            {/* Перераспознать */}
+            <Reboot onClick={() => {rebootAction().then()}}/>
+
+            {/* Удаление и смена каналов. */}
+            <CustomControlSelect
+              handleSelectChange={async (event) => {
+                if (event.value === "delete") deleteAction().then();
+                else if (event.value === "stt") sttSubmit().then();
+                else if (event.value === "swap_channels") swapChannelsAction().then();
+              }}
+              svg={"vertical"}
+              options={[
+                {value: 'delete', label: "Удалить"},
+                {value: "swap_channels" ,label: "Поменять каналы местами"},
+                {value: "stt", label: "Перетегировать"}
+              ]}
+              optionsPosition={"bottom"}
+            />
+          </div>
         </div>
       </div>
-      <Grid container className={classes.callsCols}> 
-        {/*<Grid item xs={0.2} style={{minWidth: '10px', display: 'flex', alignItems: 'center'}}>*/}
-        {/*  <CustomCheckbox*/}
-        {/*    checked={selectAllCalls}*/}
-        {/*    onClick={(event) => {*/}
-        {/*      // @ts-ignore*/}
-        {/*      dispatch(callsSlice.actions.setSelectAllCalls(event.target.checked));*/}
-        {/*    }}*/}
-        {/*  />*/}
-        {/*</Grid>*/}
- 
+      <Grid container className={classes.callsCols}>
         <Grid item xs={0.5} style={{minWidth: '50px', display: 'flex', alignItems: 'center'}}>
           <span style={{marginRight: '15px'}}><ClockSvg/></span>
           <ArrowsSvg/>
@@ -246,6 +424,71 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
           <Typography style={{marginRight: '15px', fontWeight: '600'}}>{translate('callsTag', language)}</Typography>
         </Grid>
       </Grid>
+
+      <ModalWindow
+        isMWOpen={isMWOpen}
+        handleMWClose={handleMWClose}
+        text={"Параметры перераспознования"}
+        width={'400px'}
+      >
+        <ToggleButtonGroup
+          style={{marginTop: '15px'}}
+          value={sttForm.engine}
+          exclusive
+          onChange={() => {
+          }}
+        >
+          <ToggleButton
+            value={"imot"}
+            onClick={() => {
+              setSttForm({...sttForm, engine: "imot"})
+            }}
+          >
+            <img src={Logo} alt=""/>
+          </ToggleButton>
+
+          <ToggleButton
+            value={"yandex"}
+            onClick={() => {
+              setSttForm({...sttForm, engine: "yandex"})
+            }}
+          >
+            <img src={Yandex} width={60} alt=""/>
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <div style={{display: 'flex', margin: '15px 0'}}>
+          <CustomCheckbox
+            style={{marginRight: '10px'}}
+            onClick={(event) => {
+              setSttForm({...sttForm, keepFragments: !sttForm.keepFragments})
+            }}
+            checked={sttForm.keepFragments}
+          />
+          <Typography style={{cursor: "pointer"}}>
+            Сохранять фрагменты
+          </Typography>
+        </div>
+        <div>
+          <LoadingButton
+            loading={MWButtonLoading}
+            style={{marginRight: '15px'}}
+            variant="contained"
+            color="primary"
+            onClick={sttActionSubmit}
+          >
+            {translate("sendButton", language)}
+          </LoadingButton>
+          <LoadingButton
+            variant="contained"
+            color="secondary"
+            onClick={handleMWClose}
+          >
+            {translate("cancelButton", language)}
+          </LoadingButton>
+        </div>
+      </ModalWindow>
+
     </div>
   )
 })
