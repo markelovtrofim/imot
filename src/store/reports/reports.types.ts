@@ -50,7 +50,7 @@ export type ReportParametersType = {
 }
 export type ColsGroupByParametersType = {
   group_by: string,
-  value?: string | {
+  value?: string | [] | {
     col_name: string,
     search_items: [{
       key: string,
@@ -97,6 +97,10 @@ export type defaultParamType = {
   },
   nameColumn: {
     value: string,
+  },
+  tagsNameList: {
+    options: [],
+    value: [],
   },
   callFilters: {
     options: [],

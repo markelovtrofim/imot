@@ -1,32 +1,34 @@
 import * as React from 'react';
+
 import CreatableSelect from 'react-select/creatable';
-import {FC, memo, useEffect, useRef, useState} from "react";
-import {CriteriasType, RequestDataType} from "../../../store/search/search.types";
-import {searchSlice} from "../../../store/search/search.slice";
-import {useDispatch} from "react-redux";
-import {makeStyles} from "@mui/styles";
-import {Typography} from "@mui/material";
-import Select, {components} from "react-select";
+import { FC, memo, useEffect, useRef, useState } from "react";
+import { CriteriasType, RequestDataType } from "../../../store/search/search.types";
+import { searchSlice } from "../../../store/search/search.slice";
+import { useDispatch } from "react-redux";
+import { makeStyles } from "@mui/styles";
+import { Typography } from "@mui/material";
+import Select, { components } from "react-select";
 import SearchIcon from '@mui/icons-material/Search';
 import cn from 'classnames';
 import Checkbox from "../Checkbox";
-import {templateSlice} from "../../../store/search/template.slice";
+import { templateSlice } from "../../../store/search/template.slice";
 import useOnClickOutside from "use-onclickoutside";
-import {useAppSelector} from "../../../hooks/redux";
-import {translate} from '../../../localizations';
-import {RootState} from "../../../store/store";
+import { useAppSelector } from "../../../hooks/redux";
+import { translate } from '../../../localizations';
+import { RootState } from "../../../store/store";
 import { reportsSlice } from '../../../store/reports/reports.slice';
+import { optionsCreatorVEL } from '../../../utils/optionsCreator'
 
 const CrossSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <circle cx="8" cy="8" r="8" fill="#738094"/>
+      <circle cx="8" cy="8" r="8" fill="#738094" />
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M11.1618 4.83785C11.3896 5.06567 11.3896 5.43503 11.1618 5.66285L5.66187 11.1628C5.43406 11.3906 5.06469 11.3906 4.83688 11.1628C4.60906 10.935 4.60906 10.5656 4.83688 10.3378L10.3368 4.83785C10.5646 4.61004 10.934 4.61004 11.1618 4.83785Z"
-            fill="white"/>
+        d="M11.1618 4.83785C11.3896 5.06567 11.3896 5.43503 11.1618 5.66285L5.66187 11.1628C5.43406 11.3906 5.06469 11.3906 4.83688 11.1628C4.60906 10.935 4.60906 10.5656 4.83688 10.3378L10.3368 4.83785C10.5646 4.61004 10.934 4.61004 11.1618 4.83785Z"
+        fill="white" />
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
-            fill="white"/>
+        d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
+        fill="white" />
     </svg>
   );
 };
@@ -35,8 +37,8 @@ export const OnTopArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M7.39101 4.59994C7.17176 4.83662 6.81636 4.83662 6.59711 4.59994L3.9999 1.79621L1.40271 4.59994C1.18347 4.83662 0.828006 4.83662 0.608766 4.59994C0.389526 4.36325 0.389526 3.97957 0.608766 3.74288L3.60295 0.510518C3.8222 0.273838 4.1776 0.273838 4.39685 0.510518L7.39101 3.74288C7.61026 3.97957 7.61026 4.36325 7.39101 4.59994Z"
-            fill="#1B202B"/>
+        d="M7.39101 4.59994C7.17176 4.83662 6.81636 4.83662 6.59711 4.59994L3.9999 1.79621L1.40271 4.59994C1.18347 4.83662 0.828006 4.83662 0.608766 4.59994C0.389526 4.36325 0.389526 3.97957 0.608766 3.74288L3.60295 0.510518C3.8222 0.273838 4.1776 0.273838 4.39685 0.510518L7.39101 3.74288C7.61026 3.97957 7.61026 4.36325 7.39101 4.59994Z"
+        fill="#1B202B" />
     </svg>
   );
 };
@@ -45,21 +47,20 @@ export const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M7.39101 0.400166C7.61026 0.636846 7.61026 1.02059 7.39101 1.25725L4.39685 4.48958C4.1776 4.72627 3.8222 4.72627 3.60295 4.48958L0.608766 1.25725C0.389526 1.02059 0.389526 0.636846 0.608766 0.400166C0.828006 0.163486 1.18347 0.163486 1.40271 0.400166L3.9999 3.20392L6.59711 0.400166C6.81636 0.163486 7.17176 0.163486 7.39101 0.400166Z"
-            fill="#738094"/>
+        d="M7.39101 0.400166C7.61026 0.636846 7.61026 1.02059 7.39101 1.25725L4.39685 4.48958C4.1776 4.72627 3.8222 4.72627 3.60295 4.48958L0.608766 1.25725C0.389526 1.02059 0.389526 0.636846 0.608766 0.400166C0.828006 0.163486 1.18347 0.163486 1.40271 0.400166L3.9999 3.20392L6.59711 0.400166C6.81636 0.163486 7.17176 0.163486 7.39101 0.400166Z"
+        fill="#738094" />
     </svg>
   );
 };
-
 
 export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M11.1618 4.83785C11.3896 5.06567 11.3896 5.43503 11.1618 5.66285L5.66187 11.1628C5.43406 11.3906 5.06469 11.3906 4.83688 11.1628C4.60906 10.935 4.60906 10.5656 4.83688 10.3378L10.3368 4.83785C10.5646 4.61004 10.934 4.61004 11.1618 4.83785Z"
-            fill="#237804"/>
+        d="M11.1618 4.83785C11.3896 5.06567 11.3896 5.43503 11.1618 5.66285L5.66187 11.1628C5.43406 11.3906 5.06469 11.3906 4.83688 11.1628C4.60906 10.935 4.60906 10.5656 4.83688 10.3378L10.3368 4.83785C10.5646 4.61004 10.934 4.61004 11.1618 4.83785Z"
+        fill="#237804" />
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
+        d="M4.83688 4.83785C5.06469 4.61004 5.43406 4.61004 5.66187 4.83785L11.1618 10.3378C11.3896 10.5656 11.3896 10.935 11.1618 11.1628C10.934 11.3906 10.5646 11.3906 10.3368 11.1628L4.83688 5.66285C4.60906 5.43503 4.60906 5.06567 4.83688 4.83785Z"
       />
     </svg>
   );
@@ -67,21 +68,28 @@ export const CrossWithoutBg = (props: React.SVGProps<SVGSVGElement>) => {
 
 // TYPES BLOCK
 type SelectPropsType = {
-  criteriaFull: CriteriasType,
-  criteriaCurrent: CriteriasType | RequestDataType,
+  criteriaFull: CriteriasType | null,
+  criteriaCurrent: CriteriasType | RequestDataType | null,
   isDefaultCriteria: boolean,
   block?: string,
   index?: {arrayIndex: number},
+  array?: { value: string, label: string }[],
+  valueList?: [],
+  handlerOnChange?: (e: any) => void
 };
 
-
 const SearchSelect: FC<SelectPropsType> = memo(({
-                                             criteriaFull,
-                                             criteriaCurrent,
-                                             isDefaultCriteria,
-                                             block,
-                                             index,
-                                           }) => {
+    criteriaFull,
+    criteriaCurrent,
+    isDefaultCriteria,
+    block,
+    index,
+    array,
+    valueList,
+    handlerOnChange,
+  }) => {
+
+    console.log(valueList)
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {
@@ -255,11 +263,11 @@ const SearchSelect: FC<SelectPropsType> = memo(({
   const CustomMultiValueRemove = memo((props: any) => {
     return (
       <components.MultiValueRemove {...props}>
-        <CrossWithoutBg fill={'000'}/>
+        <CrossWithoutBg fill={'000'} />
       </components.MultiValueRemove>
     )
   });
-  const LimitedChipsContainer = ({children, hasValue, ...props}: any) => {
+  const LimitedChipsContainer = ({ children, hasValue, ...props }: any) => {
     if (!hasValue) {
       return (
         <components.ValueContainer {...props}>
@@ -278,43 +286,53 @@ const SearchSelect: FC<SelectPropsType> = memo(({
       <components.ValueContainer {...props}>
         {displayChips}
         {overflowCounter > 0 &&
-        <div className={classes.selectTag}>
-          +{overflowCounter}
-        </div>}
+          <div className={classes.selectTag}>
+            +{overflowCounter}
+          </div>}
       </components.ValueContainer>
     );
   };
   const CustomInd = memo((props: any) => {
     if (menuIsOpen) {
-      return <div className={cn(classes.selectArrowOnArrow, classes.selectArrow)}><OnTopArrow/></div>
+      return <div className={cn(classes.selectArrowOnArrow, classes.selectArrow)}><OnTopArrow /></div>
     }
-    return <OnBottomArrow className={classes.selectArrow}/>
+    return <OnBottomArrow className={classes.selectArrow} />
   });
   const CustomOption = memo((props: any) => {
     if (props.children.length > 0) {
       return <div>
         <components.Option {...props} className={classes.selectOption}>
           {props.children}
-          <Checkbox
-            disableRipple
-            checked={criteriaCurrent.values.indexOf(props.children) >= 0}
-          />
+          {criteriaCurrent ? 
+            <Checkbox
+              disableRipple
+              checked={criteriaCurrent.values.indexOf(props.children) >= 0}
+            />
+          :
+            <Checkbox
+              disableRipple
+               //@ts-ignore
+              checked={Boolean(valueList.find((item) => item === props.children))}
+            />          
+          }
         </components.Option>
       </div>
     }
     return null;
   })
 
-  const CustomMenuList = memo(({selectProps, ...props}: any) => {
+  const CustomMenuList = memo(({ selectProps, ...props }: any) => {
     const selectSearch = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
-      if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
-        selectSearch.current.focus();
+      if (criteriaFull) {
+        if (selectSearch.current && criteriaFull.selectType !== 'multiString') {
+          selectSearch.current.focus();
+        }
       }
     }, [setMenuIsOpen])
 
-    const {onInputChange, inputValue, onMenuInputFocus} = selectProps;
+    const { onInputChange, inputValue, onMenuInputFocus } = selectProps;
     return (
       <div>
         <div>
@@ -344,9 +362,9 @@ const SearchSelect: FC<SelectPropsType> = memo(({
             onFocus={onMenuInputFocus}
             placeholder={translate('searchTag', language)}
           />
-          <SearchIcon className={classes.selectMenuListInputIcon}/>
+          <SearchIcon className={classes.selectMenuListInputIcon} />
         </div>
-        <div style={{height: '400px !important'}}>
+        <div style={{ height: '400px !important' }}>
           {props.children}
         </div>
       </div>
@@ -356,20 +374,21 @@ const SearchSelect: FC<SelectPropsType> = memo(({
   // LOGIC BLOCK
   // диспатч
   const dispatch = useDispatch();
-  const {language} = useAppSelector((state: RootState) => state.lang);
+  const { language } = useAppSelector((state: RootState) => state.lang);
 
   // открыте и закрытие менюшки.
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
 
   // удаление критерии.
-  const removeCriteria = () => {
-    dispatch(templateSlice.actions.setCurrentTemplate(null));
-    dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
-  };
+  // const removeCriteria = () => {
+  //   dispatch(templateSlice.actions.setCurrentTemplate(null));
+  //   if (criteriaFull) {
+  //     dispatch(searchSlice.actions.removeActiveCriteria(criteriaFull));
+  //   }
+  // };
 
   // выполняется когда меняется значение.
   const handleSelectChange = (event: any) => {
-    dispatch(templateSlice.actions.setCurrentTemplate(null));
     const eventConverter = () => {
       let result = [];
       for (let i = 0; i < event.length; i++) {
@@ -378,30 +397,35 @@ const SearchSelect: FC<SelectPropsType> = memo(({
       return result;
     };
 
-    const eventConverterResult = eventConverter();
-    if (block === 'reports') {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
-    }  else if (block === 'reports-column') {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
-    }  else if (index) {
-      dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex,  criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
-      console.log(index);
-    }  else {
-      if (isDefaultCriteria) {
-        dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
-      } else {
-        dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+    if (array) {
+      const eventConverterResult = eventConverter();
+      //@ts-ignore
+      handlerOnChange([...eventConverterResult])
+
+    } else {
+      dispatch(templateSlice.actions.setCurrentTemplate(null));
+      const eventConverterResult = eventConverter();
+      if (block === 'reports' && criteriaFull) {
+        dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      }  else if (block === 'reports-column' && criteriaFull) {
+        dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      }  else if (index && criteriaFull) {
+        dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex,  criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
+      }  else {
+        if (isDefaultCriteria && criteriaFull) {
+          dispatch(searchSlice.actions.setDefaultCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        } else if (criteriaFull) {
+          dispatch(searchSlice.actions.setActiveCriteriaValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        }
       }
     }
-
-
   };
 
   const converter = (state: any) => {
     let local: { value: string, label: string }[] = [];
     if (state) {
       for (let i = 0; i < state.values.length; i++) {
-        local.push({value: state.values[i], label: state.values[i]});
+        local.push({ value: state.values[i], label: state.values[i] });
       }
     }
     return local
@@ -418,67 +442,98 @@ const SearchSelect: FC<SelectPropsType> = memo(({
   }, []);
 
   return (
-    <div className={classes.selectBox}>
-      {criteriaFull.selectType === "multiString" ?
-        <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
-          <CreatableSelect
-            closeMenuOnSelect={false}
-            isMulti
-            createOptionPosition={'first'}
-            styles={customStyles}
-            formatCreateLabel={(str) => str}
-            value={converterCurrentResult}
-            onChange={handleSelectChange}
+    <>
+    {array && array.length > 0 ?
+      <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
+        <CreatableSelect
+          closeMenuOnSelect={false}
+          isMulti
+          createOptionPosition={'first'}
+          styles={customStyles}
+          formatCreateLabel={(str) => str}
+          value={optionsCreatorVEL(valueList)}
+          onChange={handleSelectChange}
 
-            tabIndex={0}
-            isValidNewOption={(str) => true}
-            options={converterFullResult}
-            hideSelectedOptions={false}
-            components={{
-              MenuList: CustomMenuList,
-              Option: CustomOption,
-              DropdownIndicator: CustomInd,
-              IndicatorSeparator: () => null,
-              MultiValueLabel: CustomMultiValueLabel,
-              MultiValueRemove: CustomMultiValueRemove,
-            }}
-            placeholder={translate('allTags', language)}
-            menuIsOpen={menuIsOpen}
+          tabIndex={0}
+          isValidNewOption={(str) => true}
+          options={array}
+          hideSelectedOptions={false}
+          components={{
+            MenuList: CustomMenuList,
+            Option: CustomOption,
+            DropdownIndicator: CustomInd,
+            IndicatorSeparator: () => null,
+            MultiValueLabel: CustomMultiValueLabel,
+            MultiValueRemove: CustomMultiValueRemove,
+          }}
+          placeholder={translate('allTags', language)}
+          menuIsOpen={menuIsOpen}
+        />
+      </div>
+      :
+      <div className={classes.selectBox}>
+        {criteriaFull && criteriaFull.selectType === "multiString" ?
+          <div className={classes.selectSelectBox} onClick={() => setMenuIsOpen(true)}>
+            <CreatableSelect
+              closeMenuOnSelect={false}
+              isMulti
+              createOptionPosition={'first'}
+              styles={customStyles}
+              formatCreateLabel={(str) => str}
+              value={converterCurrentResult}
+              onChange={handleSelectChange}
 
-          />
-        </div> :
-        <div className={classes.selectSelectBox}  onClick={() => setMenuIsOpen(true)}>
-          <Select
-            openMenuOnFocus={true}
-            menuIsOpen={menuIsOpen}
-            className={classes.selectItem}
-            name="color"
-            placeholder={translate('allTags', language)}
-            components={{
-              MenuList: CustomMenuList,
-              Option: CustomOption,
-              DropdownIndicator: CustomInd,
-              IndicatorSeparator: () => null,
-              MultiValueLabel: CustomMultiValueLabel,
-              MultiValueRemove: CustomMultiValueRemove,
-              ValueContainer: LimitedChipsContainer,
-            }}
-            onChange={handleSelectChange}
-            isClearable={true}
-            closeMenuOnSelect={false}
-            styles={customStyles}
-            isMulti
-            isSearchable={false}
-            value={converterCurrentResult}
-            options={converterFullResult}
-            hideSelectedOptions={false}
-          />
-          {converterCurrentResult.length < 1 &&
-          <Typography className={classes.selectPlaceholder}>{translate('allTags', language)}</Typography>
-          }
-        </div>
-      }
-    </div>
+              tabIndex={0}
+              isValidNewOption={(str) => true}
+              options={converterFullResult}
+              hideSelectedOptions={false}
+              components={{
+                MenuList: CustomMenuList,
+                Option: CustomOption,
+                DropdownIndicator: CustomInd,
+                IndicatorSeparator: () => null,
+                MultiValueLabel: CustomMultiValueLabel,
+                MultiValueRemove: CustomMultiValueRemove,
+              }}
+              placeholder={translate('allTags', language)}
+              menuIsOpen={menuIsOpen}
+
+            />
+          </div> :
+          <div className={classes.selectSelectBox}  onClick={() => setMenuIsOpen(true)}>
+            <Select
+              openMenuOnFocus={true}
+              menuIsOpen={menuIsOpen}
+              className={classes.selectItem}
+              name="color"
+              placeholder={translate('allTags', language)}
+              components={{
+                MenuList: CustomMenuList,
+                Option: CustomOption,
+                DropdownIndicator: CustomInd,
+                IndicatorSeparator: () => null,
+                MultiValueLabel: CustomMultiValueLabel,
+                MultiValueRemove: CustomMultiValueRemove,
+                ValueContainer: LimitedChipsContainer,
+              }}
+              onChange={handleSelectChange}
+              isClearable={true}
+              closeMenuOnSelect={false}
+              styles={customStyles}
+              isMulti
+              isSearchable={false}
+              value={converterCurrentResult}
+              options={converterFullResult}
+              hideSelectedOptions={false}
+            />
+            {converterCurrentResult.length < 1 &&
+            <Typography className={classes.selectPlaceholder}>{translate('allTags', language)}</Typography>
+            }
+          </div>
+        }
+      </div>
+    }
+    </>
   );
 });
 

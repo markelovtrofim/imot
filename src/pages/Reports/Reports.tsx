@@ -32,6 +32,7 @@ import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreat
 import { reportsStyles } from './Reports.jss';
 import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg } from "./Reports.svg";
 import ChartsBlock from '../../components/common/Charts/ChartsBlock';
+import SearchSelect from '../../components/common/Search/SearchSelect';
 import { reportsSlice,
   getAllReports,
   getReport,
@@ -90,8 +91,8 @@ const Reports = React.memo(() => {
       dispatch(getDefaultCriterias());
     }
     dispatch(getAllReports());
-    func();
     funcForTag();
+    func();    
     funcForCriterias();
     setLoading(false);
   }, []);
@@ -171,8 +172,8 @@ const Reports = React.memo(() => {
     },
   }
   const chartTypes = [
-    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
     {label: `${translate('barChart', language)}`, value: 'barChart' },
+    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
     {label: `${translate('pieChart', language)}`, value: 'pieChart' },
     {label: `${translate('radarChart', language)}`, value: 'radarChart' },
   ]  
@@ -183,7 +184,10 @@ const Reports = React.memo(() => {
     let local: { value: any, label: string, type: string | null }[] = [];
     for (let i = 0; i < options.length; i++) {
       let selectTitle: string = options[i]
-      local.push({ value: options[i], label: selectNames[selectTitle].label, type: selectNames[selectTitle].type })
+      //temporarily
+      if (selectTitle !== 'tag_value_list') {
+          local.push({ value: options[i], label: selectNames[selectTitle].label, type: selectNames[selectTitle].type })
+        }
     }
     return local;
   }
@@ -269,6 +273,7 @@ const Reports = React.memo(() => {
   }
 
   const activeReport = useAppSelector(state => state.reports.activeReport);
+  const period = useAppSelector(state => state.reports.activeReport.period);
   const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
 
   // selectors values
@@ -309,12 +314,26 @@ const Reports = React.memo(() => {
   const tagNamesColOptions = optionsCreatorVEL(tagNames);
   //@ts-ignore
   let tagNameColFrom = useAppSelector(state => state.reports.activeReport.cols_group_by[0]);
-  let tagNamesColValue: any = {};
-  if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
-    tagNamesColValue = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+  let tagNamesColValue: any = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+
+  let tagNameListValue: any = []
+  if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag_name_list' && groupByColumns[0].value) {
+    tagNameListValue = tagNameColFrom.value;
   } else {
-    tagNamesColValue = tagNamesOptions[0];
+    tagNameListValue = [];
   }
+
+  useEffect(() => {
+    if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
+      tagNamesColValue = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+    } 
+    else {
+      tagNamesColValue = tagNamesOptions[0];
+      if (groupByColumns[0].group_by === 'tag' && tagNamesOptions[0]) {
+        dispatch(reportsSlice.actions.setDefaultColsTagsValue({ value: tagNamesOptions[0] }))
+      }
+    }
+  }, [tagNamesOptions, groupByColumns, tagNameColFrom])
 
   const [op, setOp] = useState<any>([]);
   useEffect(() => {
@@ -394,9 +413,10 @@ const Reports = React.memo(() => {
     setCheckboxPercent(event.target.checked);
   }
   //chart
-  const [checkboxShowChart, setCheckboxShowChart] = useState(false);
+  const checkboxShowChart = useAppSelector(state => state.reports.showCharts);
   const handleCheckboxShowChart = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCheckboxShowChart(event.target.checked);
+    // setCheckboxShowChart(event.target.checked);
+    dispatch(reportsSlice.actions.setShowCharts(event.target.checked))
   }
   const [checkChart, setCheckChart] = useState('calls');
   const handleCheckChart = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -706,16 +726,26 @@ const Reports = React.memo(() => {
   }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
 
   useEffect(() => {
-    setDataChart(getDataChartFunc());
-  }, [callReport])
+    if (callReport) {
+      setDataChart(getDataChartFunc());
+    }
+  }, [callReport, checkChart])
+
+
+  const zeroParameters = () => {
+    dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
+    dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
+    dispatch(reportsSlice.actions.removeAllActiveParameters(null));
+    dispatch(reportsSlice.actions.setNameReport(''));
+    dispatch(reportsSlice.actions.setInitialSavedReport(null));
+  }
 
   const getCallParameters = async (event: any) => {
     hideVisibleParameters();
     setLoading(true);
     //обнуление параметров
-    dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
-    dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
-    dispatch(reportsSlice.actions.removeAllActiveParameters(null));
+    zeroParameters();
+
     await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
     await dispatch(getCallReport());
@@ -738,6 +768,10 @@ const Reports = React.memo(() => {
           }
         }
       }
+      if (groupByColumns[0].group_by === 'tag_name_list') {
+        dispatch(reportsSlice.actions.setDefaultColTagsName(groupByColumns[0].value))
+        
+      }
     }
 
     if (groupByColumns.length > 1) {
@@ -747,6 +781,7 @@ const Reports = React.memo(() => {
           select: { options: groupByColumnsReportOptions, value: handleOptionsReportsSelectObj(groupByColumns[i]) },
           tagsVal: { options: tagNamesColOptions, value: tagNamesColValue },
           op: { options: opAddCriterias, value: '' },
+          tagsNameList: { options: tagNamesColOptions, value: [] },
           callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] }
         }]))
         if (groupByColumns[i].group_by === 'tag') {
@@ -770,10 +805,8 @@ const Reports = React.memo(() => {
             activeColsCriterias.push(allCriterias.filter((item) => item.key === searchItem.key));
 
             let activeSearchItems = cloneDeep(activeColsCriterias);
-            // for (let y = 0; y < activeSearchItems.length; y++) {
               //@ts-ignore
               activeSearchItems[j].values = searchItem.values
-            // }
             dispatch(reportsSlice.actions.setActiveCriteriaColumn({
               arrayIndex: i - 1,
               criteria: activeSearchItems[j]
@@ -783,13 +816,20 @@ const Reports = React.memo(() => {
               criteria: handleMoreSelectClick(allCriterias, activeSearchItems[j])
             }))
           }
-        }
+        } else if (groupByColumns[i].group_by === 'tag_name_list') {
+          dispatch(reportsSlice.actions.setActiveColTagsName({
+            arrayIndex: i - 1,
+            //@ts-ignore
+            value: groupByColumns[i].value
+          }))
+        } 
       }
     }
-  }, [groupByColumns, activeReport])
+  }, [callReport])
 
   //построение отчета
   const formReport = async () => {
+    dispatch(callsSlice.actions.callsReset());
     setLoading(true);
     await dispatch(getCallReport());
     await setLoading(false);
@@ -807,7 +847,7 @@ const Reports = React.memo(() => {
       await dispatch(setReports());
       await dispatch(getAllReports());
       await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
-      
+
       setSnackbar({
         type: 'success',
         value: true,
@@ -820,17 +860,14 @@ const Reports = React.memo(() => {
   const deleteReportAsync = async () => {
     await dispatch(deleteReport(currentSavedReport.value));
     await dispatch(getAllReports());
-    await dispatch(reportsSlice.actions.setInitialSavedReport(''));
     await handleClose();
 
-    dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
-    dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
-    dispatch(reportsSlice.actions.removeAllActiveParameters(null));
+    zeroParameters();
 
     setSnackbar({
       type: 'success',
       value: true,
-      text:`${translate('reportDeleted', language)}`,
+      text: `${translate('reportDeleted', language)}`,
       time: 3000
     });
   }
@@ -871,7 +908,7 @@ const Reports = React.memo(() => {
         const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
         const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
-          setHeightTable(`${ gridEl.clientHeight - 5 }px`);
+          setHeightTable(`${ gridEl.clientHeight - 2 }px`);
         }
         if (gridElHeader && gridElHeaderInner) {
           const height = gridElHeaderInner.clientHeight
@@ -881,7 +918,7 @@ const Reports = React.memo(() => {
         }
       }
     }
-  }, [tableColumns, tableRows, activeReport, columns, rows, isOpen]);
+  }, [tableColumns, tableRows, columns, rows, callReport, activeReport]);
 
   const [snackbar, setSnackbar] = useState<SnackbarType>({
     type: 'success',
@@ -1054,10 +1091,13 @@ const Reports = React.memo(() => {
                           justify={'flex-end'}
                           onSelectChange={(event) => {
                             if (event.type === 'select-tag') {
-                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ group_by: tagNamesColValue }))
+                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: tagNamesColValue }))
                             }
                             else if (event.type === 'title') {
                               dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: reportNameColumnDefault }))
+                            }
+                            else if (event.type === 'input') {
+                              dispatch(reportsSlice.actions.setDefaultColsGroupBy({group_by: 'tag_name_list', value: []}))
                             }
                             else {
                               dispatch(reportsSlice.actions.setDefaultColsGroupBy({ group_by: event }))
@@ -1128,7 +1168,7 @@ const Reports = React.memo(() => {
                           width={'265px'}
                           justify={'flex-end'}
                           onSelectChange={(event) => {
-                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ group_by: event }))
+                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: event }))
                           }}
                           options={tagNamesColOptions}
                           value={tagNamesColValue}
@@ -1139,10 +1179,16 @@ const Reports = React.memo(() => {
                     }
                     {groupByColumnsValue && groupByColumnsValue.type === 'input' ?
                       <div style={{ display: 'inline-flex', width: '265px' }}>
-                        {/*<SearchSelect*/}
-
-
-                        {/*/>*/}
+                        <SearchSelect
+                          criteriaFull={null} 
+                          criteriaCurrent={null}
+                          isDefaultCriteria={true}
+                          array={tagNamesColOptions}
+                          valueList={tagNameListValue}
+                          handlerOnChange={(e: any) => {
+                            dispatch(reportsSlice.actions.setDefaultColTagsName(e));
+                          }}
+                        />
                       </div>
                       :
                       <></>
@@ -1157,6 +1203,7 @@ const Reports = React.memo(() => {
                             select: { options: groupByColumnsReportOptions, value: groupByColumnsValue },
                             tagsVal: { options: tagNamesColOptions, value: tagNamesColValue },
                             op: { options: opAddCriterias, value: opAddCriterias[0] },
+                            tagsNameList: { options: tagNamesColOptions, value: [] },
                             callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] }
                           }]))
                         }}
@@ -1280,6 +1327,26 @@ const Reports = React.memo(() => {
                                 :
                                 <></>
                               }
+
+                              {item[0].select.value && item[0].select.value.type === 'input' ?
+                                <div style={{ display: 'inline-flex', width: '265px' }}>
+                                  <SearchSelect
+                                    criteriaFull={null} 
+                                    criteriaCurrent={null}
+                                    isDefaultCriteria={true}
+                                    array={item[0].tagsNameList.options}
+                                    valueList={item[0].tagsNameList.value}
+                                    handlerOnChange={(e: any) => {
+                                      dispatch(reportsSlice.actions.setActiveColTagsName({
+                                        arrayIndex: arrayIndex,
+                                        value: e
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                                :
+                                <></>
+                              }
                             </div>
                           </div>
                         )
@@ -1292,43 +1359,41 @@ const Reports = React.memo(() => {
           </div>
 
           {/* фильтры звонков */}
-          <div>
-            <div className={classes.filtersBlock}>
-              <div className={classes.filterBlockWrapper}>
-                <div className={classes.searchTitleLeft}>
-                  <Typography className={classes.searchTitleLeftText} variant="h6">
-                    {translate('reportCallFilters', language)}
-                  </Typography>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ margin: '0 5px 0 20px', whiteSpace: 'nowrap' }}>
-                      <TextSelect
-                        name={'moreSelect'}
-                        value={null}
-                        handleValueChange={onAllCriteriasSelectValueChange}
-                        options={op}
-                        iconPosition={'left'}
-                        customControl={
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                          </div>
-                        }
-                        ifArrowColor={'#722ED1'}
-                        notClose={true}
-                        menuPosition={'right'}
-                        height={"400px"}
-                      />
-                    </div>
+          <div className={classes.filtersBlock}>
+            <div className={classes.filterBlockWrapper}>
+              <div className={classes.searchTitleLeft}>
+                <Typography className={classes.searchTitleLeftText} variant="h6">
+                  {translate('reportCallFilters', language)}
+                </Typography>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ margin: '0 5px 0 20px', whiteSpace: 'nowrap' }}>
+                    <TextSelect
+                      name={'moreSelect'}
+                      value={null}
+                      handleValueChange={onAllCriteriasSelectValueChange}
+                      options={op}
+                      iconPosition={'left'}
+                      customControl={
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                        </div>
+                      }
+                      ifArrowColor={'#722ED1'}
+                      notClose={true}
+                      menuPosition={'right'}
+                      height={"400px"}
+                    />
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className={classes.criteriaList}>
-                <CriteriasList
-                  allCriterias={allCriterias}
-                  activeCriterias={activeCriteriasReports}
-                  block={"reports"}
-                />
-              </div>
+            <div className={classes.criteriaList}>
+              <CriteriasList
+                allCriterias={allCriterias}
+                activeCriterias={activeCriteriasReports}
+                block={"reports"}
+              />
             </div>
           </div>
 
@@ -1635,8 +1700,8 @@ const Reports = React.memo(() => {
                               pagination
                               rows={tableRows}
                               columns={tableColumns}
-                              pageSize={rows.length}
-                              rowsPerPageOptions={[rows.length]}
+                              pageSize={rows.length > 100 ? 100 : rows.length}
+                              rowsPerPageOptions={[rows.length > 100 ? 100 : rows.length]}
                               loading={isLoading}
                               disableColumnMenu={true}
                               // disableSelectionOnClick
