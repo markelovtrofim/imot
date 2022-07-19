@@ -16,8 +16,9 @@ export const reportsStyles = makeStyles(({
   reportButtonsGroup: {
     margin: '24px 0 16px 0',
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    // justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   reportButtonsGroupLeft: {},
   reportOptionsButton: {
@@ -42,25 +43,46 @@ export const reportsStyles = makeStyles(({
     marginLeft: '20px !important'
   },
 
+  //== start
   searchTitle: {
-    // height: '40px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '15px'
+    marginBottom: '20px'
   },
 
+  //== start
   searchTitleLeft: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%'
   },
+   //== end
   searchTitleLeftText: {
     marginRight: '16px !important',
     color: '#2F3747 !important',
     fontWeight: '500 !important',
   },
+  btnAddColumn: {
+    fontFamily: '"Inter",sans-serif',
+    color: '#722ED1',
+    cursor: 'pointer',
+    marginLeft: '5px',
+    fontWeight: 700
+  },
+  
+ //== start
+  searchSvg: {
+    curstor: 'pointer',
+    height: '45px',
+    width: '45px',
+    '& svg': {
+      width: '100%',
+      height: '100%'
+    }
+  },
+   //== end
   searchTitleLeftStick: {
     marginLeft: '16px !important',
     color: '#CDD5DF !important',
@@ -97,10 +119,10 @@ export const reportsStyles = makeStyles(({
     width: '100%'
   },
   filtersBlock: {
-    border: '1px solid #E3E8EF',
-    borderRadius: '13px',
-    padding: '16px',
-    marginBottom: '8px'
+    // border: '1px solid #E3E8EF',
+    // borderRadius: '13px',
+    // padding: '16px',
+    // marginBottom: '8px'
   },
   filterBlockFlex: {
     display: 'flex',
@@ -111,7 +133,6 @@ export const reportsStyles = makeStyles(({
     padding: '16px 16px 0 16px',
   },
   filterBlockWrapper: {
-    // height: '40px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'

@@ -92,6 +92,7 @@
 
 
   "REPORTS": "REPORTS",
+  "report": "Отчет",
   "savedReports": "Сохраненные отчеты",
   "reportOptions": "Параметры отчета",
   "makeReport": "Сформировать отчет",
@@ -130,7 +131,7 @@
   "reportSumCalls": "Сумма звонков",
   "reportAll": "Всего",
   "reportCountMinutes": "Кол-во минут",
-  "reportAllCount": "Кол-во всего звонков",
+  "reportAllCount": "Кол-во звонков, попавших в строку",
   "reportDeleteMes": "Вы точно хотите удалить отчет?",
   "reportNotFind": "Не найдено звонков в выбранном периоде",
   "reportCallFind": "Под условия фильтра попало звонков",
