@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
+
 import { Link, useHistory } from "react-router-dom";
-import { useAppSelector } from "../../hooks/redux";
 import queryString from "query-string";
 import { useDispatch } from "react-redux";
+import { makeStyles } from "@mui/styles";
+import { Alert, CircularProgress, Typography } from "@mui/material";
+
+import { useAppSelector } from "../../hooks/redux";
 import { callsSlice, getCallAudio, getCallInfo, getCallStt } from "../../store/calls/calls.slice";
 import Call from "./Call";
-import { makeStyles } from "@mui/styles";
 import Preloader from '../../assets/loading.svg';
-import { Alert, CircularProgress, Typography } from "@mui/material";
 
 const CallPage = () => {
 

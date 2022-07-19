@@ -20,6 +20,7 @@ import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import CustomCheckbox from "../../components/common/Checkbox";
 
+
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion
     disableGutters

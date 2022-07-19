@@ -150,6 +150,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
       backgroundColor: '#F5F5DC'
     }
   }));
+
   const classes = useStyles();
   const dispatch = useDispatch();
 
