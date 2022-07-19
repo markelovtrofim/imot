@@ -102,14 +102,15 @@ const ControlBlock = (props: any) => {
   const [disabledCalendar, setDisabledCalendar] = useState<boolean>(false);
   const [disabledCalendarReport, setDisabledCalendarReport] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (periodReports && periodReports != 'all_time') setDisabledCalendarReport(false);
-  }, [periodReports])
+  //
+  // useEffect(() => {
+  //   if (periodReports && periodReports != 'all_time') setDisabledCalendarReport(false);
+  // }, [periodReports])
 
-  useEffect(() => {
-    if (dateSearch[0] === null) setDisabledCalendar(true);
-    if (dateReports[0] === null) setDisabledCalendarReport(true);
-  }, [dateSearch, dateReports])
+  // useEffect(() => {
+  //   if (dateSearch[0] === null) setDisabledCalendar(true);
+  //   if (dateReports[0] === null) setDisabledCalendarReport(true);
+  // }, [dateSearch, dateReports])
 
   return (
     <div className={classes.controlBlockWrapper}>

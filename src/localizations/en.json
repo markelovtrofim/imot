@@ -80,6 +80,7 @@
 
 
   "REPORTS": "REPORTS",
+  "report": "Report",
   "savedReports": "Saved reports",
   "reportOptions": "Report parameters",
   "makeReport": "Make report",
