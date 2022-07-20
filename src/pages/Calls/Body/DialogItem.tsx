@@ -52,6 +52,10 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
     },
     dateTypography: {
       fontSize: '14px !important',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
     },
     diTagsBlock: {
       display: 'flex',
@@ -68,7 +72,11 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
       color: '#738094 !important',
       fontWeight: '700 !important',
       minWidth: '110px !important',
-      marginRight: '10px !important'
+      marginRight: '10px !important',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
     },
     titleCustomer: {
       color: '#0009FF !important'
@@ -161,7 +169,6 @@ const DialogItem: FC<DialogItemType> = memo(({ prevFragment, fragment, fragmentI
           {
             isUserSelectText
             && <DictionaryStep selectionText={selectionText} closeDictionaryFunc={clearDictionaryData} />
-            // && <DictionaryPopup popupPosition={cursorPosition} selectionText={selectionText} />
           }
         </Typography>
       </div>

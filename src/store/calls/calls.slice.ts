@@ -132,7 +132,6 @@ export const updateDict = createAsyncThunk(
   async (payload: { dictId: string, phrases: any[] }) => {
     try {
       const { token } = JSON.parse(localStorage.getItem('token') || '{}');
-      console.log(payload);
       const sendData = {
         phrases: payload.phrases
       }
@@ -145,10 +144,9 @@ export const updateDict = createAsyncThunk(
         }
       });
 
-      console.log(response);
-      console.log(payload);
+      return response.status;
     } catch (error) {
-      console.log(error);
+      return 400
     }
 
   }
