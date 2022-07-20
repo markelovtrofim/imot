@@ -52,16 +52,18 @@ const Accordeon: FC<AccordeonType> = ({ title, iconSvg, initialState, children }
 
   return (
     <div>
-      <div className={classes.titleWrapper}>
+      <div 
+        className={classes.titleWrapper} 
+        onClick={() => {
+          setIsOpen(!isOpen)
+        }}
+      >
         <div className={classes.titleLeft}>
           { title }
         </div>
 
         <div 
           className={isOpen ? classes.icon : classes.iconUp}
-          onClick={() => {
-            setIsOpen(!isOpen)
-          }}
         >
           { iconSvg }
         </div>

@@ -16,7 +16,6 @@ export const reportsStyles = makeStyles(({
   reportButtonsGroup: {
     margin: '24px 0 16px 0',
     display: 'flex',
-    // justifyContent: 'space-between',
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
@@ -42,23 +41,6 @@ export const reportsStyles = makeStyles(({
     borderRadius: '5px !important',
     marginLeft: '20px !important'
   },
-
-  //== start
-  searchTitle: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px'
-  },
-
-  //== start
-  searchTitleLeft: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%'
-  },
-   //== end
   searchTitleLeftText: {
     marginRight: '16px !important',
     color: '#2F3747 !important',
@@ -71,22 +53,21 @@ export const reportsStyles = makeStyles(({
     marginLeft: '5px',
     fontWeight: 700
   },
-  
- //== start
-  searchSvg: {
-    curstor: 'pointer',
-    height: '45px',
-    width: '45px',
-    '& svg': {
-      width: '100%',
-      height: '100%'
-    }
-  },
-   //== end
   searchTitleLeftStick: {
     marginLeft: '16px !important',
     color: '#CDD5DF !important',
     fontSize: '17px !important'
+  },
+  tooltip: {
+    borderRadius: "5px",
+    fontFamily: 'Inter, sans-serif !important',
+    color: '#000 !important',
+    minWidth: '300px',
+    fontSize: '14px !important',
+    padding: '6px 8px !important',
+    backgroundColor: '#fff !important',
+    boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
+    // marginTop: '15px !important',
   },
 
   searchText: {
@@ -117,12 +98,6 @@ export const reportsStyles = makeStyles(({
     alignItems: 'flex-start',
     marginTop: '16px',
     width: '100%'
-  },
-  filtersBlock: {
-    // border: '1px solid #E3E8EF',
-    // borderRadius: '13px',
-    // padding: '16px',
-    // marginBottom: '8px'
   },
   filterBlockFlex: {
     display: 'flex',
@@ -163,10 +138,16 @@ export const reportsStyles = makeStyles(({
     alignItems: 'center',
     justifyContent: 'space-between'
   },
-  parameterItemTitle: {
-    whiteSpace: 'nowrap',
+  parameterItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginRight: '10px !important',
-    minWidth: '167px',
+    minWidth: '180px',
+  },
+  parameterItemTitle: {
+    marginRight: '10px !important',
+    whiteSpace: 'nowrap',
     color: '#2F3747 !important'
   },
   parameterSelect: {

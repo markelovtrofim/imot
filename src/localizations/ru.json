@@ -119,7 +119,7 @@
   "reportGroupByTimeWeek": "по неделям",
   "reportGroupByTimeMonth": "по месяцам",
 
-  "reportColumnHeading": "заголовок столбца",
+  "reportColumnHeading": "Заголовок",
   "reportCallFilters": "Фильтры звонков",
   "reportDeleteReport": "Удалить отчет",
   "reportSaveReport": "Сохранить отчет",

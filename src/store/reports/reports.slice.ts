@@ -349,7 +349,7 @@ const initialState: InitialStateType = {
   tableColumns: [],
 
   error: null,
-  showCharts: false,
+  showCharts: true,
 }
 
 export const reportsSlice = createSlice({
