@@ -1,3 +1,16 @@
+.sort-block-component {
+  display: flex;
+}
+.select-type-sort {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.select-type-sort > svg {
+  width: 20px;
+}
+
 .dictionary-popup {
   width: 250px;
   position: absolute;
