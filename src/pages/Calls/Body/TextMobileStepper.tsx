@@ -14,6 +14,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { getAllUserDicts, getAllWordInDictionary, updateDict } from "../../../store/calls/calls.slice";
+import { langSlice } from "../../../store/lang/lang.slice";
 import "../style.css";
 
 
@@ -22,6 +23,7 @@ interface TextMobileStepperPropType {
   changeSelectedText: any,
   choosedDictId: string,
   setChoosedDictId: any,
+  closePopupFunc: any,
 }
 
 interface TextareaComponentPropType {
@@ -57,7 +59,6 @@ const TextareaComponent = ({ value, changeValue }: TextareaComponentPropType) =>
   )
 };
 
-
 const AllUserDictsComponent = ({
   handleNext,
   allUserDicts,
@@ -83,18 +84,21 @@ const AllUserDictsComponent = ({
   }
 
   return (
-    <div className="dicts-block">
-      {
-        allUserDicts.length > 0
-          ? (
-            allUserDicts.map(renderDicts)
-          ) : (
-            <div className="wait-dicts-loader">
-              <CircularProgress />
-            </div>
-          )
-      }
-    </div>
+    <>
+      <Typography sx={{ height: 40, display: 'flex', alignItems: 'center' }}>Выберите словарь: </Typography>
+      <div className="dicts-block">
+        {
+          allUserDicts.length > 0
+            ? (
+              allUserDicts.map(renderDicts)
+            ) : (
+              <div className="wait-dicts-loader">
+                <CircularProgress />
+              </div>
+            )
+        }
+      </div>
+    </>
   )
 }
 
@@ -103,23 +107,36 @@ const AllPhraseInDictComponent = ({
   updatePhrasesValue,
   choosedDictId,
   getAllPhraseInDict,
+  addPhraseFunc,
 }: AllPhraseInDictComponentPropType) => {
 
   useEffect(() => {
     choosedDictId && getAllPhraseInDict();
   }, []);
+
   return (
-    <textarea
-      className="dictionary-textarea phrases-textarea"
-      value={phrasesValue}
-      onChange={event => updatePhrasesValue(event.target.value)}
-    >
-    </textarea>
+    <>
+      {
+        phrasesValue.length > 0
+          ? (
+            <textarea
+              className="dictionary-textarea phrases-textarea"
+              value={phrasesValue}
+              onChange={event => updatePhrasesValue(event.target.value)}
+            >
+            </textarea>
+          ) : (
+            <div className="wait-dicts-loader">
+              <CircularProgress />
+            </div>
+          )
+      }
+    </>
   )
 }
 
 
-const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, setChoosedDictId }: TextMobileStepperPropType) => {
+const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, setChoosedDictId, closePopupFunc }: TextMobileStepperPropType) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [activeStep, setActiveStep] = useState(0);
@@ -153,6 +170,7 @@ const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, se
     // @ts-ignore
     const phrases = data.payload.phrases;
     // @ts-ignore
+    phrases.push(selectedText);
     setPhrases(phrases);
     setNewPhrases(phrases.slice(0));
     setPhrasesValue(getPhrasesForTextarea(phrases));
@@ -176,63 +194,72 @@ const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, se
     handleBack();
   }
 
-  console.log(phrases);
-  console.log("Новые фразы", newPhrases);
-
   const steps = [
+    // {
+    //   label: "Редактировать",
+    //   description: <TextareaComponent value={selectedText} changeValue={changeSelectedText} />,
+    // },
     {
-      label: "Редактировать",
-      description: <TextareaComponent value={selectedText} changeValue={changeSelectedText} />,
+      label: "Редактировать выделенное слово:",
+      description: (
+        <>
+          <TextareaComponent value={selectedText} changeValue={changeSelectedText} />
+          <AllUserDictsComponent
+            handleNext={handleNext}
+            choosedDictIdFunc={setChoosedDictId}
+            allUserDicts={allUserDicts}
+            getAllUserDictsFunc={getAllUserDictsFunc}
+          />
+        </>
+      ),
     },
     {
-      label: "Выберите в какой словарь добавить",
-      description: <AllUserDictsComponent
-        handleNext={handleNext}
-        choosedDictIdFunc={setChoosedDictId}
-        allUserDicts={allUserDicts}
-        getAllUserDictsFunc={getAllUserDictsFunc}
-      />,
+      label: `Добавляем в словарь: "${selectedText}"`,
+      description:
+        <AllPhraseInDictComponent
+          phrasesValue={phrasesValue}
+          updatePhrasesValue={updatePhrasesValue}
+          addPhraseFunc={addPhrase}
+          getAllPhraseInDict={getAllPhraseInDict}
+          selectedText={selectedText}
+          choosedDictId={choosedDictId}
+          setPhrases={setPhrases}
+        />,
     },
-    {
-      label: "Слова в словаре",
-      description: <AllPhraseInDictComponent
-        phrasesValue={phrasesValue}
-        updatePhrasesValue={updatePhrasesValue}
-        addPhraseFunc={addPhrase}
-        getAllPhraseInDict={getAllPhraseInDict}
-        selectedText={selectedText}
-        choosedDictId={choosedDictId}
-        setPhrases={setPhrases}
-      />,
-    },
-    {
-      label: "Слова в словаре",
-      description: <AllPhraseInDictComponent
-        phrasesValue={phrasesValue}
-        updatePhrasesValue={updatePhrasesValue}
-        addPhraseFunc={addPhrase}
-        getAllPhraseInDict={getAllPhraseInDict}
-        selectedText={selectedText}
-        choosedDictId={choosedDictId}
-        setPhrases={setPhrases}
-      />,
-    }
   ];
 
-  function sendNewPhraseToDict() {
+  async function sendNewPhraseToDict() {
     const sendPhrases = phrasesValue.split(`
 `);
 
-    dispatch(updateDict({
+    const data = await dispatch(updateDict({
       dictId: choosedDictId,
       phrases: sendPhrases,
     }));
+    closePopupFunc();
+
+    // @ts-ignore
+    if (data.payload < 300) {
+      dispatch(langSlice.actions.setSnackbar({
+        type: "success",
+        text: "Словарь успешно обновлён",
+        value: true,
+        time: 2000
+      }));
+    } else {
+      dispatch(langSlice.actions.setSnackbar({
+        type: "error",
+        text: "Произошла какая-то ошибка. Попробуйте позже",
+        value: true,
+        time: 2000
+      }));
+    }
   }
 
   const maxSteps = steps.length;
 
   return (
-    <Box sx={{ width: 400, flexGrow: 1 }}>
+    <Box sx={{ width: 500, flexGrow: 1 }} className="popup-stepper-content">
       <Paper
         square
         elevation={0}
@@ -246,12 +273,24 @@ const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, se
       >
         <Typography>{steps[activeStep].label}</Typography>
       </Paper>
-      <Box sx={{ height: 255, maxWidth: 400, width: "100%", p: 2 }}>
+      <Box sx={{ height: 255, width: "100%", p: 2, paddingTop: "0px" }}>
         {steps[activeStep].description}
       </Box>
       <div className="menu-stepper">
         <div className="left-block">
           {
+            activeStep > 0 && (
+              <Button size="small" onClick={handleBack}>
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowRight />
+                ) : (
+                  <KeyboardArrowLeft />
+                )}
+                Назад
+              </Button>
+            )
+          }
+          {/* {
             activeStep === 0
               ? (
                 <Button
@@ -273,7 +312,7 @@ const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, se
                 >
                   Добавить
                 </Button>
-              ) : activeStep === 3 && (
+              ) : activeStep === 2 && (
                 <>
                   <Button
                     size="small"
@@ -289,18 +328,16 @@ const TextMobileStepper = ({ selectedText, changeSelectedText, choosedDictId, se
                   </Button>
                 </>
               )
-          }
+          } */}
         </div>
         <div className="right-block">
           {
-            activeStep > 0 && (
-              <Button size="small" onClick={handleBack}>
-                {theme.direction === "rtl" ? (
-                  <KeyboardArrowRight />
-                ) : (
-                  <KeyboardArrowLeft />
-                )}
-                Назад
+            activeStep === 1 && (
+              <Button
+                size="small"
+                onClick={sendNewPhraseToDict}
+              >
+                Добавить в словарь
               </Button>
             )
           }

@@ -3,6 +3,9 @@
   position: absolute;
   z-index: 1;
 }
+.popup-stepper-content {
+  height: 550px;
+}
 .dictionary-textarea-title {
   font-size: 12px;
   font-weight: bold;
@@ -10,14 +13,12 @@
 }
 .dictionary-textarea {
   width: 100%;
-  max-width: 368px;
   height: 70px;
   outline: 0;
 }
 .phrases-textarea {
-  height: 243px;
-  max-height: 243px;
-  min-height: 243px;
+  height: 450px;
+  /* max-height: 450px; */
   resize: none;
 }
 
@@ -36,7 +37,7 @@
 
 .dicts-block {
   width: 100%;
-  height: 100%;
+  height: 353px;
   overflow: auto;
 }
 
@@ -48,10 +49,12 @@
 
 .menu-stepper {
   width: 100%;
-  height: 100%;
-  padding: 11px 15px;
-  margin-top: 15px;
+  height: 36px;
+  padding: 3px 15px;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   justify-content: space-between;
+  position: absolute;
+  left: 0;
+  bottom: 0;
 }
