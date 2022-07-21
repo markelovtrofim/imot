@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
 import {TemplateType} from "./template.types";
 import {instance} from "../api";
 
@@ -12,7 +11,6 @@ export const getAllTemplates = createAsyncThunk(
         'Authorization': `Bearer ${token}`
       }
     });
-    console.log(response.data);
     thunkAPI.dispatch(templateSlice.actions.setAllTemplates(response.data));
   }
 );

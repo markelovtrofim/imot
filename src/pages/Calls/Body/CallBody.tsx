@@ -1,34 +1,38 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
-import {makeStyles} from "@mui/styles";
-import {CircularProgress, Typography} from "@mui/material";
+import React, { FC, useEffect, useRef, useState } from 'react';
+
+import { useDispatch } from "react-redux";
 import 'react-h5-audio-player/lib/styles.css';
-import {callAction, callsSlice, getCallInfo, getCallPublicToken, getCallStt} from "../../../store/calls/calls.slice";
-import {useDispatch} from "react-redux";
 import {
-  CallAudioType,
+  callAction,
+  callsSlice,
+  getCallAudio,
+  getCallInfo,
+  getCallPublicToken,
+  getCallStt
+} from "../../../store/calls/calls.slice";
+import {
   CallInfoType,
-  CallSttType,
   CallTagType,
 } from "../../../store/calls/calls.types";
+import ModalWindow from "../../../components/common/ModalWindowBox";
 import Reboot from "../../../components/common/Buttons/Reboot";
-import Download from "../../../components/common/Buttons/Download";
+import {DownloadHref} from "../../../components/common/Buttons/Download";
 import Back from "../../../components/common/Buttons/Back";
-import { BlockBox } from "../../../components/common";
-import { Fragment } from "../../../components/common/Tag";
+import {BlockBox} from "../../../components/common";
+import {Fragment} from "../../../components/common/Tag";
 import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
-import { useAppSelector } from "../../../hooks/redux";
+import {useAppSelector} from "../../../hooks/redux";
 import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
-import {translate} from "../../../localizations";
-import ModalWindow from "../../../components/common/ModalWindowBox";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ToggleButton from "@mui/material/ToggleButton";
+import { translate } from "../../../localizations";
 import CustomCheckbox from "../../../components/common/Checkbox";
 import History from "../../../components/common/Buttons/History";
-import {LoadingButton} from "@mui/lab";
 import Logo from "../../../assets/images/logo.png";
 import Yandex from "../../../assets/images/yandex_PNG20.png";
-import {langSlice} from "../../../store/lang/lang.slice";
+import { langSlice } from "../../../store/lang/lang.slice";
+import {CircularProgress, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
+import {LoadingButton} from "@mui/lab";
+import {makeStyles} from "@mui/styles";
 
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -36,46 +40,30 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
     <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path
         d="M15.4696 1.03022C15.6103 1.17087 15.6893 1.36164 15.6893 1.56055V5.38897C15.6893 5.80319 15.3535 6.13897 14.9393 6.13897C14.5251 6.13897 14.1893 5.80319 14.1893 5.38897V3.37121L11.0303 6.53022C10.7374 6.82311 10.2625 6.82311 9.9696 6.53022C9.6768 6.23732 9.6768 5.76245 9.9696 5.46956L13.1287 2.31055H11.1109C10.6967 2.31055 10.3609 1.97476 10.3609 1.56055C10.3609 1.14633 10.6967 0.810547 11.1109 0.810547H14.9393C15.1382 0.810547 15.329 0.889567 15.4696 1.03022Z"
-        fill="#73D13D" />
+        fill="#73D13D"/>
       <path
         d="M1.00005 6.86077C2.91645 11.0346 6.32648 14.3531 10.566 16.1521L11.2456 16.4549C12.8004 17.1477 14.6282 16.6214 15.5765 15.2079L16.4646 13.8842C16.7533 13.4538 16.6654 12.8741 16.2621 12.5487L13.2502 10.1189C12.8078 9.76204 12.1573 9.84524 11.8189 10.3018L10.8872 11.5591C8.49637 10.3797 6.55528 8.43874 5.37595 6.04792L6.63317 5.1162C7.08987 4.77778 7.17298 4.12726 6.81608 3.68488L4.38622 0.672942C4.06087 0.269662 3.48137 0.181692 3.051 0.470262L1.71816 1.36396C0.295825 2.31766 -0.227555 4.16051 0.481175 5.71946L0.999265 6.85908L1.00005 6.86077Z"
-        fill="#A3AEBE" />
+        fill="#A3AEBE"/>
     </svg>
   );
 };
 
 type CallBodyPropsType = {
   callInfo: CallInfoType,
-  callAudio: CallAudioType | null,
-  callStt: CallSttType | null,
-  bundleIndex: number | null,
   expanded: boolean,
   fragments: CallTagType[],
-
-  // сори)
-  audioRef: any,
-  onFragmentClick: any,
-  prevActiveFragment: any,
-  audioPlayerRef: any,
-  activeFragmentRef: any,
-  setIsCallBodyData: any
+  audioDivRef: React.RefObject<HTMLInputElement>,
+  onFragmentClick?: any,
+  test?: any
 };
 
 const CallBody: FC<CallBodyPropsType> = React.memo((
   {
     callInfo,
-    callAudio,
-    callStt,
     fragments,
-    bundleIndex,
     expanded,
-    audioRef,
-    onFragmentClick,
-    audioPlayerRef,
-    setIsCallBodyData,
-
-    prevActiveFragment,
-    activeFragmentRef
+    audioDivRef,
+    test
   }
 ) => {
   const useStyles = makeStyles(({
@@ -89,6 +77,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     },
     cbDialogInner: {
       padding: '12.5px 12px'
+    },
+    dialogTag: {
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
     },
     cbDialogItems: {
       overflowY: 'auto',
@@ -145,6 +139,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
       color: '#738094 !important',
       fontWeight: '700 !important',
       minWidth: '110px !important',
+      userSelect: 'none',
     },
     activeFragment: {
       backgroundColor: '#F5F5DC'
@@ -152,18 +147,29 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
   }));
 
   const classes = useStyles();
-  const dispatch = useDispatch();
 
-  const currentCall = useAppSelector(state => state.calls.currentCall);
   const isAuth = useAppSelector(state => state.auth.isAuth);
 
-  useEffect(() => {
-    if (!expanded && callAudio && bundleIndex) {
-      dispatch(callsSlice.actions.removeAudio({ id: callInfo.id, bundleIndex }));
-    }
-  }, [expanded]);
+  const currentCall = useAppSelector(state => state.calls.currentCall);
+  const dispatch = useDispatch();
 
-  const callId = callInfo.id;
+  const callId = callInfo.id.toUpperCase();
+
+  async function firstRenderFunc() {
+    dispatch(callsSlice.actions.setCurrentCall({
+      id: callInfo.id,
+      info: callInfo,
+      stt: null,
+      audio: null
+    }))
+    dispatch(getCallStt({id: callInfo.id}));
+    dispatch(getCallAudio({id: callInfo.id}));
+  }
+
+  useEffect(() => {
+    firstRenderFunc().then();
+  }, []);
+
 
   const prevIndex = useRef<string[] | undefined>(undefined);
   const currentIndex = useRef<string[] | undefined>(undefined);
@@ -203,14 +209,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   } // return [1-4, 2-8]
 
-
-  useEffect(() => {
-    return () => {
-      setIsCallBodyData(false);
-    }
-  }, []);
-
-  const { language } = useAppSelector(state => state.lang);
+  const {language} = useAppSelector(state => state.lang);
 
   const onListen = (eventCurrentTime: any) => {
     let currentTimeLocal;
@@ -219,8 +218,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     } else {
       currentTimeLocal = eventCurrentTime * 1000;
     }
-    if (callStt) {
-      const indices = findWordIndexes(callStt.fragments, currentTimeLocal);
+    if (currentCall && currentCall.stt) {
+      const indices = findWordIndexes(currentCall.stt.fragments, currentTimeLocal);
 
       if (indices && JSON.stringify(indices) !== JSON.stringify(prevIndex.current)) {
 
@@ -256,15 +255,14 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   }
 
-
   const callActionSelectConverter = (values: any = []) => {
     let local: { value: any, label: string }[] = [];
     for (let i = 0; i < values.length; i++) {
       if (values[i] !== "analyze" && values[i] !== "get_api_tags") {
         if (values[i] === "delete") {
-          local.unshift({value: values[i], label: translate(values[i], language)});
+          local.unshift({ value: values[i], label: translate(values[i], language) });
         } else {
-          local.push({value: values[i], label: translate(values[i], language)});
+          local.push({ value: values[i], label: translate(values[i], language) });
         }
       }
     }
@@ -273,12 +271,15 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
   // MW
   const [isOpen, setOpen] = useState(false);
+
   function handleMWOpen() {
     setOpen(true);
   }
+
   function handleMWClose() {
     setOpen(false);
   }
+
   // MW button
   const [MWButtonLoading, setMWButtonLoading] = useState(false);
 
@@ -290,6 +291,8 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     engine: "imot",
     keepFragments: false
   });
+
+  const audioPlayerRef = useRef<any>(currentCall ? currentCall.audio : "");
 
 
   // onClick's действий со звонком
@@ -310,38 +313,23 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
   }
 
   async function rebootAction() {
-    if (callStt) {
-      dispatch(callsSlice.actions.setStt({
-        stt: null,
-        id: callInfo.id,
-        index: bundleIndex
-      }));
+    if (currentCall && currentCall.stt) {
+      dispatch(callsSlice.actions.setStt(null));
 
       await dispatch(callAction({
-        id: callInfo.id,
+        id: callId,
         data: {
           action: "analyze",
-          engine: callStt.engine,
+          engine: currentCall.stt.engine,
           keep_fragments: false
         }
       }));
 
-      const newCallInfoData = await dispatch(getCallInfo({id: callInfo.id}));
-      dispatch(callsSlice.actions.setInfo({
-        // @ts-ignore
-        info: newCallInfoData.payload,
-        id: callInfo.id,
-        index: bundleIndex
-      }));
-
-      const newCallSttData = await dispatch(getCallStt({id: callInfo.id}));
-      dispatch(callsSlice.actions.setStt({
-        // @ts-ignore
-        stt: newCallSttData.payload,
-        id: callInfo.id,
-        index: bundleIndex
-      }));
-
+      const newCallInfoData = await dispatch(getCallInfo({id: callId}));
+      // @ts-ignore
+      const newCallInfo = newCallInfoData.payload
+      dispatch(callsSlice.actions.setInfo(newCallInfo));
+      await dispatch(getCallStt({id: callId}));
       dispatch(langSlice.actions.setSnackbar({
         type: "success",
         text: "Звонок перераспознан",
@@ -356,10 +344,10 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
   }
 
   async function sttActionSubmit() {
-    if (callStt) {
+    if (currentCall && currentCall.stt) {
       setMWButtonLoading(true);
       await dispatch(callAction({
-        id: callInfo.id,
+        id: callId,
         data: {
           action: "stt",
           engine: sttForm.engine,
@@ -377,61 +365,98 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     }
   }
 
+  const activeFragmentRef = useRef<any>(null);
+  const prevActiveFragment = useRef<any>(null);
+
+  useEffect(() => {
+    if (test) {
+      onFragmentClick(test);
+    }
+  }, [test]);
+
+  const onFragmentClick = (activeFragment: CallTagType) => {
+    activeFragmentRef.current = activeFragment;
+    if (currentCall && currentCall.stt) {
+      if (prevActiveFragment.current && prevActiveFragment.current !== activeFragment) {
+        const removeFragment = document.getElementById(`${prevActiveFragment.current.fragment}-phrase`);
+        if (removeFragment) {
+          removeFragment.classList.remove(classes.activeFragment);
+        }
+      }
+      const activePhrase = currentCall.stt.fragments.find(fragment => fragment.begin === activeFragment.fBegin && fragment.end === activeFragment.fEnd);
+      const allPhrases = document.getElementById(`${callInfo.id}`);
+      let activePhraseHtmlEl;
+      if (activePhrase) {
+        activePhraseHtmlEl = document.getElementById(`${activePhrase.id}-phrase`);
+      }
+      if (activePhraseHtmlEl && allPhrases) {
+        activePhraseHtmlEl.classList.add(classes.activeFragment);
+        activePhraseHtmlEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
+      prevActiveFragment.current = activeFragment;
+      audioPlayerRef.current.audioEl.current.play();
+      audioPlayerRef.current.audioEl.current.currentTime = activeFragment.fBegin / 1000;
+    }
+  }
+
   return (
     <div className={classes.callBodyWrapper}>
-      <div ref={audioRef} className={classes.audioPlayerBox}>
+      <div ref={audioDivRef} className={classes.audioPlayerBox}>
         <AudioPlayer
           onListen={onListen}
-          callAudio={callAudio}
+          callAudio={currentCall ? currentCall.audio : ""}
           audioPlayerRef={audioPlayerRef}
         />
       </div>
-      <div style={{ display: 'flex' }}>
+      <div style={{display: 'flex'}}>
         <div className={classes.cbDialogWrapper}>
           <div className={classes.cbDialogInner}>
             {fragments.length > 0 &&
-              <>
-                <Typography style={{ marginBottom: '10px' }} className={classes.typographyTitle}>
-                  Теги:
-                </Typography>
-                <div style={{ display: 'flex', marginBottom: '15px' }}>
-                  {fragments.map((fragment) => (
-                    <div
-                      onClick={(event: any) => {
-                        onFragmentClick(fragment);
-                      }}
-                    >
-                      <Fragment matchData={fragment.matchData}>
-                        {fragment.name}
-                      </Fragment>
-                    </div>
-                  ))}
-                </div>
-              </>
+            <>
+              <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+                Теги:
+              </Typography>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                {fragments.map((fragment) => (
+                  <div
+                    onClick={() => {
+                      onFragmentClick(fragment);
+                    }}
+                  >
+                    <Fragment matchData={fragment.matchData}>
+                      {fragment.name}
+                    </Fragment>
+                  </div>
+                ))}
+              </div>
+            </>
             }
 
-            {callStt ?
+            {currentCall && currentCall.stt ?
               <div>
-                <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+                <Typography style={{ marginBottom: '10px' }} className={classes.typographyTitle}>
                   Текстовый диалог:
                 </Typography>
                 <div className={classes.cbDialogItems} id={callId}>
                   <div>
-                    {callStt.fragments.length > 1 ?
-                      callStt.fragments.map((phrase, i, array) => {
+                    {currentCall.stt.fragments.length > 1 ?
+                      currentCall.stt.fragments.map((phrase, i, array) => {
                         return (
-                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-                               id={`${phrase.id}-phrase`}>
-                            <div style={{width: '85%'}}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            id={`${phrase.id}-phrase`}>
+                            <div style={{ width: '85%' }}>
                               <DialogItem
                                 audioPlayerRef={audioPlayerRef}
-                                prevFragment={array[i - 1] ? array[i - 1] : {direction: phrase.direction === 'client' ? 'operator' : 'client'}}
+                                prevFragment={array[i - 1] ? array[i - 1] : { direction: phrase.direction === 'client' ? 'operator' : 'client' }}
                                 fragment={phrase}
                                 callId={callId}
                                 fragmentIndex={i}
                               />
                             </div>
-                            <div style={{textAlign: 'center', width: '15%'}}>
+                            <div className={classes.dialogTag} style={{ textAlign: 'center', width: '15%', userSelect: 'none'}}>
                               {fragments.map((fragment, j) => {
                                 if (phrase.begin === fragment.fBegin && phrase.end === fragment.fEnd) {
                                   return <div>
@@ -449,16 +474,16 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                   </div>
                 </div>
               </div> :
-              <div style={{textAlign: "center"}}>
-                <CircularProgress size={80}/>
+              <div style={{ textAlign: "center" }}>
+                <CircularProgress size={80} />
               </div>
             }
           </div>
         </div>
 
         {/* Кнопочки */}
-        <div style={{backgroundColor: 'fff', width: '370px', marginTop: '20px'}}>
-          <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px'}}>
+        <div style={{ backgroundColor: 'fff', width: '370px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px' }}>
 
             {isAuth && (
               <Back
@@ -469,22 +494,22 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
             )}
 
             {/* Скачать */}
-            <Download href={callAudio}/>
+            <DownloadHref href={currentCall ? currentCall.audio : ""}/>
 
             {/* Перераспознать */}
             {callInfo.allowedActions.indexOf("analyze") != -1 && (
               <Reboot onClick={() => {
                 rebootAction()
-              }}/>
+              }} />
             )}
 
             {/* История */}
-            <History/>
+            <History />
 
             {/* Удаление и смена каналов. */}
             <CustomControlSelect
               handleSelectChange={async (event) => {
-                if (callStt) {
+                if (currentCall && currentCall.stt) {
                   if (event.value === "stt") {
                     sttAction()
                   } else if (event.value === "delete") {
@@ -492,11 +517,11 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                       id: callInfo.id,
                       data: {
                         action: event.value,
-                        engine: callStt.engine,
+                        engine: currentCall.stt.engine,
                         keep_fragments: false
                       }
                     }));
-                    dispatch(callsSlice.actions.deleteCall({id: callInfo.id, bundleIndex: bundleIndex}));
+                    dispatch(callsSlice.actions.deleteCall({id: callInfo.id}));
                     dispatch(langSlice.actions.setSnackbar({
                       type: "success",
                       text: "Звонок удален",
@@ -504,28 +529,18 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                       time: 1500
                     }));
                   } else if (event.value === "swap_channels") {
-                    if (callStt) {
-                      dispatch(callsSlice.actions.setStt({
-                        stt: null,
-                        id: callInfo.id,
-                        index: bundleIndex
-                      }));
+                    if (currentCall.stt) {
+                      dispatch(callsSlice.actions.setStt(null));
 
                       await dispatch(callAction({
                         id: callInfo.id,
                         data: {
                           action: event.value,
-                          engine: callStt.engine,
+                          engine: currentCall.stt.engine,
                           keep_fragments: false
                         }
                       }));
-                      const newCallSttData = await dispatch(getCallStt({id: callInfo.id}));
-                      await dispatch(callsSlice.actions.setStt({
-                        // @ts-ignore
-                        stt: newCallSttData.payload,
-                        id: callInfo.id,
-                        index: bundleIndex
-                      }));
+                      await dispatch(getCallStt({id: callInfo.id}));
                       dispatch(langSlice.actions.setSnackbar({
                         type: "success",
                         text: "Каналы поменяны местами",
@@ -544,21 +559,21 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
           {/* Params block*/}
           <BlockBox width={'auto'} height={'auto'} padding={'24px'} margin={'24px 14px 24px 24px'} borderRadius={'10px'}
-            boxShadow={'0px 0px 4px rgba(98, 98, 98, 0.22)'}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <div style={{ display: 'flex' }}>
+                    boxShadow={'0px 0px 4px rgba(98, 98, 98, 0.22)'}>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px'}}>
+              <div style={{display: 'flex'}}>
                 <Typography className={classes.typographyTitle}>Сотрудник:</Typography>
-                <Typography style={{ color: '#1B202B' }}>{callInfo.operatorPhone}</Typography>
+                <Typography style={{color: '#1B202B'}}>{callInfo.operatorPhone}</Typography>
               </div>
-              <CallSvg />
+              <CallSvg/>
             </div>
-            <div style={{ display: 'flex', marginBottom: '12px' }}>
+            <div style={{display: 'flex', marginBottom: '12px'}}>
               <Typography className={classes.typographyTitle}>Клиент:</Typography>
-              <Typography style={{ color: '#1B202B' }}>{callInfo.clientPhone}</Typography>
+              <Typography style={{color: '#1B202B'}}>{callInfo.clientPhone}</Typography>
             </div>
-            <div style={{ display: 'flex' }}>
+            <div style={{display: 'flex'}}>
               <Typography className={classes.typographyTitle}>Дата и время:</Typography>
-              <Typography style={{ color: '#1B202B' }}>{callInfo.callTimeReadable}</Typography>
+              <Typography style={{color: '#1B202B'}}>{callInfo.callTimeReadable}</Typography>
             </div>
           </BlockBox>
 
@@ -571,7 +586,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
         width={'400px'}
       >
         <ToggleButtonGroup
-          style={{marginTop: '15px'}}
+          style={{ marginTop: '15px' }}
           value={sttForm.engine}
           exclusive
           onChange={() => {
@@ -580,38 +595,38 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
           <ToggleButton
             value={"imot"}
             onClick={() => {
-              setSttForm({...sttForm, engine: "imot"})
+              setSttForm({ ...sttForm, engine: "imot" })
             }}
           >
-            <img src={Logo} alt=""/>
+            <img src={Logo} alt="" />
           </ToggleButton>
 
           <ToggleButton
             value={"yandex"}
             onClick={() => {
-              setSttForm({...sttForm, engine: "yandex"})
+              setSttForm({ ...sttForm, engine: "yandex" })
             }}
           >
-            <img src={Yandex} width={60} alt=""/>
+            <img src={Yandex} width={60} alt="" />
           </ToggleButton>
         </ToggleButtonGroup>
 
-        <div style={{display: 'flex', margin: '15px 0'}}>
+        <div style={{ display: 'flex', margin: '15px 0' }}>
           <CustomCheckbox
-            style={{marginRight: '10px'}}
+            style={{ marginRight: '10px' }}
             onClick={(event) => {
-              setSttForm({...sttForm, keepFragments: !sttForm.keepFragments})
+              setSttForm({ ...sttForm, keepFragments: !sttForm.keepFragments })
             }}
             checked={sttForm.keepFragments}
           />
-          <Typography style={{cursor: "pointer"}}>
+          <Typography style={{ cursor: "pointer" }}>
             Сохранять фрагменты
           </Typography>
         </div>
         <div>
           <LoadingButton
             loading={MWButtonLoading}
-            style={{marginRight: '15px'}}
+            style={{ marginRight: '15px' }}
             variant="contained"
             color="primary"
             onClick={sttActionSubmit}

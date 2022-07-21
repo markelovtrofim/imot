@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, memo} from 'react';
 
 import {Redirect, Route, Switch, Link, useHistory} from 'react-router-dom';
 import {makeStyles} from '@mui/styles';
@@ -22,7 +22,7 @@ import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
 import CallPage from "./pages/Calls/CallPage";
 import {callsSlice} from "./store/calls/calls.slice";
-import Snackbar from "./components/common/Snackbar";
+import Snackbar, {SnackbarType} from "./components/common/Snackbar";
 import {getChildUser, getChildUsers, getMe} from "./store/users/users.slice";
 
 
@@ -37,66 +37,35 @@ export const useStyles = makeStyles(({
   }
 }));
 
-const App = () => {
+
+
+const App = memo(() => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const history = useHistory();
-
-  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
-  let pathArray = [];
-  if (path) {
-    pathArray = path.split("/");
-  }
-  const languageParam = pathArray[1];
-  const activePage = pathArray[3];
-  const isDtOrTg = pathArray[4];
 
   const isAuth = useAppSelector(state => state.auth.isAuth);
   const {language} = useAppSelector(state => state.lang);
-  const currentUser = useAppSelector(state => state.users.currentUser);
+  const snackbar = useAppSelector(state => state.lang.snackbar)
+
+  const {path} = JSON.parse(localStorage.getItem('path') || '{}');
+  let pathArray: string[] = [];
+  if (path) {
+    pathArray = path.split("/");
+  }
+  const isDtOrTg = pathArray[4];
+
   const searchDictsParams = useAppSelector(state => state.dicts.search);
   const searchTagsParams = useAppSelector(state => state.tags.searchParams);
   const searchCallParams = useAppSelector(state => state.calls.callPageSearchParams);
 
-  // lang changer
+  const history = useHistory();
+
   useEffect(() => {
-    history.listen(async (location) => {
-      if (currentUser) {
-        let pathArray: any = [];
-        if (location.pathname.length > 1) {
-          pathArray = location.pathname.split("/");
-        }
-        const languageParam = pathArray[1];
-        pathArray = location.pathname.split("/");
-        pathArray.splice(0, 2);
-
-        if (languageParam === "ru" || languageParam === "en") {
-          dispatch(langSlice.actions.setLoading(true));
-          await dispatch(getLang(languageParam));
-          dispatch(langSlice.actions.setLoading(false));
-        } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
-          dispatch(langSlice.actions.setDefaultLang(null));
-          debugger
-          if (pathArray.length === 1) {
-            history.location.pathname = `/`;
-            history.replace(`ru/${pathArray.join("/")}`);
-          } else {
-            history.location.pathname = `/`;
-            history.replace(`ru/${currentUser ? currentUser.id : "_"}/${activePage}`);
-          }
-        }
-      }
-    });
-  }, [languageParam, currentUser]);
-
-
-  async function getUserData() {
-    await dispatch(getMe());
-    await dispatch(getChildUser());
-    await dispatch(getChildUsers());
-  }
-  useEffect(() => {
-    if (!currentUser) getUserData().then();
+    history.listen((location) => {
+      localStorage.setItem('path', JSON.stringify({
+        path: location.pathname
+      }));
+    })
   }, [history]);
 
   // костыль параметров поиска
@@ -110,30 +79,17 @@ const App = () => {
   if (searchTagsParams && isDtOrTg === "tags") {
     dispatch(tagsSlice.actions.setSearchParams(newSearch));
   }
-  if (!searchCallParams && pathArray[2] === "call") {
-    dispatch(callsSlice.actions.setCallPageSearchParams(newSearch));
-  }
+  // if (!searchCallParams && pathArray[2] === "call") {
+  //   dispatch(callsSlice.actions.setCallPageSearchParams(newSearch));
+  // }
 
-  // проверяет наличие токена
   useEffect(() => {
     const {token} = JSON.parse(localStorage.getItem('token') || '{}');
     if (token) {
       dispatch(authSlice.actions.setAuth(true))
     }
   }, []);
-
-
-  // обновляет localStorage всегда когда меняется ulr
-  useEffect(() => {
-    history.listen((location) => {
-      localStorage.setItem('path', JSON.stringify({
-        path: location.pathname
-      }));
-    })
-  }, [history]);
-
-  const snackbar = useAppSelector(state => state.lang.snackbar);
-
+  
   return (
     <div>
       <div className={classes.wrapper}>
@@ -199,17 +155,17 @@ const App = () => {
             </Route>
 
             <Route exact path={`/${language}/auth`}>
-              <Redirect to={path ? `${path}` : `/${language}/${currentUser ? currentUser.id : "_"}/calls`}/>
+              <Redirect to={path ? `${path}` : `/${language}/${"_"}/calls`}/>
             </Route>
 
             <Route exact path="/">
-              <Redirect to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}/>
+              <Redirect to={`/${language}/${"_"}/calls`}/>
             </Route>
 
             <Route exact path="*">
               <div style={{textAlign: "center", marginTop: "250px"}}>
                 <h1 style={{fontSize: '80px', marginBottom: '30px'}}>404</h1>
-                <Link style={{fontSize: '18px'}} to={`/${language}/${currentUser ? currentUser.id : "_"}/calls`}>
+                <Link style={{fontSize: '18px'}} to={`/${language}/${"_"}/calls`}>
                   На главную страницу →
                 </Link>
               </div>
@@ -232,14 +188,19 @@ const App = () => {
             </Route>
 
             <Route path="*">
-              <CallPage/>
+              <div style={{textAlign: "center", marginTop: "250px"}}>
+                <h1 style={{fontSize: '80px', marginBottom: '30px'}}>404</h1>
+                <Link style={{fontSize: '18px'}} to={`/${language}/auth`}>
+                  Авторизоваться →
+                </Link>
+              </div>
             </Route>
 
           </Switch>
         )}
       </div>
 
-      {/* Снаскбар */}
+       {/* Снаскбар */}
       <div>
         {snackbar.value && (
           <Snackbar
@@ -256,6 +217,6 @@ const App = () => {
 
     </div>
   );
-};
+});
 
 export default App

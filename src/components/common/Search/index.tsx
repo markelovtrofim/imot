@@ -7,7 +7,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import {useAppSelector} from "../../../hooks/redux";
 import {useDispatch} from "react-redux";
 import {callsSlice, getBaseCallsData} from "../../../store/calls/calls.slice";
-import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../../../store/search/search.slice";
+import {
+  getAllSearchCriterias,
+  getDefaultCriterias,
+  getSearchHash,
+  searchSlice
+} from "../../../store/search/search.slice";
 import {translate} from "../../../localizations";
 import {RootState} from "../../../store/store";
 import {getAllTemplates, templateSlice} from "../../../store/search/template.slice";
@@ -19,7 +24,8 @@ import {optionsCreator} from "../../../utils/optionsCreator";
 import CriteriasList from '../Criterias/CriteriasList';
 import SaveCriterias from '../Criterias/SaveCriterias';
 import CriteriaTemplate from '../Criterias/CriteriaTemplate';
-import SearchSelect from "./SearchSelect";
+import {useHistory} from "react-router-dom";
+import * as queryString from "querystring";
 
 const useStyles = makeStyles(({
   searchTitle: {
@@ -148,7 +154,7 @@ type FilterPropsType = {
   pageName: string
 }
 
-const Search: FC<FilterPropsType> = memo(({pageName}) => {
+const Search: FC<FilterPropsType> = memo(() => {
 
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -158,16 +164,58 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   const isAuth = useAppSelector(state => state.auth.isAuth);
   const allCriterias = useAppSelector(state => state.search.allCriterias);
   const allTemplates = useAppSelector(state => state.template.allTemplates);
+  const currentUser = useAppSelector(state => state.users.currentUser);
+
+
+  const searchParams = useAppSelector(state => state.search.searchParams);
 
   const [loading, setLoading] = useState(false);
 
+  const history = useHistory();
   const searchRequest = async () => {
     setLoading(true);
-    dispatch(callsSlice.actions.zeroingSkip(null));
-    await dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
-    await dispatch(getBaseCallsData({}));
+    dispatch(callsSlice.actions.zeroingSkip(null)); 
+    dispatch(callsSlice.actions.setEmptyCalls({leaveBundles: 0}));
+    const bastCallDataResponse = await dispatch(getBaseCallsData({}));
+    // @ts-ignore
+    const bastCallData = bastCallDataResponse.payload;
+
+    history.push(`?searchHash=${bastCallData.search_filter_hash}`); 
     setLoading(false);
-  }; 
+  };
+
+  async function convertUrlHash() {
+    if (searchParams) {
+      let newSearchParams = searchParams;
+      if (newSearchParams[0] === "?") {
+        newSearchParams = newSearchParams.slice(1);
+      }
+
+      const searchParamsObj = queryString.parse(newSearchParams);
+      const hash = searchParamsObj.searchHash;
+      if (hash) {
+        // @ts-ignore
+        const searchHashRequestData = await dispatch(getSearchHash(hash));
+        // @ts-ignore
+        const searchHashRequestError = searchHashRequestData.error;
+        // @ts-ignore
+        const searchHashRequestPayload = searchHashRequestData.payload;
+        if (searchHashRequestError) {
+          console.log(searchHashRequestError);
+        }
+        // @ts-ignore
+        if (searchHashRequestPayload) {
+          console.log(searchHashRequestPayload);
+        }
+        debugger
+      }
+    }
+  }
+
+  useEffect(() => {
+    convertUrlHash().then()
+  }, [])
+
   function switchSearchItemCLassName(className: string) {
     const classSwitcher: { [id: string]: any } = {};
     classSwitcher['searchItemBlock_1'] = classes.searchItemBlock_1;

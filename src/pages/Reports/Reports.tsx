@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState } from 'react';
+import React, {FC, memo, useEffect, useState} from 'react';
 
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../hooks/redux";
@@ -13,14 +13,13 @@ import FormGroup from '@mui/material/FormGroup';
 import Dialog from "@mui/material/Dialog";
 import cloneDeep from "lodash.clonedeep";
 
-import { RootState } from '../../store/store';
-import { translate } from "../../localizations";
+import {RootState} from '../../store/store';
+import {translate} from "../../localizations";
 import CallsHeader from '../Calls/CallsHeader';
 import CallStubMiddleware from '../Calls/Call';
-import { CallType } from '../../store/calls/calls.types';
-import { getCallsInfoById, callsSlice } from '../../store/calls/calls.slice';
-import { CriteriasType } from '../../store/search/search.types';
-import { getAllSearchCriterias, getDefaultCriterias, searchSlice } from "../../store/search/search.slice";
+import {callsSlice, getBaseCallsData, getCallsInfo, getCallsInfoById} from '../../store/calls/calls.slice';
+import {CriteriasType} from '../../store/search/search.types';
+import {getAllSearchCriterias, getDefaultCriterias, searchSlice} from "../../store/search/search.slice";
 import ContainedSelect from '../../components/common/Selects/ContainedSelect';
 import CriteriasList from '../../components/common/Criterias/CriteriasList';
 import TextSelect from '../../components/common/Selects/TextSelect/TextSelect';
@@ -33,7 +32,8 @@ import { reportsStyles } from './Reports.jss';
 import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg, CaretDownSvg, PlusSvg, InfoCircle } from "./Reports.svg";
 import ChartsBlock from '../../components/common/Charts/ChartsBlock';
 import SearchSelect from '../../components/common/Search/SearchSelect';
-import { reportsSlice,
+import {
+  reportsSlice,
   getAllReports,
   getReport,
   setReports,
@@ -47,7 +47,7 @@ import Accordeon from '../../components/common/Accordeon';
 const Reports = React.memo(() => {
   const classes = reportsStyles();
   const dispatch = useDispatch();
-  const { language } = useAppSelector((state: RootState) => state.lang);
+  const {language} = useAppSelector((state: RootState) => state.lang);
   const isAuth = useAppSelector(state => state.auth.isAuth);
   //reports
   const allReports = useAppSelector(state => state.reports.allReports);
@@ -57,14 +57,9 @@ const Reports = React.memo(() => {
   const totalCalls = useAppSelector(state => state.reports.callReport.report.total_calls);
 
   //calls
-  const calls = useAppSelector<CallType[][]>(state => state.calls.calls);
+  const calls = useAppSelector(state => state.calls.callsIncomplete);
   const [foundCalls, setFoundCalls] = React.useState<string | number>(0);
   const [callsSwitch, setCallSwitch] = useState(false);
-
-  const [expanded, setExpanded] = React.useState<string | false>(false);
-  const handleExpandedChange = (panel: string | false) => {
-    setExpanded(panel);
-  };
 
   //criterias
   const activeCriteriasReports = useAppSelector(state => state.search.activeCriteriasReports);
@@ -81,7 +76,7 @@ const Reports = React.memo(() => {
   const error = useAppSelector(state => state.reports.error);
   useEffect(() => {
     if (error) {
-      setSnackbar({ type: 'error', value: true, text: error, time: 2000 });
+      setSnackbar({type: 'error', value: true, text: error, time: 2000});
     }
   }, [error])
 
@@ -93,7 +88,7 @@ const Reports = React.memo(() => {
     }
     dispatch(getAllReports());
     funcForTag();
-    func();    
+    func();
     funcForCriterias();
     setLoading(false);
   }, []);
@@ -114,40 +109,41 @@ const Reports = React.memo(() => {
       type: string | null,
     }
   }
+
   const selectNames: selectNamesType = {
     calls: {
       label: `${translate('reportTypeCalls', language)}`,
       type: null
     },
-    time : {
+    time: {
       label: `${translate('reportGroupByRowTime', language)}`,
       type: 'select'
     },
-    search_items : {
+    search_items: {
       label: `${translate('reportGroupByRowSearchItems', language)}`,
       type: 'title'
     },
-    tag : {
+    tag: {
       label: `${translate('reportGroupByRowTag', language)}`,
       type: 'select-tag'
     },
-    tag_name_list : {
+    tag_name_list: {
       label: `${translate('reportGroupByRowTagNameList', language)}`,
       type: 'input'
     },
-    tag_value_list : {
+    tag_value_list: {
       label: `${translate('reportGroupByRowTagValueList', language)}`,
       type: 'input-value'
     },
-    operator_phone : {
+    operator_phone: {
       label: `${translate('reportGroupByRowOperatorPhone', language)}`,
       type: 'boolean'
     },
-    client_phone : {
+    client_phone: {
       label: `${translate('reportGroupByRowClientPhone', language)}`,
       type: 'boolean'
     },
-    calls_count : {
+    calls_count: {
       label: `${translate('reportGroupByRowCallsCount', language)}`,
       type: 'boolean'
     },
@@ -173,11 +169,11 @@ const Reports = React.memo(() => {
     },
   }
   const chartTypes = [
-    {label: `${translate('barChart', language)}`, value: 'barChart' },
-    {label: `${translate('lineChart', language)}`, value: 'lineChart' },
-    {label: `${translate('pieChart', language)}`, value: 'pieChart' },
-    {label: `${translate('radarChart', language)}`, value: 'radarChart' },
-  ]  
+    {label: `${translate('barChart', language)}`, value: 'barChart'},
+    {label: `${translate('lineChart', language)}`, value: 'lineChart'},
+    {label: `${translate('pieChart', language)}`, value: 'pieChart'},
+    {label: `${translate('radarChart', language)}`, value: 'radarChart'},
+  ]
   const chartTypeOptions = chartTypes;
   const [chartTypeValue, setChartTypeValue] = useState(chartTypeOptions[0]);
 
@@ -187,8 +183,8 @@ const Reports = React.memo(() => {
       let selectTitle: string = options[i]
       //temporarily
       if (selectTitle !== 'tag_value_list') {
-          local.push({ value: options[i], label: selectNames[selectTitle].label, type: selectNames[selectTitle].type })
-        }
+        local.push({value: options[i], label: selectNames[selectTitle].label, type: selectNames[selectTitle].type})
+      }
     }
     return local;
   }
@@ -196,19 +192,23 @@ const Reports = React.memo(() => {
     let local = {};
     if (options.length || options.group_by) {
       if (options === 'calls') {
-        local = { value: options, label: selectNames[options].label };
+        local = {value: options, label: selectNames[options].label};
       } else {
-        local = { value: options.group_by, label: selectNames[options.group_by].label, type: selectNames[options.group_by].type };
+        local = {
+          value: options.group_by,
+          label: selectNames[options.group_by].label,
+          type: selectNames[options.group_by].type
+        };
       }
     }
     return local;
   }
 
-  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null , activeCriterias: CriteriasType[]) => {
+  const handleMoreSelectClick = (allCriteriasArr: CriteriasType[] | null, activeCriterias: CriteriasType[]) => {
     if (allCriteriasArr) {
       let local: { value: { key: string }, label: string, icon?: string }[] = [];
       allCriteriasArr.forEach((item, i) => {
-        local.push({ value: allCriteriasArr[i], label: allCriteriasArr[i].title });
+        local.push({value: allCriteriasArr[i], label: allCriteriasArr[i].title});
       })
       for (let i = 0; i < local.length; i++) {
         if (activeCriterias.find((item) => item.key === local[i].value.key)) {
@@ -231,7 +231,10 @@ const Reports = React.memo(() => {
       }
     }
     if (index < 0) {
-      dispatch(searchSlice.actions.setActiveCriteriasReports([...activeCriteriasReports, { ...event.value, values: [] }]));
+      dispatch(searchSlice.actions.setActiveCriteriasReports([...activeCriteriasReports, {
+        ...event.value,
+        values: []
+      }]));
     }
   }
 
@@ -245,7 +248,10 @@ const Reports = React.memo(() => {
       }
     }
     if (index < 0) {
-      dispatch(searchSlice.actions.setActiveCriteriaReportsColumn([...activeCriteriasColumn, { ...event.value, values: [] }]));
+      dispatch(searchSlice.actions.setActiveCriteriaReportsColumn([...activeCriteriasColumn, {
+        ...event.value,
+        values: []
+      }]));
     }
   }
 
@@ -254,22 +260,30 @@ const Reports = React.memo(() => {
     for (let i in activeCriterias) {
       if (event.value.key === activeCriterias[i].key) {
         index = parseInt(i, 10);
-        dispatch(reportsSlice.actions.removeActiveCriteriaColumn({ criteria: activeCriterias[index], arrayIndex: arrayIndex }));
+        dispatch(reportsSlice.actions.removeActiveCriteriaColumn({
+          criteria: activeCriterias[index],
+          arrayIndex: arrayIndex
+        }));
 
         const activeCriteriasArr = cloneDeep(activeCriterias);
         activeCriteriasArr.splice(index, 1);
 
         const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriteriasArr]);
         const allOptions = local2;
-        dispatch(reportsSlice.actions.setOptionsCriterias({ arrayIndex: arrayIndex, criteria: allOptions }));
+        dispatch(reportsSlice.actions.setOptionsCriterias({arrayIndex: arrayIndex, criteria: allOptions}));
         break
       }
     }
     if (index < 0) {
-      dispatch(reportsSlice.actions.setActiveCriteriaColumn({ criteria: [...activeCriterias, { ...event.value, values: [] }], arrayIndex: arrayIndex }));
-      const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriterias, { ...event.value, values: [] }]);
+      dispatch(reportsSlice.actions.setActiveCriteriaColumn({
+        criteria: [...activeCriterias, {
+          ...event.value,
+          values: []
+        }], arrayIndex: arrayIndex
+      }));
+      const local2 = handleMoreSelectClick(allCriteriasArr, [...activeCriterias, {...event.value, values: []}]);
       const allOptions = local2;
-      dispatch(reportsSlice.actions.setOptionsCriterias({ arrayIndex: arrayIndex, criteria: allOptions }));
+      dispatch(reportsSlice.actions.setOptionsCriterias({arrayIndex: arrayIndex, criteria: allOptions}));
     }
   }
 
@@ -305,11 +319,11 @@ const Reports = React.memo(() => {
   // tag names
   const tagNames = useAppSelector(state => state.reports.tagNames);
   const tagNamesOptions = optionsCreatorVEL(tagNames);
-  let tagNamesValue = { value: '', label: '' };
+  let tagNamesValue = {value: '', label: ''};
   //@ts-ignore
   if (groupByRows.group_by === 'tag') {
     //@ts-ignore
-    tagNamesValue = { label: groupByRows.value, value: groupByRows.value };
+    tagNamesValue = {label: groupByRows.value, value: groupByRows.value};
   } else {
     tagNamesValue = tagNamesOptions[0];
   }
@@ -317,7 +331,7 @@ const Reports = React.memo(() => {
   const tagNamesColOptions = optionsCreatorVEL(tagNames);
   //@ts-ignore
   let tagNameColFrom = useAppSelector(state => state.reports.activeReport.cols_group_by[0]);
-  let tagNamesColValue: any = { label: tagNameColFrom.value, value: tagNameColFrom.value };
+  let tagNamesColValue: any = {label: tagNameColFrom.value, value: tagNameColFrom.value};
 
   let tagNameListValue: any = []
   if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag_name_list' && groupByColumns[0].value) {
@@ -328,12 +342,11 @@ const Reports = React.memo(() => {
 
   useEffect(() => {
     if (groupByColumns.length != 0 && groupByColumns[0].group_by === 'tag' && groupByColumns[0].value) {
-      tagNamesColValue = { label: tagNameColFrom.value, value: tagNameColFrom.value };
-    } 
-    else {
+      tagNamesColValue = {label: tagNameColFrom.value, value: tagNameColFrom.value};
+    } else {
       tagNamesColValue = tagNamesOptions[0];
       if (groupByColumns[0].group_by === 'tag' && tagNamesOptions[0]) {
-        dispatch(reportsSlice.actions.setDefaultColsTagsValue({ value: tagNamesOptions[0] }))
+        dispatch(reportsSlice.actions.setDefaultColsTagsValue({value: tagNamesOptions[0]}))
       }
     }
   }, [tagNamesOptions, groupByColumns, tagNameColFrom])
@@ -770,13 +783,16 @@ const Reports = React.memo(() => {
             const groupColumnsItem = groupByColumns[0].value.search_items[i]
             //@ts-ignore
             dispatch(searchSlice.actions.setActiveCriteriaReportsColumn(allCriterias.filter((item) => item.key === groupColumnsItem.key)))
-            dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({ key: groupColumnsItem.key, values: [...groupColumnsItem.values] }));
+            dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({
+              key: groupColumnsItem.key,
+              values: [...groupColumnsItem.values]
+            }));
           }
         }
       }
       if (groupByColumns[0].group_by === 'tag_name_list') {
         dispatch(reportsSlice.actions.setDefaultColTagsName(groupByColumns[0].value))
-        
+
       }
     }
 
@@ -784,17 +800,17 @@ const Reports = React.memo(() => {
       //доп группировки
       for (let i = 1; i < groupByColumns.length; i++) {
         dispatch(reportsSlice.actions.setActiveParameters([{
-          select: { options: groupByColumnsReportOptions, value: handleOptionsReportsSelectObj(groupByColumns[i]) },
-          tagsVal: { options: tagNamesColOptions, value: tagNamesColValue },
-          op: { options: opAddCriterias, value: '' },
-          tagsNameList: { options: tagNamesColOptions, value: [] },
-          callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] }
+          select: {options: groupByColumnsReportOptions, value: handleOptionsReportsSelectObj(groupByColumns[i])},
+          tagsVal: {options: tagNamesColOptions, value: tagNamesColValue},
+          op: {options: opAddCriterias, value: ''},
+          tagsNameList: {options: tagNamesColOptions, value: []},
+          callFilters: {options: opAddCriterias, values: allCriterias, activeValues: []}
         }]))
         if (groupByColumns[i].group_by === 'tag') {
           dispatch(reportsSlice.actions.setParameterTagstFieldValue({
             arrayIndex: i - 1,
             //@ts-ignore
-            value: { value: groupByColumns[i].value, label: groupByColumns[i].value }
+            value: {value: groupByColumns[i].value, label: groupByColumns[i].value}
           }))
         } else if (groupByColumns[i].group_by === 'search_items') {
           dispatch(reportsSlice.actions.setNameColumnFieldValue({
@@ -811,8 +827,8 @@ const Reports = React.memo(() => {
             activeColsCriterias.push(allCriterias.filter((item) => item.key === searchItem.key));
 
             let activeSearchItems = cloneDeep(activeColsCriterias);
-              //@ts-ignore
-              activeSearchItems[j].values = searchItem.values
+            //@ts-ignore
+            activeSearchItems[j].values = searchItem.values
             dispatch(reportsSlice.actions.setActiveCriteriaColumn({
               arrayIndex: i - 1,
               criteria: activeSearchItems[j]
@@ -828,7 +844,7 @@ const Reports = React.memo(() => {
             //@ts-ignore
             value: groupByColumns[i].value
           }))
-        } 
+        }
       }
     }
   }, [callReport])
@@ -847,12 +863,11 @@ const Reports = React.memo(() => {
   const saveReportAsync = async () => {
     if (reportName === '') {
       setValidateInputItem(true);
-    }
-    else {
+    } else {
       setValidateInputItem(false);
       await dispatch(setReports());
       await dispatch(getAllReports());
-      await dispatch(reportsSlice.actions.setCurrentSavedReport({ value: reportName, label: reportName }));
+      await dispatch(reportsSlice.actions.setCurrentSavedReport({value: reportName, label: reportName}));
 
       setSnackbar({
         type: 'success',
@@ -937,7 +952,7 @@ const Reports = React.memo(() => {
 
   return (
     <div>
-      <СontrolBlock switchEntity={'reports'} />
+      <СontrolBlock switchEntity={'reports'}/>
       <div>
         <div className={classes.reportButtonsGroup}>
           {/* <div className={classes.reportButtonsGroupLeft}>
@@ -945,7 +960,8 @@ const Reports = React.memo(() => {
               className={visibleParameters ? classes.reportOptionsButtonActive : classes.reportOptionsButton}
               color="primary"
               variant="text"
-              endIcon={visibleParameters ? <OnTopArrow style={{ margin: '0 7px 0 5px' }} /> : <OnBottomArrow style={{ margin: '0 7px 0 5px' }} />}
+              endIcon={visibleParameters ? <OnTopArrow style={{margin: '0 7px 0 5px'}}/> :
+                <OnBottomArrow style={{margin: '0 7px 0 5px'}}/>}
               onClick={() => {
                 visibleParameters ? hideVisibleParameters() : showVisibleParameters()
               }}
@@ -1011,6 +1027,7 @@ const Reports = React.memo(() => {
                           }}
                         />
                       </div>
+
                     </div>
                   </div>
 
@@ -1031,7 +1048,6 @@ const Reports = React.memo(() => {
                       />
                     </div>
                   </div> */}
-
                   {/* по строкам */}
                   <div className={classes.parameterBlock}>
                     <div className={classes.flexCenter}>
@@ -1100,7 +1116,6 @@ const Reports = React.memo(() => {
                       : <></>
                     }
                   </div>
-
                   {/* по столбцам */}
                   <div className={classes.parameterBlock}>
                     <div className={classes.parameterBlock}>
@@ -1161,11 +1176,11 @@ const Reports = React.memo(() => {
                                   value={reportNameColumnDefault}
                                   handleChange={(event: any) => {
                                     dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: event.target.value }));
+
                                   }}
                                 />
                               </div>
                             </div>
-
                             <div className={classes.parameterSelect}>
                               <TextSelect
                                 name={'moreSelect'}
@@ -1254,6 +1269,7 @@ const Reports = React.memo(() => {
                                   />
                                 </div>
                                 <div style={{ display: 'flex' }}>
+
                                   <ContainedSelect
                                     height={'38px'}
                                     width={'265px'}
@@ -1502,8 +1518,8 @@ const Reports = React.memo(() => {
             onClose={handleClose}
           >
             <div className={classes.deleteModal}>
-              <Typography style={{ fontWeight: '600' }}>{translate('reportDeleteMes', language)}</Typography>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
+              <Typography style={{fontWeight: '600'}}>{translate('reportDeleteMes', language)}</Typography>
+              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                 <LoadingButton
                   variant="outlined"
                   color="primary"
@@ -1521,7 +1537,6 @@ const Reports = React.memo(() => {
               </div>
             </div>
         </Dialog>
-
         {snackbar.value &&
           <Snackbar
             type={snackbar.type}
@@ -1564,8 +1579,6 @@ const Reports = React.memo(() => {
           </LoadingButton>
         </div>
       </div>
-
-
       {isLoading ?
         <Box sx={{
           display: 'flex',
@@ -1576,7 +1589,7 @@ const Reports = React.memo(() => {
           margin: '14% 0'
         }}
         >
-          <CircularProgress />
+          <CircularProgress/>
         </Box>
         :
         <>
@@ -1585,7 +1598,7 @@ const Reports = React.memo(() => {
               {totalCalls === 0 ?
                 <div className={classes.notFoundCalls}>{translate('reportNotFind', language)}</div>
                 :
-                <div style={{ marginBottom: '60px' }}>
+                <div style={{marginBottom: '60px'}}>
                   <div className={classes.reportItemInfo}>
 
                     {/* <div className={classes.flexCenterMb}>
@@ -1599,8 +1612,8 @@ const Reports = React.memo(() => {
                         {translate('reportExport', language)}
                       </LoadingButton>
                     </div> */}
-                    
-                    {tableRows.length > 0  && dataChart.length > 0 && checkboxShowChart ?
+
+                    {tableRows.length > 0 && dataChart.length > 0 && checkboxShowChart ?
                       <ChartsBlock
                         chartTypeValue={chartTypeValue}
                         tableRows={tableRows}
@@ -1608,7 +1621,7 @@ const Reports = React.memo(() => {
                         handleCheckChart={handleCheckChart}
                         checkChart={checkChart}
                       />
-                    : <></>
+                      : <></>
                     }
 
                     
@@ -1673,8 +1686,8 @@ const Reports = React.memo(() => {
                     </div>
                   </div>
                   <div className={classes.table}>
-                    <div style={{ display: 'flex', height: '100%' }}>
-                      <div style={{ flexGrow: 1, background: '#fff', height: heightTable }}>
+                    <div style={{display: 'flex', height: '100%'}}>
+                      <div style={{flexGrow: 1, background: '#fff', height: heightTable}}>
                         <Box
                           sx={{
                             height: 60,
@@ -1775,7 +1788,8 @@ const Reports = React.memo(() => {
                             }
                           }}
                         >
-                          <div ref={gridWrapperRef}>
+
+                          <div ref={gridWrapperRef} style={{height: heightTable}}>
                             <DataGrid
                               autoHeight
                               pagination
@@ -1818,20 +1832,12 @@ const Reports = React.memo(() => {
                       : <></>
                     }
                     {calls.length != 0 && callsSwitch ?
-                      calls.map((callsArrays: CallType[]) => {
-                        const callsArrayIndex = calls.indexOf(callsArrays)
+                      calls.map((call) => {
                         return (
-                          <div>
-                            {callsArrays.map((call: CallType) => {
-                              return (
-                                <CallStubMiddleware
-                                  callInfo={call.info} callAudio={call.audio} callStt={call.stt}
-                                  bundleIndex={callsArrayIndex} expanded={expanded === call.info?.id}
-                                  handleExpandedChange={handleExpandedChange}
-                                />
-                              )
-                            })}
-                          </div>
+                          <CallStubMiddleware
+                            callInfo={call.info}
+                            expanded={call.expanded}
+                          />
                         )
                       })
                       : <></>

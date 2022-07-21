@@ -89,7 +89,6 @@ const SearchSelect: FC<SelectPropsType> = memo(({
     handlerOnChange,
   }) => {
 
-    console.log(valueList)
   // STYLES BLOCK
   const useStyles = makeStyles(({
     selectBox: {

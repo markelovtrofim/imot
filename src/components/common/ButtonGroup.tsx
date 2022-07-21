@@ -122,7 +122,7 @@ const ButtonGroup: FC<ButtonsPropsType> = ({date, items, period}) => {
 
   useEffect(() => {
     for (let i = 0; i < items.length; i++) {
-      //@ts-ignore
+      // @ts-ignore
       if (items[i].unitOfTime[0] && date[0] && (items[i].unitOfTime[0].toString() === date[0].toString())) {
         setAlignment(items[i].value);
         dispatch(reportsSlice.actions.setPeriod(getPeriod(items[i].value)))
