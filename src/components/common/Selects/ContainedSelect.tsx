@@ -61,7 +61,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = (
       justifyContent: justify ? justify : 'left',
       alignItems: 'center',
       width: '100% !important',
-      marginRight: marginRight ? marginRight : '25px'
+      marginRight: marginRight ? marginRight : '10px'
     },
     selectMenuListInput: {
       width: "228px",

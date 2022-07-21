@@ -3,6 +3,7 @@ import {Skeleton, Typography} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, {AccordionProps} from '@mui/material/Accordion';
+
 import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary';
@@ -19,7 +20,6 @@ import {useAppSelector} from "../../hooks/redux";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
 import CustomCheckbox from "../../components/common/Checkbox";
-
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion
@@ -92,13 +92,13 @@ type CallStubMiddlewarePropsType = {
 };
 
 
+
 const CallStubMiddleware = memo((
   {
     callInfo,
     expanded,
     solo
   }: CallStubMiddlewarePropsType) => {
-
   const useStyles = makeStyles(({
     accordion: {
       backgroundColor: '#ffffff !important',
@@ -272,7 +272,7 @@ function areEqual(prevProps: CallPropsType, nextProps: CallPropsType) {
   return prevProps.expanded === nextProps.expanded;
 }
 
-const Call = memo((props: CallPropsType) => {
+const Call = (props: CallPropsType) => {
   const useStyles = makeStyles(({
     accordion: {
       border: 'none !important',
@@ -581,9 +581,9 @@ const Call = memo((props: CallPropsType) => {
                 </Stack>
               </div>}
 
-
             </div>
           </div>
+
         </AccordionSummary>
       </div>
       {/* Основная информация о звонке. */}

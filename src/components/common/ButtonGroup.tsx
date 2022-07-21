@@ -117,7 +117,7 @@ const ButtonGroup: FC<ButtonsPropsType> = ({date, items, period}) => {
       //@ts-ignore
       dispatch(reportsSlice.actions.setDate(unitsOfTime[getNamePeriod(period)]));
     }
-  }, [period, callReport])
+  }, [ callReport])
 
 
   useEffect(() => {

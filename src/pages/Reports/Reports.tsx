@@ -47,6 +47,7 @@ import {
   getSelectors,
   getTagNames
 } from '../../store/reports/reports.slice';
+import Accordeon from '../../components/common/Accordeon';
 
 const Reports = React.memo(() => {
   const classes = reportsStyles();
@@ -299,7 +300,10 @@ const Reports = React.memo(() => {
   const selectorsValues = useAppSelector(state => state.reports.selectors);
 
   //название отчета
-  const reportName = useAppSelector(state => state.reports.activeReport.report_name);
+  let reportName = useAppSelector(state => state.reports.activeReport.report_name);
+  if (!reportName) {
+    reportName = `${translate('report', language)} ${new Date().toLocaleDateString()}`;
+  }
 
   // тип отчета
   const typeReportOptions = handleOptionsReportsSelect(selectorsValues.report_types);
@@ -422,13 +426,17 @@ const Reports = React.memo(() => {
   const handleChangeCheckCalls = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxCalls(event.target.checked);
   }
-  const [checkboxMinutes, setCheckboxMinutes] = useState(true);
+  const [checkboxMinutes, setCheckboxMinutes] = useState(false);
   const handleChangeCheckMinutes = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxMinutes(event.target.checked);
   }
-  const [checkboxPercent, setCheckboxPercent] = useState(true);
+  const [checkboxPercent, setCheckboxPercent] = useState(false);
   const handleChangeCheckPercent = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxPercent(event.target.checked);
+  }
+  const [checkboxQuant, setCheckboxQuant] = useState(false);
+  const handleChangeCheckQuant = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckboxQuant(event.target.checked);
   }
   //chart
   const checkboxShowChart = useAppSelector(state => state.reports.showCharts);
@@ -592,7 +600,7 @@ const Reports = React.memo(() => {
         )
       })
     }
-    if (checkboxCalls) {
+    if (checkboxQuant) {
       columnsArray.push({
         field: 'row_total_processed_calls_count',
         headerName: `${translate('reportAllCount', language)}`,
@@ -741,7 +749,7 @@ const Reports = React.memo(() => {
   useEffect(() => {
     dispatch(reportsSlice.actions.setTableRows(rows));
     dispatch(reportsSlice.actions.setTableColumns(columns));
-  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent])
+  }, [callReport, checkboxValue, checkboxCalls, checkboxMinutes, checkboxPercent, checkboxQuant])
 
   useEffect(() => {
     if (callReport) {
@@ -759,7 +767,7 @@ const Reports = React.memo(() => {
   }
 
   const getCallParameters = async (event: any) => {
-    hideVisibleParameters();
+    // hideVisibleParameters();
     setLoading(true);
     //обнуление параметров
     zeroParameters();
@@ -854,7 +862,7 @@ const Reports = React.memo(() => {
     setLoading(true);
     await dispatch(getCallReport());
     await setLoading(false);
-    hideVisibleParameters();
+    // hideVisibleParameters();
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
@@ -928,7 +936,7 @@ const Reports = React.memo(() => {
         const gridElHeader: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeaders')!;
         const gridElHeaderInner: HTMLDivElement = gridDiv.querySelector('.MuiDataGrid-columnHeadersInner')!;
         if (gridEl) {
-          setHeightTable(`${gridEl.clientHeight - 2}px`);
+          setHeightTable(`${ gridEl.clientHeight }px`);
         }
         if (gridElHeader && gridElHeaderInner) {
           const height = gridElHeaderInner.clientHeight
@@ -952,7 +960,7 @@ const Reports = React.memo(() => {
       <СontrolBlock switchEntity={'reports'}/>
       <div>
         <div className={classes.reportButtonsGroup}>
-          <div className={classes.reportButtonsGroupLeft}>
+          {/* <div className={classes.reportButtonsGroupLeft}>
             <LoadingButton
               className={visibleParameters ? classes.reportOptionsButtonActive : classes.reportOptionsButton}
               color="primary"
@@ -965,11 +973,10 @@ const Reports = React.memo(() => {
             >
               {translate('reportOptions', language)}
             </LoadingButton>
-          </div>
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            <Typography
-              style={{marginRight: '20px', whiteSpace: 'nowrap'}}>{translate('savedReports', language)}:</Typography>
-            <div style={{display: 'flex'}}>
+          </div> */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Typography style={{ marginRight: '20px', whiteSpace: 'nowrap' }}>{translate('savedReports', language)}:</Typography>
+            <div style={{ display: 'flex' }}>
               <ContainedSelect
                 height={'38px'}
                 width={'265px'}
@@ -985,476 +992,514 @@ const Reports = React.memo(() => {
           </div>
         </div>
       </div>
-      {visibleParameters ?
-        <BlockBox padding="16px">
-          {/* звонки */}
+
+      <div>
+        <BlockBox padding="24px" margin="0 0 24px 0">
           <div className={classes.filtersBlock}>
-            <div className={classes.searchTitle}>
-              <div className={classes.searchTitleLeft}>
+            <Accordeon
+              title={
                 <Typography className={classes.searchTitleLeftText} variant="h6">
                   {translate('reportOptions', language)}
                 </Typography>
-              </div>
-            </div>
-            <div style={{display: 'flex', alignItems: 'flex-start', minHeight: '50px'}}>
-              <div style={{width: '100%'}}>
-                {/* название */}
-                <div className={classes.parameterBlock}>
-                  <div className={classes.flexCenter}>
-                    <Typography className={classes.parameterItemTitle}>{translate('reportTitle', language)}</Typography>
-                    <div style={{width: '265px'}}
-                         className={validateInputItem ? classes.errorInput : classes.reportName}>
-                      <span>
-                        <Typography className={classes.errorTitle}>{translate('reportTitleMes', language)}</Typography>
-                      </span>
-                      <Input
-                        name={"report_name"}
-                        type={"text"}
-                        bcColor={"#FFFFFF"}
-                        height={'38px'}
-                        border={'1px solid #E3E8EF'}
-                        label={""}
-                        value={reportName}
-                        handleChange={(event: any) => {
-                          dispatch(reportsSlice.actions.setNameReport(event.target.value))
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* тип отчета */}
-                <div className={classes.parameterBlock}>
-                  <div className={classes.flexCenter}>
-                    <Typography className={classes.parameterItemTitle}>{translate('reportType', language)}</Typography>
-                    <ContainedSelect
-                      height={'38px'}
-                      width={'265px'}
-                      justify={'center'}
-                      onSelectChange={
-                        (event) => {
-                          dispatch(reportsSlice.actions.setTypeReport(event.value));
-                        }}
-                      options={typeReportOptions}
-                      value={typeReportValue}
-                    />
-                  </div>
-                </div>
-
-                {/* по строкам */}
-                <div className={classes.parameterBlock}>
-                  <div className={classes.flexCenter}>
-                    <Typography
-                      className={classes.parameterItemTitle}>{translate('reportGroupByRow', language)}</Typography>
-                    <ContainedSelect
-                      height={'38px'}
-                      width={'265px'}
-                      justify={'flex-end'}
-                      onSelectChange={(event) => {
-                        if (event.type === 'select-tag') {
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({
-                            group_by: event.value,
-                            value: tagNamesValue.value
-                          }));
-                        } else if (event.type === 'select') {
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({
-                            group_by: event.value,
-                            value: timeColumnsReportValue.value
-                          }));
-                        } else {
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({group_by: event.value, value: null}));
-                        }
-                      }}
-                      options={groupByRowsReportOptions}
-                      value={groupByRowsValue}
-                    />
-                  </div>
-                  {/* по тегу */}
-                  {groupByRowsValue && groupByRowsValue.type === 'select-tag' ?
-                    <div style={{width: '265px'}}>
-                      <ContainedSelect
-                        height={'38px'}
-                        width={'265px'}
-                        justify={'flex-end'}
-                        onSelectChange={(event) => {
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({
-                            group_by: groupByRowsValue.value,
-                            value: event.value
-                          }))
-                        }}
-                        options={tagNamesOptions}
-                        value={tagNamesValue}
-                      />
-                    </div>
-                    : <></>
-                  }
-
-                  {/* по времени */}
-                  {groupByRowsValue && groupByRowsValue.type === 'select' ?
-                    <div style={{width: '265px'}}>
-                      <ContainedSelect
-                        height={'38px'}
-                        width={'265px'}
-                        justify={'flex-end'}
-                        onSelectChange={(event) => {
-                          setTimeColumnsReportValue(event);
-                          dispatch(reportsSlice.actions.setActiveRowsGroupBy({
-                            group_by: groupByRowsValue.value,
-                            value: event.value
-                          }));
-                        }
-                        }
-                        options={timeColumnsReportOptions}
-                        value={timeColumnsReportValue}
-                      />
-                    </div>
-                    : <></>
-                  }
-                </div>
-
-                {/* по столбцам */}
-                <div className={classes.parameterBlock}>
+              }
+              iconSvg={
+                <CaretDownSvg/>
+              }
+              initialState={true}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', minHeight: '50px' }}>
+                <div style={{ width: '100%' }}>
+                  {/* название */}
                   <div className={classes.parameterBlock}>
+                    <div className={classes.flexCenter}>
+                      <Typography className={classes.parameterItemTitle}>{translate('reportTitle', language)}</Typography>
+                      <div style={{ width: '265px' }} className={validateInputItem ? classes.errorInput : classes.reportName}>
+                        <span>
+                          <Typography className={classes.errorTitle}>{translate('reportTitleMes', language)}</Typography>
+                        </span>
+                        <Input
+                          name={"report_name"}
+                          type={"text"}
+                          bcColor={"#FFFFFF"}
+                          height={'38px'}
+                          border={'1px solid #E3E8EF'}
+                          label={""}
+                          value={reportName}
+                          handleChange={(event: any) => {
+                            dispatch(reportsSlice.actions.setNameReport(event.target.value))
+                          }}
+                        />
+                      </div>
 
-                    {/* типо дефолтный */}
-                    <div style={{display: 'inline-flex', color: '#2F3747'}}>
-                      <div className={classes.flexCenter}>
-                        <Typography
-                          className={classes.parameterItemTitle}>{translate('reportGroupByColumns', language)}</Typography>
+                    </div>
+                  </div>
+
+                  {/* тип отчета */}
+                  {/* <div className={classes.parameterBlock}>
+                    <div className={classes.flexCenter}>
+                      <Typography className={classes.parameterItemTitle}>{translate('reportType', language)}</Typography>
+                      <ContainedSelect
+                        height={'38px'}
+                        width={'265px'}
+                        justify={'center'}
+                        onSelectChange={
+                          (event) => {
+                            dispatch(reportsSlice.actions.setTypeReport(event.value));
+                          }}
+                        options={typeReportOptions}
+                        value={typeReportValue}
+                      />
+                    </div>
+                  </div> */}
+                  {/* по строкам */}
+                  <div className={classes.parameterBlock}>
+                    <div className={classes.flexCenter}>
+                      <Typography className={classes.parameterItemTitle}>{translate('reportGroupByRow', language)}</Typography>
+                      <ContainedSelect
+                        height={'38px'}
+                        width={'265px'}
+                        justify={'flex-end'}
+                        onSelectChange={(event) => {
+                          if (event.type === 'select-tag') {
+                            dispatch(reportsSlice.actions.setActiveRowsGroupBy({ group_by: event.value, value: tagNamesValue.value }));
+                          } else if (event.type === 'select') {
+                            dispatch(reportsSlice.actions.setActiveRowsGroupBy({ group_by: event.value, value: timeColumnsReportValue.value }));
+                          }
+                          else {
+                            dispatch(reportsSlice.actions.setActiveRowsGroupBy({ group_by: event.value, value: null }));
+                          }
+                        }}
+                        options={groupByRowsReportOptions}
+                        value={groupByRowsValue}
+                      />
+                    </div>
+                    {/* по тегу */}
+                    {groupByRowsValue && groupByRowsValue.type === 'select-tag' ?
+                      <div style={{ width: '265px' }}>
                         <ContainedSelect
                           height={'38px'}
                           width={'265px'}
                           justify={'flex-end'}
                           onSelectChange={(event) => {
-                            if (event.type === 'select-tag') {
-                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({value: tagNamesColValue}))
-                            } else if (event.type === 'title') {
-                              dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: reportNameColumnDefault}))
-                            } else if (event.type === 'input') {
-                              dispatch(reportsSlice.actions.setDefaultColsGroupBy({
-                                group_by: 'tag_name_list',
-                                value: []
-                              }))
-                            } else {
-                              dispatch(reportsSlice.actions.setDefaultColsGroupBy({group_by: event}))
-                            }
+                            dispatch(reportsSlice.actions.setActiveRowsGroupBy({ group_by: groupByRowsValue.value, value: event.value }))
                           }}
-                          options={groupByColumnsReportOptions}
-                          value={groupByColumnsValue}
+                          options={tagNamesOptions}
+                          value={tagNamesValue}
                         />
                       </div>
-                    </div>
-                    {groupByColumnsValue && groupByColumnsValue.type === 'title' ?
-                      <>
-                        <div style={{display: 'inline-flex'}}>
-                          <div style={{marginRight: '20px', minWidth: '265px', width: '265px'}}>
-                            <Input
-                              name={""}
-                              type={"text"}
-                              height={'38px'}
-                              bcColor={"#FFFFFF"}
-                              border={'1px solid #E3E8EF'}
-                              label={`${translate('reportColumnHeading', language)}`}
-                              value={reportNameColumnDefault}
-                              handleChange={(event: any) => {
-                                dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({col_name: event.target.value}));
-                              }}
-                            />
-                          </div>
-                        </div>
+                      : <></>
+                    }
 
-                        <div className={classes.parameterSelect}>
-                          <TextSelect
-                            name={'moreSelect'}
-                            value={null}
-                            handleValueChange={onAllCriteriasColumnSelectValueChange}
-                            options={opCriteriasColumn}
-                            iconPosition={'left'}
-                            customControl={
-                              <div className={classes.filterBlockControl}>
-                                <Typography
-                                  className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                              </div>
-                            }
-                            ifArrowColor={'#722ED1'}
-                            notClose={true}
-                            menuPosition={'right'}
-                            height={"400px"}
+                    {/* по времени */}
+                    {groupByRowsValue && groupByRowsValue.type === 'select' ?
+                      <div style={{ width: '265px' }}>
+                        <ContainedSelect
+                          height={'38px'}
+                          width={'265px'}
+                          justify={'flex-end'}
+                          onSelectChange={(event) => {
+                            setTimeColumnsReportValue(event);
+                            dispatch(reportsSlice.actions.setActiveRowsGroupBy({ group_by: groupByRowsValue.value, value: event.value }));
+                          }
+                          }
+                          options={timeColumnsReportOptions}
+                          value={timeColumnsReportValue}
+                        />
+                      </div>
+                      : <></>
+                    }
+                  </div>
+                  {/* по столбцам */}
+                  <div className={classes.parameterBlock}>
+                    <div className={classes.parameterBlock}>
+
+                      {/* типо дефолтный */}
+                      <div style={{ display: 'inline-flex', color: '#2F3747' }}>
+                        <div className={classes.flexCenter}>
+                          <Typography className={classes.parameterItemTitle}>{translate('reportGroupByColumns', language)}</Typography>
+                          <ContainedSelect
+                            height={'38px'}
+                            width={'265px'}
+                            justify={'flex-end'}
+                            onSelectChange={(event) => {
+                              if (event.type === 'select-tag') {
+                                dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: tagNamesColValue }))
+                              }
+                              else if (event.type === 'title') {
+                                dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: reportNameColumnDefault }))
+                              }
+                              else if (event.type === 'input') {
+                                dispatch(reportsSlice.actions.setDefaultColsGroupBy({group_by: 'tag_name_list', value: []}))
+                              }
+                              else {
+                                dispatch(reportsSlice.actions.setDefaultColsGroupBy({ group_by: event }))
+                              }
+                            }}
+                            options={groupByColumnsReportOptions}
+                            value={groupByColumnsValue}
                           />
                         </div>
+                      </div>
+                      {groupByColumnsValue && groupByColumnsValue.type === 'title' ?
+                      <>
+                        <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '16px', width: '100%', marginTop: '16px', marginLeft: '177px'}}>
+                          <div style={{minWidth: '167px', width: '100%', marginBottom: '16px' }}>
+                          <Typography style={{color: '#2F3747'}} >Значение столбца 1</Typography>
+                          </div>
 
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          width: '100%',
-                          paddingLeft: '177px',
-                          marginTop: '16px'
-                        }}>
-                          {activeCriteriasColumn.length > 0 ?
-                            <div className={classes.filterBlockFlex}>
-                              <CriteriasList
-                                allCriterias={allCriteriasColumn}
-                                activeCriterias={activeCriteriasColumn}
-                                block={"reports-column"}
+                          <div style={{display: 'inline-flex', alignItems: 'center'}}>
+                            <div style={{ display: 'flex' }}>
+                              <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
+                                <Input
+                                  name={""}
+                                  type={"text"}
+                                  height={'38px'}
+                                  bcColor={"#FFFFFF"}
+                                  border={'1px solid #E3E8EF'}
+                                  label={`${translate('reportColumnHeading', language)}`}
+                                  value={reportNameColumnDefault}
+                                  handleChange={(event: any) => {
+                                    dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: event.target.value }));
+
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className={classes.parameterSelect}>
+                              <TextSelect
+                                name={'moreSelect'}
+                                value={null}
+                                handleValueChange={onAllCriteriasColumnSelectValueChange}
+                                options={opCriteriasColumn}
+                                iconPosition={'left'}
+                                customControl={
+                                  <div className={classes.filterBlockControl}>
+                                    <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                                  </div>
+                                }
+                                ifArrowColor={'#722ED1'}
+                                notClose={true}
+                                menuPosition={'right'}
+                                height={"400px"}
                               />
+                            </div>
+                          </div>
+                          {activeCriteriasColumn.length > 0 ?
+                            <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginTop: '16px' }}>
+                              <div className={classes.filterBlockFlex}>
+                                <CriteriasList
+                                  allCriterias={allCriteriasColumn}
+                                  activeCriterias={activeCriteriasColumn}
+                                  block={"reports-column"}
+                                />
+                              </div>
                             </div>
                             : <></>
                           }
                         </div>
                       </>
                       : <></>
-                    }
-                    {groupByColumnsValue && groupByColumnsValue.type === 'select-tag' ?
-                      <div style={{display: 'inline-flex', width: '265px'}}>
-                        <ContainedSelect
-                          height={'38px'}
-                          width={'265px'}
-                          justify={'flex-end'}
-                          onSelectChange={(event) => {
-                            dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({value: event}))
-                          }}
-                          options={tagNamesColOptions}
-                          value={tagNamesColValue}
-                        />
-                      </div>
-                      :
-                      <></>
-                    }
-                    {groupByColumnsValue && groupByColumnsValue.type === 'input' ?
-                      <div style={{display: 'inline-flex', width: '265px'}}>
-                        <SearchSelect
-                          criteriaFull={null}
-                          criteriaCurrent={null}
-                          isDefaultCriteria={true}
-                          array={tagNamesColOptions}
-                          valueList={tagNameListValue}
-                          handlerOnChange={(e: any) => {
-                            dispatch(reportsSlice.actions.setDefaultColTagsName(e));
-                          }}
-                        />
-                      </div>
-                      :
-                      <></>
-                    }
-                  </div>
-
-                  <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <div style={{minWidth: '155px'}}>
-                      <Plus
-                        handleClick={() => {
-                          dispatch(reportsSlice.actions.setActiveParameters([{
-                            select: {options: groupByColumnsReportOptions, value: groupByColumnsValue},
-                            tagsVal: {options: tagNamesColOptions, value: tagNamesColValue},
-                            op: {options: opAddCriterias, value: opAddCriterias[0]},
-                            tagsNameList: {options: tagNamesColOptions, value: []},
-                            callFilters: {options: opAddCriterias, values: allCriterias, activeValues: []}
-                          }]))
-                        }}
-                      />
+                      }
+                      {groupByColumnsValue && groupByColumnsValue.type === 'select-tag' ?
+                        <div style={{ display: 'inline-flex', width: '265px' }}>
+                          <ContainedSelect
+                            height={'38px'}
+                            width={'265px'}
+                            justify={'flex-end'}
+                            onSelectChange={(event) => {
+                              dispatch(reportsSlice.actions.setDefaultColsTagGroupBy({ value: event }))
+                            }}
+                            options={tagNamesColOptions}
+                            value={tagNamesColValue}
+                          />
+                        </div>
+                        :
+                        <></>
+                      }
+                      {groupByColumnsValue && groupByColumnsValue.type === 'input' ?
+                        <div style={{ display: 'inline-flex', width: '265px' }}>
+                          <SearchSelect 
+                            criteriaFull={null} 
+                            criteriaCurrent={null}
+                            isDefaultCriteria={true}
+                            array={tagNamesColOptions}
+                            valueList={tagNameListValue}
+                            handlerOnChange={(e: any) => {
+                              dispatch(reportsSlice.actions.setDefaultColTagsName(e));
+                            }}
+                          />
+                        </div>
+                        :
+                        <></>
+                      }
                     </div>
 
-                    {/* новые фильтры */}
-                    <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                      {activeParameters.map((item) => {
-                        const arrayIndex = activeParameters.indexOf(item);
-                        return (
-                          <div style={{
-                            width: '100%',
-                            display: 'flex',
-                            justifyContent: ' flex-start',
-                            marginBottom: '16px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                              <div style={{height: '16px', minWidth: '18px', marginRight: '5px'}}>
-                                <TrashSvg
-                                  style={{width: '100%', height: 'auto'}}
-                                  onClick={() => {
-                                    dispatch(reportsSlice.actions.removeParameterField({
-                                      arrayIndex: arrayIndex,
-                                    }));
-                                  }}
-                                />
-                              </div>
-
-                              <div style={{display: 'flex'}}>
-                                <ContainedSelect
-                                  height={'38px'}
-                                  width={'265px'}
-                                  justify={'center'}
-                                  onSelectChange={(event: any) => {
-                                    dispatch(reportsSlice.actions.setParameterSelectFieldValue({
-                                      arrayIndex: arrayIndex,
-                                      value: event
-                                    }))
-                                  }}
-                                  options={item[0].select.options}
-                                  value={item[0].select.value}
-                                />
-                              </div>
-                              {item[0].select.value && item[0].select.value.type === 'title' ?
-                                <>
-                                  <div style={{display: 'inline-flex'}}>
-                                    <div style={{marginRight: '20px', minWidth: '265px', width: '265px'}}>
-                                      <Input
-                                        name={""}
-                                        type={"text"}
-                                        height={'38px'}
-                                        bcColor={"#FFFFFF"}
-                                        border={'1px solid #E3E8EF'}
-                                        label={`${translate('reportColumnHeading', language)}`}
-                                        value={item[0].nameColumn.value}
-                                        handleChange={(event: any) => {
-                                          dispatch(reportsSlice.actions.setNameColumnFieldValue({
-                                            arrayIndex: arrayIndex,
-                                            value: event.target.value
-                                          }))
-                                        }}
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className={classes.parameterSelect}>
-                                    <TextSelect
-                                      name={'moreSelect'}
-                                      value={null}
-                                      handleValueChange={(event: any) => {
-                                        onAllCriteriasColumnSelectValueChangeTEST(
-                                          event,
-                                          arrayIndex,
-                                          item[0].callFilters.activeValues,
-                                          item[0].callFilters.values,
-                                          item[0].callFilters.options
-                                        )
-                                      }}
-                                      options={item[0].callFilters.options}
-                                      iconPosition={'left'}
-                                      customControl={
-                                        <div className={classes.filterBlockControl}>
-                                          <Typography
-                                            className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                                        </div>
-                                      }
-                                      ifArrowColor={'#722ED1'}
-                                      notClose={true}
-                                      menuPosition={'right'}
-                                      height={"400px"}
-                                    />
-                                  </div>
-                                  {item[0].callFilters.activeValues.length > 0 ?
-                                    <div style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      width: '100%',
-                                      paddingLeft: '24px',
-                                      marginTop: '8px'
-                                    }}>
-                                      <div className={classes.filterBlockFlex}>
-                                        <CriteriasList
-                                          allCriterias={item[0].callFilters.values}
-                                          activeCriterias={item[0].callFilters.activeValues}
-                                          index={{arrayIndex: arrayIndex}}
-                                        />
-                                      </div>
-                                    </div>
-                                    : <></>
-                                  }
-                                </>
-                                : <></>
-                              }
-
-                              {item[0].select.value && item[0].select.value.type === 'select-tag' ?
-                                <div style={{display: 'inline-flex', width: '265px'}}>
-                                  <ContainedSelect
-                                    height={'38px'}
-                                    width={'265px'}
-                                    justify={'flex-end'}
-                                    onSelectChange={(event) => {
-                                      dispatch(reportsSlice.actions.setParameterTagstFieldValue({
+                    <div style={{ width: '100%'}}>
+                      {/* новые фильтры */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '155px' }}>
+                        {activeParameters.map((item) => {
+                          const arrayIndex = activeParameters.indexOf(item);
+                          return (
+                            <div style={{ width: '100%', display: 'flex', justifyContent: ' flex-start', marginBottom: '16px', flexWrap: 'wrap' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+                                <div style={{ height: '16px', minWidth: '18px', marginRight: '5px' }}>
+                                  <TrashSvg
+                                    style={{ width: '100%', height: 'auto' }}
+                                    onClick={() => {
+                                      dispatch(reportsSlice.actions.removeParameterField({
                                         arrayIndex: arrayIndex,
-                                        value: event
-                                      }))
-                                    }
-                                    }
-                                    options={item[0].tagsVal.options}
-                                    value={item[0].tagsVal.value}
-                                  />
-                                </div>
-                                :
-                                <></>
-                              }
-
-                              {item[0].select.value && item[0].select.value.type === 'input' ?
-                                <div style={{display: 'inline-flex', width: '265px'}}>
-                                  <SearchSelect
-                                    criteriaFull={null}
-                                    criteriaCurrent={null}
-                                    isDefaultCriteria={true}
-                                    array={item[0].tagsNameList.options}
-                                    valueList={item[0].tagsNameList.value}
-                                    handlerOnChange={(e: any) => {
-                                      dispatch(reportsSlice.actions.setActiveColTagsName({
-                                        arrayIndex: arrayIndex,
-                                        value: e
                                       }));
                                     }}
                                   />
                                 </div>
-                                :
-                                <></>
-                              }
+
+                                <div style={{ display: 'flex' }}>
+
+                                  <ContainedSelect
+                                    height={'38px'}
+                                    width={'265px'}
+                                    justify={'center'}
+                                    onSelectChange={(event: any) => {
+                                      dispatch(reportsSlice.actions.setParameterSelectFieldValue({
+                                        arrayIndex: arrayIndex,
+                                        value: event
+                                      }))
+                                    }}
+                                    options={item[0].select.options}
+                                    value={item[0].select.value}
+                                  />
+                                </div>
+                                {item[0].select.value && item[0].select.value.type === 'title' ?
+                                  <>
+                                    <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '16px', width: '100%', marginTop: '16px', marginLeft: '23px'}}>
+                                      <div style={{minWidth: '167px', width: '100%', marginBottom: '16px' }}>
+                                        <Typography style={{color: '#2F3747'}} >Значение столбца { arrayIndex + 2 }</Typography>
+                                      </div>
+                                      <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                        <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
+                                          <Input
+                                            name={""}
+                                            type={"text"}
+                                            height={'38px'}
+                                            bcColor={"#FFFFFF"}
+                                            border={'1px solid #E3E8EF'}
+                                            label={`${translate('reportColumnHeading', language)}`}
+                                            value={item[0].nameColumn.value}
+                                            handleChange={(event: any) => {
+                                              dispatch(reportsSlice.actions.setNameColumnFieldValue({
+                                                arrayIndex: arrayIndex,
+                                                value: event.target.value
+                                              }))
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div className={classes.parameterSelect}>
+                                        <TextSelect
+                                          name={'moreSelect'}
+                                          value={null}
+                                          handleValueChange={(event: any) => {
+                                            onAllCriteriasColumnSelectValueChangeTEST(
+                                              event,
+                                              arrayIndex,
+                                              item[0].callFilters.activeValues,
+                                              item[0].callFilters.values,
+                                              item[0].callFilters.options
+                                            )
+                                          }}
+                                          options={item[0].callFilters.options}
+                                          iconPosition={'left'}
+                                          customControl={
+                                            <div className={classes.filterBlockControl}>
+                                              <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                                            </div>
+                                          }
+                                          ifArrowColor={'#722ED1'}
+                                          notClose={true}
+                                          menuPosition={'right'}
+                                          height={"400px"}
+                                        />
+                                      </div>
+
+                                      {item[0].callFilters.activeValues.length > 0 ?
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '8px' }}>
+                                          <div className={classes.filterBlockFlex}>
+                                            <CriteriasList
+                                              allCriterias={item[0].callFilters.values}
+                                              activeCriterias={item[0].callFilters.activeValues}
+                                              index={{ arrayIndex: arrayIndex }}
+                                            />
+                                          </div>
+                                        </div>
+                                        : <></>
+                                      }
+                                    </div> 
+                                  </>
+                                  : <></>
+                                }
+
+                                {item[0].select.value && item[0].select.value.type === 'select-tag' ?
+                                  <div style={{ display: 'inline-flex', width: '265px' }}>
+                                    <ContainedSelect
+                                      height={'38px'}
+                                      width={'265px'}
+                                      justify={'flex-end'}
+                                      onSelectChange={(event) => {
+                                        dispatch(reportsSlice.actions.setParameterTagstFieldValue({
+                                          arrayIndex: arrayIndex,
+                                          value: event
+                                        }))
+                                      }
+                                      }
+                                      options={item[0].tagsVal.options}
+                                      value={item[0].tagsVal.value}
+                                    />
+                                  </div>
+                                  :
+                                  <></>
+                                }
+
+                                {item[0].select.value && item[0].select.value.type === 'input' ?
+                                  <div style={{ display: 'inline-flex', width: '265px' }}>
+                                    <SearchSelect
+                                      criteriaFull={null} 
+                                      criteriaCurrent={null}
+                                      isDefaultCriteria={true}
+                                      array={item[0].tagsNameList.options}
+                                      valueList={item[0].tagsNameList.value}
+                                      handlerOnChange={(e: any) => {
+                                        dispatch(reportsSlice.actions.setActiveColTagsName({
+                                          arrayIndex: arrayIndex,
+                                          value: e
+                                        }));
+                                      }}
+                                    />
+                                  </div>
+                                  :
+                                  <></>
+                                }
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
+                          )
+                        })}
+                      </div>
+
+                      <div style={{ paddingLeft: '180px' }}>
+                        <div
+                          style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}
+                          onClick={() => {
+                            dispatch(reportsSlice.actions.setActiveParameters([{
+                              select: { options: groupByColumnsReportOptions, value: groupByColumnsValue },
+                              tagsVal: { options: tagNamesColOptions, value: tagNamesColValue },
+                              op: { options: opAddCriterias, value: opAddCriterias[0] },
+                              tagsNameList: { options: tagNamesColOptions, value: [] },
+                              callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] }
+                            }]))
+                          }}
+                        >
+                          <PlusSvg/>
+                          <div className={classes.btnAddColumn}>Добавить столбец</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Accordeon>
           </div>
+        </BlockBox>
 
+        <BlockBox padding="24px" margin="0 0 24px 0">
           {/* фильтры звонков */}
           <div className={classes.filtersBlock}>
-            <div className={classes.filterBlockWrapper}>
-              <div className={classes.searchTitleLeft}>
+            <Accordeon
+              title={
                 <Typography className={classes.searchTitleLeftText} variant="h6">
                   {translate('reportCallFilters', language)}
                 </Typography>
-                <div style={{display: 'flex', alignItems: 'center'}}>
-                  <div style={{margin: '0 5px 0 20px', whiteSpace: 'nowrap'}}>
-                    <TextSelect
-                      name={'moreSelect'}
-                      value={null}
-                      handleValueChange={onAllCriteriasSelectValueChange}
-                      options={op}
-                      iconPosition={'left'}
-                      customControl={
-                        <div style={{display: 'flex', alignItems: 'center'}}>
-                          <Typography
-                            className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                        </div>
-                      }
-                      ifArrowColor={'#722ED1'}
-                      notClose={true}
-                      menuPosition={'right'}
-                      height={"400px"}
+              }
+              iconSvg={
+                <CaretDownSvg/>
+              }
+              initialState={false}
+            >
+              {/* content */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <div style={{ margin: '0 5px 0 20px', whiteSpace: 'nowrap' }}>
+                  <TextSelect
+                    name={'moreSelect'}
+                    value={null}
+                    handleValueChange={onAllCriteriasSelectValueChange}
+                    options={op}
+                    iconPosition={'left'}
+                    customControl={
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                      </div>
+                    }
+                    ifArrowColor={'#722ED1'}
+                    notClose={true}
+                    menuPosition={'right'}
+                    height={"400px"}
+                  />
+                </div>
+              </div>
+              <div className={classes.criteriaList}>
+                <CriteriasList
+                  allCriterias={allCriterias}
+                  activeCriterias={activeCriteriasReports}
+                  block={"reports"}
+                />
+              </div>
+            </Accordeon>
+          </div>
+        </BlockBox>
+
+        <BlockBox padding="24px" margin="0 0 24px 0">
+          <div className={classes.filtersBlock}>
+            <Accordeon
+              title={
+                <Typography className={classes.searchTitleLeftText} variant="h6">
+                  Графики
+                </Typography>
+              }
+              iconSvg={
+                <CaretDownSvg/>
+              }
+              initialState={true}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{display: 'flex', alignItems: 'center', marginRight: '20px'}}>
+                  <FormGroup className={classes.checkboxDiff}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          onChange={handleCheckboxShowChart}
+                          checked={checkboxShowChart}
+                        />}
+                      label={`${translate('reportToggleChart', language)}`}
+                    />
+                  </FormGroup>
+                  <div>
+                    <ContainedSelect
+                      height={'38px'}
+                      width={'265px'}
+                      justify={'center'}
+                      onSelectChange={(event: any) => {
+                        setChartTypeValue(event)
+                      }}
+                      options={chartTypeOptions}
+                      value={chartTypeValue}
                     />
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div className={classes.criteriaList}>
-              <CriteriasList
-                allCriterias={allCriterias}
-                activeCriterias={activeCriteriasReports}
-                block={"reports"}
-              />
-            </div>
+            </Accordeon>
           </div>
+        </BlockBox>
 
-          <Dialog
+        <Dialog
             open={isOpen}
             onClose={handleClose}
           >
@@ -1477,81 +1522,49 @@ const Reports = React.memo(() => {
                 </LoadingButton>
               </div>
             </div>
-          </Dialog>
-
-          {snackbar.value &&
+        </Dialog>
+        {snackbar.value &&
           <Snackbar
             type={snackbar.type}
             open={snackbar.value}
             onClose={() => {
-              setSnackbar({...snackbar, value: false})
+              setSnackbar({ ...snackbar, value: false })
             }}
             text={snackbar.text}
             time={snackbar.time}
           />
+        }
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          {currentSavedReport.value ?
+            <LoadingButton
+              className={classes.getReportsButton}
+              color="error"
+              variant="outlined"
+              onClick={handleOpen}
+            >
+              {translate('reportDeleteReport', language)}
+            </LoadingButton>
+            : <></>
           }
+          <LoadingButton
+            className={classes.getReportsButton}
+            color="primary"
+            variant="outlined"
+            onClick={saveReportAsync}
+          >
+            {translate('reportSaveReport', language)}
+          </LoadingButton>
 
-          <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            <div style={{display: 'flex', alignItems: 'center', marginRight: '20px'}}>
-              <FormGroup className={classes.checkboxDiff}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      onChange={handleCheckboxShowChart}
-                      checked={checkboxShowChart}
-                    />}
-                  label={`${translate('reportToggleChart', language)}`}
-                />
-              </FormGroup>
-              <div>
-                <ContainedSelect
-                  height={'38px'}
-                  width={'265px'}
-                  justify={'center'}
-                  onSelectChange={(event: any) => {
-                    setChartTypeValue(event)
-                  }}
-                  options={chartTypeOptions}
-                  value={chartTypeValue}
-                />
-              </div>
-            </div>
-            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              {currentSavedReport.value ?
-                <LoadingButton
-                  className={classes.getReportsButton}
-                  color="error"
-                  variant="outlined"
-                  onClick={handleOpen}
-                >
-                  {translate('reportDeleteReport', language)}
-                </LoadingButton>
-                : <></>
-              }
-              <LoadingButton
-                className={classes.getReportsButton}
-                color="primary"
-                variant="outlined"
-                onClick={saveReportAsync}
-              >
-                {translate('reportSaveReport', language)}
-              </LoadingButton>
-
-              <LoadingButton
-                className={classes.getReportsButton}
-                color="primary"
-                variant="contained"
-                onClick={formReport}
-              >
-                {translate('makeReport', language)}
-              </LoadingButton>
-            </div>
-
-          </div>
-        </BlockBox>
-        : null
-      }
-
+          <LoadingButton
+            className={classes.getReportsButton}
+            color="primary"
+            variant="contained"
+            onClick={formReport}
+          >
+            {translate('makeReport', language)}
+          </LoadingButton>
+        </div>
+      </div>
       {isLoading ?
         <Box sx={{
           display: 'flex',
@@ -1598,8 +1611,8 @@ const Reports = React.memo(() => {
                     }
 
                     <div>
-                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                        <Typography className={classes.reportTitle} variant="h6">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography className={classes.reportTitle} variant="h5">
                           {reportName}
                         </Typography>
                         <FormGroup className={classes.checkboxDiff}>
@@ -1639,12 +1652,21 @@ const Reports = React.memo(() => {
                           label={`${translate('reportMinutes', language)}`}
                         />
                         <FormControlLabel
+                          className={classes.checkboxDiffLabel}
                           control={
                             <Checkbox
                               onChange={handleChangeCheckPercent}
                               checked={checkboxPercent}
                             />}
                           label={`${translate('reportPercent', language)}`}
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              onChange={handleChangeCheckQuant}
+                              checked={checkboxQuant}
+                            />}
+                          label={"Кол-во звонков, попавших в строку"}
                         />
                       </FormGroup>
                     </div>
@@ -1706,12 +1728,15 @@ const Reports = React.memo(() => {
                               alignSelf: 'flex-end',
                               marginBottom: '-3px'
                             },
-                            '& .MuiDataGrid-columnHeader:nth-of-type(3n + 1) .MuiDataGrid-columnSeparator svg': {
+                            '& .MuiDataGrid-columnHeader:first-of-type .MuiDataGrid-columnSeparator svg': {
                               // fontSize: '2rem !important',
                               color: 'rgba(115, 128, 148, 0.7) !important'
                             },
                             "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
                               opacity: 0.5
+                            },
+                            "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted):last-of-type .MuiDataGrid-columnSeparator": {
+                              opacity: '0 !important'
                             },
                             '& .MuiDataGrid-iconButtonContainer': {
                               '& button': {

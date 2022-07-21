@@ -12,7 +12,6 @@ import {
 } from "./calls.types";
 import {RootState} from "../store";
 import {instance} from "../api";
-import cloneDeep from "lodash.clonedeep";
 
 const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   let requestArray = [];
@@ -42,7 +41,6 @@ const convertDate = (date: Date | null) => {
   }
   return date;
 };
-
 
 export const getAllUserDicts = createAsyncThunk(
   'dicts/getAllUserDicts',
@@ -115,7 +113,7 @@ export const getCallPublicToken = createAsyncThunk(
 
 export const getBaseCallsData = createAsyncThunk(
   'calls/getBaseCallsData',
-  async (payload: { sort?: string }, thunkAPI) => {
+  async (payload: { sort?: string, sortDesc?: boolean }, thunkAPI) => {
     try {
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
 
@@ -125,18 +123,22 @@ export const getBaseCallsData = createAsyncThunk(
       let startDate = convertDate(state.search.date[0]);
       let endDate = convertDate(state.search.date[1]);
 
+      console.log(payload.sortDesc);
+      console.log(payload.sort ? (payload.sort !== "date" ? payload.sort : "") : "");
       let requestParameters =
         `skip=${state.calls.skip}&limit=${state.calls.limit}` +
         `&start_date=${startDate}` +
         `&end_date=${endDate}` +
-        `&sort=${payload.sort ? (payload.sort !== "date" ? payload.sort : "") : ""}`;
+        `&sort=${payload.sort ? (payload.sort !== "date" ? payload.sort : "") : ""}` +
+        `&sort_desc=${payload.sortDesc === undefined ? true : payload.sortDesc}`;
 
       if (!startDate && !endDate) {
         requestParameters =
           `skip=${state.calls.skip}&limit=${state.calls.limit}`
       }
       const requestData = convertDataForRequest(state.search.defaultCriterias, state.search.activeCriterias);
-      const {data} = await instance.post<ResponseBaseCallsDataType>(
+      const { data } = await instance.post<ResponseBaseCallsDataType>(
+
         `search_calls/?` +
         requestParameters,
         requestData,
@@ -192,6 +194,18 @@ export const getCallsInfo = createAsyncThunk(
       await thunkAPI.dispatch(callsSlice.actions.setCallsInfo(localCalls));
     } catch (error) {
       console.log(error);
+    }
+  }
+);
+
+export const getAndSetCallInfo = createAsyncThunk(
+  'calls/getAndSetCallInfo',
+  async (payload: { id: string, bundleIndex: number | null }, thunkAPI) => {
+    if (payload.bundleIndex || payload.bundleIndex === 0) {
+      const infoData = await thunkAPI.dispatch(getCallInfo({ id: payload.id }));
+      // @ts-ignore
+      const info = infoData.payload;
+      thunkAPI.dispatch(callsSlice.actions.setInfo({ info: info, id: payload.id, index: payload.bundleIndex }));
     }
   }
 );
@@ -257,44 +271,6 @@ export const getCallAudio = createAsyncThunk(
     return blobUrl;
   }
 );
-
-// export const getAndSetCallInfo = createAsyncThunk(
-//   'calls/getAndSetCallInfo',
-//   async (payload: { id: string, bundleIndex: number | null }, thunkAPI) => {
-//     if (payload.bundleIndex || payload.bundleIndex === 0) {
-//       const infoData = await thunkAPI.dispatch(getCallInfo({id: payload.id}));
-//       // @ts-ignore
-//       const info = infoData.payload;
-//       thunkAPI.dispatch(callsSlice.actions.setInfo({info: info, id: payload.id, index: payload.bundleIndex}));
-//     }
-//   }
-// );
-
-// export const getCallsInfoById = createAsyncThunk(
-//   'calls/getCallsInfoById',
-//   async (payload: any[], thunkAPI) => {
-//     try {
-//       let localCalls = [];
-//       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
-//       for (let i = 0; i < payload.length; i++) {
-//         const response = await instance.get(`call/${payload[i]}`, {
-//           headers: {
-//             'Authorization': `Bearer ${token}`
-//           }
-//         });
-//         localCalls.push({
-//           id: payload[i],
-//           info: response.data,
-//           stt: null,
-//           audio: null
-//         })
-//       }
-//       thunkAPI.dispatch(callsSlice.actions.setCallsInfo(localCalls));
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   }
-// );
 
 export const callAction = createAsyncThunk(
   'calls/callAction',
@@ -492,7 +468,6 @@ export const callsSlice = createSlice({
         state.skip = 10;
       }
     },
-
     setInfo(state, action: PayloadAction<CallInfoType>) {
       if (state.currentCall) {
         state.currentCall.info = action.payload;
@@ -516,7 +491,6 @@ export const callsSlice = createSlice({
         state.currentCall.stt = action.payload;
       }
     },
-
     zeroingSkip(state, action: PayloadAction<null>) {
       state.skip = 0;
     },

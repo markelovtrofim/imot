@@ -1,6 +1,6 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
-import {makeStyles} from "@mui/styles";
-import {CircularProgress, Typography} from "@mui/material";
+import React, { FC, useEffect, useRef, useState } from 'react';
+
+import { useDispatch } from "react-redux";
 import 'react-h5-audio-player/lib/styles.css';
 import {
   callAction,
@@ -15,6 +15,8 @@ import {
   CallInfoType,
   CallTagType,
 } from "../../../store/calls/calls.types";
+import { callAction, callsSlice, getCallInfo, getCallPublicToken, getCallStt } from "../../../store/calls/calls.slice";
+import ModalWindow from "../../../components/common/ModalWindowBox";
 import Reboot from "../../../components/common/Buttons/Reboot";
 import {DownloadHref} from "../../../components/common/Buttons/Download";
 import Back from "../../../components/common/Buttons/Back";
@@ -24,16 +26,12 @@ import AudioPlayer from "../../../components/common/AudioPlayer";
 import DialogItem from "./DialogItem";
 import {useAppSelector} from "../../../hooks/redux";
 import CustomControlSelect from "../../../components/common/Selects/CustomControlSelect";
-import {translate} from "../../../localizations";
-import ModalWindow from "../../../components/common/ModalWindowBox";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ToggleButton from "@mui/material/ToggleButton";
+import { translate } from "../../../localizations";
 import CustomCheckbox from "../../../components/common/Checkbox";
 import History from "../../../components/common/Buttons/History";
-import {LoadingButton} from "@mui/lab";
 import Logo from "../../../assets/images/logo.png";
 import Yandex from "../../../assets/images/yandex_PNG20.png";
-import {langSlice} from "../../../store/lang/lang.slice";
+import { langSlice } from "../../../store/lang/lang.slice";
 
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
@@ -78,6 +76,12 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     },
     cbDialogInner: {
       padding: '12.5px 12px'
+    },
+    dialogTag: {
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
     },
     cbDialogItems: {
       overflowY: 'auto',
@@ -134,6 +138,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
       color: '#738094 !important',
       fontWeight: '700 !important',
       minWidth: '110px !important',
+      userSelect: 'none',
     },
     activeFragment: {
       backgroundColor: '#F5F5DC'
@@ -254,9 +259,9 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
     for (let i = 0; i < values.length; i++) {
       if (values[i] !== "analyze" && values[i] !== "get_api_tags") {
         if (values[i] === "delete") {
-          local.unshift({value: values[i], label: translate(values[i], language)});
+          local.unshift({ value: values[i], label: translate(values[i], language) });
         } else {
-          local.push({value: values[i], label: translate(values[i], language)});
+          local.push({ value: values[i], label: translate(values[i], language) });
         }
       }
     }
@@ -431,7 +436,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
 
             {currentCall && currentCall.stt ?
               <div>
-                <Typography style={{marginBottom: '10px'}} className={classes.typographyTitle}>
+                <Typography style={{ marginBottom: '10px' }} className={classes.typographyTitle}>
                   Текстовый диалог:
                 </Typography>
                 <div className={classes.cbDialogItems} id={callId}>
@@ -439,18 +444,18 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                     {currentCall.stt.fragments.length > 1 ?
                       currentCall.stt.fragments.map((phrase, i, array) => {
                         return (
-                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-                               id={`${phrase.id}-phrase`}>
-                            <div style={{width: '85%'}}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            id={`${phrase.id}-phrase`}>
+                            <div style={{ width: '85%' }}>
                               <DialogItem
                                 audioPlayerRef={audioPlayerRef}
-                                prevFragment={array[i - 1] ? array[i - 1] : {direction: phrase.direction === 'client' ? 'operator' : 'client'}}
+                                prevFragment={array[i - 1] ? array[i - 1] : { direction: phrase.direction === 'client' ? 'operator' : 'client' }}
                                 fragment={phrase}
                                 callId={callId}
                                 fragmentIndex={i}
                               />
                             </div>
-                            <div style={{textAlign: 'center', width: '15%'}}>
+                            <div className={classes.dialogTag} style={{ textAlign: 'center', width: '15%', userSelect: 'none'}}>
                               {fragments.map((fragment, j) => {
                                 if (phrase.begin === fragment.fBegin && phrase.end === fragment.fEnd) {
                                   return <div>
@@ -468,16 +473,16 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
                   </div>
                 </div>
               </div> :
-              <div style={{textAlign: "center"}}>
-                <CircularProgress size={80}/>
+              <div style={{ textAlign: "center" }}>
+                <CircularProgress size={80} />
               </div>
             }
           </div>
         </div>
 
         {/* Кнопочки */}
-        <div style={{backgroundColor: 'fff', width: '370px', marginTop: '20px'}}>
-          <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px'}}>
+        <div style={{ backgroundColor: 'fff', width: '370px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '14px' }}>
 
             {isAuth && (
               <Back
@@ -494,11 +499,11 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
             {callInfo.allowedActions.indexOf("analyze") != -1 && (
               <Reboot onClick={() => {
                 rebootAction()
-              }}/>
+              }} />
             )}
 
             {/* История */}
-            <History/>
+            <History />
 
             {/* Удаление и смена каналов. */}
             <CustomControlSelect
@@ -580,7 +585,7 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
         width={'400px'}
       >
         <ToggleButtonGroup
-          style={{marginTop: '15px'}}
+          style={{ marginTop: '15px' }}
           value={sttForm.engine}
           exclusive
           onChange={() => {
@@ -589,38 +594,38 @@ const CallBody: FC<CallBodyPropsType> = React.memo((
           <ToggleButton
             value={"imot"}
             onClick={() => {
-              setSttForm({...sttForm, engine: "imot"})
+              setSttForm({ ...sttForm, engine: "imot" })
             }}
           >
-            <img src={Logo} alt=""/>
+            <img src={Logo} alt="" />
           </ToggleButton>
 
           <ToggleButton
             value={"yandex"}
             onClick={() => {
-              setSttForm({...sttForm, engine: "yandex"})
+              setSttForm({ ...sttForm, engine: "yandex" })
             }}
           >
-            <img src={Yandex} width={60} alt=""/>
+            <img src={Yandex} width={60} alt="" />
           </ToggleButton>
         </ToggleButtonGroup>
 
-        <div style={{display: 'flex', margin: '15px 0'}}>
+        <div style={{ display: 'flex', margin: '15px 0' }}>
           <CustomCheckbox
-            style={{marginRight: '10px'}}
+            style={{ marginRight: '10px' }}
             onClick={(event) => {
-              setSttForm({...sttForm, keepFragments: !sttForm.keepFragments})
+              setSttForm({ ...sttForm, keepFragments: !sttForm.keepFragments })
             }}
             checked={sttForm.keepFragments}
           />
-          <Typography style={{cursor: "pointer"}}>
+          <Typography style={{ cursor: "pointer" }}>
             Сохранять фрагменты
           </Typography>
         </div>
         <div>
           <LoadingButton
             loading={MWButtonLoading}
-            style={{marginRight: '15px'}}
+            style={{ marginRight: '15px' }}
             variant="contained"
             color="primary"
             onClick={sttActionSubmit}

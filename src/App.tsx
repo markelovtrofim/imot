@@ -22,7 +22,7 @@ import {tagsSlice} from "./store/tags/tags.slice";
 import {getLang, langSlice} from "./store/lang/lang.slice";
 import CallPage from "./pages/Calls/CallPage";
 import {callsSlice} from "./store/calls/calls.slice";
-import Snackbar from "./components/common/Snackbar";
+import Snackbar, {SnackbarType} from "./components/common/Snackbar";
 import {getChildUser, getChildUsers, getMe} from "./store/users/users.slice";
 
 
@@ -38,10 +38,12 @@ export const useStyles = makeStyles(({
 }));
 
 
+
 const App = memo(() => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const isAuth = useAppSelector(state => state.auth.isAuth);
+
 
   const isAuth = useAppSelector(state => state.auth.isAuth);
   const {language} = useAppSelector(state => state.lang);
@@ -54,10 +56,12 @@ const App = memo(() => {
   }
   const isDtOrTg = pathArray[4];
 
-
   const searchDictsParams = useAppSelector(state => state.dicts.search);
   const searchTagsParams = useAppSelector(state => state.tags.searchParams);
   const searchCallParams = useAppSelector(state => state.calls.callPageSearchParams);
+  const {language} = useAppSelector(state => state.lang);
+
+  const history = useHistory();
 
   useEffect(() => {
     history.listen((location) => {
@@ -88,7 +92,7 @@ const App = memo(() => {
       dispatch(authSlice.actions.setAuth(true))
     }
   }, []);
-
+  
   return (
     <div>
       <div className={classes.wrapper}>
