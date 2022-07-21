@@ -279,46 +279,54 @@ const initialState: InitialStateType = {
   //
   callReport: {
     report: {
-      cols: [],
+      cols: [{
+        group_id: 0,
+        col_name: '',
+      }],
       rows: [],
       total_calls: 0,
       row_group_header: '',
       values: {
         any: {
-          cols: {
+          col_groups: {
             any: {
-              calls_count: 0,
-              calls_minutes: 0,
-              percent_count_from_total: 0,
-              percent_calls_count_from_total: 0,
-              call_ids: []
+              any: {
+                calls_count: 0,
+                calls_minutes: 0,
+                percent_calls_count_from_total: 0,
+                call_ids: []
+              }
             }
           },
           row_info: {
             row_sum_calls_count: 0,
             row_sum_calls_minutes: 0,
             row_percent_count_from_total: 0,
-            row_total_processed_calls_count: 0,
+            row_total_processed_calls: {
+              count: 0,
+              call_ids: []
+            },
           }
         },
       }
     },
     diff_report: {
       any: {
-        cols: {
+        col_groups: {
           any: {
-            calls_count: 0,
-            calls_minutes: 0,
-            percent_count_from_total: 0,
-            percent_calls_count_from_total: 0,
-            call_ids: []
+            any: {
+              calls_count: 0,
+              calls_minutes: 0,
+              percent_calls_count_from_total: 0,
+              call_ids: []
+            }
           }
         },
         row_info: {
           row_sum_calls_count: 0,
           row_sum_calls_minutes: 0,
           row_percent_count_from_total: 0,
-          row_total_processed_calls_count: 0,
+          row_total_processed_calls: 0
         }
       },
     },

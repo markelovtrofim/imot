@@ -41,6 +41,13 @@ export const reportsStyles = makeStyles(({
     borderRadius: '5px !important',
     marginLeft: '20px !important'
   },
+  getReportsButtonOutline: {
+    // @ts-ignore
+    textTransform: 'none !important',
+    borderRadius: '5px !important',
+    marginLeft: '20px !important',
+    backgroundColor: '#fff !important'
+  },
   searchTitleLeftText: {
     marginRight: '16px !important',
     color: '#2F3747 !important',

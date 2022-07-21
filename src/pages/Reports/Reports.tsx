@@ -274,7 +274,6 @@ const Reports = React.memo(() => {
   }
 
   const activeReport = useAppSelector(state => state.reports.activeReport);
-  // const period = useAppSelector(state => state.reports.activeReport.period);
   const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
 
   // selectors values
@@ -450,10 +449,11 @@ const Reports = React.memo(() => {
       headerClassName: 'light-header--theme',
     }];
     callReport.report.cols.forEach((item, index) => {
+      const colName = item.col_name
       if (checkboxCalls) {
         columnsArray.push({
           field: `calls_count_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `${translate('reportCalls', language)}`,
           minWidth: 150,
           height: 75,
@@ -466,17 +466,16 @@ const Reports = React.memo(() => {
           cellClassName: 'cell-active',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportCalls', language)}`}</div>
             </div>
           )
         })
       }
-
       if (checkboxMinutes) {
         columnsArray.push({
           field: `calls_minutes_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `${translate('reportMinutes', language)}`,
           minWidth: 150,
           height: 75,
@@ -489,17 +488,16 @@ const Reports = React.memo(() => {
           content: 'minuts',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportMinutes', language)}`}</div>
             </div>
           )
         })
       }
-
       if (checkboxPercent) {
         columnsArray.push({
           field: `percent_calls_count_from_total_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `%`,
           minWidth: 150,
           height: 75,
@@ -512,13 +510,12 @@ const Reports = React.memo(() => {
           content: 'percent',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{'%'}</div>
             </div>
           )
         })
       }
-
     })
     if (checkboxCalls) {
       columnsArray.push({
@@ -561,7 +558,6 @@ const Reports = React.memo(() => {
         )
       })
     }
-
     if (checkboxPercent) {
       columnsArray.push({
         field: 'row_percent_count_from_total',
@@ -584,7 +580,7 @@ const Reports = React.memo(() => {
     }
     if (checkboxQuant) {
       columnsArray.push({
-        field: 'row_total_processed_calls_count',
+        field: 'row_total_processed_calls',
         headerName: `${translate('reportAllCount', language)}`,
         minWidth: 150,
         height: 75,
@@ -593,6 +589,7 @@ const Reports = React.memo(() => {
         headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
+        cellClassName: 'cell-active',
         content: 'percent',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
@@ -602,14 +599,12 @@ const Reports = React.memo(() => {
         )
       })
     }
-
     return columnsArray
   }
   const columns: GridColDef[] = columnsTable();
   const rowsTable = () => {
     const result: any[] = [];
     let resultIds: any[] = [];
-
     callReport.report.rows.forEach((itemRow, indexRow) => {
       //создаем первую id строку
       result.push({});
@@ -621,13 +616,13 @@ const Reports = React.memo(() => {
 
       //количество звонков/ минут/ %
       callReport.report.cols.forEach((itemCol, indexCol) => {
-        result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_count;
-        result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_minutes;
-        result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total}%`;
-        result[indexRow][`percent_calls_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total;
-
+        result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_count;
+        result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_minutes;
+        result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total}%`;
+        result[indexRow][`percent_calls_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total;
+        
         if (checkboxValue) {
-          const diffValue = callReport.diff_report[itemRow].cols[itemCol].calls_count;
+          const diffValue = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_count;
           let diffAdd = '';
           if (diffValue > 0) {
             diffAdd = ` (+${diffValue})`;
@@ -636,7 +631,7 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`calls_count_${indexCol}`] += diffAdd;
 
-          const diffValueMinutes = callReport.diff_report[itemRow].cols[itemCol].calls_minutes;
+          const diffValueMinutes = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_minutes;
           let diffAddMinutes = '';
           if (diffValueMinutes > 0) {
             diffAddMinutes = ` (+${diffValueMinutes})`;
@@ -645,7 +640,7 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`calls_minutes_${indexCol}`] += diffAddMinutes;
 
-          const diffValuePercent = callReport.diff_report[itemRow].cols[itemCol].percent_calls_count_from_total;
+          const diffValuePercent = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total;
           let diffAddPercent = '';
           if (diffValuePercent > 0) {
             diffAddPercent = ` (+${diffValuePercent}%)`;
@@ -654,15 +649,18 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`percent_calls_count_from_total_${indexCol}`] += diffAddPercent;
         }
-        result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].call_ids;
+        result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].call_ids;
+        //@ts-ignore
+        result[indexRow]['callIds']['row_total_processed_calls'] = callReport.report.values[itemRow].row_info.row_total_processed_calls.call_ids;
         //массив ids
-        resultIds.push(...callReport.report.values[itemRow].cols[itemCol].call_ids);
+        resultIds.push(...callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].call_ids);
       })
       //общее время по строке
       result[indexRow]['row_sum_calls_count'] = callReport.report.values[itemRow].row_info.row_sum_calls_count;
       result[indexRow]['row_sum_calls_minutes'] = callReport.report.values[itemRow].row_info.row_sum_calls_minutes;
       result[indexRow]['row_percent_count_from_total'] = `${callReport.report.values[itemRow].row_info.row_percent_count_from_total}%`;
-      result[indexRow]['row_total_processed_calls_count'] = callReport.report.values[itemRow].row_info.row_total_processed_calls_count;
+      //@ts-ignore
+      result[indexRow]['row_total_processed_calls'] = callReport.report.values[itemRow].row_info.row_total_processed_calls.count;
 
       if (checkboxValue) {
         const diffValue = callReport.diff_report[itemRow].row_info.row_sum_calls_count;
@@ -692,14 +690,14 @@ const Reports = React.memo(() => {
         }
         result[indexRow][`row_percent_count_from_total`] += diffAddPercent;
 
-        const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls_count;
+        const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls;
         let diffAddCount = '';
         if (diffValueCount > 0) {
           diffAddCount = ` (+${diffValueCount}%)`;
         } else {
           diffAddCount = ` (${diffValueCount}%)`;
         }
-        result[indexRow][`row_total_processed_calls_count`] += diffAddCount;
+        result[indexRow][`row_total_processed_calls`] += diffAddCount;
       }
       //массив ids
       result[indexRow]['callIds']['row_sum_calls_count'] = resultIds;
@@ -747,7 +745,6 @@ const Reports = React.memo(() => {
   }
 
   const getCallParameters = async (event: any) => {
-    // hideVisibleParameters();
     setLoading(true);
     setCallSwitch(false)
     dispatch(callsSlice.actions.callsReset());
@@ -843,7 +840,6 @@ const Reports = React.memo(() => {
     dispatch(callsSlice.actions.callsReset());
     await dispatch(getCallReport());
     setLoading(false);
-    // hideVisibleParameters();
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
@@ -1424,7 +1420,7 @@ const Reports = React.memo(() => {
               initialState={false}
             >
               {/* content */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: '25px'}}>
                 <div style={{ margin: '0 5px 0 20px', whiteSpace: 'nowrap' }}>
                   <TextSelect
                     name={'moreSelect'}
@@ -1540,7 +1536,7 @@ const Reports = React.memo(() => {
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           {currentSavedReport.value ?
             <LoadingButton
-              className={classes.getReportsButton}
+              className={classes.getReportsButtonOutline}
               color="error"
               variant="outlined"
               onClick={handleOpen}
@@ -1550,7 +1546,7 @@ const Reports = React.memo(() => {
             : <></>
           }
           <LoadingButton
-            className={classes.getReportsButton}
+            className={classes.getReportsButtonOutline}
             color="primary"
             variant="outlined"
             onClick={saveReportAsync}
@@ -1791,7 +1787,8 @@ const Reports = React.memo(() => {
                               disableColumnMenu={true}
                               onCellClick={(params, event: MuiEvent<React.MouseEvent>) => {
                                 if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field]);
-                              }}
+                              }
+                            }
                             />
                           </div>
                         </Box>
