@@ -172,9 +172,47 @@ const Header: React.FC = () => {
   //   dispatch(getChildUsers());
   // }, []);
 
+  const languageParam = historyPathArray[1];
+  // lang changer
+  useEffect(() => {
+    history.listen(async (location) => {
+      let pathArray: any = [];
+      if (location.pathname) {
+        pathArray = location.pathname.split("/");
+      }
+      const languageParam = pathArray[1];
+      pathArray = location.pathname.split("/");
+      pathArray.splice(0, 2);
+
+      if (languageParam === "ru" || languageParam === "en") {
+        dispatch(langSlice.actions.setLoading(true));
+        await dispatch(getLang(languageParam));
+        dispatch(langSlice.actions.setLoading(false));
+      } else if (!languageParam || (languageParam !== "ru" && languageParam !== "en")) {
+        dispatch(langSlice.actions.setDefaultLang(null));
+        if (pathArray.length === 1) {
+          history.location.pathname = `/`;
+          history.replace(`ru/${pathArray.join("/")}`);
+        } else {
+          history.location.pathname = `/`;
+          history.replace(`ru/${currentUser ? currentUser.id : "_"}/calls`);
+        }
+      }
+    });
+  }, [languageParam, currentUser]);
+
+  async function getUserData() {
+    await dispatch(getMe());
+    await dispatch(getChildUser());
+    await dispatch(getChildUsers());
+  }
+  useEffect(() => {
+    if (!currentUser) getUserData().then();
+  }, [history]);
+
   const logout = () => {
     dispatch(removeAuthToken());
-    dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
+    dispatch(callsSlice.actions.setEmptyCalls({leaveBundles: 0}));
     dispatch(searchSlice.actions.removeAllState(null));
     history.location.pathname = "/";
     history.push(`/${language}/auth`);

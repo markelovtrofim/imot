@@ -154,7 +154,7 @@ type FilterPropsType = {
   pageName: string
 }
 
-const Search: FC<FilterPropsType> = memo(({pageName}) => {
+const Search: FC<FilterPropsType> = memo(() => {
 
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -166,6 +166,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   const allTemplates = useAppSelector(state => state.template.allTemplates);
   const currentUser = useAppSelector(state => state.users.currentUser);
 
+
   const searchParams = useAppSelector(state => state.search.searchParams);
 
   const [loading, setLoading] = useState(false);
@@ -174,7 +175,7 @@ const Search: FC<FilterPropsType> = memo(({pageName}) => {
   const searchRequest = async () => {
     setLoading(true);
     dispatch(callsSlice.actions.zeroingSkip(null)); 
-    dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}));
+    dispatch(callsSlice.actions.setEmptyCalls({leaveBundles: 0}));
     const bastCallDataResponse = await dispatch(getBaseCallsData({}));
     // @ts-ignore
     const bastCallData = bastCallDataResponse.payload;
