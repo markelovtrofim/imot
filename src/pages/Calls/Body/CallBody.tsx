@@ -10,12 +10,10 @@ import {
   getCallPublicToken,
   getCallStt
 } from "../../../store/calls/calls.slice";
-import {useDispatch} from "react-redux";
 import {
   CallInfoType,
   CallTagType,
 } from "../../../store/calls/calls.types";
-import { callAction, callsSlice, getCallInfo, getCallPublicToken, getCallStt } from "../../../store/calls/calls.slice";
 import ModalWindow from "../../../components/common/ModalWindowBox";
 import Reboot from "../../../components/common/Buttons/Reboot";
 import {DownloadHref} from "../../../components/common/Buttons/Download";
@@ -32,6 +30,9 @@ import History from "../../../components/common/Buttons/History";
 import Logo from "../../../assets/images/logo.png";
 import Yandex from "../../../assets/images/yandex_PNG20.png";
 import { langSlice } from "../../../store/lang/lang.slice";
+import {CircularProgress, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
+import {LoadingButton} from "@mui/lab";
+import {makeStyles} from "@mui/styles";
 
 
 const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {

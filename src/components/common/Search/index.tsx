@@ -166,7 +166,6 @@ const Search: FC<FilterPropsType> = memo(() => {
   const allTemplates = useAppSelector(state => state.template.allTemplates);
   const currentUser = useAppSelector(state => state.users.currentUser);
 
-  const searchParams = useAppSelector(state => state.search.searchParams);
 
   const searchParams = useAppSelector(state => state.search.searchParams);
 

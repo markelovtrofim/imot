@@ -272,7 +272,7 @@ function areEqual(prevProps: CallPropsType, nextProps: CallPropsType) {
   return prevProps.expanded === nextProps.expanded;
 }
 
-const Call = (props: CallPropsType) => {
+const Call = memo((props: CallPropsType) => {
   const useStyles = makeStyles(({
     accordion: {
       border: 'none !important',

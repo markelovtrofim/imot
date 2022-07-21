@@ -12,6 +12,7 @@ import {
 } from "./calls.types";
 import {RootState} from "../store";
 import {instance} from "../api";
+import cloneDeep from "lodash.clonedeep";
 
 const convertDataForRequest = (defaultCriterias: any, activeCriterias: any) => {
   let requestArray = [];
@@ -194,18 +195,6 @@ export const getCallsInfo = createAsyncThunk(
       await thunkAPI.dispatch(callsSlice.actions.setCallsInfo(localCalls));
     } catch (error) {
       console.log(error);
-    }
-  }
-);
-
-export const getAndSetCallInfo = createAsyncThunk(
-  'calls/getAndSetCallInfo',
-  async (payload: { id: string, bundleIndex: number | null }, thunkAPI) => {
-    if (payload.bundleIndex || payload.bundleIndex === 0) {
-      const infoData = await thunkAPI.dispatch(getCallInfo({ id: payload.id }));
-      // @ts-ignore
-      const info = infoData.payload;
-      thunkAPI.dispatch(callsSlice.actions.setInfo({ info: info, id: payload.id, index: payload.bundleIndex }));
     }
   }
 );

@@ -34,7 +34,7 @@ import {
   optionsCreatorWithKey
 } from '../../utils/optionsCreator';
 import {reportsStyles} from './Reports.jss';
-import {ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg} from "./Reports.svg";
+import {ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg, CaretDownSvg, PlusSvg} from "./Reports.svg";
 import ChartsBlock from '../../components/common/Charts/ChartsBlock';
 import SearchSelect from '../../components/common/Search/SearchSelect';
 import {

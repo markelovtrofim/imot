@@ -42,8 +42,6 @@ export const useStyles = makeStyles(({
 const App = memo(() => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const isAuth = useAppSelector(state => state.auth.isAuth);
-
 
   const isAuth = useAppSelector(state => state.auth.isAuth);
   const {language} = useAppSelector(state => state.lang);
@@ -59,7 +57,6 @@ const App = memo(() => {
   const searchDictsParams = useAppSelector(state => state.dicts.search);
   const searchTagsParams = useAppSelector(state => state.tags.searchParams);
   const searchCallParams = useAppSelector(state => state.calls.callPageSearchParams);
-  const {language} = useAppSelector(state => state.lang);
 
   const history = useHistory();
 
