@@ -11,10 +11,10 @@ import {makeStyles} from "@mui/styles";
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import {TwoTags, Fragment} from "../../components/common/Tag";
-import {CallInfoType, CallSttType, CallTagType} from "../../store/calls/calls.types";
+import {CallInfoType, CallTagType} from "../../store/calls/calls.types";
 import CallBody from "./Body/CallBody";
 import {useDispatch} from "react-redux";
-import {callsSlice, getAndSetCallAudio, getAndSetCallStt} from "../../store/calls/calls.slice";
+import {callsSlice} from "../../store/calls/calls.slice";
 import {useAppSelector} from "../../hooks/redux";
 import {RootState} from "../../store/store";
 import {translate} from "../../localizations";
@@ -36,16 +36,29 @@ const Accordion = styled((props: AccordionProps) => (
   },
 }));
 
+
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon sx={{fontSize: '0.9rem'}}/>}
-    {...props}
+    expandIcon={
+      <span style={{
+        borderRadius: '5px',
+        width: '32px',
+        height: '32px',
+        backgroundColor: '#E3E8EF',
+        cursor: "pointer"
+      }}>
+        <ArrowForwardIosSharpIcon style={{fontSize: '0.9rem', margin: "5px"}}/>
+      </span>
+    } {...props}
   />
 ))(({theme}) => ({
   backgroundColor:
     theme.palette.mode === 'dark'
       ? 'rgba(255, 255, 255, .05)'
       : 'rgba(0, 0, 0, .03)',
+  '& .MuiAccordionSummary-expandIconWrapper .MuiSvgIcon-root': {
+    margin: "9px !important"
+  },
   '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
     transform: 'rotate(180deg)',
   },
@@ -74,25 +87,18 @@ const CallSvg = (props: React.SVGProps<SVGSVGElement>) => {
 
 type CallStubMiddlewarePropsType = {
   callInfo: CallInfoType | null,
-  callAudio: string | null,
-  callStt: CallSttType | null,
-  bundleIndex: number | null,
-
   expanded: boolean,
-  handleExpandedChange: (panel: string | false) => void,
-  solo?: boolean
+  solo?: boolean,
 };
 
 
-const CallStubMiddleware = memo(({
-                                   callInfo,
-                                   callAudio,
-                                   callStt = null,
-                                   bundleIndex,
-                                   expanded,
-                                   handleExpandedChange,
-                                   solo
-                                 }: CallStubMiddlewarePropsType) => {
+const CallStubMiddleware = memo((
+  {
+    callInfo,
+    expanded,
+    solo
+  }: CallStubMiddlewarePropsType) => {
+
   const useStyles = makeStyles(({
     accordion: {
       backgroundColor: '#ffffff !important',
@@ -115,15 +121,6 @@ const CallStubMiddleware = memo(({
       '&.Mui-disabled': {
         opacity: '1 !important'
       }
-    },
-    slave: {
-      position: 'absolute',
-      top: '35px',
-      right: '40px',
-      borderRadius: '5px',
-      width: '32px',
-      height: '32px',
-      backgroundColor: '#E3E8EF',
     },
     callInner: {},
     employee: {
@@ -166,7 +163,6 @@ const CallStubMiddleware = memo(({
       backgroundColor: '#F8FAFC',
       border: 'none',
     },
-
     '@media (width: 1024px)': {
       callInner: {
         display: 'block',
@@ -174,8 +170,7 @@ const CallStubMiddleware = memo(({
     }
   }));
 
-  const classes = useStyles();
-
+  const classes = useStyles()
 
   // Заглушки пока не пришли звонки с сервака.
   if (!callInfo) {
@@ -187,7 +182,8 @@ const CallStubMiddleware = memo(({
             <div style={{textAlign: 'center', margin: '12px 12px 0 0'}}>
               <CustomCheckbox
                 checked={false}
-                onChange={() => {}}
+                onChange={() => {
+                }}
               />
             </div>
 
@@ -231,10 +227,6 @@ const CallStubMiddleware = memo(({
                   <Skeleton style={{maxWidth: '500px', margin: '0 0 20px 10px'}} height={20} variant="text"/>
                 </div>
               </div>
-
-              <div className={classes.slave}>
-
-              </div>
             </Grid>
 
           </Grid>
@@ -245,10 +237,6 @@ const CallStubMiddleware = memo(({
   return (
     <Call
       callInfo={callInfo}
-      callAudio={callAudio}
-      callStt={callStt}
-      bundleIndex={bundleIndex}
-      handleExpandedChange={handleExpandedChange}
       expanded={expanded}
       solo={solo}
     />
@@ -258,13 +246,9 @@ const CallStubMiddleware = memo(({
 
 type CallPropsType = {
   callInfo: CallInfoType,
-  callAudio: string | null,
-  callStt: CallSttType | null,
-  bundleIndex: number | null,
-
   expanded: boolean,
-  handleExpandedChange: (panel: string | false) => void,
-  solo?: boolean
+
+  solo?: boolean,
 };
 
 // конвертирует время для показа
@@ -285,10 +269,10 @@ export const timeConverter = (s: number, hoursIsDisplay: boolean) => {
 };
 
 function areEqual(prevProps: CallPropsType, nextProps: CallPropsType) {
-  return prevProps.callAudio === nextProps.callAudio && prevProps.callStt === nextProps.callStt && prevProps.expanded === nextProps.expanded;
+  return prevProps.expanded === nextProps.expanded;
 }
 
-const Call = (props: CallPropsType) => {
+const Call = memo((props: CallPropsType) => {
   const useStyles = makeStyles(({
     accordion: {
       border: 'none !important',
@@ -330,8 +314,12 @@ const Call = (props: CallPropsType) => {
       width: '32px',
       height: '32px',
       backgroundColor: '#E3E8EF',
+      "&:hover": {
+        backgroundColor: '#D6D9DF'
+      }
     },
     callInner: {
+      width: "100%",
       display: 'flex',
       ['@media (max-width:1024px)']: { // eslint-disable-line no-useless-computed-key
         display: 'block',
@@ -405,26 +393,19 @@ const Call = (props: CallPropsType) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  // устанавливает локальный bundle index
-  const [index, setIndex] = useState<null | number>(null);
-  useEffect(() => {
-    if (index === null) {
-      setIndex(props.bundleIndex);
-    }
-  }, [props.bundleIndex])
-
-  // устанавливает пришело ли аудио и stt.
-  const [isCallBodyData, setIsCallBodyData] = useState<boolean>(false);
+  const {language} = useAppSelector((state: RootState) => state.lang);
+  const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
 
   // разделяет теги на теги и фрагменты
   const tagsAndFragmentsSeparator = () => {
     let tags = [];
     let fragments = [];
     for (let i = 0; i < props.callInfo.tags?.length; i++) {
-      // debugger
+
       // if (props.callInfo.tags[i].tagType === 'api_callback') {
       //   clientTags.push(props.callInfo.tags[i]);
       // }{
+
       if (props.callInfo.tags[i].fragment) {
         fragments.push(props.callInfo.tags[i]);
       } else {
@@ -438,13 +419,11 @@ const Call = (props: CallPropsType) => {
 
   const scroll = (currentTarget: any) => {
     if (currentTarget) {
-      setTimeout(() => {
-        const topValue = window.pageYOffset + currentTarget.getBoundingClientRect().top - 10;
-        window.scrollTo({
-          top: topValue,
-          behavior: "smooth"
-        });
-      }, 400);
+      const topValue = window.pageYOffset + currentTarget.getBoundingClientRect().top - 10;
+      window.scrollTo({
+        top: topValue,
+        behavior: "smooth"
+      });
     }
   }
 
@@ -460,71 +439,25 @@ const Call = (props: CallPropsType) => {
 
     onResize()
     window.addEventListener('resize', onResize)
-
     return () => {
       window.addEventListener('resize', onResize)
     }
   });
 
-  const activeFragmentRef = useRef<any>(null);
-  const prevActiveFragment = useRef<any>(null);
+  const checked = selectedCalls.length > 0 && selectedCalls.find(selectedCall => {
+    return selectedCall.callId === props.callInfo.id.toUpperCase();
+  })
 
-  const audioPlayerRef = useRef<any>(props.callAudio);
+  const expandedId = useAppSelector(state => state.calls.expandedId);
 
-
-  const onFragmentClick = (activeFragment: CallTagType) => {
-    activeFragmentRef.current = activeFragment;
-    if (props.callStt) {
-      if (prevActiveFragment.current && prevActiveFragment.current !== activeFragment) {
-        const removeFragment = document.getElementById(`${prevActiveFragment.current.fragment}-phrase`);
-        if (removeFragment) {
-          removeFragment.classList.remove(classes.activeFragment);
-        }
-      }
-
-      const activePhrase = props.callStt.fragments.find(fragment => fragment.begin === activeFragment.fBegin && fragment.end === activeFragment.fEnd);
-      const allPhrases = document.getElementById(`${props.callInfo.id}`);
-      let activePhraseHtmlEl;
-
-      if (activePhrase) {
-        activePhraseHtmlEl = document.getElementById(`${activePhrase.id}-phrase`);
-      }
-
-      if (activePhraseHtmlEl && allPhrases) {
-        activePhraseHtmlEl.classList.add(classes.activeFragment);
-        activePhraseHtmlEl.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
-      }
-
-      prevActiveFragment.current = activeFragment;
-
-      audioPlayerRef.current.audioEl.current.play();
-      audioPlayerRef.current.audioEl.current.currentTime = activeFragment.fBegin / 1000;
-
-    }
-  }
-
-  useEffect(() => {
-    if (activeFragmentRef.current && props.callAudio && props.callStt) {
-      onFragmentClick(activeFragmentRef.current);
-    }
-  }, [props.callAudio, props.callStt])
-
-  const {language} = useAppSelector((state: RootState) => state.lang);
-
-  const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
-  const selectAllCalls = useAppSelector(state => state.calls.isSelectAllCalls);
-
-  const checked = selectedCalls.length > 0 && selectedCalls.find(selectedCall => selectedCall.callId === props.callInfo.id)
+  const [test, setTest] = useState(null);
 
   return (
     <Accordion
       id={props.callInfo.id}
       className={classes.accordion}
       tabIndex={-1}
-      expanded={props.solo ? props.solo : props.expanded && isCallBodyData}
+      expanded={props.expanded}
     >
       {/* Первичная информация о звонке. */}
       <div style={{position: 'sticky', top: '0', zIndex: '101'}} ref={accordionSummary}>
@@ -534,41 +467,27 @@ const Call = (props: CallPropsType) => {
         >
           <div style={{textAlign: 'center', margin: '12px 12px 0 0'}}>
             <CustomCheckbox
-              checked={checked && (checked.callId === props.callInfo.id)}
+              checked={checked && (checked.callId === props.callInfo.id.toUpperCase())}
               onChange={(event) => {
-                if (selectAllCalls) {
-                  dispatch(callsSlice.actions.setSelectAllCalls(false));
-                }
-
                 if (event.currentTarget.checked) {
-                  dispatch(callsSlice.actions.pushSelectedCall({callId: props.callInfo.id, bundleIndex: props.bundleIndex}));
+                  dispatch(callsSlice.actions.pushSelectedCall({
+                    callId: props.callInfo.id,
+                  }));
                 } else {
-                  dispatch(callsSlice.actions.removeSelectedCall({callId: props.callInfo.id, bundleIndex: props.bundleIndex}));
+                  dispatch(callsSlice.actions.removeSelectedCall({
+                    callId: props.callInfo.id,
+                  }));
                 }
               }}
             />
           </div>
           <div className={classes.callInner} onClick={async (e) => {
-            if (index || index === 0) {
-              if (!isCallBodyData) {
-                props.handleExpandedChange(props.callInfo.id);
-                dispatch(getAndSetCallAudio({id: props.callInfo.id, bundleIndex: index}));
-                dispatch(getAndSetCallStt({id: props.callInfo.id, bundleIndex: index}));
-                await setIsCallBodyData(true);
-              } else {
-                dispatch(callsSlice.actions.removeAudio({id: props.callInfo.id, bundleIndex: index}));
-                setIsCallBodyData(false);
-                if (audioPlayerRef.current) {
-                  audioPlayerRef.current.audioEl.current.currentTime = 0;
-                  prevActiveFragment.current = null;
-                  activeFragmentRef.current = null;
-                }
-                props.handleExpandedChange(false);
-              }
+            if (!props.expanded) {
               scroll(e.target);
             }
+            dispatch(callsSlice.actions.setExpanded({id: expandedId, value: false}));
+            dispatch(callsSlice.actions.setExpanded({id: props.callInfo.id, value: !props.expanded}));
           }}>
-
             <div className={classes.callEmAndCl}>
               {/* Сотрудник. */}
               <div>
@@ -621,7 +540,6 @@ const Call = (props: CallPropsType) => {
                 </div>
               </div>
             </div>
-
             <div className={classes.tagsAndFragmentsBlock}>
               {/* Tags */}
               <div style={{display: 'flex'}}>
@@ -648,11 +566,12 @@ const Call = (props: CallPropsType) => {
                       <div
                         onClick={async (event) => {
                           if (!props.expanded) {
-                            await props.handleExpandedChange(props.callInfo.id);
+                            dispatch(callsSlice.actions.setExpanded({id: props.callInfo.id, value: true}));
                           } else {
                             event.stopPropagation();
                           }
-                          onFragmentClick(tag);
+                          // @ts-ignore
+                          setTest(tag);
                         }}
                       >
                         <Fragment matchData={tag.matchData}>{tag.name}</Fragment>
@@ -660,37 +579,26 @@ const Call = (props: CallPropsType) => {
                     )
                   })}
                 </Stack>
-              </div>
-              }
-              <div className={classes.slave}>
-              </div>
+              </div>}
+
 
             </div>
           </div>
-
         </AccordionSummary>
       </div>
       {/* Основная информация о звонке. */}
       <AccordionDetails className={classes.accordionDetails}>
         <CallBody
-          onFragmentClick={onFragmentClick}
-          audioRef={audioRef}
           callInfo={props.callInfo}
-          callAudio={props.callAudio}
-          callStt={props.callStt}
           fragments={tagsAndFragmentsArray.fragments}
-          bundleIndex={props.bundleIndex}
           expanded={props.expanded}
-          audioPlayerRef={audioPlayerRef}
+          audioDivRef={audioRef}
 
-          setIsCallBodyData={setIsCallBodyData}
-
-          prevActiveFragment={prevActiveFragment}
-          activeFragmentRef={activeFragmentRef}
+          test={test}
         />
       </AccordionDetails>
     </Accordion>
   );
-}
+}, areEqual);
 
 export default CallStubMiddleware;

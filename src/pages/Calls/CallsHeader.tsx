@@ -9,9 +9,8 @@ import {translate} from "../../localizations";
 import {
   callsAction,
   callsSlice, deleteCall,
-  getActionFiles, getAndSetCallInfo, getAndSetCallStt,
-  getBaseCallsData, getTask,
-  SelectedCallType
+  getActionFiles,
+  getBaseCallsData, getCallInfo, getCallStt, getTask
 } from "../../store/calls/calls.slice";
 import {DownloadOnClick} from "../../components/common/Buttons/Download";
 import Reboot from "../../components/common/Buttons/Reboot";
@@ -20,7 +19,6 @@ import CustomControlSelect from "../../components/common/Selects/CustomControlSe
 import {langSlice} from "../../store/lang/lang.slice";
 import ContainedSelect from "../../components/common/Selects/ContainedSelect";
 import cloneDeep from "lodash.clonedeep";
-import {current} from "@reduxjs/toolkit";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import Logo from "../../assets/images/logo.png";
@@ -28,6 +26,7 @@ import Yandex from "../../assets/images/yandex_PNG20.png";
 import CustomCheckbox from "../../components/common/Checkbox";
 import {LoadingButton} from "@mui/lab";
 import ModalWindow from "../../components/common/ModalWindowBox";
+import {SelectedCallType} from "../../store/calls/calls.types";
 
 const useStyles = makeStyles(({
   callsHeader: {
@@ -76,7 +75,7 @@ const ArrowsSvg = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 type CallsHeaderPropsType = {
-  found: any,
+  found?: any,
   total?: any,
   switchTitleFound: boolean
 };
@@ -92,11 +91,13 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
   const dispatch = useDispatch();
   const {language} = useAppSelector((state: RootState) => state.lang);
 
-  const selectAllCalls = useAppSelector(state => state.calls.isSelectAllCalls);
+  const foundUseApp = useAppSelector(state => state.calls.found);
+  const totalUseApp = useAppSelector(state => state.calls.total);
+
   const currentUser = useAppSelector(state => state.users.currentUser);
   const selectedCalls = useAppSelector(state => state.calls.selectedCalls);
 
-  const calls = useAppSelector(state => state.calls.calls);
+  const calls = useAppSelector(state => state.calls.callsIncomplete);
 
   const sortParams = useAppSelector(state => state.calls.sort);
   const sortArray = [
@@ -112,8 +113,8 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
 
   async function superMegaUltraHardFunction(selectedCalls: SelectedCallType[]) {
     await selectedCalls.forEach(async (selectedCall) => {
-      await dispatch(getAndSetCallInfo({id: selectedCall.callId, bundleIndex: selectedCall.bundleIndex}));
-      await dispatch(getAndSetCallStt({id: selectedCall.callId, bundleIndex: selectedCall.bundleIndex}));
+      await dispatch(getCallInfo({id: selectedCall.callId}));
+      await dispatch(getCallStt({id: selectedCall.callId}));
     });
   }
 
@@ -130,9 +131,11 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
   const [MWButtonLoading, setMWButtonLoading] = useState<boolean>(false);
 
   const [isMWOpen, setMWOpen] = useState<boolean>(false)
+
   function handleMWClose() {
     setMWOpen(false);
   }
+
   function handleMWOpen() {
     setMWOpen(true);
   }
@@ -140,6 +143,12 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
   // calls buttons
   async function downloadAction() {
     if (currentUser) {
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Запрос отправлен",
+        value: true,
+        time: 2000
+      }));
       const action = "audio_archive";
       const taskIdData = await dispatch(callsAction({
         action: action,
@@ -165,6 +174,12 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
 
   async function excelAction() {
     if (currentUser) {
+      dispatch(langSlice.actions.setSnackbar({
+        type: "info",
+        text: "Запрос отправлен",
+        value: true,
+        time: 2000
+      }));
       const action = "stt_export";
       const taskIdData = await dispatch(callsAction({
         action: action,
@@ -235,23 +250,21 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
       time: 2000
     }));
     for (const selectedCall of selectedCalls) {
-      if (selectedCall.bundleIndex || selectedCall.bundleIndex === 0) {
-        await dispatch(deleteCall(selectedCall.callId));
-        let currentCalls = callsLocal[selectedCall.bundleIndex];
-        const call = currentCalls.find(item => {
-          if (item.info) {
-            return item.info.id === selectedCall.callId;
-          }
-        })
-        let callIndex = -1;
-        if (call) {
-          callIndex = currentCalls.indexOf(call);
+      await dispatch(deleteCall(selectedCall.callId));
+      let currentCalls = callsLocal;
+      const call = currentCalls.find(item => {
+        if (item.info) {
+          return item.info.id === selectedCall.callId;
         }
-        if (callIndex != -1) {
-          currentCalls.splice(callIndex, 1);
-        }
-        callsLocal[selectedCall.bundleIndex] = currentCalls
+      })
+      let callIndex = -1;
+      if (call) {
+        callIndex = currentCalls.indexOf(call);
       }
+      if (callIndex != -1) {
+        currentCalls.splice(callIndex, 1);
+      }
+      callsLocal = currentCalls
     }
     dispatch(callsSlice.actions.setCalls(callsLocal));
     dispatch(callsSlice.actions.removeSelectedCalls(null));
@@ -287,7 +300,13 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
       if (taskPayload) {
         const taskId = taskPayload.data.task_id;
         await dispatch(getTask(taskId));
-        superMegaUltraHardFunction(selectedCalls);
+        await superMegaUltraHardFunction(selectedCalls);
+        dispatch(langSlice.actions.setSnackbar({
+          type: "success",
+          text: "Звонки перераспознаны",
+          value: true,
+          time: 2000
+        }));
       } else {
         dispatch(langSlice.actions.setSnackbar({
           type: "info",
@@ -334,9 +353,10 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
       <div className={classes.callsTitle}>
         <div>
           {!switchTitleFound ?
-            <Typography className={classes.callsTitleText}>Найдено звонков {found} из {total}</Typography>
+            <Typography className={classes.callsTitleText}>Найдено
+              звонков {found ? found : foundUseApp} из {total ? total : totalUseApp}</Typography>
             :
-            <Typography className={classes.callsTitleText}>Найдено {found} звонков</Typography>
+            <Typography className={classes.callsTitleText}>Найдено {found ? found : foundUseApp} звонков</Typography>
           }
         </div>
         <div style={{display: 'flex', alignItems: 'center'}}>
@@ -354,7 +374,7 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
                 } else {
                   dispatch(callsSlice.actions.setSort(event.value));
                   dispatch(callsSlice.actions.zeroingSkip(null));
-                  dispatch(callsSlice.actions.setEmptyState({leaveBundles: 0}))
+                  dispatch(callsSlice.actions.setEmptyCalls({leaveBundles: 0}))
                   if (event.value === "duration") {
                     dispatch(getBaseCallsData({sort: event.value}))
                   } else if (event.value === "date") {
@@ -369,11 +389,15 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
 
           <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginLeft: '20px'}}>
             {/* Скачать */}
-            <DownloadOnClick onClick={() => {downloadAction().then()}}/>
+            <DownloadOnClick onClick={() => {
+              downloadAction().then()
+            }}/>
 
             {/* Excel export */}
             <IconButton
-              onClick={() => {excelAction().then()}}
+              onClick={() => {
+                excelAction().then()
+              }}
               icon={
                 <Typography style={{fontSize: "13px"}}>ex</Typography>
               }
@@ -384,7 +408,9 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
             />
 
             {/* Перераспознать */}
-            <Reboot onClick={() => {rebootAction().then()}}/>
+            <Reboot onClick={() => {
+              rebootAction().then()
+            }}/>
 
             {/* Удаление и смена каналов. */}
             <CustomControlSelect
@@ -396,7 +422,7 @@ const CallsHeader: FC<CallsHeaderPropsType> = React.memo((
               svg={"vertical"}
               options={[
                 {value: 'delete', label: "Удалить"},
-                {value: "swap_channels" ,label: "Поменять каналы местами"},
+                {value: "swap_channels", label: "Поменять каналы местами"},
                 {value: "stt", label: "Перетегировать"}
               ]}
               optionsPosition={"bottom"}

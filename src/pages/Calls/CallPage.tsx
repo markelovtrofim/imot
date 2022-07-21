@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 
 import { Link, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { useDispatch } from "react-redux";
 import { makeStyles } from "@mui/styles";
-import { Alert, CircularProgress, Typography } from "@mui/material";
+import { Alert, CircularProgress } from "@mui/material";
 
 import { useAppSelector } from "../../hooks/redux";
 import { callsSlice, getCallAudio, getCallInfo, getCallStt } from "../../store/calls/calls.slice";
 import Call from "./Call";
-import Preloader from '../../assets/loading.svg';
 
-const CallPage = () => {
+const CallPage = memo(() => {
 
   const useStyles = makeStyles(({
     callPageBox: {
@@ -23,11 +22,9 @@ const CallPage = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const searchParams = useAppSelector(state => state.calls.callPageSearchParams);
-
   useEffect(() => {
     const searchParamsObject = queryString.parse(history.location.search);
-    if (searchParamsObject.call && searchParamsObject.token) {
+    if (searchParamsObject.id && searchParamsObject.token) {
       dispatch(callsSlice.actions.setCallPageSearchParams(history.location.search));
     }
   }, [history]);
@@ -65,7 +62,7 @@ const CallPage = () => {
   // добавление параметров поиска
   useEffect(() => {
     fetchCallInfoData().then();
-  }, [searchParams]);
+  }, []);
 
   useEffect(() => {
     document.title = "Звонок | IMOT.io";
@@ -76,6 +73,7 @@ const CallPage = () => {
   }, []);
 
   const currentCall = useAppSelector(state => state.calls.currentCall);
+  console.log(currentCall);
   const currentUser = useAppSelector(state => state.users.currentUser);
   const isAuth = useAppSelector(state => state.auth.isAuth);
   const { language } = useAppSelector(state => state.lang);
@@ -86,12 +84,7 @@ const CallPage = () => {
         <div className={classes.callPageBox}>
           <Call
             callInfo={currentCall.info}
-            callAudio={currentCall.audio}
-            callStt={currentCall.stt}
-            bundleIndex={null}
             expanded={true}
-            handleExpandedChange={() => {
-            }}
             solo={true}
           />
         </div>
@@ -117,6 +110,6 @@ const CallPage = () => {
       )}
     </div>
   );
-};
+});
 
 export default CallPage;
