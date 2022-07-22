@@ -1,19 +1,20 @@
 import * as React from 'react';
-import {FC, memo, useEffect, useState} from "react";
-import {useDispatch} from "react-redux";
-import {makeStyles} from "@mui/styles";
-import Select, {components} from "react-select";
+import { FC, memo, useEffect, useState } from "react";
+
+import { useDispatch } from "react-redux";
+import { makeStyles } from "@mui/styles";
+import Select, { components } from "react-select";
 import SearchIcon from '@mui/icons-material/Search';
+
 import cn from 'classnames';
-import {templateSlice} from "../../../store/search/template.slice";
-import {searchSlice} from "../../../store/search/search.slice";
+import { usersSlice } from '../../../store/users/users.slice';
 
 export const OnTopArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M7.39101 4.59994C7.17176 4.83662 6.81636 4.83662 6.59711 4.59994L3.9999 1.79621L1.40271 4.59994C1.18347 4.83662 0.828006 4.83662 0.608766 4.59994C0.389526 4.36325 0.389526 3.97957 0.608766 3.74288L3.60295 0.510518C3.8222 0.273838 4.1776 0.273838 4.39685 0.510518L7.39101 3.74288C7.61026 3.97957 7.61026 4.36325 7.39101 4.59994Z"
-            fill="#1B202B"/>
+          d="M7.39101 4.59994C7.17176 4.83662 6.81636 4.83662 6.59711 4.59994L3.9999 1.79621L1.40271 4.59994C1.18347 4.83662 0.828006 4.83662 0.608766 4.59994C0.389526 4.36325 0.389526 3.97957 0.608766 3.74288L3.60295 0.510518C3.8222 0.273838 4.1776 0.273838 4.39685 0.510518L7.39101 3.74288C7.61026 3.97957 7.61026 4.36325 7.39101 4.59994Z"
+          fill="#1B202B"/>
     </svg>
   );
 };
@@ -22,8 +23,8 @@ export const OnBottomArrow = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path fillRule="evenodd" clipRule="evenodd"
-            d="M7.39101 0.400166C7.61026 0.636846 7.61026 1.02059 7.39101 1.25725L4.39685 4.48958C4.1776 4.72627 3.8222 4.72627 3.60295 4.48958L0.608766 1.25725C0.389526 1.02059 0.389526 0.636846 0.608766 0.400166C0.828006 0.163486 1.18347 0.163486 1.40271 0.400166L3.9999 3.20392L6.59711 0.400166C6.81636 0.163486 7.17176 0.163486 7.39101 0.400166Z"
-            fill="#738094"/>
+          d="M7.39101 0.400166C7.61026 0.636846 7.61026 1.02059 7.39101 1.25725L4.39685 4.48958C4.1776 4.72627 3.8222 4.72627 3.60295 4.48958L0.608766 1.25725C0.389526 1.02059 0.389526 0.636846 0.608766 0.400166C0.828006 0.163486 1.18347 0.163486 1.40271 0.400166L3.9999 3.20392L6.59711 0.400166C6.81636 0.163486 7.17176 0.163486 7.39101 0.400166Z"
+          fill="#738094"/>
     </svg>
   );
 };
@@ -35,6 +36,7 @@ type ContainedSelectPropsType = {
   height?: string,
   justify?: string,
   marginRight?: string,
+  menuUserState?: boolean,
 
   onSelectChange: (event: any) => void,
   options: { value: any, label: string }[],
@@ -48,6 +50,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = (
     height,
     justify,
     marginRight,
+    menuUserState,
 
     onSelectChange,
     options,
@@ -184,7 +187,7 @@ const ContainedSelect: FC<ContainedSelectPropsType> = (
     })
   }
   const classes = useStyles();
-
+  const dispatch = useDispatch();
 
   // COMPONENTS BLOCK
   const Arrow = memo((props: any) => {
@@ -217,14 +220,25 @@ const ContainedSelect: FC<ContainedSelectPropsType> = (
   const handleSelectChange = (event: any) => {
     onSelectChange(event);
     setMenuIsOpen(false);
+    dispatch(usersSlice.actions.chooseUserMenu(false));
   };
 
+  useEffect(() => {
+    //@ts-ignore
+    if (menuUserState != null) setMenuIsOpen(menuUserState);
+  }, [menuUserState])
 
   // костылечек для загрытия селектов
   useEffect(() => {
-    document.addEventListener("mousedown", () => setMenuIsOpen(false));
+    document.addEventListener("mousedown", () => {
+      setMenuIsOpen(false);
+      dispatch(usersSlice.actions.chooseUserMenu(false));
+    });
     return () => {
-      document.removeEventListener("mousedown", () => setMenuIsOpen(false));
+      document.removeEventListener("mousedown", () => {
+        setMenuIsOpen(false);
+        dispatch(usersSlice.actions.chooseUserMenu(false));
+      })
     };
   }, []);
 

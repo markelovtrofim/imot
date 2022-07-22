@@ -144,6 +144,7 @@ const Header: React.FC = () => {
 
   const childUsers = useAppSelector(state => state.users.childUsers);
   const currentChildUser = useAppSelector(state => state.users.currentChildUser);
+  const menuUserState = useAppSelector(state => state.users.userMenu);
 
   const [alignment, setAlignment] = React.useState("");
 
@@ -382,6 +383,7 @@ const Header: React.FC = () => {
                 onSelectChange={handleUserChange}
                 options={convertedOptions}
                 value={convertedValue}
+                menuUserState={menuUserState}
               />
             )}
             {/* Смена языка */}

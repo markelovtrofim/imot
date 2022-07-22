@@ -88,6 +88,7 @@
   "reportTitleMes": "Specify the name of the report",
   "reportType": "Report type",
   "reportTypeCalls": "calls",
+  "reportUser": "You must select a user to build a report",
 
   "reportGroupByRow": "Rows grouping",
   "reportGroupByRowTime": "by time",
@@ -131,6 +132,7 @@
   "lineChart": "Line chart",
   "barChart": "Bar chart",
   "pieChart": "Pie chart",
-  "radarChart": "Radar chart"
+  "radarChart": "Radar chart",
+  "reportUserBtn": "Open"
 
 }

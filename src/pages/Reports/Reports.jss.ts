@@ -290,5 +290,25 @@ export const reportsStyles = makeStyles(({
   centerMessageTitle: {
     maxWidth: '300px',
     textAlign: 'center'
+  },
+  centerMessageUser: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '400px',
+    minHeight: '400px',
+  },
+  centerMessageInfo: {
+    color: '#738094',
+    opacity: '0.6',
+    fontWeight: '500',
+    marginBottom: '24px',
+    maxWidth: '250px',
+    textAlign: 'center'
+  },
+  centerMessageBtn: {
+    //@ts-ignore
+    textTransform: 'none !important'
   }
 }));
