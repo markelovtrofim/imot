@@ -71,13 +71,15 @@ export const getChildUser = createAsyncThunk(
 type InitialStateType = {
   currentUser: UserType | null,
   childUsers: ChildUserType[] | null,
-  currentChildUser: ChildUserType | null
+  currentChildUser: ChildUserType | null,
+  userMenu: boolean,
 };
 
 const initialState: InitialStateType = {
   currentUser: null,
   childUsers: null,
-  currentChildUser: null
+  currentChildUser: null,
+  userMenu: false
 };
 
 export const usersSlice = createSlice({
@@ -92,6 +94,9 @@ export const usersSlice = createSlice({
     },
     setCurrentChildUser(state, action: PayloadAction<ChildUserType>) {
       state.currentChildUser = action.payload;
-    }
+    },
+    chooseUserMenu(state, action: any) {
+      state.userMenu = action.payload
+    },
   }
 });

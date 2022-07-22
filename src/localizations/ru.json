@@ -100,6 +100,7 @@
   "reportTitleMes": "Укажите название отчета",
   "reportType": "Тип отчета",
   "reportTypeCalls": "по звонкам",
+  "reportUser": "Для построения отчета необходимо выбрать пользователя",
 
   "reportGroupByRow": "Группировка строк",
   "reportGroupByRowTime": "по времени",
@@ -143,6 +144,7 @@
   "lineChart": "Линейная диаграмма",
   "barChart": "Гистограмма",
   "pieChart": "Круговая диаграмма",
-  "radarChart": "Радиальная диаграмма" 
+  "radarChart": "Радиальная диаграмма",
+  "reportUserBtn": "Выбрать"
 
 }
