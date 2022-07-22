@@ -27,6 +27,7 @@ export const getDefaultCriterias = createAsyncThunk(
       }
     });
     thunkAPI.dispatch(searchSlice.actions.setDefaultCriterias(response.data));
+    thunkAPI.dispatch(searchSlice.actions.setDefaultCriteriasReport(response.data));
   }
 )
 
@@ -49,6 +50,7 @@ type InitialStateType = {
   allCriterias: CriteriasType[] | null,
   defaultCriterias: RequestDataType[],
   activeCriterias: CriteriasType[],
+  defaultCriteriasReport: RequestDataType[],
   activeCriteriasReports: CriteriasType[],
   activeCriteriasColumn: CriteriasType[],
 }
@@ -60,6 +62,7 @@ const initialState: InitialStateType = {
   allCriterias: null,
   defaultCriterias: [],
   activeCriterias: [],
+  defaultCriteriasReport: [],
   activeCriteriasReports: [],
   activeCriteriasColumn: [],
 };
@@ -138,6 +141,31 @@ export const searchSlice = createSlice({
     setActiveCriteriasReports(state, action: PayloadAction<CriteriasType[]>) {
       state.activeCriteriasReports = action.payload;
     },
+
+    setDefaultCriteriasReport(state, action: PayloadAction<string[] | null>) {
+      if (!action.payload) {
+        state.defaultCriteriasReport.length = 0;
+      } else {
+        for (let i = 0; i < action.payload.length; i++) {
+          state.defaultCriteriasReport.push({key: action.payload[i], values: []});
+        }
+      }
+    },
+    setDefaultCriteriaValuesReport(state, action: PayloadAction<RequestDataType>) {
+      const obj = current(state.defaultCriteriasReport).find(item => {
+        return item.key === action.payload.key
+      });
+      if (obj) {
+        const index = current(state.defaultCriteriasReport).indexOf(obj);
+        state.defaultCriteriasReport[index].values = action.payload.values;
+      }
+    },
+    setClearDefaultCriteriasValuesReport(state, action: PayloadAction<null>) {
+      for (let i = 0; i < state.defaultCriteriasReport.length; i++) {
+        state.defaultCriteriasReport[i] = {...state.defaultCriteriasReport[i], values: []};
+      }
+    },
+
     setActiveCriteriaReportsValues(state, action: any) {
       const obj = current(state.activeCriteriasReports).find(item => {
         return item.key === action.payload.key
@@ -173,7 +201,6 @@ export const searchSlice = createSlice({
       const index = current(state.activeCriteriasColumn).indexOf(obj);
       state.activeCriteriasColumn[index].values = action.payload.values;
     },
-
 
     removeActiveCriteriaColumnReports(state, action: PayloadAction<CriteriasType>) {
       let activeCriteriasColumn = cloneDeep(current(state.activeCriteriasColumn));

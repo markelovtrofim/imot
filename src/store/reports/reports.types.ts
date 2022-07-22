@@ -16,20 +16,24 @@ export type CallReportType = {
   report_parameters_hash: string,
 }
 export type CallReportItem = {
-  cols: [],
+  cols: {
+    group_id: number,
+    col_name: string,
+  }[],
   rows: [],
   total_calls: number,
   row_group_header: string,
   values: { [key: string]: CallReportItemValues },
 }
 export type CallReportItemValues = {
-  cols: { [key: string]: CallReportItemCols },
+  col_groups: {[key: string]: {
+    [key: string] : CallReportItemCols
+  }},
   row_info: CallReportItemRow,
 }
 export type CallReportItemCols = {
   calls_count: number,
   calls_minutes: number,
-  percent_count_from_total: number,
   percent_calls_count_from_total: number,
   call_ids: []
 }
@@ -37,8 +41,12 @@ export type CallReportItemRow = {
   row_sum_calls_count: number,
   row_sum_calls_minutes: number,
   row_percent_count_from_total: number,
-  row_total_processed_calls_count: number,
+  row_total_processed_calls: {
+    count: number,
+    call_ids: []
+  } | number
 }
+
 
 export type ReportParametersType = {
   report_name: string,

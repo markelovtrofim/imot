@@ -100,14 +100,14 @@
   "reportGroupByColumns": "Columns grouping",
   "reportGroupByRowSearchItems": "by search items",
   "reportGroupByRowCallsCount": "by calls count",
-  "reportGroupByRowSttEngine": "STT-engine",
+  "reportGroupByRowSttEngine": "by STT-engine",
 
   "reportGroupByTimeHour": "by hour",
   "reportGroupByTimeDay": "by day",
   "reportGroupByTimeWeek": "by week",
   "reportGroupByTimeMonth": "by months",
 
-  "reportColumnHeading": "column heading",
+  "reportColumnHeading": "Header",
   "reportCallFilters": "Call filters",
   "reportDeleteReport": "Delete report",
   "reportSaveReport": "Save report",

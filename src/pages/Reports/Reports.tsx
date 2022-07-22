@@ -1,10 +1,10 @@
 import React, {FC, memo, useEffect, useState} from 'react';
 
-import {useDispatch} from "react-redux";
-import {useAppSelector} from "../../hooks/redux";
-import {DataGrid, GridColDef, GridRowsProp, MuiEvent} from '@mui/x-data-grid';
-import {Typography} from '@mui/material';
-import {LoadingButton} from '@mui/lab';
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../hooks/redux";
+import { DataGrid, GridColDef, GridRowsProp, MuiEvent } from '@mui/x-data-grid';
+import { Tooltip, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import Box from '@mui/material/Box';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -25,16 +25,11 @@ import CriteriasList from '../../components/common/Criterias/CriteriasList';
 import TextSelect from '../../components/common/Selects/TextSelect/TextSelect';
 import Input from "../../components/common/Input";
 import Plus from '../../components/common/Buttons/Plus';
-import Snackbar, {SnackbarType} from "../../components/common/Snackbar";
-import {BlockBox, СontrolBlock} from "../../components/common";
-import {
-  optionsCreator,
-  optionsCreatorVEL,
-  optionsCreatorWithName,
-  optionsCreatorWithKey
-} from '../../utils/optionsCreator';
-import {reportsStyles} from './Reports.jss';
-import {ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg, CaretDownSvg, PlusSvg} from "./Reports.svg";
+import Snackbar, { SnackbarType } from "../../components/common/Snackbar";
+import { BlockBox, СontrolBlock } from "../../components/common";
+import { optionsCreator, optionsCreatorVEL, optionsCreatorWithName, optionsCreatorWithKey } from '../../utils/optionsCreator';
+import { reportsStyles } from './Reports.jss';
+import { ExportIcon, OnTopArrow, OnBottomArrow, TrashSvg, CaretDownSvg, PlusSvg, InfoCircle } from "./Reports.svg";
 import ChartsBlock from '../../components/common/Charts/ChartsBlock';
 import SearchSelect from '../../components/common/Search/SearchSelect';
 import {
@@ -68,13 +63,13 @@ const Reports = React.memo(() => {
 
   //criterias
   const activeCriteriasReports = useAppSelector(state => state.search.activeCriteriasReports);
-  const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
+  const defaultCriteriasReport = useAppSelector(state => state.search.defaultCriteriasReport);
   const allCriterias = useAppSelector(state => state.search.allCriterias);
   const allCriteriasColumn = useAppSelector(state => state.search.allCriterias);
   const activeCriteriasColumn = useAppSelector(state => state.search.activeCriteriasColumn);
   const activeParameters = useAppSelector(state => state.reports.activeParameters);
 
-  const [visibleParameters, setVisibleParameters] = React.useState(true);
+  // const [visibleParameters, setVisibleParameters] = React.useState(true);
   const [isLoading, setLoading] = useState(false);
 
   //error
@@ -293,7 +288,6 @@ const Reports = React.memo(() => {
   }
 
   const activeReport = useAppSelector(state => state.reports.activeReport);
-  const period = useAppSelector(state => state.reports.activeReport.period);
   const groupByColumns = useAppSelector(state => state.reports.activeReport.cols_group_by);
 
   // selectors values
@@ -302,7 +296,7 @@ const Reports = React.memo(() => {
   //название отчета
   let reportName = useAppSelector(state => state.reports.activeReport.report_name);
   if (!reportName) {
-    reportName = `${translate('report', language)} ${new Date().toLocaleDateString()}`;
+    reportName = `${translate('report', language)} ${new Date().toLocaleString().slice(0, -3)}`;
   }
 
   // тип отчета
@@ -360,7 +354,7 @@ const Reports = React.memo(() => {
   const [op, setOp] = useState<any>([]);
   useEffect(() => {
     setOp(handleMoreSelectClick(allCriterias, activeCriteriasReports));
-  }, [allCriterias, activeCriteriasReports, defaultCriterias]);
+  }, [allCriterias, activeCriteriasReports, defaultCriteriasReport]);
 
   const [opCriteriasColumn, setOpCriteriasColumn] = useState<any>([]);
   useEffect(() => {
@@ -468,10 +462,11 @@ const Reports = React.memo(() => {
       headerClassName: 'light-header--theme',
     }];
     callReport.report.cols.forEach((item, index) => {
+      const colName = item.col_name
       if (checkboxCalls) {
         columnsArray.push({
           field: `calls_count_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `${translate('reportCalls', language)}`,
           minWidth: 150,
           height: 75,
@@ -484,17 +479,16 @@ const Reports = React.memo(() => {
           cellClassName: 'cell-active',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportCalls', language)}`}</div>
             </div>
           )
         })
       }
-
       if (checkboxMinutes) {
         columnsArray.push({
           field: `calls_minutes_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `${translate('reportMinutes', language)}`,
           minWidth: 150,
           height: 75,
@@ -507,17 +501,16 @@ const Reports = React.memo(() => {
           content: 'minuts',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{`${translate('reportMinutes', language)}`}</div>
             </div>
           )
         })
       }
-
       if (checkboxPercent) {
         columnsArray.push({
           field: `percent_calls_count_from_total_${index}`,
-          name: `${item}`,
+          name: `${colName}`,
           headerName: `%`,
           minWidth: 150,
           height: 75,
@@ -530,13 +523,12 @@ const Reports = React.memo(() => {
           content: 'percent',
           renderHeader: () => (
             <div className={classes.tableHeaderTitle}>
-              <div className={classes.tableHeaderSubTitle}>{item}</div>
+              <div className={classes.tableHeaderSubTitle}>{colName}</div>
               <div className={classes.tableHeaderSubSubTitle}>{'%'}</div>
             </div>
           )
         })
       }
-
     })
     if (checkboxCalls) {
       columnsArray.push({
@@ -579,7 +571,6 @@ const Reports = React.memo(() => {
         )
       })
     }
-
     if (checkboxPercent) {
       columnsArray.push({
         field: 'row_percent_count_from_total',
@@ -602,7 +593,7 @@ const Reports = React.memo(() => {
     }
     if (checkboxQuant) {
       columnsArray.push({
-        field: 'row_total_processed_calls_count',
+        field: 'row_total_processed_calls',
         headerName: `${translate('reportAllCount', language)}`,
         minWidth: 150,
         height: 75,
@@ -611,6 +602,7 @@ const Reports = React.memo(() => {
         headerAlign: 'center',
         align: 'center',
         headerClassName: 'light-header--theme',
+        cellClassName: 'cell-active',
         content: 'percent',
         renderHeader: () => (
           <div className={classes.tableHeaderTitle}>
@@ -620,33 +612,30 @@ const Reports = React.memo(() => {
         )
       })
     }
-
     return columnsArray
   }
   const columns: GridColDef[] = columnsTable();
   const rowsTable = () => {
     const result: any[] = [];
-    const columnsArray: any[] = columnsTable();
     let resultIds: any[] = [];
-
     callReport.report.rows.forEach((itemRow, indexRow) => {
       //создаем первую id строку
       result.push({});
       result[indexRow].id = indexRow;
-      result[indexRow][columnsArray[0].field] = itemRow;
+      result[indexRow][columns[0].field] = itemRow;
 
       //создаем пустой массив для callIds
       result[indexRow]['callIds'] = {};
 
       //количество звонков/ минут/ %
       callReport.report.cols.forEach((itemCol, indexCol) => {
-        result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_count;
-        result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].calls_minutes;
-        result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total}%`;
-        result[indexRow][`percent_calls_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].percent_calls_count_from_total;
-
+        result[indexRow][`calls_count_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_count;
+        result[indexRow][`calls_minutes_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_minutes;
+        result[indexRow][`percent_calls_count_from_total_${indexCol}`] = `${callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total}%`;
+        result[indexRow][`percent_calls_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total;
+        
         if (checkboxValue) {
-          const diffValue = callReport.diff_report[itemRow].cols[itemCol].calls_count;
+          const diffValue = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_count;
           let diffAdd = '';
           if (diffValue > 0) {
             diffAdd = ` (+${diffValue})`;
@@ -655,7 +644,7 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`calls_count_${indexCol}`] += diffAdd;
 
-          const diffValueMinutes = callReport.diff_report[itemRow].cols[itemCol].calls_minutes;
+          const diffValueMinutes = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].calls_minutes;
           let diffAddMinutes = '';
           if (diffValueMinutes > 0) {
             diffAddMinutes = ` (+${diffValueMinutes})`;
@@ -664,7 +653,7 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`calls_minutes_${indexCol}`] += diffAddMinutes;
 
-          const diffValuePercent = callReport.diff_report[itemRow].cols[itemCol].percent_calls_count_from_total;
+          const diffValuePercent = callReport.diff_report[itemRow].col_groups[itemCol.group_id][itemCol.col_name].percent_calls_count_from_total;
           let diffAddPercent = '';
           if (diffValuePercent > 0) {
             diffAddPercent = ` (+${diffValuePercent}%)`;
@@ -673,15 +662,18 @@ const Reports = React.memo(() => {
           }
           result[indexRow][`percent_calls_count_from_total_${indexCol}`] += diffAddPercent;
         }
-        result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].cols[itemCol].call_ids;
+        result[indexRow]['callIds'][`calls_count_${indexCol}`] = callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].call_ids;
+        //@ts-ignore
+        result[indexRow]['callIds']['row_total_processed_calls'] = callReport.report.values[itemRow].row_info.row_total_processed_calls.call_ids;
         //массив ids
-        resultIds.push(...callReport.report.values[itemRow].cols[itemCol].call_ids);
+        resultIds.push(...callReport.report.values[itemRow].col_groups[itemCol.group_id][itemCol.col_name].call_ids);
       })
       //общее время по строке
       result[indexRow]['row_sum_calls_count'] = callReport.report.values[itemRow].row_info.row_sum_calls_count;
       result[indexRow]['row_sum_calls_minutes'] = callReport.report.values[itemRow].row_info.row_sum_calls_minutes;
       result[indexRow]['row_percent_count_from_total'] = `${callReport.report.values[itemRow].row_info.row_percent_count_from_total}%`;
-      result[indexRow]['row_total_processed_calls_count'] = callReport.report.values[itemRow].row_info.row_total_processed_calls_count;
+      //@ts-ignore
+      result[indexRow]['row_total_processed_calls'] = callReport.report.values[itemRow].row_info.row_total_processed_calls.count;
 
       if (checkboxValue) {
         const diffValue = callReport.diff_report[itemRow].row_info.row_sum_calls_count;
@@ -711,14 +703,14 @@ const Reports = React.memo(() => {
         }
         result[indexRow][`row_percent_count_from_total`] += diffAddPercent;
 
-        const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls_count;
+        const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls;
         let diffAddCount = '';
         if (diffValueCount > 0) {
-          diffAddCount = ` (+${diffValueCount}%)`;
+          diffAddCount = ` (+${diffValueCount})`;
         } else {
-          diffAddCount = ` (${diffValueCount}%)`;
+          diffAddCount = ` (${diffValueCount})`;
         }
-        result[indexRow][`row_total_processed_calls_count`] += diffAddCount;
+        result[indexRow][`row_total_processed_calls`] += diffAddCount;
       }
       //массив ids
       result[indexRow]['callIds']['row_sum_calls_count'] = resultIds;
@@ -757,7 +749,6 @@ const Reports = React.memo(() => {
     }
   }, [callReport, checkChart])
 
-
   const zeroParameters = () => {
     dispatch(searchSlice.actions.removeAllActiveCriteriasReports(null));
     dispatch(searchSlice.actions.removeAllActiveCriteriasColumnReports(null));
@@ -767,15 +758,17 @@ const Reports = React.memo(() => {
   }
 
   const getCallParameters = async (event: any) => {
-    // hideVisibleParameters();
     setLoading(true);
+    setCallSwitch(false)
+    dispatch(callsSlice.actions.callsReset());
+   
     //обнуление параметров
     zeroParameters();
 
     await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
     await dispatch(getCallReport());
-    setLoading(false);
+    await setLoading(false);
   }
 
   //отображение доп группировки по столбцам из сохраненных отчетов - to do:  переделать это
@@ -784,7 +777,7 @@ const Reports = React.memo(() => {
       if (groupByColumns[0].group_by === 'search_items') {
         //@ts-ignore
         if (groupByColumns[0].value.search_items) {
-          //@ts-ignore
+          //@ts-ignore 
           for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
             //@ts-ignore
             const groupColumnsItem = groupByColumns[0].value.search_items[i]
@@ -858,11 +851,11 @@ const Reports = React.memo(() => {
 
   //построение отчета
   const formReport = async () => {
-    dispatch(callsSlice.actions.callsReset());
     setLoading(true);
+    setCallSwitch(false)
+    dispatch(callsSlice.actions.callsReset());
     await dispatch(getCallReport());
     await setLoading(false);
-    // hideVisibleParameters();
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
@@ -903,18 +896,19 @@ const Reports = React.memo(() => {
   const getCalls = async (callIds: any[]) => {
     if (callIds.length != 0) {
       dispatch(callsSlice.actions.callsReset());
-      await dispatch(getCallsInfoById(callIds));
       setCallSwitch(true);
+      
+      await dispatch(getCallsInfoById(callIds));
       setFoundCalls(callIds.length);
-    } else setCallSwitch(false)
+    } else setCallSwitch(false);
   }
 
-  const hideVisibleParameters = () => {
-    setVisibleParameters(false);
-  }
-  const showVisibleParameters = () => {
-    setVisibleParameters(true);
-  }
+  // const hideVisibleParameters = () => {
+  //   setVisibleParameters(false);
+  // }
+  // const showVisibleParameters = () => {
+  //   setVisibleParameters(true);
+  // }
 
   const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => {
@@ -946,7 +940,7 @@ const Reports = React.memo(() => {
         }
       }
     }
-  }, [tableColumns, tableRows, columns, rows, callReport, activeReport]);
+  }, [tableColumns,totalCalls, tableRows, columns, rows, callReport, activeReport]);
 
   const [snackbar, setSnackbar] = useState<SnackbarType>({
     type: 'success',
@@ -995,7 +989,7 @@ const Reports = React.memo(() => {
 
       <div>
         <BlockBox padding="24px" margin="0 0 24px 0">
-          <div className={classes.filtersBlock}>
+          <div>
             <Accordeon
               title={
                 <Typography className={classes.searchTitleLeftText} variant="h6">
@@ -1012,7 +1006,9 @@ const Reports = React.memo(() => {
                   {/* название */}
                   <div className={classes.parameterBlock}>
                     <div className={classes.flexCenter}>
-                      <Typography className={classes.parameterItemTitle}>{translate('reportTitle', language)}</Typography>
+                      <div className={classes.parameterItem}>
+                        <Typography className={classes.parameterItemTitle}>{translate('reportTitle', language)}</Typography>
+                      </div>
                       <div style={{ width: '265px' }} className={validateInputItem ? classes.errorInput : classes.reportName}>
                         <span>
                           <Typography className={classes.errorTitle}>{translate('reportTitleMes', language)}</Typography>
@@ -1054,7 +1050,17 @@ const Reports = React.memo(() => {
                   {/* по строкам */}
                   <div className={classes.parameterBlock}>
                     <div className={classes.flexCenter}>
-                      <Typography className={classes.parameterItemTitle}>{translate('reportGroupByRow', language)}</Typography>
+                      <div className={classes.parameterItem}>
+                        <Typography className={classes.parameterItemTitle}>{translate('reportGroupByRow', language)}</Typography>
+                        <Tooltip
+                          disableInteractive={true}
+                          classes={{ tooltip: classes.tooltip }}
+                          placement="bottom"
+                          title={<div>Значения по строкам</div>}
+                        >
+                          <div style={{height: '20px', cursor: 'pointer'}}><InfoCircle style={{height: '20px'}}/></div>
+                        </Tooltip>
+                      </div>
                       <ContainedSelect
                         height={'38px'}
                         width={'265px'}
@@ -1116,7 +1122,20 @@ const Reports = React.memo(() => {
                       {/* типо дефолтный */}
                       <div style={{ display: 'inline-flex', color: '#2F3747' }}>
                         <div className={classes.flexCenter}>
-                          <Typography className={classes.parameterItemTitle}>{translate('reportGroupByColumns', language)}</Typography>
+                          <div className={classes.parameterItem}>
+                            <Typography className={classes.parameterItemTitle}>{translate('reportGroupByColumns', language)}</Typography>
+                            <Tooltip
+                              disableInteractive={true}
+                              classes={{ tooltip: classes.tooltip }}
+                              placement="bottom"
+                              title={<div>
+                                  <div style={{marginBottom: '4px'}}>Значения колонок</div>
+                                  <div>Дополнительные столбцы можно сформировать по нажатию кнопки "Добавить"</div>
+                                </div>}
+                            >
+                              <div style={{height: '20px', cursor: 'pointer'}}><InfoCircle style={{height: '20px'}}/></div>
+                            </Tooltip>
+                          </div>
                           <ContainedSelect
                             height={'38px'}
                             width={'265px'}
@@ -1142,11 +1161,7 @@ const Reports = React.memo(() => {
                       </div>
                       {groupByColumnsValue && groupByColumnsValue.type === 'title' ?
                       <>
-                        <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '16px', width: '100%', marginTop: '16px', marginLeft: '177px'}}>
-                          <div style={{minWidth: '167px', width: '100%', marginBottom: '16px' }}>
-                          <Typography style={{color: '#2F3747'}} >Значение столбца 1</Typography>
-                          </div>
-
+                        <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '20px 16px 16px', width: '100%', marginTop: '16px', marginLeft: '191px'}}>
                           <div style={{display: 'inline-flex', alignItems: 'center'}}>
                             <div style={{ display: 'flex' }}>
                               <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
@@ -1156,7 +1171,7 @@ const Reports = React.memo(() => {
                                   height={'38px'}
                                   bcColor={"#FFFFFF"}
                                   border={'1px solid #E3E8EF'}
-                                  label={`${translate('reportColumnHeading', language)}`}
+                                  label={`${translate('reportColumnHeading', language)} 1`}
                                   value={reportNameColumnDefault}
                                   handleChange={(event: any) => {
                                     dispatch(reportsSlice.actions.setDefaultColsTitleGroupBy({ col_name: event.target.value }));
@@ -1236,13 +1251,13 @@ const Reports = React.memo(() => {
 
                     <div style={{ width: '100%'}}>
                       {/* новые фильтры */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '155px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '158px' }}>
                         {activeParameters.map((item) => {
                           const arrayIndex = activeParameters.indexOf(item);
                           return (
                             <div style={{ width: '100%', display: 'flex', justifyContent: ' flex-start', marginBottom: '16px', flexWrap: 'wrap' }}>
                               <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
-                                <div style={{ height: '16px', minWidth: '18px', marginRight: '5px' }}>
+                                <div style={{ height: '19px', minWidth: '19px', marginRight: '14px' , cursor: 'pointer'}}>
                                   <TrashSvg
                                     style={{ width: '100%', height: 'auto' }}
                                     onClick={() => {
@@ -1252,9 +1267,7 @@ const Reports = React.memo(() => {
                                     }}
                                   />
                                 </div>
-
                                 <div style={{ display: 'flex' }}>
-
                                   <ContainedSelect
                                     height={'38px'}
                                     width={'265px'}
@@ -1271,59 +1284,56 @@ const Reports = React.memo(() => {
                                 </div>
                                 {item[0].select.value && item[0].select.value.type === 'title' ?
                                   <>
-                                    <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '16px', width: '100%', marginTop: '16px', marginLeft: '23px'}}>
-                                      <div style={{minWidth: '167px', width: '100%', marginBottom: '16px' }}>
-                                        <Typography style={{color: '#2F3747'}} >Значение столбца { arrayIndex + 2 }</Typography>
-                                      </div>
+                                    <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '20px 16px 16px', width: '100%', marginTop: '16px', marginLeft: '34px'}}>
                                       <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                        <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
-                                          <Input
-                                            name={""}
-                                            type={"text"}
-                                            height={'38px'}
-                                            bcColor={"#FFFFFF"}
-                                            border={'1px solid #E3E8EF'}
-                                            label={`${translate('reportColumnHeading', language)}`}
-                                            value={item[0].nameColumn.value}
-                                            handleChange={(event: any) => {
-                                              dispatch(reportsSlice.actions.setNameColumnFieldValue({
-                                                arrayIndex: arrayIndex,
-                                                value: event.target.value
-                                              }))
+                                        <div style={{ display: 'flex' }}>
+                                          <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
+                                            <Input
+                                              name={""}
+                                              type={"text"}
+                                              height={'38px'}
+                                              bcColor={"#FFFFFF"}
+                                              border={'1px solid #E3E8EF'}
+                                              label={`${translate('reportColumnHeading', language)} ${arrayIndex + 2}`}
+                                              value={item[0].nameColumn.value}
+                                              handleChange={(event: any) => {
+                                                dispatch(reportsSlice.actions.setNameColumnFieldValue({
+                                                  arrayIndex: arrayIndex,
+                                                  value: event.target.value
+                                                }))
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className={classes.parameterSelect}>
+                                          <TextSelect
+                                            name={'moreSelect'}
+                                            value={null}
+                                            handleValueChange={(event: any) => {
+                                              onAllCriteriasColumnSelectValueChangeTEST(
+                                                event,
+                                                arrayIndex,
+                                                item[0].callFilters.activeValues,
+                                                item[0].callFilters.values,
+                                                item[0].callFilters.options
+                                              )
                                             }}
+                                            options={item[0].callFilters.options}
+                                            iconPosition={'left'}
+                                            customControl={
+                                              <div className={classes.filterBlockControl}>
+                                                <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                                              </div>
+                                            }
+                                            ifArrowColor={'#722ED1'}
+                                            notClose={true}
+                                            menuPosition={'right'}
+                                            height={"400px"}
                                           />
                                         </div>
                                       </div>
-
-                                      <div className={classes.parameterSelect}>
-                                        <TextSelect
-                                          name={'moreSelect'}
-                                          value={null}
-                                          handleValueChange={(event: any) => {
-                                            onAllCriteriasColumnSelectValueChangeTEST(
-                                              event,
-                                              arrayIndex,
-                                              item[0].callFilters.activeValues,
-                                              item[0].callFilters.values,
-                                              item[0].callFilters.options
-                                            )
-                                          }}
-                                          options={item[0].callFilters.options}
-                                          iconPosition={'left'}
-                                          customControl={
-                                            <div className={classes.filterBlockControl}>
-                                              <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                                            </div>
-                                          }
-                                          ifArrowColor={'#722ED1'}
-                                          notClose={true}
-                                          menuPosition={'right'}
-                                          height={"400px"}
-                                        />
-                                      </div>
-
                                       {item[0].callFilters.activeValues.length > 0 ?
-                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginTop: '16px' }}>
                                           <div className={classes.filterBlockFlex}>
                                             <CriteriasList
                                               allCriterias={item[0].callFilters.values}
@@ -1385,7 +1395,7 @@ const Reports = React.memo(() => {
                         })}
                       </div>
 
-                      <div style={{ paddingLeft: '180px' }}>
+                      <div style={{ paddingLeft: '192px' }}>
                         <div
                           style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}
                           onClick={() => {
@@ -1394,12 +1404,12 @@ const Reports = React.memo(() => {
                               tagsVal: { options: tagNamesColOptions, value: tagNamesColValue },
                               op: { options: opAddCriterias, value: opAddCriterias[0] },
                               tagsNameList: { options: tagNamesColOptions, value: [] },
-                              callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] }
+                              callFilters: { options: opAddCriterias, values: allCriterias, activeValues: [] },
                             }]))
                           }}
                         >
                           <PlusSvg/>
-                          <div className={classes.btnAddColumn}>Добавить столбец</div>
+                          <div className={classes.btnAddColumn}>Добавить</div>
                         </div>
                       </div>
                     </div>
@@ -1412,7 +1422,7 @@ const Reports = React.memo(() => {
 
         <BlockBox padding="24px" margin="0 0 24px 0">
           {/* фильтры звонков */}
-          <div className={classes.filtersBlock}>
+          <div>
             <Accordeon
               title={
                 <Typography className={classes.searchTitleLeftText} variant="h6">
@@ -1425,7 +1435,7 @@ const Reports = React.memo(() => {
               initialState={false}
             >
               {/* content */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: '25px'}}>
                 <div style={{ margin: '0 5px 0 20px', whiteSpace: 'nowrap' }}>
                   <TextSelect
                     name={'moreSelect'}
@@ -1447,6 +1457,7 @@ const Reports = React.memo(() => {
               </div>
               <div className={classes.criteriaList}>
                 <CriteriasList
+                  defaultCriterias={defaultCriteriasReport}
                   allCriterias={allCriterias}
                   activeCriterias={activeCriteriasReports}
                   block={"reports"}
@@ -1457,7 +1468,7 @@ const Reports = React.memo(() => {
         </BlockBox>
 
         <BlockBox padding="24px" margin="0 0 24px 0">
-          <div className={classes.filtersBlock}>
+          <div>
             <Accordeon
               title={
                 <Typography className={classes.searchTitleLeftText} variant="h6">
@@ -1469,6 +1480,7 @@ const Reports = React.memo(() => {
               }
               initialState={true}
             >
+              
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{display: 'flex', alignItems: 'center', marginRight: '20px'}}>
                   <FormGroup className={classes.checkboxDiff}>
@@ -1481,7 +1493,7 @@ const Reports = React.memo(() => {
                       label={`${translate('reportToggleChart', language)}`}
                     />
                   </FormGroup>
-                  <div>
+                  { checkboxShowChart && <div>
                     <ContainedSelect
                       height={'38px'}
                       width={'265px'}
@@ -1493,6 +1505,7 @@ const Reports = React.memo(() => {
                       value={chartTypeValue}
                     />
                   </div>
+                  }
                 </div>
               </div>
             </Accordeon>
@@ -1537,7 +1550,7 @@ const Reports = React.memo(() => {
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           {currentSavedReport.value ?
             <LoadingButton
-              className={classes.getReportsButton}
+              className={classes.getReportsButtonOutline}
               color="error"
               variant="outlined"
               onClick={handleOpen}
@@ -1547,7 +1560,7 @@ const Reports = React.memo(() => {
             : <></>
           }
           <LoadingButton
-            className={classes.getReportsButton}
+            className={classes.getReportsButtonOutline}
             color="primary"
             variant="outlined"
             onClick={saveReportAsync}
@@ -1610,24 +1623,24 @@ const Reports = React.memo(() => {
                       : <></>
                     }
 
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography className={classes.reportTitle} variant="h5">
-                          {reportName}
-                        </Typography>
-                        <FormGroup className={classes.checkboxDiff}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                onChange={handleChangeCheck}
-                                checked={checkboxValue}
-                              />}
-                            label={`${translate('reportDiff', language)}`}
-                          />
-                        </FormGroup>
-                      </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography className={classes.reportTitle} variant="h5">
+                        {reportName}
+                      </Typography>
+                      <FormGroup className={classes.checkboxDiff}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              onChange={handleChangeCheck}
+                              checked={checkboxValue}
+                            />}
+                          label={`${translate('reportDiff', language)}`}
+                        />
+                      </FormGroup>
                     </div>
-                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div className={classes.reportFindNumber}>
                         {translate('reportCallFind', language)}: &nbsp;
                         {totalCalls}
@@ -1729,7 +1742,6 @@ const Reports = React.memo(() => {
                               marginBottom: '-3px'
                             },
                             '& .MuiDataGrid-columnHeader:first-of-type .MuiDataGrid-columnSeparator svg': {
-                              // fontSize: '2rem !important',
                               color: 'rgba(115, 128, 148, 0.7) !important'
                             },
                             "& .MuiDataGrid-root .MuiDataGrid-columnHeader:not(.MuiDataGrid-columnHeader--sorted) .MuiDataGrid-sortIcon": {
@@ -1786,16 +1798,30 @@ const Reports = React.memo(() => {
                               rowsPerPageOptions={[rows.length > 100 ? 100 : rows.length]}
                               loading={isLoading}
                               disableColumnMenu={true}
-                              // disableSelectionOnClick
                               onCellClick={(params, event: MuiEvent<React.MouseEvent>) => {
                                 if (params.row.callIds[params.field] != undefined) getCalls(params.row.callIds[params.field]);
-                              }}
+                              }
+                            }
                             />
                           </div>
                         </Box>
                       </div>
                     </div>
                   </div>
+                  
+                  {isLoading ?
+                    <Box sx={{
+                      display: 'flex',
+                      height: '100%',
+                      width: '100%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      margin: '14% 0'
+                    }}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  :
                   <div>
                     {calls.length != 0 && callsSwitch ?
                       <CallsHeader
@@ -1816,6 +1842,7 @@ const Reports = React.memo(() => {
                       : <></>
                     }
                   </div>
+                   }
                 </div>
               }
             </>

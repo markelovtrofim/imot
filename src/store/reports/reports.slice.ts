@@ -124,11 +124,13 @@ export const setReports = createAsyncThunk(
       const {token} = JSON.parse(localStorage.getItem('token') || '{}');
       // @ts-ignore;
       const state: RootState = thunkAPI.getState();
-      const requestCriterias = convertCriterias(state.search.activeCriteriasReports);
+      const requestActiveCriterias = convertCriterias(state.search.activeCriteriasReports);
+      const requestDefaultCriterias = convertCriterias(state.search.defaultCriteriasReport);
+
       const requestSearchItemsColumn = convertCriterias(state.search.activeCriteriasColumn);
       const requestFilters = convertColumn(state.reports.activeReport, requestSearchItemsColumn);
       const requestColsGroupBy = convertColsGroupBy(requestFilters, state.reports.activeParameters);
-      const requestData = convertCallSearch(requestCriterias, requestColsGroupBy);
+      const requestData = convertCallSearch([...requestActiveCriterias, ...requestDefaultCriterias], requestColsGroupBy);
       console.log(requestData);
 
       const response = await instance.post(`reports`, requestData, {
@@ -175,12 +177,13 @@ export const getCallReport = createAsyncThunk(
       let startDate = convertDate(state.reports.date[0]);
       // @ts-ignore;
       let endDate = convertDate(state.reports.date[1]);
+      const requestActiveCriterias = convertCriterias(state.search.activeCriteriasReports);
+      const requestDefaultCriterias = convertCriterias(state.search.defaultCriteriasReport);
 
-      const requestCriterias = convertCriterias(state.search.activeCriteriasReports);
       const requestSearchItemsColumn = convertCriterias(state.search.activeCriteriasColumn);
       const requestFilters = convertColumn(state.reports.activeReport, requestSearchItemsColumn);
       const requestColsGroupBy = convertColsGroupBy(requestFilters, state.reports.activeParameters);
-      const requestData = convertCallSearch(requestCriterias, requestColsGroupBy);
+      const requestData = convertCallSearch([...requestActiveCriterias, ...requestDefaultCriterias], requestColsGroupBy);
       console.log(requestData)
       let requestParameters = `reports/make/calls/?start_date=${startDate}&end_date=${endDate}`;
       if (!startDate && !endDate) {
@@ -231,7 +234,6 @@ export const getSelectors = createAsyncThunk(
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(response.data)
       thunkAPI.dispatch(reportsSlice.actions.getSelectorsValues({selectors: response.data, tags: state.reports.tagNames}));
     } catch(error) {
       console.log(error)
@@ -279,46 +281,54 @@ const initialState: InitialStateType = {
   //
   callReport: {
     report: {
-      cols: [],
+      cols: [{
+        group_id: 0,
+        col_name: '',
+      }],
       rows: [],
       total_calls: 0,
       row_group_header: '',
       values: {
         any: {
-          cols: {
+          col_groups: {
             any: {
-              calls_count: 0,
-              calls_minutes: 0,
-              percent_count_from_total: 0,
-              percent_calls_count_from_total: 0,
-              call_ids: []
+              any: {
+                calls_count: 0,
+                calls_minutes: 0,
+                percent_calls_count_from_total: 0,
+                call_ids: []
+              }
             }
           },
           row_info: {
             row_sum_calls_count: 0,
             row_sum_calls_minutes: 0,
             row_percent_count_from_total: 0,
-            row_total_processed_calls_count: 0,
+            row_total_processed_calls: {
+              count: 0,
+              call_ids: []
+            },
           }
         },
       }
     },
     diff_report: {
       any: {
-        cols: {
+        col_groups: {
           any: {
-            calls_count: 0,
-            calls_minutes: 0,
-            percent_count_from_total: 0,
-            percent_calls_count_from_total: 0,
-            call_ids: []
+            any: {
+              calls_count: 0,
+              calls_minutes: 0,
+              percent_calls_count_from_total: 0,
+              call_ids: []
+            }
           }
         },
         row_info: {
           row_sum_calls_count: 0,
           row_sum_calls_minutes: 0,
           row_percent_count_from_total: 0,
-          row_total_processed_calls_count: 0,
+          row_total_processed_calls: 0
         }
       },
     },
@@ -349,7 +359,7 @@ const initialState: InitialStateType = {
   tableColumns: [],
 
   error: null,
-  showCharts: false,
+  showCharts: true,
 }
 
 export const reportsSlice = createSlice({
@@ -443,16 +453,6 @@ export const reportsSlice = createSlice({
       }
     },
 
-    convertSearchItems(state, action: any) {
-      let requestArray: any = [];
-      for (let i = 0; i < action.payload.length; i++) {
-        if (action.payload[i].values.length > 0) {
-          requestArray.push({key: action.payload[i].key, values: action.payload[i].values});
-          // @ts-ignore
-          state.activeReport.cols_group_by[0].value.search_items.push({key: action.payload[i].key, values: action.payload[i].values})
-        }
-      }
-    },
 
     setDefaultColTagsName(state, action: any) {
       state.activeReport.cols_group_by[0].value = action.payload;

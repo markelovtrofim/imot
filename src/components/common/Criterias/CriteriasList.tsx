@@ -8,14 +8,18 @@ const useStyles = makeStyles(({
     display: 'flex',
     width: '100%',
     flexWrap: 'wrap',
-    // marginTop: '16px'
-    // display: 'grid'
   },
   searchItem: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     margin: '0 22px 16px 0',
+    width: '70%',
+  },
+  searchItemActive: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
   },
   searchItemBlock_1:{
@@ -46,11 +50,13 @@ const useStyles = makeStyles(({
     width: '30%',
     display: 'flex',
     alignItems: 'center',
+    margin: '0 22px 16px 0',
   },
   searchItemBlock_Wide: {
     width: '70%',
     display: 'flex',
     alignItems: 'center',
+    margin: '0 22px 16px 0',
   },
 }))
 
@@ -108,7 +114,7 @@ const CriteriasList: FC<FindCriteriasPropsType> = React.memo(({
         return ( 
           // <div className={switchSearchItemCLassName(criteriaBlock)}> 
             <div className={switchSearchItemCLassName(criteriaWide)}>
-              <div className={classes.searchItem}>
+              <div className={classes.searchItemActive}>
                 <CriteriaItem
                   title={criteria.title}
                   criteriaFull={compResult[0]}
