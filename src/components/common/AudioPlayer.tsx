@@ -1,7 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
 import { makeStyles } from "@mui/styles";
 import ReactAudioPlayer from "react-audio-player";
-import ReactPlayer from 'react-player'
 import Speed from "./Buttons/Speed";
 
 const useStyles = makeStyles(({
@@ -72,7 +71,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({ callAudio, onListen, audioPlaye
 
   return (
     <div tabIndex={1} className={classes.playerLineBlock} style={{ display: 'flex', backgroundColor: '#F8FAFC' }}>
-      {/* <ReactAudioPlayer
+      <ReactAudioPlayer
         ref={audioPlayerRef}
         className={classes.audioPlayer}
         controls={true}
@@ -82,17 +81,6 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({ callAudio, onListen, audioPlaye
         onListen={onListen}
         onSeeked={onListen}
         preload="auto"
-      /> */}
-      <ReactPlayer
-        ref={audioPlayerRef}
-        className={classes.audioPlayer}
-        controls={true}
-        url={callAudio ? callAudio : ''}
-        listenInterval={1}
-        onListen={onListen}
-        onSeeked={onListen}
-        preload="auto"
-        playbackRate={1}
       />
       <div className={classes.playerRateBlock}>
         <span className={classes.rateValueTitle}>Скорость аудио</span>
