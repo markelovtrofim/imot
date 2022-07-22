@@ -66,6 +66,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({ callAudio, onListen, audioPlaye
 
   const changePlayerRate = (event: any) => {
     setPlaybackRateValue(event.target.value);
+    audioPlayerRef.current.audioEl.current.playbackRate = event.target.value
     localStorage.setItem("userPlayerRateValue", event.target.value);
   }
 
