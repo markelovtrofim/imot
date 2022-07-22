@@ -44,6 +44,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({ callAudio, onListen, audioPlaye
   const [playbackRateValue, setPlaybackRateValue] = useState<any>(localStorage.getItem("userPlayerRateValue"));
 
   useEffect(() => {
+    audioPlayerRef.current.audioEl.current.playbackRate = playbackRateValue;
     return () => {
       setIsPlaying(false);
     }
@@ -66,7 +67,7 @@ const AudioPlayer: FC<AudioPlayerPropsType> = ({ callAudio, onListen, audioPlaye
 
   const changePlayerRate = (event: any) => {
     setPlaybackRateValue(event.target.value);
-    audioPlayerRef.current.audioEl.current.playbackRate = event.target.value
+    audioPlayerRef.current.audioEl.current.playbackRate = event.target.value;
     localStorage.setItem("userPlayerRateValue", event.target.value);
   }
 
