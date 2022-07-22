@@ -404,10 +404,18 @@ const SearchSelect: FC<SelectPropsType> = memo(({
     } else {
       dispatch(templateSlice.actions.setCurrentTemplate(null));
       const eventConverterResult = eventConverter();
+      //for reports
       if (block === 'reports' && criteriaFull) {
-        dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        if (isDefaultCriteria) {
+          dispatch(searchSlice.actions.setDefaultCriteriaValuesReport({key: criteriaFull.key, values: [...eventConverterResult]}));
+          // break
+        } else {
+          dispatch(searchSlice.actions.setActiveCriteriaReportsValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+        }
+      //for reports column
       }  else if (block === 'reports-column' && criteriaFull) {
         dispatch(searchSlice.actions.setActiveCriteriaReportsColumnValues({key: criteriaFull.key, values: [...eventConverterResult]}));
+      //for reports add columns
       }  else if (index && criteriaFull) {
         dispatch(reportsSlice.actions.setActiveCriteriaValuesColumn({arrayIndex: index.arrayIndex,  criteria: {key: criteriaFull.key, values: [...eventConverterResult]}}))
       }  else {

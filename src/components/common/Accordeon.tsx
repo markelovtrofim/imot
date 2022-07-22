@@ -11,7 +11,8 @@ const useStyles = makeStyles(({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: '40px'
+    height: '40px',
+    cursor: 'pointer'
   },
   titleLeft: {
     display: 'flex',

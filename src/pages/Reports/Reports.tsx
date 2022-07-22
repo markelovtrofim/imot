@@ -63,7 +63,7 @@ const Reports = React.memo(() => {
 
   //criterias
   const activeCriteriasReports = useAppSelector(state => state.search.activeCriteriasReports);
-  const defaultCriterias = useAppSelector(state => state.search.defaultCriterias);
+  const defaultCriteriasReport = useAppSelector(state => state.search.defaultCriteriasReport);
   const allCriterias = useAppSelector(state => state.search.allCriterias);
   const allCriteriasColumn = useAppSelector(state => state.search.allCriterias);
   const activeCriteriasColumn = useAppSelector(state => state.search.activeCriteriasColumn);
@@ -354,7 +354,7 @@ const Reports = React.memo(() => {
   const [op, setOp] = useState<any>([]);
   useEffect(() => {
     setOp(handleMoreSelectClick(allCriterias, activeCriteriasReports));
-  }, [allCriterias, activeCriteriasReports, defaultCriterias]);
+  }, [allCriterias, activeCriteriasReports, defaultCriteriasReport]);
 
   const [opCriteriasColumn, setOpCriteriasColumn] = useState<any>([]);
   useEffect(() => {
@@ -706,9 +706,9 @@ const Reports = React.memo(() => {
         const diffValueCount = callReport.diff_report[itemRow].row_info.row_total_processed_calls;
         let diffAddCount = '';
         if (diffValueCount > 0) {
-          diffAddCount = ` (+${diffValueCount}%)`;
+          diffAddCount = ` (+${diffValueCount})`;
         } else {
-          diffAddCount = ` (${diffValueCount}%)`;
+          diffAddCount = ` (${diffValueCount})`;
         }
         result[indexRow][`row_total_processed_calls`] += diffAddCount;
       }
@@ -768,7 +768,7 @@ const Reports = React.memo(() => {
     await dispatch(reportsSlice.actions.setCurrentSavedReport(event));
     await dispatch(getReport(event.value));
     await dispatch(getCallReport());
-    setLoading(false);
+    await setLoading(false);
   }
 
   //отображение доп группировки по столбцам из сохраненных отчетов - to do:  переделать это
@@ -777,7 +777,7 @@ const Reports = React.memo(() => {
       if (groupByColumns[0].group_by === 'search_items') {
         //@ts-ignore
         if (groupByColumns[0].value.search_items) {
-          //@ts-ignore
+          //@ts-ignore 
           for (let i = 0; i < groupByColumns[0].value.search_items.length; i++) {
             //@ts-ignore
             const groupColumnsItem = groupByColumns[0].value.search_items[i]
@@ -855,7 +855,7 @@ const Reports = React.memo(() => {
     setCallSwitch(false)
     dispatch(callsSlice.actions.callsReset());
     await dispatch(getCallReport());
-    setLoading(false);
+    await setLoading(false);
   }
 
   const [validateInputItem, setValidateInputItem] = useState(false);
@@ -900,7 +900,6 @@ const Reports = React.memo(() => {
       
       await dispatch(getCallsInfoById(callIds));
       setFoundCalls(callIds.length);
-
     } else setCallSwitch(false);
   }
 
@@ -941,7 +940,7 @@ const Reports = React.memo(() => {
         }
       }
     }
-  }, [tableColumns, tableRows, columns, rows, callReport, activeReport]);
+  }, [tableColumns,totalCalls, tableRows, columns, rows, callReport, activeReport]);
 
   const [snackbar, setSnackbar] = useState<SnackbarType>({
     type: 'success',
@@ -1269,7 +1268,6 @@ const Reports = React.memo(() => {
                                   />
                                 </div>
                                 <div style={{ display: 'flex' }}>
-
                                   <ContainedSelect
                                     height={'38px'}
                                     width={'265px'}
@@ -1286,55 +1284,56 @@ const Reports = React.memo(() => {
                                 </div>
                                 {item[0].select.value && item[0].select.value.type === 'title' ?
                                   <>
-                                    <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '20px 16px 16px', width: '100%', marginTop: '16px', marginLeft: '34px', display: 'flex', alignItems: 'center'}}>
+                                    <div style={{border: '1px solid #E3E8EF', borderRadius: '13px', padding: '20px 16px 16px', width: '100%', marginTop: '16px', marginLeft: '34px'}}>
                                       <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                        <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
-                                          <Input
-                                            name={""}
-                                            type={"text"}
-                                            height={'38px'}
-                                            bcColor={"#FFFFFF"}
-                                            border={'1px solid #E3E8EF'}
-                                            label={`${translate('reportColumnHeading', language)} ${arrayIndex + 2}`}
-                                            value={item[0].nameColumn.value}
-                                            handleChange={(event: any) => {
-                                              dispatch(reportsSlice.actions.setNameColumnFieldValue({
-                                                arrayIndex: arrayIndex,
-                                                value: event.target.value
-                                              }))
+                                        <div style={{ display: 'flex' }}>
+                                          <div style={{ marginRight: '20px', minWidth: '265px', width: '265px' }}>
+                                            <Input
+                                              name={""}
+                                              type={"text"}
+                                              height={'38px'}
+                                              bcColor={"#FFFFFF"}
+                                              border={'1px solid #E3E8EF'}
+                                              label={`${translate('reportColumnHeading', language)} ${arrayIndex + 2}`}
+                                              value={item[0].nameColumn.value}
+                                              handleChange={(event: any) => {
+                                                dispatch(reportsSlice.actions.setNameColumnFieldValue({
+                                                  arrayIndex: arrayIndex,
+                                                  value: event.target.value
+                                                }))
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className={classes.parameterSelect}>
+                                          <TextSelect
+                                            name={'moreSelect'}
+                                            value={null}
+                                            handleValueChange={(event: any) => {
+                                              onAllCriteriasColumnSelectValueChangeTEST(
+                                                event,
+                                                arrayIndex,
+                                                item[0].callFilters.activeValues,
+                                                item[0].callFilters.values,
+                                                item[0].callFilters.options
+                                              )
                                             }}
+                                            options={item[0].callFilters.options}
+                                            iconPosition={'left'}
+                                            customControl={
+                                              <div className={classes.filterBlockControl}>
+                                                <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
+                                              </div>
+                                            }
+                                            ifArrowColor={'#722ED1'}
+                                            notClose={true}
+                                            menuPosition={'right'}
+                                            height={"400px"}
                                           />
                                         </div>
                                       </div>
-                                      <div className={classes.parameterSelect}>
-                                        <TextSelect
-                                          name={'moreSelect'}
-                                          value={null}
-                                          handleValueChange={(event: any) => {
-                                            onAllCriteriasColumnSelectValueChangeTEST(
-                                              event,
-                                              arrayIndex,
-                                              item[0].callFilters.activeValues,
-                                              item[0].callFilters.values,
-                                              item[0].callFilters.options
-                                            )
-                                          }}
-                                          options={item[0].callFilters.options}
-                                          iconPosition={'left'}
-                                          customControl={
-                                            <div className={classes.filterBlockControl}>
-                                              <Typography className={classes.filterBlockTitle}>{translate('searchMore', language)}</Typography>
-                                            </div>
-                                          }
-                                          ifArrowColor={'#722ED1'}
-                                          notClose={true}
-                                          menuPosition={'right'}
-                                          height={"400px"}
-                                        />
-                                      </div>
-
                                       {item[0].callFilters.activeValues.length > 0 ?
-                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', paddingLeft: '24px', marginTop: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginTop: '16px' }}>
                                           <div className={classes.filterBlockFlex}>
                                             <CriteriasList
                                               allCriterias={item[0].callFilters.values}
@@ -1458,7 +1457,7 @@ const Reports = React.memo(() => {
               </div>
               <div className={classes.criteriaList}>
                 <CriteriasList
-                  // defaultCriterias={}
+                  defaultCriterias={defaultCriteriasReport}
                   allCriterias={allCriterias}
                   activeCriterias={activeCriteriasReports}
                   block={"reports"}
